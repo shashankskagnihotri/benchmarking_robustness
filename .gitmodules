@@ -9,4 +9,4 @@
 	url = git@github.com:open-mmlab/mmsegmentation.git
 [submodule "disparity_estimation/stereo-transformer"]
 	path = disparity_estimation/stereo-transformer
-	url = https://github.com/mli0603/stereo-transformer.git
+	url = git@github.com:mli0603/stereo-transformer.git
