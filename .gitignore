@@ -180,3 +180,11 @@ dataset/
 # vs code
 .vscode/
 .pyc
+
+## ignore for dispartiy_estimation/stero-transformer
+*.pyc
+*.tar
+*.log
+*.
+sample_data/
+run/
