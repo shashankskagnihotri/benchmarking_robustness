@@ -211,7 +211,10 @@ def main(args):
     summary_writer = TensorboardSummary(checkpoint_saver.experiment_dir)
 
     # build dataloader
-    data_loader_train, data_loader_val, _ = build_data_loader(args)
+    data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
+    print("ADEBUG: val SIZE" + str(len(data_loader_val)))
+    print("ADEBUG: train SIZE" + str(len(data_loader_train)))
+    print("ADEBUG: test SIZE" + str(len(data_loader_test)))
 
     # build loss criterion
     criterion = build_criterion(args)

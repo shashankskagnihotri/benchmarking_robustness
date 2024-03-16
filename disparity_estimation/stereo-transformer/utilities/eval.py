@@ -62,6 +62,7 @@ def evaluate(model: torch.nn.Module, criterion: torch.nn.Module, data_loader: It
     eval_stats['epe'] = eval_stats['epe'] / valid_samples
     eval_stats['iou'] = eval_stats['iou'] / valid_samples
     eval_stats['px_error_rate'] = eval_stats['error_px'] / eval_stats['total_px']
+    print("ADEBUG: Valid Samples: " + str(valid_samples))
 
     # write to tensorboard
     write_summary(eval_stats, summary, epoch, 'eval')

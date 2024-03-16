@@ -188,3 +188,4 @@ dataset/
 *.
 sample_data/
 run/
+*.dat
