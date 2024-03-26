@@ -42,9 +42,9 @@ else:
 test_left_img, test_right_img = DA.dataloader(args.datapath)
 
 if args.model == 'stackhourglass':
-    model = stackhourglass(args.maxdisp)
+    model = stackhourglass(int(args.maxdisp))
 elif args.model == 'basic':
-    model = basic(args.maxdisp)
+    model = basic(int(args.maxdisp))
 else:
     print('no model')
 
