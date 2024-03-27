@@ -42,7 +42,7 @@ from ptlflow.utils.utils import (
 )
 
 # Import cosPGD functions
-from ....benchmarking_robustness.adversarial.cospgd import functions as attack_functions
+from cospgd import functions as attack_functions
 import torch.nn as nn
 
 # Attack parameters
