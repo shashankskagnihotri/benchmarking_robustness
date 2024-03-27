@@ -41,6 +41,18 @@ from ptlflow.utils.utils import (
     tensor_dict_to_numpy,
 )
 
+# Import cosPGD functions
+from ....benchmarking_robustness.adversarial.cospgd import functions as attack_functions
+import torch.nn as nn
+
+# Attack parameters
+epsilon = 0.03
+norm = "two"
+alpha = 0.01
+iterations = 5
+criterion = nn.CrossEntropyLoss(ignore_index=255, reduction="none")
+
+
 config_logging()
 
 
@@ -51,6 +63,38 @@ def _init_parser() -> ArgumentParser:
         type=str,
         choices=["all", "select"] + get_list_of_available_models_list(),
         help="Name of the model to use.",
+    )
+    parser.add_argument(
+        "--attack",
+        type=str,
+        default="none",
+        choices=["fgsm", "pgd", "cospgd", "none"],
+        help="Name of the attack to use.",
+    )
+    parser.add_argument(
+        "--attack_norm",
+        type=str,
+        default=norm,
+        choices=["two", "inf"],
+        help="Set norm to use for adversarial attack.",
+    )
+    parser.add_argument(
+        "--attack_epsilon",
+        type=float,
+        default=epsilon,
+        help="Set epsilon to use for adversarial attack.",
+    )
+    parser.add_argument(
+        "--attack_iterations",
+        type=int,
+        default=iterations,
+        help="Set number of iterations for adversarial attack.",
+    )
+    parser.add_argument(
+        "--attack_alpha",
+        type=float,
+        default=alpha,
+        help="Set epsilon to use for adversarial attack.",
     )
     parser.add_argument(
         "--selection",
@@ -235,7 +279,10 @@ def validate(args: Namespace, model: BaseModel) -> pd.DataFrame:
     metrics_df["checkpoint"] = [args.pretrained_ckpt]
 
     for dataset_name, dl in dataloaders.items():
-        metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
+        if args.attack == "none":
+            metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
+        else: 
+            metrics_mean = attack_one_dataloader(args, model, dl, dataset_name)
         metrics_df[[f"{dataset_name}-{k}" for k in metrics_mean.keys()]] = list(
             metrics_mean.values()
         )
@@ -428,6 +475,233 @@ def validate_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
     return metrics_mean
+
+
+@torch.enable_grad()
+def attack_one_dataloader(
+    args: Namespace,
+    model: BaseModel,
+    dataloader: DataLoader,
+    dataloader_name: str,
+) -> Dict[str, float]:
+    """Perform adversarial attack for all examples of one dataloader.
+
+    Parameters
+    ----------
+    args : Namespace
+        Arguments to configure the model and the validation.
+    model : BaseModel
+        The model to be used for validation.
+    dataloader : DataLoader
+        The dataloader for the validation.
+    dataloader_name : str
+        A string to identify this dataloader.
+
+    Returns
+    -------
+    Dict[str, float]
+        The average metric values for this dataloader.
+    """
+    metrics_sum = {}
+
+    metrics_individual = None
+    if args.write_individual_metrics:
+        metrics_individual = {"filename": [], "epe": [], "outlier": []}
+
+    with tqdm(dataloader) as tdl:
+        prev_preds = None
+        for i, inputs in enumerate(tdl):
+            if args.scale_factor is not None:
+                scale_factor = args.scale_factor
+            else:
+                scale_factor = (
+                    None
+                    if args.max_forward_side is None
+                    else float(args.max_forward_side) / min(inputs["images"].shape[-2:])
+                )
+
+            io_adapter = IOAdapter(
+                model,
+                inputs["images"].shape[-2:],
+                target_scale_factor=scale_factor,
+                cuda=torch.cuda.is_available(),
+                fp16=args.fp16,
+            )
+            inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
+            inputs["prev_preds"] = prev_preds
+
+            match args.attack: # Start adversarial attack (generate perturbed images)
+                case "fgsm":
+                    inputs["images"] = fgsm(args, inputs, model)
+                case "pgd" | "cospgd":
+                    inputs["images"] = cos_pgd(args, inputs, model)
+                case "none":
+                    pass
+
+            preds = model(inputs)
+
+            if args.warm_start:
+                if (
+                    "is_seq_start" in inputs["meta"]
+                    and inputs["meta"]["is_seq_start"][0]
+                ):
+                    prev_preds = None
+                else:
+                    prev_preds = preds
+                    for k, v in prev_preds.items():
+                        if isinstance(v, torch.Tensor):
+                            prev_preds[k] = v.detach()
+
+            inputs = io_adapter.unscale(inputs, image_only=True)
+            preds = io_adapter.unscale(preds)
+
+            if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
+                if args.seq_val_mode == "first":
+                    k = 0
+                elif args.seq_val_mode == "middle":
+                    k = inputs["images"].shape[1] // 2
+                elif args.seq_val_mode == "last":
+                    k = inputs["flows"].shape[1] - 1
+                for key, val in inputs.items():
+                    if key == "meta":
+                        inputs["meta"]["image_paths"] = inputs["meta"]["image_paths"][
+                            k : k + 1
+                        ]
+                    elif key == "images":
+                        inputs[key] = val[:, k : k + 2]
+                    elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
+                        inputs[key] = val[:, k : k + 1]
+
+            metrics = model.val_metrics(preds, inputs)
+
+            for k in metrics.keys():
+                if metrics_sum.get(k) is None:
+                    metrics_sum[k] = 0.0
+                metrics_sum[k] += metrics[k].item()
+            tdl.set_postfix(
+                epe=metrics_sum["val/epe"] / (i + 1),
+                outlier=metrics_sum["val/outlier"] / (i + 1),
+            )
+
+            filename = ""
+            if "sintel" in inputs["meta"]["dataset_name"][0].lower():
+                filename = f'{Path(inputs["meta"]["image_paths"][0][0]).parent.name}/'
+            filename += Path(inputs["meta"]["image_paths"][0][0]).stem
+
+            if metrics_individual is not None:
+                metrics_individual["filename"].append(filename)
+                metrics_individual["epe"].append(metrics["val/epe"].item())
+                metrics_individual["outlier"].append(metrics["val/outlier"].item())
+
+            generate_outputs(
+                args, inputs, preds, dataloader_name, i, inputs.get("meta")
+            )
+
+            if args.max_samples is not None and i >= (args.max_samples - 1):
+                break
+
+    if args.write_individual_metrics:
+        ind_df = pd.DataFrame(metrics_individual)
+        args.output_path.mkdir(parents=True, exist_ok=True)
+        ind_df.to_csv(
+            Path(args.output_path) / f"{dataloader_name}_epe_outlier.csv", index=None
+        )
+
+    metrics_mean = {}
+    for k, v in metrics_sum.items():
+        metrics_mean[k] = v / len(dataloader)
+    return metrics_mean
+
+
+def fgsm(images, model):
+    pass
+
+@torch.enable_grad()
+def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
+    """Perform pgd or cospgd adversarial attack on input images.
+
+    Parameters
+    ----------
+    args : Namespace
+        Arguments to configure the model and the validation.
+    inputs : Dict[str, torch.Tensor]
+        Input images and labels.
+    model : BaseModel
+        The model for adversarial attack.
+
+    Returns
+    -------
+    torch.Tensor
+        Perturbed images.
+    """
+    images = inputs["images"]
+    labels = inputs["labels"]
+
+    orig_labels = labels.clone()
+    orig_images = images.clone()
+
+    with torch.no_grad():
+        orig_preds = model(images)    
+
+    if args.attack_norm == "inf":
+        images = attack_functions.init_linf(
+                            images,
+                            epsilon = args.attack_epsilon,
+                            clamp_min = 0,
+                            clamp_max = 1
+                        )
+    elif args.attack_norm == "two":
+          images = attack_functions.init_l2(
+                            images,
+                            epsilon = args.attack_epsilon,
+                            clamp_min = 0,
+                            clamp_max = 1
+                        )
+          
+    images.requires_grad=True
+
+    preds = model(images)
+    loss = criterion(preds.float(), labels.long())
+
+    for t in range(args.iterations):
+        if args.attack == "cospgd":
+            loss = attack_functions.cospgd_scale(
+                                predictions = preds,
+                                labels = labels.long(),
+                                loss = loss,
+                                targeted = False,
+                                one_hot = False
+                            )
+        loss = loss.mean()
+        loss.backward()
+        if args.attack_norm == 'inf':
+            images = attack_functions.step_inf(
+                perturbed_image = images,
+                epsilon = args.attack_epsilon,
+                data_grad = images.grad,
+                orig_image = orig_images,
+                alpha = args.attack_alpha,
+                targeted = False,
+                clamp_min = 0,
+                clamp_max = 1,
+                grad_scale = None
+            )
+        elif args.attack_norm == 'two':
+            images = attack_functions.step_l2(
+                perturbed_image = images,
+                epsilon = args.attack_epsilon,
+                data_grad = images.grad,
+                orig_image = orig_images,
+                alpha = args.attack_alpha,
+                targeted = False,
+                clamp_min = 0,
+                clamp_max = 1,
+                grad_scale = None
+            )
+
+        images.requires_grad = True
+        preds = model(images)
+        loss = criterion(preds.float(), labels.long())
 
 
 def _get_model_names(args: Namespace) -> List[str]:
