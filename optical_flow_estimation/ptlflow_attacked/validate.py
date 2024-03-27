@@ -16,6 +16,8 @@
 # limitations under the License.
 # =============================================================================
 
+import pdb
+
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
@@ -50,7 +52,7 @@ epsilon = 0.03
 norm = "two"
 alpha = 0.01
 iterations = 5
-criterion = nn.CrossEntropyLoss(ignore_index=255, reduction="none")
+criterion = nn.CrossEntropyLoss(reduction="none")
 
 
 config_logging()
@@ -71,6 +73,9 @@ def _init_parser() -> ArgumentParser:
         choices=["fgsm", "pgd", "cospgd", "none"],
         help="Name of the attack to use.",
     )
+    parser.add_argument('-it', '--iterations', type=int, default=1,
+                        help='number of iterations for adversarial attack')
+    
     parser.add_argument(
         "--attack_norm",
         type=str,
@@ -636,8 +641,12 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
     torch.Tensor
         Perturbed images.
     """
-    images = inputs["images"]
-    labels = inputs["labels"]
+    #pdb.set_trace()
+    images = inputs["images"].squeeze(0)
+
+    labels = inputs["flows"].squeeze(0)
+    print(images.size())
+    print(labels.size())
 
     orig_labels = labels.clone()
     orig_images = images.clone()
@@ -653,7 +662,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                             clamp_max = 1
                         )
     elif args.attack_norm == "two":
-          images = attack_functions.init_l2(
+          images = init_l2(
                             images,
                             epsilon = args.attack_epsilon,
                             clamp_min = 0,
@@ -661,15 +670,25 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                         )
           
     images.requires_grad=True
+    # labels = labels.unsqueeze(0)
 
-    preds = model(images)
-    loss = criterion(preds.float(), labels.long())
+
+    perturbed_inputs = inputs
+    perturbed_inputs["images"] = images.unsqueeze(0)
+    print(perturbed_inputs["images"].size())
+    preds = model(perturbed_inputs)
+    preds_raw = preds["flows"].squeeze(0)
+    print(preds_raw.size())
+
+
+
+    loss = criterion(preds_raw.float(), labels.float())
 
     for t in range(args.iterations):
         if args.attack == "cospgd":
             loss = attack_functions.cospgd_scale(
-                                predictions = preds,
-                                labels = labels.long(),
+                                predictions = preds_raw,
+                                labels = labels.float(),
                                 loss = loss,
                                 targeted = False,
                                 one_hot = False
@@ -689,7 +708,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                 grad_scale = None
             )
         elif args.attack_norm == 'two':
-            images = attack_functions.step_l2(
+            images = step_l2(
                 perturbed_image = images,
                 epsilon = args.attack_epsilon,
                 data_grad = images.grad,
@@ -702,8 +721,11 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
             )
 
         images.requires_grad = True
-        preds = model(images)
-        loss = criterion(preds.float(), labels.long())
+        perturbed_inputs = inputs
+        perturbed_inputs["images"] = images.unsqueeze(0)
+        preds = model(perturbed_inputs)
+        preds_raw = preds["flows"].squeeze(0)
+        loss = criterion(preds_raw.float(), labels.float())
 
     loss = loss.mean()
 
@@ -788,6 +810,81 @@ def _write_to_file(
                     v = v * 255
                 cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
 
+@staticmethod
+def init_l2(
+        images,
+        epsilon,
+        clamp_min = 0,
+        clamp_max = 1,
+    ):
+    noise = torch.FloatTensor(images.shape).uniform_(-1, 1).to(images.device)
+    print(images.size())
+    print(noise.size())
+    #pdb.set_trace()
+
+    noise = lp_normalize(
+        noise = noise,
+        p = 2,
+        epsilon = epsilon,
+        decrease_only = False
+    )
+    images = images + noise
+    images = images.clamp(clamp_min, clamp_max)
+    return images
+
+@staticmethod
+def lp_normalize(
+        noise,
+        p,
+        epsilon = None,
+        decrease_only = False
+    ):
+    if epsilon is None:
+        epsilon = torch.tensor(1.0)
+    denom = torch.norm(noise, p=p, dim=(-1, -2, -3))
+    denom = torch.maximum(denom, torch.tensor(1E-12)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
+    #pdb.set_trace()
+    if decrease_only:
+        denom = torch.maximum(denom/epsilon, torch.tensor(1))
+    else:
+        denom = denom / epsilon
+    return noise / denom
+
+@staticmethod
+def step_l2(
+        perturbed_image,
+        epsilon,
+        data_grad,
+        orig_image,
+        alpha,
+        targeted,
+        clamp_min = 0,
+        clamp_max = 1,
+        grad_scale = None
+    ):
+    # normalize gradients
+    if targeted:
+        data_grad *= -1
+    data_grad = lp_normalize(
+        data_grad,
+        p = 2,
+        epsilon = 1.0,
+        decrease_only = False
+    )
+    if grad_scale is not None:
+        data_grad *= grad_scale
+    # Create the perturbed image by adjusting each pixel of the input image
+    perturbed_image = perturbed_image.detach() + alpha*data_grad
+    # clip to l2 ball
+    delta = lp_normalize(
+        noise = perturbed_image - orig_image,
+        p = 2,
+        epsilon = epsilon,
+        decrease_only = True
+    )
+    # Adding clipping to maintain [0,1] range
+    perturbed_image = torch.clamp(orig_image + delta, clamp_min, clamp_max).detach()
+    return perturbed_image
 
 if __name__ == "__main__":
     parser = _init_parser()
