@@ -508,6 +508,7 @@ def attack_one_dataloader(
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
 
+    losses = torch.zeros(len(dataloader))
     with tqdm(dataloader) as tdl:
         prev_preds = None
         for i, inputs in enumerate(tdl):
@@ -530,15 +531,16 @@ def attack_one_dataloader(
             inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
             inputs["prev_preds"] = prev_preds
 
-            match args.attack: # Start adversarial attack (generate perturbed images)
+            # TODO: figure out what to do with scaled images and labels
+            match args.attack: # Commit adversarial attack
                 case "fgsm":
-                    inputs["images"] = fgsm(args, inputs, model)
+                    # inputs["images"] = fgsm(args, inputs, model)
+                    images, labels, preds, losses[i] = fgsm(args, inputs, model)
                 case "pgd" | "cospgd":
-                    inputs["images"] = cos_pgd(args, inputs, model)
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = cos_pgd(args, inputs, model)
                 case "none":
-                    pass
-
-            preds = model(inputs)
+                    preds = model(inputs)
 
             if args.warm_start:
                 if (
@@ -640,8 +642,8 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
     orig_labels = labels.clone()
     orig_images = images.clone()
 
-    with torch.no_grad():
-        orig_preds = model(images)    
+    # with torch.no_grad():
+    #     orig_preds = model(images)    
 
     if args.attack_norm == "inf":
         images = attack_functions.init_linf(
@@ -702,6 +704,10 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
         images.requires_grad = True
         preds = model(images)
         loss = criterion(preds.float(), labels.long())
+
+    loss = loss.mean()
+
+    return images, labels, preds, loss.item()
 
 
 def _get_model_names(args: Namespace) -> List[str]:
