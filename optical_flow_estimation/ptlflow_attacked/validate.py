@@ -53,6 +53,8 @@ norm = "two"
 alpha = 0.01
 iterations = 5
 criterion = nn.CrossEntropyLoss(reduction="none")
+targeted = False
+batch_size = 1
 
 
 config_logging()
@@ -620,8 +622,32 @@ def attack_one_dataloader(
     return metrics_mean
 
 
-def fgsm(images, model):
-    pass
+@torch.enable_grad()
+def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel):
+    images = inputs["images"].squeeze(0)
+    labels = inputs["flows"].squeeze(0)
+
+    orig_labels = labels.clone()
+    orig_images = images.clone()
+    images.requires_grad=True
+    perturbed_inputs = inputs
+    perturbed_inputs["images"] = images.unsqueeze(0)
+    preds = model(perturbed_inputs)
+
+    preds_raw = preds["flows"].squeeze(0)
+
+    loss = criterion(preds_raw.float(), labels.float())
+    loss = loss.mean()
+    loss.backward()
+    images = fgsm_attack(args, images, images.grad, orig_images)
+
+    images.requires_grad = True
+    perturbed_inputs = inputs
+    perturbed_inputs["images"] = images.unsqueeze(0)
+    preds = model(perturbed_inputs)
+
+    return images, labels, preds, loss.item()
+
 
 @torch.enable_grad()
 def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
@@ -641,15 +667,13 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
     torch.Tensor
         Perturbed images.
     """
-    #pdb.set_trace()
-    images = inputs["images"].squeeze(0)
 
+    images = inputs["images"].squeeze(0)
     labels = inputs["flows"].squeeze(0)
-    print(images.size())
-    print(labels.size())
 
     orig_labels = labels.clone()
     orig_images = images.clone()
+    
 
     # with torch.no_grad():
     #     orig_preds = model(images)    
@@ -662,7 +686,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                             clamp_max = 1
                         )
     elif args.attack_norm == "two":
-          images = init_l2(
+        images = attack_functions.init_l2(
                             images,
                             epsilon = args.attack_epsilon,
                             clamp_min = 0,
@@ -670,20 +694,13 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                         )
           
     images.requires_grad=True
-    # labels = labels.unsqueeze(0)
-
 
     perturbed_inputs = inputs
     perturbed_inputs["images"] = images.unsqueeze(0)
-    print(perturbed_inputs["images"].size())
     preds = model(perturbed_inputs)
     preds_raw = preds["flows"].squeeze(0)
-    print(preds_raw.size())
-
-
-
+    
     loss = criterion(preds_raw.float(), labels.float())
-
     for t in range(args.iterations):
         if args.attack == "cospgd":
             loss = attack_functions.cospgd_scale(
@@ -708,7 +725,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                 grad_scale = None
             )
         elif args.attack_norm == 'two':
-            images = step_l2(
+            images = attack_functions.step_l2(
                 perturbed_image = images,
                 epsilon = args.attack_epsilon,
                 data_grad = images.grad,
@@ -810,81 +827,28 @@ def _write_to_file(
                     v = v * 255
                 cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
 
-@staticmethod
-def init_l2(
-        images,
-        epsilon,
-        clamp_min = 0,
-        clamp_max = 1,
-    ):
-    noise = torch.FloatTensor(images.shape).uniform_(-1, 1).to(images.device)
-    print(images.size())
-    print(noise.size())
-    #pdb.set_trace()
-
-    noise = lp_normalize(
-        noise = noise,
-        p = 2,
-        epsilon = epsilon,
-        decrease_only = False
-    )
-    images = images + noise
-    images = images.clamp(clamp_min, clamp_max)
-    return images
 
 @staticmethod
-def lp_normalize(
-        noise,
-        p,
-        epsilon = None,
-        decrease_only = False
-    ):
-    if epsilon is None:
-        epsilon = torch.tensor(1.0)
-    denom = torch.norm(noise, p=p, dim=(-1, -2, -3))
-    denom = torch.maximum(denom, torch.tensor(1E-12)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
-    #pdb.set_trace()
-    if decrease_only:
-        denom = torch.maximum(denom/epsilon, torch.tensor(1))
-    else:
-        denom = denom / epsilon
-    return noise / denom
-
-@staticmethod
-def step_l2(
-        perturbed_image,
-        epsilon,
-        data_grad,
-        orig_image,
-        alpha,
-        targeted,
-        clamp_min = 0,
-        clamp_max = 1,
-        grad_scale = None
-    ):
-    # normalize gradients
+def fgsm_attack(args: Namespace, perturbed_image, data_grad, orig_image):
+    # Collect the element-wise sign of the data gradient
+    sign_data_grad = data_grad.sign()
+    # Create the perturbed image by adjusting each pixel of the input image        
     if targeted:
-        data_grad *= -1
-    data_grad = lp_normalize(
-        data_grad,
-        p = 2,
-        epsilon = 1.0,
-        decrease_only = False
-    )
-    if grad_scale is not None:
-        data_grad *= grad_scale
-    # Create the perturbed image by adjusting each pixel of the input image
-    perturbed_image = perturbed_image.detach() + alpha*data_grad
-    # clip to l2 ball
-    delta = lp_normalize(
-        noise = perturbed_image - orig_image,
-        p = 2,
-        epsilon = epsilon,
-        decrease_only = True
-    )
+        sign_data_grad *= -1
+    perturbed_image = perturbed_image.detach() + args.attack_alpha*sign_data_grad
     # Adding clipping to maintain [0,1] range
-    perturbed_image = torch.clamp(orig_image + delta, clamp_min, clamp_max).detach()
+    if args.attack_norm == 'inf':
+        delta = torch.clamp(perturbed_image - orig_image, min = -1*args.attack_epsilon, max=args.attack_epsilon)
+    elif args.attack_norm == 'two':
+        delta = perturbed_image - orig_image
+        delta_norms = torch.norm(delta.view(batch_size, -1), p=2, dim=1)
+        factor = args.attack_epsilon / delta_norms
+        factor = torch.min(factor, torch.ones_like(delta_norms))
+        delta = delta * factor.view(-1, 1, 1, 1)
+    perturbed_image = torch.clamp(orig_image + delta, 0, 1)
+    # Return the perturbed image
     return perturbed_image
+
 
 if __name__ == "__main__":
     parser = _init_parser()
