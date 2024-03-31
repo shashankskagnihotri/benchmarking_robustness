@@ -46,7 +46,8 @@ from ptlflow.utils.utils import (
 # Import cosPGD functions
 from cospgd import functions as attack_functions
 import torch.nn as nn
-
+import adversarial_attacks_pytorch
+from adversarial_attacks_pytorch.torchattacks import FGSM
 # Attack parameters
 epsilon = 0.03
 norm = "two"
@@ -542,7 +543,7 @@ def attack_one_dataloader(
             match args.attack: # Commit adversarial attack
                 case "fgsm":
                     # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, losses[i] = fgsm(args, inputs, model)
+                    images, labels, preds, placeholder = fgsm2(args, inputs, model)
                 case "pgd" | "cospgd":
                     # inputs["images"] = cos_pgd(args, inputs, model)
                     images, labels, preds, losses[i] = cos_pgd(args, inputs, model)
@@ -647,6 +648,17 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel):
     preds = model(perturbed_inputs)
 
     return images, labels, preds, loss.item()
+
+
+def fgsm2(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
+    attack = FGSM(model, args.attack_epsilon)
+    perturbed_inputs = attack(inputs)
+    preds = model(perturbed_inputs)
+    images = None
+    labels = None
+
+    return images, labels, preds, None
+
 
 
 @torch.enable_grad()
