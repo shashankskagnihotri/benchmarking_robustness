@@ -42,6 +42,7 @@ from ptlflow_attacked.ptlflow.utils.utils import (
     get_list_of_available_models_list,
     tensor_dict_to_numpy,
 )
+from attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic
 
 # Import cosPGD functions
 from cospgd import functions as attack_functions
@@ -603,7 +604,7 @@ def attack_one_dataloader(
                     elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
                         inputs[key] = val[:, k : k + 1]
 
-            metrics = model.val_metrics(preds, inputs)
+            # metrics = model.val_metrics(preds, inputs)
             if args.attack_targeted:
                 metrics = model.val_metrics(preds, targeted_flow_dic)
             else:
@@ -672,20 +673,13 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     loss = loss.mean()
     loss.backward()
 
-    image_1 = inputs["images"][0][0].unsqueeze(0)
-    image_2 = inputs["images"][0][1].unsqueeze(0)
-    
-    grad = inputs["images"].grad
-    image_1_grad = grad[0][0].unsqueeze(0)
-    image_2_grad = grad[0][1].unsqueeze(0)
+    image_1, image_2 = get_image_tensors(inputs)
+    image_1_grad, image_2_grad = get_image_grads(inputs)
 
     image_1_adv = fgsm_attack(args, image_1, image_1_grad, orig_image_1)
     image_2_adv = fgsm_attack(args, image_2, image_2_grad, orig_image_2)
 
-    images.requires_grad = True
-    perturbed_inputs = inputs
-    adversarial_image_tensor = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
-    perturbed_inputs["images"] = adversarial_image_tensor
+    perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv)
     preds = model(perturbed_inputs)
 
     return images, labels, preds, loss.item()
