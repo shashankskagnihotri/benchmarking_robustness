@@ -77,9 +77,6 @@ def _init_parser() -> ArgumentParser:
         choices=["fgsm", "pgd", "cospgd", "none"],
         help="Name of the attack to use.",
     )
-    parser.add_argument('-it', '--attack_iterations', type=int, default=1,
-                        help='number of iterations for adversarial attack')
-    
     parser.add_argument(
         "--attack_norm",
         type=str,
@@ -104,12 +101,6 @@ def _init_parser() -> ArgumentParser:
         type=float,
         default=alpha,
         help="Set epsilon to use for adversarial attack.",
-    )
-    parser.add_argument(
-        "--attack_targeted",
-        type=bool,
-        default=targeted,
-        help="Set if adversarial attack should be targeted.",
     )
     parser.add_argument(
         "--attack_targeted",
@@ -562,6 +553,11 @@ def attack_one_dataloader(
                 args.attack_epsilon = args.attack_epsilon*255
 
             # TODO: include if-clause for targeted and overwrite flow labels with zero_flow
+            if args.attack_targeted:
+                zero_flow = torch.zeros_like(inputs["flows"])
+                orig_flow = inputs["flows"]
+                with torch.no_grad():
+                    orig_preds = model(inputs)
 
             match args.attack: # Commit adversarial attack
                 case "fgsm":
@@ -606,7 +602,12 @@ def attack_one_dataloader(
                         inputs[key] = val[:, k : k + 1]
 
             # TODO: compare preds with original ground truths, original predictions, zero flow --> new metrics
-            metrics = model.val_metrics(preds, inputs)
+            if args.attack_targeted:
+                zero_flow_inputs = inputs.clone()
+                zero_flow_inputs["flows"] = zero_flow
+                metrics = model.val_metrics(preds, zero_flow_inputs)
+            else:
+                metrics = model.val_metrics(preds, inputs)
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
@@ -652,13 +653,11 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel):
     images = inputs["images"].squeeze(0)
     labels = inputs["flows"].squeeze(0)
 
-    orig_labels = labels.clone()
     orig_images = images.clone()
 
     # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
     if args.attack_targeted:
-        # labels = torch.zeros_like(labels)
-        inputs["flows"] = torch.zeros_like(inputs["flows"])
+        labels = torch.zeros_like(labels)
 
     images.requires_grad=True
     perturbed_inputs = inputs
@@ -713,13 +712,11 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
     images = inputs["images"].squeeze(0)
     labels = inputs["flows"].squeeze(0)
 
-    orig_labels = labels.clone()
     orig_images = images.clone()
 
      # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
     if args.attack_targeted:
-        # labels = torch.zeros_like(labels)
-        inputs["flows"] = torch.zeros_like(inputs["flows"])
+        labels = torch.zeros_like(labels)
 
     if args.attack_norm == "inf":
         images = attack_functions.init_linf(
@@ -744,13 +741,12 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
     preds_raw = preds["flows"].squeeze(0)
     
     loss = criterion(preds_raw.float(), labels.float())
-    for t in range(args.iterations):
+    for t in range(args.attack_iterations):
         if args.attack == "cospgd":
             loss = attack_functions.cospgd_scale(
                                 predictions = preds_raw,
                                 labels = labels.float(),
                                 loss = loss,
-                                targeted = args.attack_targeted,
                                 targeted = args.attack_targeted,
                                 one_hot = False
                             )
@@ -764,7 +760,6 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                 orig_image = orig_images,
                 alpha = args.attack_alpha,
                 targeted = args.attack_targeted,
-                targeted = args.attack_targeted,
                 clamp_min = 0,
                 clamp_max = 1,
                 grad_scale = None
@@ -777,7 +772,6 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                 orig_image = orig_images,
                 alpha = args.attack_alpha,
                 targeted = args.attack_targeted,
-                targeted = args.attack_targeted,
                 clamp_min = 0,
                 clamp_max = 1,
                 grad_scale = None
@@ -789,10 +783,6 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
         preds = model(perturbed_inputs)
         preds_raw = preds["flows"].squeeze(0)
         loss = criterion(preds_raw.float(), labels.float())
-
-        # if self.targeted:
-        #     self.actual_metrics.update(orig_labels.detach().cpu().numpy(), preds.detach().max(dim=1)[1].cpu().numpy())
-        #     self.initial_metrics.update(orig_preds.detach().max(dim=1)[1].cpu().numpy(), preds.detach().max(dim=1)[1].cpu().numpy()) 
 
         # if self.targeted:
         #     self.actual_metrics.update(orig_labels.detach().cpu().numpy(), preds.detach().max(dim=1)[1].cpu().numpy())
