@@ -603,6 +603,7 @@ def attack_one_dataloader(
                     elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
                         inputs[key] = val[:, k : k + 1]
 
+            # TODO: compare preds with original ground truths, original predictions, zero flow --> new metrics
             metrics = model.val_metrics(preds, inputs)
             if args.attack_targeted:
                 metrics = model.val_metrics(preds, targeted_flow_dic)
