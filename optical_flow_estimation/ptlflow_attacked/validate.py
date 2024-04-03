@@ -46,13 +46,14 @@ from ptlflow.utils.utils import (
 # Import cosPGD functions
 from cospgd import functions as attack_functions
 import torch.nn as nn
+from torchvision.transforms import Normalize
 import adversarial_attacks_pytorch
 from adversarial_attacks_pytorch.torchattacks import FGSM
 # Attack parameters
-epsilon = 0.03
-norm = "two"
+epsilon = 8 / 255
+norm = "inf"
 alpha = 0.01
-iterations = 5
+iterations = 3
 criterion = nn.CrossEntropyLoss(reduction="none")
 targeted = False
 batch_size = 1
@@ -76,7 +77,7 @@ def _init_parser() -> ArgumentParser:
         choices=["fgsm", "pgd", "cospgd", "none"],
         help="Name of the attack to use.",
     )
-    parser.add_argument('-it', '--iterations', type=int, default=1,
+    parser.add_argument('-it', '--attack_iterations', type=int, default=1,
                         help='number of iterations for adversarial attack')
     
     parser.add_argument(
@@ -544,13 +545,22 @@ def attack_one_dataloader(
             inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
             inputs["prev_preds"] = prev_preds
 
-            # TODO: figure out what to do with scaled images and labels
+
+            # TODO: do we need normalization like this?
+            # mean=[0.485, 0.456, 0.406]
+            # std=[0.229, 0.224, 0.225]
+            # model = nn.Sequential(Normalize(mean = mean, std = std), model)
+
+            # TODO: figure out what to do with epsilon scaling
             if inputs["images"].max() > 1.0:
                 args.attack_epsilon = args.attack_epsilon*255
+
+            # TODO: include if-clause for targeted and overwrite flow labels with zero_flow
+
             match args.attack: # Commit adversarial attack
                 case "fgsm":
                     # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, placeholder = fgsm2(args, inputs, model)
+                    images, labels, preds, placeholder = fgsm(args, inputs, model)
                 case "pgd" | "cospgd":
                     # inputs["images"] = cos_pgd(args, inputs, model)
                     images, labels, preds, losses[i] = cos_pgd(args, inputs, model)
@@ -589,6 +599,7 @@ def attack_one_dataloader(
                     elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
                         inputs[key] = val[:, k : k + 1]
 
+            # TODO: compare preds with original ground truths, original predictions, zero flow --> new metrics
             metrics = model.val_metrics(preds, inputs)
 
             for k in metrics.keys():
@@ -637,6 +648,12 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel):
 
     orig_labels = labels.clone()
     orig_images = images.clone()
+
+    # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
+    if args.attack_targeted:
+        # labels = torch.zeros_like(labels)
+        inputs["flows"] = torch.zeros_like(inputs["flows"])
+
     images.requires_grad=True
     perturbed_inputs = inputs
     perturbed_inputs["images"] = images.unsqueeze(0)
@@ -692,11 +709,11 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
 
     orig_labels = labels.clone()
     orig_images = images.clone()
-    
+
+     # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
     if args.attack_targeted:
-        labels = torch.zeros_like(labels)
-        # with torch.no_grad():
-        #     orig_preds = model(images.unsqueeze(0))    
+        # labels = torch.zeros_like(labels)
+        inputs["flows"] = torch.zeros_like(inputs["flows"])
 
     if args.attack_norm == "inf":
         images = attack_functions.init_linf(
@@ -857,7 +874,7 @@ def fgsm_attack(args: Namespace, perturbed_image, data_grad, orig_image):
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
     # Create the perturbed image by adjusting each pixel of the input image        
-    if targeted:
+    if args.attack_targeted:
         sign_data_grad *= -1
     perturbed_image = perturbed_image.detach() + args.attack_alpha*sign_data_grad
     # Adding clipping to maintain [0,1] range
