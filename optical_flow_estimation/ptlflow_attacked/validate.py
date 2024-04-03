@@ -112,6 +112,12 @@ def _init_parser() -> ArgumentParser:
         help="Set if adversarial attack should be targeted.",
     )
     parser.add_argument(
+        "--attack_targeted",
+        type=bool,
+        default=targeted,
+        help="Set if adversarial attack should be targeted.",
+    )
+    parser.add_argument(
         "--selection",
         type=str,
         nargs="+",
@@ -745,6 +751,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                                 labels = labels.float(),
                                 loss = loss,
                                 targeted = args.attack_targeted,
+                                targeted = args.attack_targeted,
                                 one_hot = False
                             )
         loss = loss.mean()
@@ -756,6 +763,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                 data_grad = images.grad,
                 orig_image = orig_images,
                 alpha = args.attack_alpha,
+                targeted = args.attack_targeted,
                 targeted = args.attack_targeted,
                 clamp_min = 0,
                 clamp_max = 1,
@@ -769,6 +777,7 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
                 orig_image = orig_images,
                 alpha = args.attack_alpha,
                 targeted = args.attack_targeted,
+                targeted = args.attack_targeted,
                 clamp_min = 0,
                 clamp_max = 1,
                 grad_scale = None
@@ -780,6 +789,10 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
         preds = model(perturbed_inputs)
         preds_raw = preds["flows"].squeeze(0)
         loss = criterion(preds_raw.float(), labels.float())
+
+        # if self.targeted:
+        #     self.actual_metrics.update(orig_labels.detach().cpu().numpy(), preds.detach().max(dim=1)[1].cpu().numpy())
+        #     self.initial_metrics.update(orig_preds.detach().max(dim=1)[1].cpu().numpy(), preds.detach().max(dim=1)[1].cpu().numpy()) 
 
         # if self.targeted:
         #     self.actual_metrics.update(orig_labels.detach().cpu().numpy(), preds.detach().max(dim=1)[1].cpu().numpy())
