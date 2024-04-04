@@ -140,7 +140,7 @@ class Attack(object):
         """
         self.attack_mode = "default"
         self.targeted = False
-        print("Attack mode is changed to 'default.'")
+        # print("Attack mode is changed to 'default.'")
 
     @wrapper_method
     def _set_mode_targeted(self, mode, quiet):
@@ -148,8 +148,8 @@ class Attack(object):
             raise ValueError("Targeted mode is not supported.")
         self.targeted = True
         self.attack_mode = mode
-        if not quiet:
-            print("Attack mode is changed to '%s'." % mode)
+        # if not quiet:
+             # print("Attack mode is changed to '%s'." % mode)
 
     @wrapper_method
     def set_mode_targeted_by_function(self, target_map_function, quiet=False):

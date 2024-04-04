@@ -31,16 +31,13 @@ class FGSM(Attack):
         self.eps = eps
         self.supported_mode = ["default", "targeted"]
 
-    def forward(self, inputs):
+    def forward(self, images, labels):
         r"""
         Overridden.
         """
-        images = inputs["images"].squeeze(0)
-        labels = inputs["flows"].squeeze(0)
 
-
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        images = images.squeeze(0)
+        labels = labels.squeeze(0)
 
         if self.targeted:
             target_labels = self.get_target_label(images, labels)
@@ -48,7 +45,7 @@ class FGSM(Attack):
         loss = nn.CrossEntropyLoss()
 
         images.requires_grad = True
-        inputs["images"] = images.unsqueeze(0)
+        inputs = {"images": images.unsqueeze(0)}
         outputs = self.get_logits(inputs)
         outputs_tensor = outputs["flows"].squeeze(0)
 
@@ -59,13 +56,23 @@ class FGSM(Attack):
             cost = loss(outputs_tensor, labels)
 
         # Update adversarial images
-        grad = torch.autograd.grad(
+        grads = torch.autograd.grad(
             cost, images, retain_graph=False, create_graph=False
         )[0]
 
-        adv_images = images + self.eps * grad.sign()
-        adv_images = torch.clamp(adv_images, min=0, max=1).detach()
-        adv_inputs = inputs
-        adv_inputs["images"] = adv_images.unsqueeze(0)
+        image_1_grad = grads[0].unsqueeze(0)
+        image_2_grad = grads[1].unsqueeze(0)
+        
 
-        return adv_inputs
+        image_1 = images.squeeze(0)[0].unsqueeze(0).detach().to(self.device)
+        image_2 = images.squeeze(0)[1].unsqueeze(0).detach().to(self.device)
+        
+        image_adv_1 = image_1 + self.eps * image_1_grad.sign()
+        image_adv_2 = image_2 + self.eps * image_2_grad.sign()
+        image_adv_1 = torch.clamp(image_adv_1, min=0, max=1).detach()
+        image_adv_2 = torch.clamp(image_adv_2, min=0, max=1).detach()
+
+        images_adv = torch.torch.cat((image_adv_1, image_adv_2)).unsqueeze(0)
+        inputs_adv = {"images": images_adv}
+
+        return inputs_adv

@@ -299,7 +299,7 @@ def validate(args: Namespace, model: BaseModel) -> pd.DataFrame:
             metrics_mean.values()
         )
         args.output_path.mkdir(parents=True, exist_ok=True)
-        metrics_df.T.to_csv(args.output_path / "metrics.csv", header=False)
+        metrics_df.T.to_csv(args.output_path / f"metrics_f{args.attack}_{args.attack_targeted}.csv", header=False)
     metrics_df = metrics_df.round(3)
     return metrics_df
 
@@ -550,18 +550,20 @@ def attack_one_dataloader(
             if args.attack_targeted:
                 targeted_flow_tensor = torch.zeros_like(inputs["flows"])
                 targeted_flow_dic = {"flows": targeted_flow_tensor}
+            # print(inputs["flows"])
 
-                with torch.no_grad():
-                    orig_preds = model(inputs)
-
+            with torch.no_grad():
+                orig_preds = model(inputs)
             # TODO: figure out what to do with scaled images and labels
             match args.attack: # Commit adversarial attack
                 case "fgsm":
                     # inputs["images"] = fgsm(args, inputs, model)
+                    # TODO: remove fgsm2
                     images, labels, preds, placeholder = fgsm(args, inputs, model, targeted_flow_dic)
+                # TODO: change fgsm to ffgsm
                 case "ffgsm":
                     # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, placeholder = ffgsm(args, inputs, model)
+                    images, labels, preds, placeholder = fgsm2(args, inputs, model, targeted_flow_dic)
                 case "pgd" | "cospgd":
                     # inputs["images"] = cos_pgd(args, inputs, model)
                     images, labels, preds, losses[i] = cos_pgd(args, inputs, model, targeted_flow_dic)
@@ -685,9 +687,14 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     return images, labels, preds, loss.item()
 
 
-def ffgsm(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
-    attack = FFGSM(model, args.attack_epsilon, args.attack_alpha)
-    perturbed_inputs = attack(inputs)
+def fgsm2(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_flow_dic: Optional[Dict[str, torch.Tensor]]):
+    attack = FGSM(model, args.attack_epsilon)
+    if args.attack_targeted:
+        attack.targeted = True
+        attack.set_mode_targeted_by_label()
+        perturbed_inputs = attack(inputs["images"], targeted_flow_dic["flows"])
+    else:
+        perturbed_inputs = attack(inputs["images"], inputs["flows"])
     preds = model(perturbed_inputs)
     images = None
     labels = None
