@@ -549,8 +549,7 @@ def attack_one_dataloader(
             targeted_flow_dic = None
             if args.attack_targeted:
                 targeted_flow_tensor = torch.zeros_like(inputs["flows"])
-                targeted_flow_dic = inputs
-                targeted_flow_dic["flows"] = targeted_flow_tensor
+                targeted_flow_dic = {"flows": targeted_flow_tensor}
 
                 with torch.no_grad():
                     orig_preds = model(inputs)
@@ -607,6 +606,7 @@ def attack_one_dataloader(
             # metrics = model.val_metrics(preds, inputs)
             if args.attack_targeted:
                 metrics = model.val_metrics(preds, targeted_flow_dic)
+                # metrics = model.val_metrics(preds, inputs)
             else:
                 metrics = model.val_metrics(preds, inputs)
 
@@ -732,11 +732,6 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, 
 
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
     orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
-
-    
-    
-    if args.attack_targeted:
-        labels = torch.zeros_like(labels)
 
     # with torch.no_grad():
     #     orig_preds = model(images)
