@@ -42,18 +42,19 @@ class FGSM(Attack):
         if self.targeted:
             target_labels = self.get_target_label(images, labels)
 
-        loss = nn.CrossEntropyLoss()
+        loss = nn.MSELoss(reduction="none")
 
         images.requires_grad_(True)
         inputs = {"images": images.unsqueeze(0)}
         outputs = self.get_logits(inputs)
         outputs_tensor = outputs["flows"].squeeze(0)
-
         # Calculate loss
         if self.targeted:
             cost = -loss(outputs_tensor, target_labels)
         else:
             cost = loss(outputs_tensor, labels)
+
+        cost = cost.mean()
 
         # Update adversarial images
         grads = torch.autograd.grad(
@@ -62,17 +63,18 @@ class FGSM(Attack):
 
         image_1_grad = grads[0].unsqueeze(0)
         image_2_grad = grads[1].unsqueeze(0)
-        
 
         image_1 = images.squeeze(0)[0].unsqueeze(0).detach().to(self.device)
         image_2 = images.squeeze(0)[1].unsqueeze(0).detach().to(self.device)
         
         image_adv_1 = image_1 + self.eps * image_1_grad.sign()
+
         image_adv_2 = image_2 + self.eps * image_2_grad.sign()
         image_adv_1 = torch.clamp(image_adv_1, min=0, max=1).detach()
         image_adv_2 = torch.clamp(image_adv_2, min=0, max=1).detach()
 
         images_adv = torch.torch.cat((image_adv_1, image_adv_2)).unsqueeze(0)
         inputs_adv = {"images": images_adv}
+
 
         return inputs_adv
