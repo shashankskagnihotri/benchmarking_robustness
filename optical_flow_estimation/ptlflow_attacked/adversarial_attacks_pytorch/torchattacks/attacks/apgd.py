@@ -48,7 +48,7 @@ class APGD(Attack):
         steps=10,
         n_restarts=1,
         seed=0,
-        loss="ce",
+        loss="mse",
         eot_iter=1,
         rho=0.75,
         verbose=False,
@@ -165,9 +165,11 @@ class APGD(Attack):
         loss_best_steps = torch.zeros([self.steps + 1, 1])
         acc_steps = torch.zeros_like(loss_best_steps)
         
-
+        #TODO: implement losses correctly
         if self.loss == "ce":
             criterion_indiv = nn.CrossEntropyLoss(reduction="none")
+        elif self.loss == "mse":
+            criterion_indiv = nn.MSELoss(reduction="none")
         elif self.loss == "dlr":
             criterion_indiv = self.dlr_loss
         else:
@@ -184,7 +186,7 @@ class APGD(Attack):
                 output_tensors = logits["flows"].squeeze(0)
                 loss_indiv = criterion_indiv(output_tensors, y)
                 # TODO:SUM correct? Not Mean?
-                loss = loss_indiv.sum()
+                loss = loss_indiv.mean()
 
             # 1 backward pass (eot_iter = 1)
             
@@ -362,7 +364,7 @@ class APGD(Attack):
                     output_tensors = logits["flows"].squeeze(0)
                     loss_indiv = criterion_indiv(output_tensors, y)
                     # TODO:SUM correct? Not Mean?
-                    loss = loss_indiv.sum()
+                    loss = loss_indiv.mean()
 
                 # 1 backward pass (eot_iter = 1)
                 grad += torch.autograd.grad(loss, x_adv)[0].detach()
