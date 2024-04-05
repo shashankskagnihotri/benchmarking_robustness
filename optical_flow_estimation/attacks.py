@@ -569,7 +569,7 @@ def attack_one_dataloader(
                     images, labels, preds, losses[i] = cos_pgd(args, inputs, model, targeted_flow_dic)
                 case "apgd":
                     # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, placeholder = apgd(args, inputs, model)
+                    images, labels, preds, placeholder = apgd(args, inputs, model, targeted_flow_dic)
                 case "none":
                     preds = model(inputs)
 
@@ -702,9 +702,14 @@ def fgsm2(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, ta
     return images, labels, preds, None
 
 
-def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel):
+def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_flow_dic: Optional[Dict[str, torch.Tensor]]):
     attack = APGD(model, eps=args.attack_epsilon, verbose=True)
-    perturbed_inputs = attack(inputs)
+    if args.attack_targeted:
+        attack.targeted = True
+        attack.set_mode_targeted_by_label()
+        perturbed_inputs = attack(inputs["images"], targeted_flow_dic["flows"])
+    else:
+        perturbed_inputs = attack(inputs["images"], inputs["flows"])
     preds = model(perturbed_inputs)
     images = None
     labels = None
