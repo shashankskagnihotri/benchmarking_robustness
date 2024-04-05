@@ -552,8 +552,8 @@ def attack_one_dataloader(
                 targeted_flow_dic = {"flows": targeted_flow_tensor}
             # print(inputs["flows"])
 
-            with torch.no_grad():
-                orig_preds = model(inputs)
+            #with torch.no_grad():
+                # orig_preds = model(inputs)
             # TODO: figure out what to do with scaled images and labels
             match args.attack: # Commit adversarial attack
                 case "fgsm":
@@ -664,9 +664,7 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     else:
         labels = inputs["flows"].squeeze(0)
 
-    images = inputs["images"]
-    images.requires_grad = True
-    inputs["images"] = images
+    inputs["images"].requires_grad_(True)
 
     preds = model(inputs)
     preds_raw = preds["flows"].squeeze(0)
@@ -684,7 +682,7 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv)
     preds = model(perturbed_inputs)
 
-    return images, labels, preds, loss.item()
+    return inputs["images"], labels, preds, loss.item()
 
 
 def fgsm2(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_flow_dic: Optional[Dict[str, torch.Tensor]]):
@@ -707,9 +705,11 @@ def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, tar
     if args.attack_targeted:
         attack.targeted = True
         attack.set_mode_targeted_by_label()
-        perturbed_inputs = attack(inputs["images"], targeted_flow_dic["flows"])
+        perturbed_images = attack(inputs["images"], targeted_flow_dic["flows"])
     else:
-        perturbed_inputs = attack(inputs["images"], inputs["flows"])
+        perturbed_images = attack(inputs["images"], inputs["flows"])
+    perturbed_inputs = inputs
+    perturbed_inputs["images"] = perturbed_images
     preds = model(perturbed_inputs)
     images = None
     labels = None
