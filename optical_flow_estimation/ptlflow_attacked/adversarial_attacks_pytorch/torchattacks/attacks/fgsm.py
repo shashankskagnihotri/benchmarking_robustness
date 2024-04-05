@@ -44,7 +44,7 @@ class FGSM(Attack):
 
         loss = nn.CrossEntropyLoss()
 
-        images.requires_grad = True
+        images.requires_grad_(True)
         inputs = {"images": images.unsqueeze(0)}
         outputs = self.get_logits(inputs)
         outputs_tensor = outputs["flows"].squeeze(0)
