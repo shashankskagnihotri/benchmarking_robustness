@@ -48,7 +48,7 @@ class APGD(Attack):
         steps=10,
         n_restarts=1,
         seed=0,
-        loss="mse",
+        loss="epe",
         eot_iter=1,
         rho=0.75,
         verbose=False,
@@ -101,14 +101,12 @@ class APGD(Attack):
             - x_sorted[:, -1] * (1.0 - ind)
         ) / (x_sorted[:, -1] - x_sorted[:, -3] + 1e-12)
 
-    def attack_single_run(self, x_in, y_in):
-        x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone().unsqueeze(0)
-        y = y_in.clone() if len(y_in.shape) == 4 else y_in.clone().unsqueeze(0)
+    def attack_single_run(self, images_orig, lables_orig):
+        images = images_orig.clone() if len(images_orig.shape) == 4 else images_orig.clone().unsqueeze(0)
+        lables = lables_orig.clone() if len(lables_orig.shape) == 4 else lables_orig.clone().unsqueeze(0)
 
-        x_1 = x[0].unsqueeze(0)
-        x_2 = x[1].unsqueeze(0)
-        
-
+        image_1 = images[0].unsqueeze(0)
+        image_2 = images[1].unsqueeze(0)
 
         self.steps_2, self.steps_min, self.size_decr = (
             max(int(0.22 * self.steps), 1),
@@ -121,8 +119,9 @@ class APGD(Attack):
             )
 
         if self.norm == "Linf":
-            t = 2 * torch.rand(x_1.shape).to(self.device).detach() - 1
-            x_adv_1 = x_1.detach() + self.eps * torch.ones([x_1.shape[0], 1, 1, 1]).to(
+            # image 1 Linf-norm
+            t = 2 * torch.rand(image_1.shape).to(self.device).detach() - 1
+            image_1_adv = image_1.detach() + self.eps * torch.ones([image_1.shape[0], 1, 1, 1]).to(
                 self.device
             ).detach() * t / (
                 t.reshape([t.shape[0], -1])
@@ -130,8 +129,9 @@ class APGD(Attack):
                 .max(dim=1, keepdim=True)[0]
                 .reshape([-1, 1, 1, 1])
             )  # nopep8
-            t = 2 * torch.rand(x_2.shape).to(self.device).detach() - 1
-            x_adv_2 = x_2.detach() + self.eps * torch.ones([x_2.shape[0], 1, 1, 1]).to(
+            # image 2 Linf-norm
+            t = 2 * torch.rand(image_2.shape).to(self.device).detach() - 1
+            image_2_adv = image_2.detach() + self.eps * torch.ones([image_2.shape[0], 1, 1, 1]).to(
                 self.device
             ).detach() * t / (
                 t.reshape([t.shape[0], -1])
@@ -139,31 +139,33 @@ class APGD(Attack):
                 .max(dim=1, keepdim=True)[0]
                 .reshape([-1, 1, 1, 1])
             )  # nopep8
+            # image 1 L2-norm
         elif self.norm == "L2":
-            t = torch.randn(x_1.shape).to(self.device).detach()
-            x_adv_1 = x_1.detach() + self.eps * torch.ones([x_1.shape[0], 1, 1, 1]).to(
+            t = torch.randn(image_1.shape).to(self.device).detach()
+            image_1_adv = image_1.detach() + self.eps * torch.ones([image_1.shape[0], 1, 1, 1]).to(
                 self.device
             ).detach() * t / (
                 (t ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
             )  # nopep8
-            t = torch.randn(x_2.shape).to(self.device).detach()
-            x_adv_2 = x_2.detach() + self.eps * torch.ones([x_2.shape[0], 1, 1, 1]).to(
+            t = torch.randn(image_2.shape).to(self.device).detach()
+            image_2_adv = image_2.detach() + self.eps * torch.ones([image_2.shape[0], 1, 1, 1]).to(
                 self.device
             ).detach() * t / (
                 (t ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
             )  # nopep8
-        x_adv_1 = x_adv_1.clamp(0.0, 1.0)
-        x_adv_2 = x_adv_2.clamp(0.0, 1.0)
+        image_1_adv = image_1_adv.clamp(0.0, 1.0)
+        image_2_adv = image_2_adv.clamp(0.0, 1.0)
 
-        x_best = torch.cat((x_adv_1, x_adv_2)).unsqueeze(0)
-        x_best_adv = torch.cat((x_adv_1, x_adv_2)).unsqueeze(0)
+        images_best = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
+        images_best_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
 
         #loss_steps = torch.zeros([self.steps, x.shape[0]])
         #loss_best_steps = torch.zeros([self.steps + 1, x.shape[0]])
         #acc_steps = torch.zeros_like(loss_best_steps)
         loss_steps = torch.zeros([self.steps, 1])
         loss_best_steps = torch.zeros([self.steps + 1, 1])
-        acc_steps = torch.zeros_like(loss_best_steps)
+        epe_steps = torch.zeros_like(loss_best_steps)
+
         
         #TODO: implement losses correctly
         if self.loss == "ce":
@@ -172,38 +174,47 @@ class APGD(Attack):
             criterion_indiv = nn.MSELoss(reduction="none")
         elif self.loss == "dlr":
             criterion_indiv = self.dlr_loss
+        # Loss is handled with script
+        elif self.loss == "epe":
+            criterion_indiv = None
         else:
             raise ValueError("unknown loss")
 
-        x_adv = torch.cat((x_adv_1, x_adv_2)).unsqueeze(0)
-        x_adv.requires_grad_(True)
-        grad = torch.zeros_like(x.unsqueeze(0))
-        x_adv_dic = {"images": x_adv}
+        images_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
+        images_adv.requires_grad_(True)
+        grad = torch.zeros_like(images.unsqueeze(0))
+        images_adv_dic = {"images": images_adv}
         for _ in range(self.eot_iter):
             with torch.enable_grad():
                 # 1 forward pass (eot_iter = 1)
-                logits = self.get_logits(x_adv_dic)
-                output_tensors = logits["flows"].squeeze(0)
-                loss_indiv = criterion_indiv(output_tensors, y)
+                preds_dic = self.get_logits(images_adv_dic)
+                preds = preds_dic["flows"].squeeze(0)
+                if criterion_indiv is None:
+                    loss_indiv = epe(preds, lables)
+                else:
+                    loss_indiv = criterion_indiv(preds, lables)
                 # TODO:SUM correct? Not Mean?
                 loss = loss_indiv.mean()
 
             # 1 backward pass (eot_iter = 1)
             
-            grad += torch.autograd.grad(loss, x_adv)[0].detach()
+            grad += torch.autograd.grad(loss, images_adv)[0].detach()
         grad /= float(self.eot_iter)
         grad_best = grad.clone()
 
-        # acc = logits.detach().max(1)[1] == y
-        # acc_steps[0] = acc + 0
+        if self.loss == "epe":
+            epe_score = loss
+        else:
+            epe_score = epe(preds, lables)
+        # TODO: what is this used for? Was acc steps
+        epe_steps[0] = epe_score + 0
         loss_best = loss_indiv.detach().view(len(loss_indiv),-1).mean(dim=1)
-
         step_size = (
             self.eps
             * torch.ones([1, 1, 1, 1]).to(self.device).detach()
             * torch.Tensor([2.0]).to(self.device).detach().reshape([1, 1, 1, 1])
         )  # nopep8
-        x_adv_old = x_adv.clone()
+        images_adv_old = images_adv.clone()
         counter = 0
         k = self.steps_2 + 0
         u = np.arange(1)
@@ -217,90 +228,94 @@ class APGD(Attack):
         for i in range(self.steps):
             # gradient step
             with torch.no_grad():
-                x_adv = x_adv.detach()
-                grad2 = x_adv - x_adv_old
-                x_adv_old = x_adv.clone()
+                images_adv = images_adv.detach()
+                grad2 = images_adv - images_adv_old
+                images_adv_old = images_adv.clone()
 
                 a = 0.75 if i > 0 else 1.0
                 
-                x_adv_1 = x_adv.squeeze(0)[0].unsqueeze(0)
-                x_adv_2 = x_adv.squeeze(0)[1].unsqueeze(0)
+                image_1_adv = images_adv.squeeze(0)[0].unsqueeze(0)
+                image_2_adv = images_adv.squeeze(0)[1].unsqueeze(0)
 
-                grad2_1 = grad2.squeeze(0)[0].unsqueeze(0)
-                grad2_2 = grad2.squeeze(0)[1].unsqueeze(0)
+                grad2_i1 = grad2.squeeze(0)[0].unsqueeze(0)
+                grad2_i2 = grad2.squeeze(0)[1].unsqueeze(0)
 
-                grad_1 = grad.squeeze(0)[0].unsqueeze(0) 
-                grad_2 = grad.squeeze(0)[1].unsqueeze(0) 
+                grad_i1 = grad.squeeze(0)[0].unsqueeze(0) 
+                grad_i2 = grad.squeeze(0)[1].unsqueeze(0) 
 
                 
                 
                 if self.norm == "Linf":
-                    x_adv_1_1 = x_adv_1 + step_size * torch.sign(grad_1)
-                    x_adv_1_1 = torch.clamp(
-                        torch.min(torch.max(x_adv_1_1, x_1 - self.eps), x_1 + self.eps),
+                    # image_1_adv Linf-norm
+                    image_1_adv_v1 = image_1_adv + step_size * torch.sign(grad_i1)
+                    image_1_adv_v1 = torch.clamp(
+                        torch.min(torch.max(image_1_adv_v1, image_1 - self.eps), image_1 + self.eps),
                         0.0,
                         1.0,
                     )
-                    x_adv_1_1 = torch.clamp(
+                    image_1_adv_v1 = torch.clamp(
                         torch.min(
                             torch.max(
-                                x_adv_1 + (x_adv_1_1 - x_adv_1) * a + grad2_1 * (1 - a),
-                                x_1 - self.eps,
+                                image_1_adv + (image_1_adv_v1 - image_1_adv) * a + grad2_i1 * (1 - a),
+                                image_1 - self.eps,
                             ),
-                            x_1 + self.eps,
+                            image_1 + self.eps,
                         ),
                         0.0,
                         1.0,
                     )
-                    x_adv_2_1 = x_adv_2 + step_size * torch.sign(grad_2)
-                    x_adv_2_1 = torch.clamp(
-                        torch.min(torch.max(x_adv_2_1, x_2 - self.eps), x_2 + self.eps),
+                    # image_2_adv Linf-norm
+                    image_2_adv_v1 = image_2_adv + step_size * torch.sign(grad_i2)
+                    image_2_adv_v1 = torch.clamp(
+                        torch.min(torch.max(image_2_adv_v1, image_2 - self.eps), image_2 + self.eps),
                         0.0,
                         1.0,
                     )
-                    x_adv_2_1 = torch.clamp(
+                    image_2_adv_v1 = torch.clamp(
                         torch.min(
                             torch.max(
-                                x_adv_2 + (x_adv_2_1 - x_adv_2) * a + grad2_2 * (1 - a),
-                                x_2 - self.eps,
+                                image_2_adv + (image_2_adv_v1 - image_2_adv) * a + grad2_i2 * (1 - a),
+                                image_2 - self.eps,
                             ),
-                            x_2 + self.eps,
+                            image_2 + self.eps,
                         ),
                         0.0,
                         1.0,
                     )
 
                 elif self.norm == "L2":
-                    x_adv_1_1 = x_adv_1 + step_size * grad_1 / (
-                        (grad_1 ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
+                    # image_1_adv L2-norm
+                    # TODO: are the dimensions here correct? What is exaclty happening?
+                    image_1_adv_v1 = image_1_adv + step_size * grad_i1 / (
+                        (grad_i1 ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
                     )  # nopep8
-                    x_adv_1_1 = torch.clamp(
-                        x_1
-                        + (x_adv_1_1 - x_1)
+                    image_1_adv_v1 = torch.clamp(
+                        image_1
+                        + (image_1_adv_v1 - image_1)
                         / (
-                            ((x_adv_1_1 - x_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_1_adv_v1 - image_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(x_1.shape).to(self.device).detach(),
-                            ((x_adv_1_1 - x_1) ** 2)
+                            self.eps * torch.ones(image_1.shape).to(self.device).detach(),
+                            ((image_1_adv_v1 - image_1) ** 2)
                             .sum(dim=(1, 2, 3), keepdim=True)
                             .sqrt(),
                         ),
                         0.0,
                         1.0,
                     )  # nopep8
-                    x_adv_1_1 = x_adv_1 + (x_adv_1_1 - x_adv_1) * a + grad2_1 * (1 - a)
-                    x_adv_1_1 = torch.clamp(
-                        x_1
-                        + (x_adv_1_1 - x_1)
+                    image_1_adv_v1 = image_1_adv + (image_1_adv_v1 - image_1_adv) * a + grad2_i1 * (1 - a)
+                    image_1_adv_v1 = torch.clamp(
+                        image_1
+                        + (image_1_adv_v1 - image_1)
                         / (
-                            ((x_adv_1_1 - x_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_1_adv_v1 - image_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(x.shape).to(self.device).detach(),
-                            ((x_adv_1_1 - x_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            self.eps * torch.ones(image_1.shape).to(self.device).detach(),
+                            ((image_1_adv_v1 - image_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
                             + 1e-12,
                         ),
                         0.0,
@@ -308,36 +323,37 @@ class APGD(Attack):
                     )  # nopep8
 
 
-                    x_adv_2_1 = x_adv_2 + step_size * grad_2 / (
-                        (grad_2 ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
+                    # image_2_adv L2-norm
+                    image_2_adv_v1 = image_2_adv + step_size * grad_i2 / (
+                        (grad_i2 ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
                     )  # nopep8
-                    x_adv_2_1 = torch.clamp(
-                        x_2
-                        + (x_adv_2_1 - x_2)
+                    image_2_adv_v1 = torch.clamp(
+                        image_2
+                        + (image_2_adv_v1 - image_2)
                         / (
-                            ((x_adv_2_1 - x_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_2_adv_v1 - image_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(x_2.shape).to(self.device).detach(),
-                            ((x_adv_2_1 - x_2) ** 2)
+                            self.eps * torch.ones(image_2.shape).to(self.device).detach(),
+                            ((image_2_adv_v1 - image_2) ** 2)
                             .sum(dim=(1, 2, 3), keepdim=True)
                             .sqrt(),
                         ),
                         0.0,
                         1.0,
                     )  # nopep8
-                    x_adv_2_1 = x_adv_2 + (x_adv_2_1 - x_adv_2) * a + grad2_2 * (1 - a)
-                    x_adv_2_1 = torch.clamp(
-                        x_2
-                        + (x_adv_2_1 - x_2)
+                    image_2_adv_v1 = image_2_adv + (image_2_adv_v1 - image_2_adv) * a + grad2_i2 * (1 - a)
+                    image_2_adv_v1 = torch.clamp(
+                        image_2
+                        + (image_2_adv_v1 - image_2)
                         / (
-                            ((x_adv_2_1 - x_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_2_adv_v1 - image_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(x_2.shape).to(self.device).detach(),
-                            ((x_adv_2_1 - x_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            self.eps * torch.ones(image_2.shape).to(self.device).detach(),
+                            ((image_2_adv_v1 - image_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
                             + 1e-12,
                         ),
                         0.0,
@@ -345,38 +361,42 @@ class APGD(Attack):
                     )  # nopep8
 
                 #x_adv = x_adv_1 + 0.0
-                x_adv_1 = x_adv_1_1 + 0.0
-                x_adv_2 = x_adv_2_1 + 0.0
-                x_adv = torch.cat((x_adv_1, x_adv_2)).unsqueeze(0)
+                image_1_adv = image_1_adv_v1 + 0.0
+                image_2_adv = image_2_adv_v1 + 0.0
+                images_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
                 
 
             # get gradient
-            x_adv.requires_grad_(True)
-            grad = torch.zeros_like(x.unsqueeze(0))
-            x_adv_dic = {"images": x_adv}
+            images_adv.requires_grad_(True)
+            grad = torch.zeros_like(images.unsqueeze(0))
+            images_adv_dic = {"images": images_adv}
             for _ in range(self.eot_iter):
                 with torch.enable_grad():
                     # 1 forward pass (eot_iter = 1)
-                    #logits = self.get_logits(x_adv)
-                    #loss_indiv = criterion_indiv(logits, y)
-                    #loss = loss_indiv.sum()
-                    logits = self.get_logits(x_adv_dic)
-                    output_tensors = logits["flows"].squeeze(0)
-                    loss_indiv = criterion_indiv(output_tensors, y)
-                    # TODO:SUM correct? Not Mean?
+                    preds_dic = self.get_logits(images_adv_dic)
+                    preds = preds_dic["flows"].squeeze(0)
+                    if criterion_indiv is None:
+                        loss_indiv = epe(preds, lables)
+                    else:
+                        loss_indiv = criterion_indiv(preds, lables)
                     loss = loss_indiv.mean()
 
                 # 1 backward pass (eot_iter = 1)
-                grad += torch.autograd.grad(loss, x_adv)[0].detach()
+                grad += torch.autograd.grad(loss, images_adv)[0].detach()
 
             grad /= float(self.eot_iter)
 
-            #pred = logits.detach().max(1)[1] == y
-            #acc = torch.min(acc, pred)
-            #acc_steps[i + 1] = acc + 0
+            if self.loss == "epe":
+                epe_score = loss
+            else:
+                epe_score = epe(preds, lables)
+            # TODO: what is this used for? Was acc steps
+            epe_steps[0] = epe_score + 0
+
             #x_best_adv[(pred == 0).nonzero().squeeze()] = (
             #    x_adv[(pred == 0).nonzero().squeeze()] + 0.0
             #)  # nopep8
+            images_best_adv = images_adv
             if self.verbose:
                 print("iteration: {} - Best loss: {:.6f}".format(i, loss_best.sum()))
 
@@ -386,8 +406,7 @@ class APGD(Attack):
                 
                 loss_steps[i] = y1.cpu() + 0
                 ind = (y1 > loss_best).nonzero().squeeze()
-                
-                x_best[ind] = x_adv[ind].clone()
+                images_best[ind] = images_adv[ind].clone()
                 grad_best[ind] = grad[ind].clone()
                 loss_best[ind] = y1[ind] + 0
                 loss_best_steps[i + 1] = loss_best + 0
@@ -416,20 +435,25 @@ class APGD(Attack):
 
                         fl_oscillation = np.where(fl_oscillation)
 
-                        x_adv[fl_oscillation] = x_best[fl_oscillation].clone()
+                        images_adv[fl_oscillation] = images_best[fl_oscillation].clone()
                         grad[fl_oscillation] = grad_best[fl_oscillation].clone()
 
                     counter3 = 0
                     k = np.maximum(k - self.size_decr, self.steps_min)
+        import pdb
+        pdb.set_trace()
+        return images_best, None, loss_best, images_best_adv
 
-        return x_best, None, loss_best, x_best_adv
-
-    def perturb(self, x_in, y_in, best_loss=False, cheap=True):
+    def perturb(self, images_orig, labels_orig, best_loss=False, cheap=True):
         assert self.norm in ["Linf", "L2"]
-        x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone().unsqueeze(0)
-        y = y_in.clone() if len(y_in.shape) == 4 else y_in.clone().unsqueeze(0)
+        images = images_orig.clone() if len(images_orig.shape) == 4 else images_orig.clone().unsqueeze(0)
+        lables = labels_orig.clone() if len(labels_orig.shape) == 4 else labels_orig.clone().unsqueeze(0)
         
-        adv = x.clone()
+        images_adv = images.clone()
+        pred_dic = self.get_logits(get_input_format(images))
+
+        epe_score = epe(lables, pred_dic["flows"].squeeze(0))
+        epe_score = epe_score.mean()
         # acc = self.get_logits(x).max(1)[1] == y
         # loss = -1e10 * torch.ones_like(acc).float()
         if self.verbose:
@@ -454,43 +478,88 @@ class APGD(Attack):
                     # if len(ind_to_fool.shape) == 0:
                         # ind_to_fool = ind_to_fool.unsqueeze(0)
 
-                    x_to_fool, y_to_fool = (
-                        x.clone(),
-                        y.clone(),
+                    images_to_fool, lables_to_fool = (
+                        images.clone(),
+                        lables.clone(),
                     )  # nopep8
                     (
-                        best_curr,
-                        acc_curr,
+                        images_best_curr,
+                        epe_curr,
                         loss_curr,
-                        adv_curr,
+                        images_adv_curr,
                     ) = self.attack_single_run(
-                        x_to_fool, y_to_fool
+                        images_to_fool, lables_to_fool
                     )  # nopep8
-                    #
-                    adv = adv_curr.clone()
+                    images_adv = images_adv_curr.clone()
+                    #ind_curr = (acc_curr == 0).nonzero().squeeze()
+                    #acc[ind_to_fool[ind_curr]] = 0
+                    #adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
                     if self.verbose:
                         print(
                             "restart {}  - cum. time: {:.1f} s".format(
                                 counter, time.time() - startt
                             )
                         )
-                    acc = None
-            return acc, adv
+                    epe_score = None
+            return epe_score, images_adv
 
         else:
-            adv_best = x.detach().clone()
+            images_adv_best = images.detach().clone()
             loss_best = torch.ones([1]).to(self.device) * (
                 -float("inf")
             )  # nopep8
             import pdb
             pdb.set_trace()
             for counter in range(self.n_restarts):
-                best_curr, _, loss_curr, _ = self.attack_single_run(x, y)
+                images_best_curr, _, loss_curr, _ = self.attack_single_run(images, lables)
                 ind_curr = (loss_curr > loss_best).nonzero().squeeze()
-                adv_best[ind_curr] = best_curr[ind_curr] + 0.0
+                images_adv_best[ind_curr] = images_best_curr[ind_curr] + 0.0
                 loss_best[ind_curr] = loss_curr[ind_curr] + 0.0
 
                 if self.verbose:
                     print("restart {} - loss: {:.5f}".format(counter, loss_best.sum()))
 
-            return loss_best, adv_best
+            return loss_best, images_adv_best
+        
+
+@staticmethod
+def get_input_format(input):
+    if isinstance(input, dict):
+        return input
+    elif torch.is_tensor(input) and len(input.size()) == 4:
+        input_dic = {"images": input.unsqueeze(0)}
+        return input_dic
+    elif torch.is_tensor(input) and len(input.size()) == 5:
+        input_dic = {"images": input}
+        return input_dic
+    
+# From FlowUnderAttack
+@staticmethod
+def epe(flow1, flow2):
+    """"
+    Compute the  endpoint errors (EPEs) between two flow fields.
+    The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
+    (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
+
+    Args:
+        flow1 (tensor):
+            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+        flow2 (tensor):
+            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+
+    Raises:
+        ValueError: dimensons not valid
+
+    Returns:
+        float: scalar average endpoint error
+    """
+    diff_squared = (flow1 - flow2)**2
+    if len(diff_squared.size()) == 3:
+        # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
+        epe = torch.sum(diff_squared, dim=0).sqrt()
+    elif len(diff_squared.size()) == 4:
+        # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
+        epe = torch.sum(diff_squared, dim=1).sqrt()
+    else:
+        raise ValueError("The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: " + str(flow1.size()) + " and " + str(flow1.size()))
+    return epe
