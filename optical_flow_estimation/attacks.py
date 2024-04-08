@@ -75,7 +75,7 @@ def _init_parser() -> ArgumentParser:
         "--attack",
         type=str,
         default="none",
-        choices=["fgsm", "pgd", "cospgd", "ffgsm", "apgd", "none"],
+        choices=["fgsm", "bim", "pgd", "cospgd", "ffgsm", "apgd", "none"],
         help="Name of the attack to use.",
     )
     parser.add_argument(
@@ -565,9 +565,15 @@ def attack_one_dataloader(
                 case "ffgsm":
                     # inputs["images"] = fgsm(args, inputs, model)
                     images, labels, preds, placeholder = fgsm2(args, inputs, model, targeted_inputs)
-                case "pgd" | "cospgd":
+                case "pgd":
                     # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = cos_pgd(args, inputs, model, targeted_inputs)
+                    images, labels, preds, losses[i] = pgd(args, inputs, model, targeted_inputs)
+                case "cospgd":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = cospgd(args, inputs, model, targeted_inputs)
+                case "bim":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim(args, inputs, model, targeted_inputs)
                 case "apgd":
                     # inputs["images"] = fgsm(args, inputs, model)
                     images, labels, preds, placeholder = apgd(args, inputs, model, targeted_inputs)
@@ -726,9 +732,17 @@ def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, tar
     return images, labels, preds, None
 
 
+def pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+    return bim(args, inputs, model, targeted_inputs)
+
+
+def cospgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+    return bim(args, inputs, model, targeted_inputs)
+
+
 @torch.enable_grad()
-def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    """Perform pgd or cospgd adversarial attack on input images.
+def bim(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+    """Perform bim, pgd or cospgd adversarial attack on input images.
 
     Parameters
     ----------
@@ -753,36 +767,35 @@ def cos_pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, 
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
     orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
 
-    # with torch.no_grad():
-    #     orig_preds = model(images)
     image_1, image_2 = get_image_tensors(inputs)
-
-    if args.attack_norm == "inf":
-        image_1 = attack_functions.init_linf(
-                            image_1,
-                            epsilon = args.attack_epsilon,
-                            clamp_min = 0,
-                            clamp_max = 1
-                        )
-        image_2 = attack_functions.init_linf(
-                            image_2,
-                            epsilon = args.attack_epsilon,
-                            clamp_min = 0,
-                            clamp_max = 1
-                        )
-    elif args.attack_norm == "two":
-        image_1 = attack_functions.init_l2(
-                            image_1,
-                            epsilon = args.attack_epsilon,
-                            clamp_min = 0,
-                            clamp_max = 1
-                        )
-        image_2 = attack_functions.init_l2(
-                            image_2,
-                            epsilon = args.attack_epsilon,
-                            clamp_min = 0,
-                            clamp_max = 1
-                        )
+    
+    if 'pgd' in args.attack:
+        if args.attack_norm == "inf":
+            image_1 = attack_functions.init_linf(
+                                image_1,
+                                epsilon = args.attack_epsilon,
+                                clamp_min = 0,
+                                clamp_max = 1
+                            )
+            image_2 = attack_functions.init_linf(
+                                image_2,
+                                epsilon = args.attack_epsilon,
+                                clamp_min = 0,
+                                clamp_max = 1
+                            )
+        elif args.attack_norm == "two":
+            image_1 = attack_functions.init_l2(
+                                image_1,
+                                epsilon = args.attack_epsilon,
+                                clamp_min = 0,
+                                clamp_max = 1
+                            )
+            image_2 = attack_functions.init_l2(
+                                image_2,
+                                epsilon = args.attack_epsilon,
+                                clamp_min = 0,
+                                clamp_max = 1
+                            )
     perturbed_inputs = replace_images_dic(inputs, image_1, image_2)
     perturbed_images = perturbed_inputs["images"]
     perturbed_images.requires_grad=True
