@@ -670,6 +670,8 @@ def attack_one_dataloader(
 def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
     # TODO: ADD NORMALIZATION + EPSILON SCALING!
 
+    args.alpha = args.epsilon
+
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
     orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
 
@@ -796,6 +798,9 @@ def bim(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targ
                                 clamp_min = 0,
                                 clamp_max = 1
                             )
+    else:
+        args.alpha = args.epsilon
+    
     perturbed_inputs = replace_images_dic(inputs, image_1, image_2)
     perturbed_images = perturbed_inputs["images"]
     perturbed_images.requires_grad=True
