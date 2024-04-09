@@ -48,7 +48,7 @@ from attack_utils.utils import get_image_tensors, get_image_grads, replace_image
 from cospgd import functions as attack_functions
 import torch.nn as nn
 import ptlflow_attacked.adversarial_attacks_pytorch
-from ptlflow_attacked.adversarial_attacks_pytorch.torchattacks import FGSM, FFGSM, APGD
+from ptlflow_attacked.adversarial_attacks_pytorch.torchattacks import FGSM, FFGSM, APGD, APGDT
 # Attack parameters
 epsilon = 8 / 255
 norm = "inf"
@@ -579,7 +579,7 @@ def attack_one_dataloader(
                     images, labels, preds, placeholder = apgd(args, inputs, model, targeted_inputs)
                 case "none":
                     preds = model(inputs)
-
+            
             if args.warm_start:
                 if (
                     "is_seq_start" in inputs["meta"]
@@ -718,12 +718,13 @@ def fgsm2(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, ta
 
 
 def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    attack = APGD(model, eps=args.attack_epsilon, verbose=True)
     if args.attack_targeted:
+        attack = APGD(model, eps=args.attack_epsilon, verbose=False)
         attack.targeted = True
         attack.set_mode_targeted_by_label()
-        perturbed_inputs = attack(inputs["images"], targeted_inputs["flows"])
+        perturbed_images = attack(inputs["images"], targeted_inputs["flows"])
     else:
+        attack = APGD(model, eps=args.attack_epsilon, verbose=False)
         perturbed_images = attack(inputs["images"], inputs["flows"])
     perturbed_inputs = inputs
     perturbed_inputs["images"] = perturbed_images
@@ -881,7 +882,6 @@ def bim(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targ
         loss = criterion(pred_flows.float(), labels.float())
 
     loss = loss.mean()
-
     return perturbed_images, labels, preds, loss.item()
 
 

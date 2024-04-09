@@ -63,7 +63,7 @@ class APGD(Attack):
         self.eot_iter = eot_iter
         self.thr_decr = rho
         self.verbose = verbose
-        self.supported_mode = ["default"]
+        self.supported_mode = ["default", "targeted"]
 
 
     def forward(self, images, labels):
@@ -72,6 +72,9 @@ class APGD(Attack):
         """
         images = images.squeeze(0)
         labels = labels.squeeze(0)
+
+        if self.targeted:
+            labels = self.get_target_label(images, labels)
 
         images = images.clone().detach().to(self.device)
         labels = labels.clone().detach().to(self.device)
@@ -200,6 +203,8 @@ class APGD(Attack):
             
             grad += torch.autograd.grad(loss, images_adv)[0].detach()
         grad /= float(self.eot_iter)
+        if self.targeted:
+            grad = grad * -1
         grad_best = grad.clone()
 
         if self.loss == "epe":
@@ -385,6 +390,8 @@ class APGD(Attack):
                 grad += torch.autograd.grad(loss, images_adv)[0].detach()
 
             grad /= float(self.eot_iter)
+            if self.targeted:
+                grad = grad * -1
 
             if self.loss == "epe":
                 epe_score = loss
@@ -405,7 +412,10 @@ class APGD(Attack):
                 y1 = loss_indiv.detach().clone().view(len(loss_indiv),-1).mean(dim=1)
                 
                 loss_steps[i] = y1.cpu() + 0
-                ind = (y1 > loss_best).nonzero().squeeze()
+                if self.targeted:
+                    ind = (y1 < loss_best).nonzero().squeeze()
+                else:
+                    ind = (y1 > loss_best).nonzero().squeeze()
                 images_best[ind] = images_adv[ind].clone()
                 grad_best[ind] = grad[ind].clone()
                 loss_best[ind] = y1[ind] + 0
@@ -440,8 +450,7 @@ class APGD(Attack):
 
                     counter3 = 0
                     k = np.maximum(k - self.size_decr, self.steps_min)
-        import pdb
-        pdb.set_trace()
+
         return images_best, None, loss_best, images_best_adv
 
     def perturb(self, images_orig, labels_orig, best_loss=False, cheap=True):
