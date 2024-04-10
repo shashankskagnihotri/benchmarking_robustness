@@ -60,6 +60,10 @@ targeted = False
 batch_size = 1
 
 
+# PCFA parameters
+delta_bound=0.005
+
+
 config_logging()
 
 
@@ -90,6 +94,12 @@ def _init_parser() -> ArgumentParser:
         type=float,
         default=epsilon,
         help="Set epsilon to use for adversarial attack.",
+    )
+    parser.add_argument(
+        "--attack_delta_bound",
+        type=float,
+        default=delta_bound,
+        help="Set delta bound to use for PCFA.",
     )
     parser.add_argument(
         "--attack_iterations",
@@ -984,6 +994,83 @@ def fgsm_attack(args: Namespace, perturbed_image, data_grad, orig_image):
     perturbed_image = torch.clamp(orig_image + delta, 0, 1)
     # Return the perturbed image
     return perturbed_image
+
+
+def attack_pcfa(args):
+    """
+    Performs an PCFA attack on a given model and for all images of a specified dataset.
+    """
+
+    optim_mu = 2500./args.delta_bound
+        
+    optimizer_lr = args.delta_bound
+
+    eps_box = 1e-7
+
+    # Define what device we are using
+    if not torch.cuda.is_available():
+        device = torch.device("cpu")
+    else:
+        device = torch.device("cuda")
+
+    # Make sure the model is not trained:
+    # for param in model.parameters():
+    #     param.requires_grad = False
+    
+    # If dataset has ground truth
+    has_gt = True
+
+        # Initialize statistics and Logging
+        sum_aee_gt = 0.
+        sum_aee_tgt = 0.
+        sum_aee_gt_tgt = 0.
+        sum_aee_adv_gt = 0.
+        sum_aee_adv_tgt = 0.
+        sum_aee_adv_pred = 0.
+        sum_l2_delta12 = 0.
+        sum_aee_adv_tgt_min = 0.
+        sum_aee_adv_pred_min = 0.
+        sum_l2_delta12_min = 0.
+        tests = 0
+
+
+        # Loop over all examples in test set
+        print("Starting Attack on %s %s\n" % (args.dataset, args.dataset_stage))
+        for batch, (image1, image2, flow, _) in enumerate(tqdm(data_loader)):
+
+            aee_gt, aee_tgt, aee_gt_tgt, aee_adv_gt, aee_adv_tgt, aee_adv_pred, l2_delta1, l2_delta2, l2_delta12, aee_adv_tgt_min_val, aee_adv_pred_min_val, delta12_min_val = pcfa_attack(model, image1, image2, flow, batch, distortion_folder, eps_box, device, optimizer_lr, has_gt, optim_mu, args)
+            sum_aee_tgt += aee_tgt
+            sum_aee_adv_tgt += aee_adv_tgt
+            sum_aee_adv_pred += aee_adv_pred
+            sum_l2_delta12 += l2_delta12
+            sum_aee_adv_tgt_min += aee_adv_tgt_min_val
+            sum_aee_adv_pred_min += aee_adv_pred_min_val
+            sum_l2_delta12_min += delta12_min_val
+            if has_gt:
+                sum_aee_gt += aee_gt
+                sum_aee_gt_tgt += aee_gt_tgt
+                sum_aee_adv_gt += aee_adv_gt
+            tests += 1
+
+        # Calculate final accuracy
+        logging.calc_log_averages(tests,
+                ("aee_avg_pred-gt",sum_aee_gt),
+                ("aee_avg_pred-tgt", sum_aee_tgt),
+                ("aee_avg_gt-tgt",sum_aee_gt_tgt),
+                ("aee_avg_predadv-gt", sum_aee_adv_gt),
+                ("aee_avg_predadv-tgt", sum_aee_adv_tgt),
+                ("aee_avg_pred-predadv", sum_aee_adv_pred),
+                ("l2_avg_delta12", sum_l2_delta12),
+                ("aee_avg_predadv-tgt_min", sum_aee_adv_tgt_min),
+                ("aee_avg_pred-predadv_min", sum_aee_adv_pred_min),
+                ("l2_avg_delta12_min", sum_l2_delta12_min))
+
+
+        print("\nFinished attacking with PCFA. The best achieved values are")
+        print("\tAEE(f_adv, f_init)=%f" % (sum_aee_adv_pred_min / tests))
+        print("\tAEE(f_adv, f_targ)=%f" % (sum_aee_adv_tgt_min / tests))
+        print("\tL2(perturbation)  =%f" % (sum_l2_delta12_min / tests))
+        print()
 
 
 # From FlowUnderAttack
