@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 
 from ..attack import Attack
+from ....attack_utils.loss_criterion import LossCriterion
 
 
 
@@ -167,21 +168,19 @@ class APGD(Attack):
         #acc_steps = torch.zeros_like(loss_best_steps)
         loss_steps = torch.zeros([self.steps, 1])
         loss_best_steps = torch.zeros([self.steps + 1, 1])
-        epe_steps = torch.zeros_like(loss_best_steps)
+        # epe_steps = torch.zeros_like(loss_best_steps)
 
         
         #TODO: implement losses correctly
         if self.loss == "ce":
-            criterion_indiv = nn.CrossEntropyLoss(reduction="none")
-        elif self.loss == "mse":
-            criterion_indiv = nn.MSELoss(reduction="none")
+            # criterion_indiv = nn.CrossEntropyLoss(reduction="none")
+            raise ValueError("only epe or mse")
         elif self.loss == "dlr":
-            criterion_indiv = self.dlr_loss
-        # Loss is handled with script
-        elif self.loss == "epe":
-            criterion_indiv = None
-        else:
-            raise ValueError("unknown loss")
+            # TODO: is dlr applicable for Optical Flow?
+            # criterion_indiv = self.dlr_loss
+            raise ValueError("dlr not implemented")
+        criterion_indiv = LossCriterion(self.loss)
+
 
         images_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
         images_adv.requires_grad_(True)
@@ -192,10 +191,7 @@ class APGD(Attack):
                 # 1 forward pass (eot_iter = 1)
                 preds_dic = self.get_logits(images_adv_dic)
                 preds = preds_dic["flows"].squeeze(0)
-                if criterion_indiv is None:
-                    loss_indiv = epe(preds, lables)
-                else:
-                    loss_indiv = criterion_indiv(preds, lables)
+                loss_indiv = criterion_indiv.loss(preds, lables)
                 # TODO:SUM correct? Not Mean?
                 loss = loss_indiv.mean()
 
@@ -207,12 +203,12 @@ class APGD(Attack):
             grad = grad * -1
         grad_best = grad.clone()
 
-        if self.loss == "epe":
-            epe_score = loss
-        else:
-            epe_score = epe(preds, lables)
+        # if self.loss == "epe":
+        #     epe_score = loss
+        # else:
+        #     epe_score = epe(preds, lables)
         # TODO: what is this used for? Was acc steps
-        epe_steps[0] = epe_score + 0
+        # epe_steps[0] = epe_score + 0
         loss_best = loss_indiv.detach().view(len(loss_indiv),-1).mean(dim=1)
         step_size = (
             self.eps
@@ -380,10 +376,7 @@ class APGD(Attack):
                     # 1 forward pass (eot_iter = 1)
                     preds_dic = self.get_logits(images_adv_dic)
                     preds = preds_dic["flows"].squeeze(0)
-                    if criterion_indiv is None:
-                        loss_indiv = epe(preds, lables)
-                    else:
-                        loss_indiv = criterion_indiv(preds, lables)
+                    loss_indiv = criterion_indiv.loss(preds, lables)
                     loss = loss_indiv.mean()
 
                 # 1 backward pass (eot_iter = 1)
@@ -393,12 +386,12 @@ class APGD(Attack):
             if self.targeted:
                 grad = grad * -1
 
-            if self.loss == "epe":
-                epe_score = loss
-            else:
-                epe_score = epe(preds, lables)
+            # if self.loss == "epe":
+            #     epe_score = loss
+            # else:
+            #     epe_score = epe(preds, lables)
             # TODO: what is this used for? Was acc steps
-            epe_steps[0] = epe_score + 0
+            # epe_steps[0] = epe_score + 0
 
             #x_best_adv[(pred == 0).nonzero().squeeze()] = (
             #    x_adv[(pred == 0).nonzero().squeeze()] + 0.0
@@ -459,10 +452,10 @@ class APGD(Attack):
         lables = labels_orig.clone() if len(labels_orig.shape) == 4 else labels_orig.clone().unsqueeze(0)
         
         images_adv = images.clone()
-        pred_dic = self.get_logits(get_input_format(images))
-
-        epe_score = epe(lables, pred_dic["flows"].squeeze(0))
-        epe_score = epe_score.mean()
+        # pred_dic = self.get_logits(get_input_format(images))
+        epe_score = None
+        # epe_score = epe(lables, pred_dic["flows"].squeeze(0))
+        # epe_score = epe_score.mean()
         # acc = self.get_logits(x).max(1)[1] == y
         # loss = -1e10 * torch.ones_like(acc).float()
         if self.verbose:
@@ -541,34 +534,3 @@ def get_input_format(input):
     elif torch.is_tensor(input) and len(input.size()) == 5:
         input_dic = {"images": input}
         return input_dic
-    
-# From FlowUnderAttack
-@staticmethod
-def epe(flow1, flow2):
-    """"
-    Compute the  endpoint errors (EPEs) between two flow fields.
-    The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
-    (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
-
-    Args:
-        flow1 (tensor):
-            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
-        flow2 (tensor):
-            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
-
-    Raises:
-        ValueError: dimensons not valid
-
-    Returns:
-        float: scalar average endpoint error
-    """
-    diff_squared = (flow1 - flow2)**2
-    if len(diff_squared.size()) == 3:
-        # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-        epe = torch.sum(diff_squared, dim=0).sqrt()
-    elif len(diff_squared.size()) == 4:
-        # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-        epe = torch.sum(diff_squared, dim=1).sqrt()
-    else:
-        raise ValueError("The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: " + str(flow1.size()) + " and " + str(flow1.size()))
-    return epe
