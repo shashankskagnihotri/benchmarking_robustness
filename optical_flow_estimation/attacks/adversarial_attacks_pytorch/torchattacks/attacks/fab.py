@@ -85,10 +85,13 @@ class FAB(Attack):
         r"""
         Overridden.
         """
+        images = images.squeeze(0)
+        labels = labels.squeeze(0)
 
         images = images.clone().detach().to(self.device)
         labels = labels.clone().detach().to(self.device)
         adv_images = self.perturb(images, labels)
+
 
         return adv_images
 
@@ -103,11 +106,15 @@ class FAB(Attack):
 
     def get_diff_logits_grads_batch(self, imgs, la):
         im = imgs.clone().requires_grad_()
+        im_dic = {"images": im.unsqueeze(0)}
         with torch.enable_grad():
-            y = self.get_logits(im)
+            y_dic = self.get_logits(im_dic)
+            y = y_dic["flows"].squeeze(0)
 
         g2 = torch.zeros([y.shape[-1], *imgs.size()]).to(self.device)
         grad_mask = torch.zeros_like(y)
+        import pdb
+        pdb.set_trace()
         for counter in range(y.shape[-1]):
             zero_gradients(im)
             grad_mask[:, counter] = 1.0
@@ -145,40 +152,57 @@ class FAB(Attack):
         :param x:    clean images
         :param y:    clean labels, if None we use the predicted labels
         """
-
         # self.device = x.device
+        # [3, 370, 1226]
         self.orig_dim = list(x.shape[1:])
+        # 3
         self.ndims = len(self.orig_dim)
 
         x = x.detach().clone().float().to(self.device)
         # assert next(self.model.parameters()).device == x.device
+        x_dic = {"images": x.unsqueeze(0)}
+        preds_dic = self.get_logits(x_dic)
+        preds = preds_dic["flows"].squeeze(0)
 
-        y_pred = self._get_predicted_label(x)
-        if y is None:
-            y = y_pred.detach().clone().long().to(self.device)
-        else:
-            y = y.detach().clone().long().to(self.device)
-        pred = y_pred == y
-        corr_classified = pred.float().sum()
-        if self.verbose:
-            print("Clean accuracy: {:.2%}".format(pred.float().mean()))
-        if pred.sum() == 0:
-            return x
-        pred = self.check_shape(pred.nonzero().squeeze())
+        # y_pred = self._get_predicted_label(x)
+        # if y is None:
+        #     y = y_pred.detach().clone().long().to(self.device)
+        # else:
+        #     y = y.detach().clone().long().to(self.device)
+        # pred = y_pred == y
+        # corr_classified: sum of correct classification -> here always [0]?
+        # corr_classified = pred.float().sum()
+        corr_classified = torch.tensor([0]).float()
+        # if self.verbose:
+        #     print("Clean accuracy: {:.2%}".format(pred.float().mean()))
+
+        # if missclassification -> return, not applicable here
+        # if pred.sum() == 0:
+            # return x
+        # pred = self.check_shape(pred.nonzero().squeeze())
 
         startt = time.time()
         # runs the attack only on correctly classified points
-        im2 = x[pred].detach().clone()
-        la2 = y[pred].detach().clone()
+        # here, all are missclassified, therefore just clone
+        im2 = x.detach().clone()
+        la2 = y.detach().clone()
         if len(im2.shape) == self.ndims:
             im2 = im2.unsqueeze(0)
+        # what is bs? here 2, for 2 images?
         bs = im2.shape[0]
+        # u1 is [0,1] why? 
         u1 = torch.arange(bs)
         adv = im2.clone()
         adv_c = x.clone()
+        
+        # [1e10, 1e10]
         res2 = 1e10 * torch.ones([bs]).to(self.device)
+        # [0., 0.]
         res_c = torch.zeros([x.shape[0]]).to(self.device)
+
         x1 = im2.clone()
+        # im2 is reshaped into 2 dimensions, why exactly?
+        # x0 is of size [2, 1360860]
         x0 = im2.clone().reshape([bs, -1])
         counter_restarts = 0
 
@@ -241,11 +265,13 @@ class FAB(Attack):
                     )
 
                 x1 = x1.clamp(0.0, 1.0)
+                
 
             counter_iter = 0
             while counter_iter < self.steps:
                 with torch.no_grad():
                     df, dg = self.get_diff_logits_grads_batch(x1, la2)
+                    
                     if self.norm == "Linf":
                         dist1 = df.abs() / (
                             1e-12
@@ -393,7 +419,8 @@ class FAB(Attack):
         :param x:    clean images
         :param y:    clean labels, if None we use the predicted labels
         """
-
+        import pdb
+        pdb.set_trace()
         if self.device is None:
             self.device = x.device
         self.orig_dim = list(x.shape[1:])
@@ -401,7 +428,11 @@ class FAB(Attack):
 
         x = x.detach().clone().float().to(self.device)
         # assert next(self.model.parameters()).device == x.device
+        x_dic = {"images": x.unsqueeze(0)}
+        preds_dic = self.get_logits(x_dic)
+        preds = preds_dic["flows"].squeeze(0)
 
+        # TODO: further implement
         y_pred = self._get_predicted_label(x)
         if y is None:
             y = y_pred.detach().clone().long().to(self.device)
@@ -650,8 +681,11 @@ class FAB(Attack):
     def perturb(self, x, y):
         adv = x.clone()
         with torch.no_grad():
-            acc = self.get_logits(x).max(1)[1] == y
-
+            x_dic = {"images": x.unsqueeze(0)}
+            # acc = self.get_logits(x).max(1)[1] == y
+            preds_dic = self.get_logits(x_dic)
+            preds = preds_dic["flows"].squeeze(0)
+            epe_score = epe(preds, y)
             startt = time.time()
 
             torch.random.manual_seed(self.seed)
@@ -659,66 +693,75 @@ class FAB(Attack):
 
             def inner_perturb(targeted):
                 for counter in range(self.n_restarts):
-                    ind_to_fool = acc.nonzero().squeeze()
-                    if len(ind_to_fool.shape) == 0:
-                        ind_to_fool = ind_to_fool.unsqueeze(0)
-                    if ind_to_fool.numel() != 0:
-                        x_to_fool, y_to_fool = (
-                            x[ind_to_fool].clone(),
-                            y[ind_to_fool].clone(),
-                        )  # nopep8
+                    # ind_to_fool = acc.nonzero().squeeze()
+                    # if len(ind_to_fool.shape) == 0:
+                        # ind_to_fool = ind_to_fool.unsqueeze(0)
+                    # if ind_to_fool.numel() != 0:
+                    x_to_fool, y_to_fool = (
+                        x.clone(),
+                        y.clone(),
+                    )  # nopep8
+                    # TODO: single_runs
+                    if targeted:
+                        adv_curr = self.attack_single_run_targeted(
+                            x_to_fool, y_to_fool, use_rand_start=(counter > 0)
+                        )
+                    else:
+                        adv_curr = self.attack_single_run(
+                            x_to_fool, y_to_fool, use_rand_start=(counter > 0)
+                        )
 
+                    # acc_curr = self.get_logits(adv_curr).max(1)[1] == y_to_fool
+                    adv_curr_dic = {"images": adv_curr.unsqueeze(0)}
+                    preds_dic = self.get_logits(adv_curr_dic)
+                    preds = preds_dic["flows"].squeeze(0)
+                    epe_score_curr = epe(preds, y)
+
+                    if self.norm == "Linf":
+                        res = (
+                            (x_to_fool - adv_curr)
+                            .abs()
+                            .view(x_to_fool.shape[0], -1)
+                            .max(1)[0]
+                        )  # nopep8
+                    elif self.norm == "L2":
+                        res = (
+                            ((x_to_fool - adv_curr) ** 2)
+                            .view(x_to_fool.shape[0], -1)
+                            .sum(dim=-1)
+                            .sqrt()
+                        )  # nopep8
+                    # acc_curr = torch.max(0, res > self.eps)
+                    if res <= self.eps:
+                        adv = adv_curr.clone()
+                    else:
+                        break
+
+                    # ind_curr = (acc_curr == 0).nonzero().squeeze()
+                    # acc[ind_to_fool[ind_curr]] = 0
+                    # adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
+
+                    if self.verbose:
                         if targeted:
-                            adv_curr = self.attack_single_run_targeted(
-                                x_to_fool, y_to_fool, use_rand_start=(counter > 0)
+                            print(
+                                "restart {} - target_class {} - robust accuracy: {:.2%} at eps = {:.5f} - cum. time: {:.1f} s".format(
+                                    counter,
+                                    self.target_class,
+                                    # acc.float().mean(),
+                                    self.eps,
+                                    time.time() - startt,
+                                )
                             )
                         else:
-                            adv_curr = self.attack_single_run(
-                                x_to_fool, y_to_fool, use_rand_start=(counter > 0)
+                            print(
+                                "restart {} - robust accuracy: {:.2%} at eps = {:.5f} - cum. time: {:.1f} s".format(
+                                    counter,
+                                    # acc.float().mean(),
+                                    self.eps,
+                                    time.time() - startt,
+                                )
                             )
-
-                        acc_curr = self.get_logits(adv_curr).max(1)[1] == y_to_fool
-                        if self.norm == "Linf":
-                            res = (
-                                (x_to_fool - adv_curr)
-                                .abs()
-                                .view(x_to_fool.shape[0], -1)
-                                .max(1)[0]
-                            )  # nopep8
-                        elif self.norm == "L2":
-                            res = (
-                                ((x_to_fool - adv_curr) ** 2)
-                                .view(x_to_fool.shape[0], -1)
-                                .sum(dim=-1)
-                                .sqrt()
-                            )  # nopep8
-                        acc_curr = torch.max(acc_curr, res > self.eps)
-
-                        ind_curr = (acc_curr == 0).nonzero().squeeze()
-                        acc[ind_to_fool[ind_curr]] = 0
-                        adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
-
-                        if self.verbose:
-                            if targeted:
-                                print(
-                                    "restart {} - target_class {} - robust accuracy: {:.2%} at eps = {:.5f} - cum. time: {:.1f} s".format(
-                                        counter,
-                                        self.target_class,
-                                        acc.float().mean(),
-                                        self.eps,
-                                        time.time() - startt,
-                                    )
-                                )
-                            else:
-                                print(
-                                    "restart {} - robust accuracy: {:.2%} at eps = {:.5f} - cum. time: {:.1f} s".format(
-                                        counter,
-                                        acc.float().mean(),
-                                        self.eps,
-                                        time.time() - startt,
-                                    )
-                                )
-
+            # TODO: multitargeted
             if self.multi_targeted:
                 for target_class in range(2, self.n_target_classes + 2):
                     self.target_class = target_class
@@ -907,3 +950,35 @@ def zero_gradients(x):
     elif isinstance(x, container_abcs.Iterable):
         for elem in x:
             zero_gradients(elem)
+
+
+# From FlowUnderAttack
+@staticmethod
+def epe(flow1, flow2):
+    """"
+    Compute the  endpoint errors (EPEs) between two flow fields.
+    The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
+    (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
+
+    Args:
+        flow1 (tensor):
+            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+        flow2 (tensor):
+            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+
+    Raises:
+        ValueError: dimensons not valid
+
+    Returns:
+        float: scalar average endpoint error
+    """
+    diff_squared = (flow1 - flow2)**2
+    if len(diff_squared.size()) == 3:
+        # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
+        epe = torch.sum(diff_squared, dim=0).sqrt()
+    elif len(diff_squared.size()) == 4:
+        # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
+        epe = torch.sum(diff_squared, dim=1).sqrt()
+    else:
+        raise ValueError("The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: " + str(flow1.size()) + " and " + str(flow1.size()))
+    return epe

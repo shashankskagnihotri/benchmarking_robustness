@@ -43,12 +43,13 @@ from ptlflow_attacked.ptlflow.utils.utils import (
     tensor_dict_to_numpy,
 )
 from attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
-
+from attacks.fgsm import fgsm
+from attacks.apgd import apgd
+from attacks.bim_pgd_cospgd import bim_pgd_cospgd
+from attacks.fab import fab
+from ptlflow_attacked.validate import validate_one_dataloader, generate_outputs, _get_model_names
 # Import cosPGD functions
-from cospgd import functions as attack_functions
 import torch.nn as nn
-import ptlflow_attacked.adversarial_attacks_pytorch
-from ptlflow_attacked.adversarial_attacks_pytorch.torchattacks import FGSM, FFGSM, APGD, APGDT, FAB
 # Attack parameters
 epsilon = 8 / 255
 norm = "inf"
@@ -229,48 +230,7 @@ def _init_parser() -> ArgumentParser:
     return parser
 
 
-def generate_outputs(
-    args: Namespace,
-    inputs: Dict[str, torch.Tensor],
-    preds: Dict[str, torch.Tensor],
-    dataloader_name: str,
-    batch_idx: int,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> None:
-    """Display on screen and/or save outputs to disk, if required.
-
-    Parameters
-    ----------
-    args : Namespace
-        The arguments with the required values to manage the outputs.
-    inputs : Dict[str, torch.Tensor]
-        The inputs loaded from the dataset (images, groundtruth).
-    preds : Dict[str, torch.Tensor]
-        The model predictions (optical flow and others).
-    dataloader_name : str
-        A string to identify from which dataloader these inputs came from.
-    batch_idx : int
-        Indicates in which position of the loader this input is.
-    metadata : Dict[str, Any], optional
-        Metadata about this input, if available.
-    """
-    inputs = tensor_dict_to_numpy(inputs)
-    inputs["flows_viz"] = flow_utils.flow_to_rgb(inputs["flows"])[:, :, ::-1]
-    if inputs.get("flows_b") is not None:
-        inputs["flows_b_viz"] = flow_utils.flow_to_rgb(inputs["flows_b"])[:, :, ::-1]
-    preds = tensor_dict_to_numpy(preds)
-    preds["flows_viz"] = flow_utils.flow_to_rgb(preds["flows"])[:, :, ::-1]
-    if preds.get("flows_b") is not None:
-        preds["flows_b_viz"] = flow_utils.flow_to_rgb(preds["flows_b"])[:, :, ::-1]
-
-    if args.show:
-        _show(inputs, preds, args.max_show_side)
-
-    if args.write_outputs:
-        _write_to_file(args, preds, dataloader_name, batch_idx, metadata)
-
-
-def validate(args: Namespace, model: BaseModel) -> pd.DataFrame:
+def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     """Perform the validation.
 
     Parameters
@@ -318,7 +278,7 @@ def validate(args: Namespace, model: BaseModel) -> pd.DataFrame:
     return metrics_df
 
 
-def validate_list_of_models(args: Namespace) -> None:
+def attack_list_of_models(args: Namespace) -> None:
     """Perform the validation.
 
     Parameters
@@ -359,7 +319,7 @@ def validate_list_of_models(args: Namespace) -> None:
                     args.output_path = Path(args.output_path) / model_id
 
                     model = get_model(mname, cname, args)
-                    instance_metrics_df = validate(args, model)
+                    instance_metrics_df = attack(args, model)
                     metrics_df = pd.concat([metrics_df, instance_metrics_df])
                     args.output_path.parent.mkdir(parents=True, exist_ok=True)
                     if args.reversed:
@@ -373,134 +333,6 @@ def validate_list_of_models(args: Namespace) -> None:
                 except Exception as e:  # noqa: B902
                     logging.warning("Skipping model %s due to exception %s", mname, e)
                     break
-
-
-@torch.no_grad()
-def validate_one_dataloader(
-    args: Namespace,
-    model: BaseModel,
-    dataloader: DataLoader,
-    dataloader_name: str,
-) -> Dict[str, float]:
-    """Perform validation for all examples of one dataloader.
-
-    Parameters
-    ----------
-    args : Namespace
-        Arguments to configure the model and the validation.
-    model : BaseModel
-        The model to be used for validation.
-    dataloader : DataLoader
-        The dataloader for the validation.
-    dataloader_name : str
-        A string to identify this dataloader.
-
-    Returns
-    -------
-    Dict[str, float]
-        The average metric values for this dataloader.
-    """
-    metrics_sum = {}
-
-    metrics_individual = None
-    if args.write_individual_metrics:
-        metrics_individual = {"filename": [], "epe": [], "outlier": []}
-
-    with tqdm(dataloader) as tdl:
-        prev_preds = None
-        for i, inputs in enumerate(tdl):
-            if args.scale_factor is not None:
-                scale_factor = args.scale_factor
-            else:
-                scale_factor = (
-                    None
-                    if args.max_forward_side is None
-                    else float(args.max_forward_side) / min(inputs["images"].shape[-2:])
-                )
-
-            io_adapter = IOAdapter(
-                model,
-                inputs["images"].shape[-2:],
-                target_scale_factor=scale_factor,
-                cuda=torch.cuda.is_available(),
-                fp16=args.fp16,
-            )
-            inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
-            inputs["prev_preds"] = prev_preds
-
-            preds = model(inputs)
-
-            if args.warm_start:
-                if (
-                    "is_seq_start" in inputs["meta"]
-                    and inputs["meta"]["is_seq_start"][0]
-                ):
-                    prev_preds = None
-                else:
-                    prev_preds = preds
-                    for k, v in prev_preds.items():
-                        if isinstance(v, torch.Tensor):
-                            prev_preds[k] = v.detach()
-
-            inputs = io_adapter.unscale(inputs, image_only=True)
-            preds = io_adapter.unscale(preds)
-
-            if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
-                if args.seq_val_mode == "first":
-                    k = 0
-                elif args.seq_val_mode == "middle":
-                    k = inputs["images"].shape[1] // 2
-                elif args.seq_val_mode == "last":
-                    k = inputs["flows"].shape[1] - 1
-                for key, val in inputs.items():
-                    if key == "meta":
-                        inputs["meta"]["image_paths"] = inputs["meta"]["image_paths"][
-                            k : k + 1
-                        ]
-                    elif key == "images":
-                        inputs[key] = val[:, k : k + 2]
-                    elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
-                        inputs[key] = val[:, k : k + 1]
-
-            metrics = model.val_metrics(preds, inputs)
-
-            for k in metrics.keys():
-                if metrics_sum.get(k) is None:
-                    metrics_sum[k] = 0.0
-                metrics_sum[k] += metrics[k].item()
-            tdl.set_postfix(
-                epe=metrics_sum["val/epe"] / (i + 1),
-                outlier=metrics_sum["val/outlier"] / (i + 1),
-            )
-
-            filename = ""
-            if "sintel" in inputs["meta"]["dataset_name"][0].lower():
-                filename = f'{Path(inputs["meta"]["image_paths"][0][0]).parent.name}/'
-            filename += Path(inputs["meta"]["image_paths"][0][0]).stem
-
-            if metrics_individual is not None:
-                metrics_individual["filename"].append(filename)
-                metrics_individual["epe"].append(metrics["val/epe"].item())
-                metrics_individual["outlier"].append(metrics["val/outlier"].item())
-
-            generate_outputs(
-                args, inputs, preds, dataloader_name, i, inputs.get("meta")
-            )
-
-            if args.max_samples is not None and i >= (args.max_samples - 1):
-                break
-
-    if args.write_individual_metrics:
-        ind_df = pd.DataFrame(metrics_individual)
-        args.output_path.mkdir(parents=True, exist_ok=True)
-        ind_df.to_csv(
-            Path(args.output_path) / f"{dataloader_name}_epe_outlier.csv", index=None
-        )
-
-    metrics_mean = {}
-    for k, v in metrics_sum.items():
-        metrics_mean[k] = v / len(dataloader)
-    return metrics_mean
 
 
 @torch.enable_grad()
@@ -572,21 +404,16 @@ def attack_one_dataloader(
             match args.attack: # Commit adversarial attack
                 case "fgsm":
                     # inputs["images"] = fgsm(args, inputs, model)
-                    # TODO: remove fgsm2
                     images, labels, preds, placeholder = fgsm(args, inputs, model, targeted_inputs)
-                # TODO: change fgsm to ffgsm
-                case "ffgsm":
-                    # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, placeholder = fgsm2(args, inputs, model, targeted_inputs)
                 case "pgd":
                     # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = pgd(args, inputs, model, targeted_inputs)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(args, inputs, model, targeted_inputs)
                 case "cospgd":
                     # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = cospgd(args, inputs, model, targeted_inputs)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(args, inputs, model, targeted_inputs)
                 case "bim":
                     # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = bim(args, inputs, model, targeted_inputs)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(args, inputs, model, targeted_inputs)
                 case "apgd":
                     # inputs["images"] = fgsm(args, inputs, model)
                     images, labels, preds, placeholder = apgd(args, inputs, model, targeted_inputs)
@@ -679,341 +506,6 @@ def attack_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
     return metrics_mean
-
-
-@torch.enable_grad()
-def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    # TODO: ADD NORMALIZATION + EPSILON SCALING!
-
-    args.attack_alpha = args.attack_epsilon
-
-    orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
-    orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
-
-    # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
-    if args.attack_targeted:
-        labels = targeted_inputs["flows"].squeeze(0)
-    else:
-        labels = inputs["flows"].squeeze(0)
-
-    inputs["images"].requires_grad_(True)
-
-    preds = model(inputs)
-    preds_raw = preds["flows"].squeeze(0)
-
-    loss = criterion(preds_raw.float(), labels.float())
-    loss = loss.mean()
-    loss.backward()
-
-    image_1, image_2 = get_image_tensors(inputs)
-    image_1_grad, image_2_grad = get_image_grads(inputs)
-
-    image_1_adv = fgsm_attack(args, image_1, image_1_grad, orig_image_1)
-    image_2_adv = fgsm_attack(args, image_2, image_2_grad, orig_image_2)
-
-    perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv)
-    preds = model(perturbed_inputs)
-
-    return inputs["images"], labels, preds, loss.item()
-
-
-def fgsm2(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    attack = FGSM(model, args.attack_epsilon)
-    if args.attack_targeted:
-        attack.targeted = True
-        attack.set_mode_targeted_by_label()
-        perturbed_inputs = attack(inputs["images"], targeted_inputs["flows"])
-    else:
-        perturbed_inputs = attack(inputs["images"], inputs["flows"])
-    preds = model(perturbed_inputs)
-    images = None
-    labels = None
-
-    return images, labels, preds, None
-
-
-def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    if args.attack_targeted:
-        attack = APGD(model, eps=args.attack_epsilon, verbose=False)
-        attack.targeted = True
-        attack.set_mode_targeted_by_label()
-        perturbed_images = attack(inputs["images"], targeted_inputs["flows"])
-    else:
-        attack = APGD(model, eps=args.attack_epsilon, verbose=False)
-        perturbed_images = attack(inputs["images"], inputs["flows"])
-    perturbed_inputs = inputs
-    perturbed_inputs["images"] = perturbed_images
-    preds = model(perturbed_inputs)
-    images = None
-    labels = None
-
-    return images, labels, preds, None
-
-
-def fab(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    attack = FAB(model, args.attack_epsilon)
-    if args.attack_targeted:
-        attack.targeted = True
-        attack.set_mode_targeted_by_label()
-        perturbed_inputs = attack(inputs["images"], targeted_inputs["flows"])
-    else:
-        perturbed_inputs = attack(inputs["images"], inputs["flows"])
-    preds = model(perturbed_inputs)
-    images = None
-    labels = None
-
-    return images, labels, preds, None
-
-
-def pgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    return bim(args, inputs, model, targeted_inputs)
-
-
-def cospgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    return bim(args, inputs, model, targeted_inputs)
-
-
-@torch.enable_grad()
-def bim(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    """Perform bim, pgd or cospgd adversarial attack on input images.
-
-    Parameters
-    ----------
-    args : Namespace
-        Arguments to configure the model and the validation.
-    inputs : Dict[str, torch.Tensor]
-        Input images and labels.
-    model : BaseModel
-        The model for adversarial attack.
-
-    Returns
-    -------
-    torch.Tensor
-        Perturbed images.
-    """
-
-    if args.attack_targeted:
-        labels = targeted_inputs["flows"].squeeze(0)
-    else:
-        labels = inputs["flows"].squeeze(0)
-
-    orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
-    orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
-
-    image_1, image_2 = get_image_tensors(inputs)
-    
-    if 'pgd' in args.attack:
-        if args.attack_norm == "inf":
-            image_1 = attack_functions.init_linf(
-                                image_1,
-                                epsilon = args.attack_epsilon,
-                                clamp_min = 0,
-                                clamp_max = 1
-                            )
-            image_2 = attack_functions.init_linf(
-                                image_2,
-                                epsilon = args.attack_epsilon,
-                                clamp_min = 0,
-                                clamp_max = 1
-                            )
-        elif args.attack_norm == "two":
-            image_1 = attack_functions.init_l2(
-                                image_1,
-                                epsilon = args.attack_epsilon,
-                                clamp_min = 0,
-                                clamp_max = 1
-                            )
-            image_2 = attack_functions.init_l2(
-                                image_2,
-                                epsilon = args.attack_epsilon,
-                                clamp_min = 0,
-                                clamp_max = 1
-                            )
-    else:
-        args.alpha = args.epsilon
-    
-    perturbed_inputs = replace_images_dic(inputs, image_1, image_2)
-    perturbed_images = perturbed_inputs["images"]
-    perturbed_images.requires_grad=True
-    perturbed_inputs["images"] = perturbed_images
-
-    preds = model(perturbed_inputs)
-    pred_flows = preds["flows"].squeeze(0)
-    
-    # loss = criterion(pred_flows.float(), labels.float())
-    loss = epe(pred_flows.float(), labels.float())
-    for t in range(args.attack_iterations):
-        if args.attack == "cospgd":
-            loss = attack_functions.cospgd_scale(
-                                predictions = pred_flows,
-                                labels = labels.float(),
-                                loss = loss,
-                                targeted = args.attack_targeted,
-                                one_hot = False
-                            )
-        loss = loss.mean()
-        loss.backward()
-        image_1_adv, image_2_adv = get_image_tensors(perturbed_inputs)
-        image_1_grad, image_2_grad = get_image_grads(perturbed_inputs)
-        if args.attack_norm == 'inf':
-            image_1_adv = attack_functions.step_inf(
-                perturbed_image = image_1_adv,
-                epsilon = args.attack_epsilon,
-                data_grad = image_1_grad,
-                orig_image = orig_image_1,
-                alpha = args.attack_alpha,
-                targeted = args.attack_targeted,
-                clamp_min = 0,
-                clamp_max = 1,
-                grad_scale = None
-            )
-            image_2_adv = attack_functions.step_inf(
-                perturbed_image = image_2_adv,
-                epsilon = args.attack_epsilon,
-                data_grad = image_2_grad,
-                orig_image = orig_image_2,
-                alpha = args.attack_alpha,
-                targeted = args.attack_targeted,
-                clamp_min = 0,
-                clamp_max = 1,
-                grad_scale = None
-            )
-        elif args.attack_norm == 'two':
-            image_1_adv = attack_functions.step_l2(
-                perturbed_image = image_1_adv,
-                epsilon = args.attack_epsilon,
-                data_grad = image_1_grad,
-                orig_image = orig_image_1,
-                alpha = args.attack_alpha,
-                targeted = args.attack_targeted,
-                clamp_min = 0,
-                clamp_max = 1,
-                grad_scale = None
-            )
-            image_2_adv = attack_functions.step_l2(
-                perturbed_image = image_2_adv,
-                epsilon = args.attack_epsilon,
-                data_grad = image_2_grad,
-                orig_image = orig_image_2,
-                alpha = args.attack_alpha,
-                targeted = args.attack_targeted,
-                clamp_min = 0,
-                clamp_max = 1,
-                grad_scale = None
-            )
-
-        perturbed_inputs = replace_images_dic(perturbed_inputs, image_1_adv, image_2_adv)
-        perturbed_images = perturbed_inputs["images"]
-        perturbed_images.requires_grad=True
-        perturbed_inputs["images"] = perturbed_images
-
-        preds = model(perturbed_inputs)
-        pred_flows = preds["flows"].squeeze(0)
-        loss = criterion(pred_flows.float(), labels.float())
-
-    loss = loss.mean()
-    return perturbed_images, labels, preds, loss.item()
-
-
-def _get_model_names(args: Namespace) -> List[str]:
-    if args.model == "all":
-        model_names = ptlflow.models_dict.keys()
-    elif args.model == "select":
-        if args.selection is None:
-            raise ValueError(
-                "When select is chosen, model names must be provided to --selection."
-            )
-        model_names = args.selection
-    return model_names
-
-
-def _show(
-    inputs: Dict[str, torch.Tensor], preds: Dict[str, torch.Tensor], max_show_side: int
-) -> None:
-    for k, v in inputs.items():
-        if isinstance(v, np.ndarray) and (
-            len(v.shape) == 2 or v.shape[2] == 1 or v.shape[2] == 3
-        ):
-            if max(v.shape[:2]) > max_show_side:
-                scale_factor = float(max_show_side) / max(v.shape[:2])
-                v = cv.resize(
-                    v, (int(scale_factor * v.shape[1]), int(scale_factor * v.shape[0]))
-                )
-            cv.imshow(k, v)
-    for k, v in preds.items():
-        if isinstance(v, np.ndarray) and (
-            len(v.shape) == 2 or v.shape[2] == 1 or v.shape[2] == 3
-        ):
-            if max(v.shape[:2]) > max_show_side:
-                scale_factor = float(max_show_side) / max(v.shape[:2])
-                v = cv.resize(
-                    v, (int(scale_factor * v.shape[1]), int(scale_factor * v.shape[0]))
-                )
-            cv.imshow("pred_" + k, v)
-    cv.waitKey(1)
-
-
-def _write_to_file(
-    args: Namespace,
-    preds: Dict[str, torch.Tensor],
-    dataloader_name: str,
-    batch_idx: int,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> None:
-    out_root_dir = Path(args.output_path) / dataloader_name
-
-    extra_dirs = ""
-    if metadata is not None:
-        img_path = Path(metadata["image_paths"][0][0])
-        image_name = img_path.stem
-        if "sintel" in dataloader_name:
-            seq_name = img_path.parts[-2]
-            extra_dirs = seq_name
-    else:
-        image_name = f"{batch_idx:08d}"
-
-    if args.flow_format != "original":
-        flow_ext = args.flow_format
-    else:
-        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
-            flow_ext = "png"
-        else:
-            flow_ext = "flo"
-
-    for k, v in preds.items():
-        if isinstance(v, np.ndarray):
-            out_dir = out_root_dir / k / extra_dirs
-            out_dir.mkdir(parents=True, exist_ok=True)
-            if k == "flows" or k == "flows_b":
-                flow_utils.flow_write(out_dir / f"{image_name}.{flow_ext}", v)
-            elif len(v.shape) == 2 or (
-                len(v.shape) == 3 and (v.shape[2] == 1 or v.shape[2] == 3)
-            ):
-                if v.max() <= 1:
-                    v = v * 255
-                cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
-
-
-@staticmethod
-def fgsm_attack(args: Namespace, perturbed_image, data_grad, orig_image):
-    # Collect the element-wise sign of the data gradient
-    sign_data_grad = data_grad.sign()
-    # Create the perturbed image by adjusting each pixel of the input image        
-    if args.attack_targeted:
-        sign_data_grad *= -1
-    perturbed_image = perturbed_image.detach() + args.attack_alpha*sign_data_grad
-    # Adding clipping to maintain [0,1] range
-    if args.attack_norm == 'inf':
-        delta = torch.clamp(perturbed_image - orig_image, min = -1*args.attack_epsilon, max=args.attack_epsilon)
-    elif args.attack_norm == 'two':
-        delta = perturbed_image - orig_image
-        delta_norms = torch.norm(delta.view(batch_size, -1), p=2, dim=1)
-        factor = args.attack_epsilon / delta_norms
-        factor = torch.min(factor, torch.ones_like(delta_norms))
-        delta = delta * factor.view(-1, 1, 1, 1)
-    perturbed_image = torch.clamp(orig_image + delta, 0, 1)
-    # Return the perturbed image
-    return perturbed_image
 
 
 def attack_pcfa(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
@@ -1410,8 +902,8 @@ if __name__ == "__main__":
         model = get_model(sys.argv[1], args.pretrained_ckpt, args)
         args.output_path.mkdir(parents=True, exist_ok=True)
 
-        validate(args, model)
+        attack(args, model)
     else:
-        validate_list_of_models(args)
+        attack_list_of_models(args)
 
 

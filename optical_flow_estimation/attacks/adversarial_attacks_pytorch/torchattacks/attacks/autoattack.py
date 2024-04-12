@@ -45,6 +45,7 @@ class AutoAttack(Attack):
         n_classes=10,
         seed=None,
         verbose=False,
+        loss="epe"
     ):
         super().__init__("AutoAttack", model)
         self.norm = norm
@@ -64,10 +65,10 @@ class AutoAttack(Attack):
                         norm=norm,
                         seed=self.get_seed(),
                         verbose=verbose,
-                        loss="ce",
+                        loss=loss,
                         n_restarts=1,
                     ),
-                    APGDT(
+                    APGD(
                         model,
                         eps=eps,
                         norm=norm,
@@ -75,6 +76,7 @@ class AutoAttack(Attack):
                         verbose=verbose,
                         n_classes=n_classes,
                         n_restarts=1,
+                        loss=loss,
                     ),
                     FAB(
                         model,
