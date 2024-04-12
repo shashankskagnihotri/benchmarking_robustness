@@ -42,7 +42,7 @@ from ptlflow_attacked.ptlflow.utils.utils import (
     get_list_of_available_models_list,
     tensor_dict_to_numpy,
 )
-from attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
+from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
 from attacks.fgsm import fgsm
 from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd

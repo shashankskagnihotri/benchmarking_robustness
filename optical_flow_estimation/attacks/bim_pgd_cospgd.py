@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 import torch
 
 from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
-from attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
+from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
 # Import cosPGD functions
 from cospgd import functions as attack_functions
 import torch.nn as nn
