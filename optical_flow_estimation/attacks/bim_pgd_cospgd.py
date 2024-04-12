@@ -68,7 +68,7 @@ def bim_pgd_cospgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: Base
                                 clamp_max = 1
                             )
     else:
-        args.alpha = args.epsilon
+        args.attack_alpha = args.attack_epsilon
     
     perturbed_inputs = replace_images_dic(inputs, image_1, image_2)
     perturbed_images = perturbed_inputs["images"]
