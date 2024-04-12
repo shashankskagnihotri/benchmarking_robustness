@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class Criterion:
+class LossCriterion:
     def __init__(self, name="epe"):
         self.name = name
         self.nn_criterion = None

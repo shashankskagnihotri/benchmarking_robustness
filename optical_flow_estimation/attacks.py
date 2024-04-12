@@ -56,7 +56,8 @@ norm = "inf"
 alpha = 0.01
 iterations = 3
 # criterion = nn.CrossEntropyLoss(reduction="none")
-criterion = nn.MSELoss(reduction="none")
+# criterion = nn.MSELoss(reduction="none")
+loss_function = "epe"
 targeted = False
 batch_size = 1
 
@@ -122,6 +123,12 @@ def _init_parser() -> ArgumentParser:
     type=bool,
     default=targeted,
     help="Set if adversarial attack should be targeted.",
+    )
+    parser.add_argument(
+    "--attack_loss",
+    type=str,
+    default=loss_function,
+    help="Set the name of the used loss function (mse, epe)",
     )
     parser.add_argument(
         "--selection",

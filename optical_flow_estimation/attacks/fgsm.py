@@ -4,13 +4,14 @@ import torch
 from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
 import torch.nn as nn
+from attacks.attack_utils.loss_criterion import LossCriterion
+
 batch_size = 1
-criterion = nn.MSELoss(reduction="none")
 
 @torch.enable_grad()
 def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
     # TODO: ADD NORMALIZATION + EPSILON SCALING!
-
+    criterion = LossCriterion(args.attack_loss)
     args.attack_alpha = args.attack_epsilon
 
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
@@ -27,7 +28,7 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     preds = model(inputs)
     preds_raw = preds["flows"].squeeze(0)
 
-    loss = criterion(preds_raw.float(), labels.float())
+    loss = criterion.loss(preds_raw.float(), labels.float())
     loss = loss.mean()
     loss.backward()
 
