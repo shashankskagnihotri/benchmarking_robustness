@@ -74,8 +74,13 @@ class Attack(object):
         self.model_name = model.__class__.__name__
 
     def get_logits(self, inputs, *args, **kwargs):
-        if self._normalization_applied is False:
+        if isinstance(inputs, dict):
             images = inputs["images"].squeeze(0)
+        elif torch.is_tensor(inputs):
+            images = inputs
+        else:
+            raise ValueError
+        if self._normalization_applied is False:
             images = self.normalize(images)
             inputs["images"] = images.unsqueeze(0)
         logits = self.model(inputs)
