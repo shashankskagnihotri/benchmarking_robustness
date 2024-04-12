@@ -48,7 +48,7 @@ from attack_utils.utils import get_image_tensors, get_image_grads, replace_image
 from cospgd import functions as attack_functions
 import torch.nn as nn
 import ptlflow_attacked.adversarial_attacks_pytorch
-from ptlflow_attacked.adversarial_attacks_pytorch.torchattacks import FGSM, FFGSM, APGD, APGDT
+from ptlflow_attacked.adversarial_attacks_pytorch.torchattacks import FGSM, FFGSM, APGD, APGDT, FAB
 # Attack parameters
 epsilon = 8 / 255
 norm = "inf"
@@ -75,7 +75,7 @@ def _init_parser() -> ArgumentParser:
         "--attack",
         type=str,
         default="none",
-        choices=["fgsm", "bim", "pgd", "cospgd", "ffgsm", "apgd", "none"],
+        choices=["fgsm", "bim", "pgd", "cospgd", "ffgsm", "apgd", "fab", "none"],
         help="Name of the attack to use.",
     )
     parser.add_argument(
@@ -577,6 +577,8 @@ def attack_one_dataloader(
                 case "apgd":
                     # inputs["images"] = fgsm(args, inputs, model)
                     images, labels, preds, placeholder = apgd(args, inputs, model, targeted_inputs)
+                case "fab":
+                    images, labels, preds, placeholder = fab(args, inputs, model, targeted_inputs)
                 case "none":
                     preds = model(inputs)
             
@@ -670,7 +672,7 @@ def attack_one_dataloader(
 def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
     # TODO: ADD NORMALIZATION + EPSILON SCALING!
 
-    args.alpha = args.epsilon
+    args.attack_alpha = args.attack_epsilon
 
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
     orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
@@ -728,6 +730,21 @@ def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, tar
         perturbed_images = attack(inputs["images"], inputs["flows"])
     perturbed_inputs = inputs
     perturbed_inputs["images"] = perturbed_images
+    preds = model(perturbed_inputs)
+    images = None
+    labels = None
+
+    return images, labels, preds, None
+
+
+def fab(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+    attack = FAB(model, args.attack_epsilon)
+    if args.attack_targeted:
+        attack.targeted = True
+        attack.set_mode_targeted_by_label()
+        perturbed_inputs = attack(inputs["images"], targeted_inputs["flows"])
+    else:
+        perturbed_inputs = attack(inputs["images"], inputs["flows"])
     preds = model(perturbed_inputs)
     images = None
     labels = None
