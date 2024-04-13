@@ -183,7 +183,6 @@ dataset/
 
 ## ignore for dispartiy_estimation/stero-transformer
 *.pyc
-*.tar
 *.log
 *.
 sample_data/
