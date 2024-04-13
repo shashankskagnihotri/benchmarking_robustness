@@ -165,7 +165,7 @@ cython_debug/
 .png
 .jpeg
 .jpg
-.tar
+# removed .tar because they contain weights
 .pth
 .npy
 
@@ -176,3 +176,15 @@ data/
 dataset/
 .flo
 .fio
+
+# vs code
+.vscode/
+.pyc
+
+## ignore for dispartiy_estimation/stero-transformer
+*.pyc
+*.log
+*.
+sample_data/
+run/
+*.dat
