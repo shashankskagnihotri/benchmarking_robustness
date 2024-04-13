@@ -440,7 +440,7 @@ class RandomShiftRotate(RightOnlyTransform):
         shift = random.random() * self.max_shift * 2 - self.max_shift
         rotation = random.random() * self.max_rotation * 2 - self.max_rotation
 
-        matrix = float32([[np.cos(np.deg2rad(rotation)), -np.sin(np.deg2rad(rotation)), 0],
+        matrix = np.float32([[np.cos(np.deg2rad(rotation)), -np.sin(np.deg2rad(rotation)), 0],
                              [np.sin(np.deg2rad(rotation)), np.cos(np.deg2rad(rotation)), shift]])
 
         return cv2.warpAffine(img, matrix, (w, h), cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)

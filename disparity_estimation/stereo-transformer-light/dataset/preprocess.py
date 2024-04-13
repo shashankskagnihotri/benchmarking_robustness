@@ -102,7 +102,7 @@ def augment(input_data, transformation):
     # set occlusion area to 0
     occ_mask = input_data['occ_mask']
     input_data['disp'][occ_mask] = 0
-    input_data['disp'] = np.ascontiguousarray(input_data['disp'], dtype=float32)
+    input_data['disp'] = np.ascontiguousarray(input_data['disp'], dtype=np.float32)
 
     # return normalized image
     return normalization(**input_data)
