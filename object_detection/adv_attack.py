@@ -14,6 +14,7 @@ import logging
 from typing import Callable
 import shutil
 import os
+from collect_attack_results import collect_results
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
 
@@ -346,4 +347,5 @@ if __name__ == "__main__":
     with open(destination_file, "w") as json_file:
         json.dump(args_dict, json_file)
 
-    # Print comparison table
+    # Collect and print results
+    collect_results()
