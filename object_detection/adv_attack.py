@@ -82,7 +82,6 @@ def fgsm_attack(
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
 
     images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    images_clone = images.clone().float().detach()
     assert isinstance(images, torch.Tensor)
 
     # from retinanet_r50_fpn.py. TODO: read from runner.model
@@ -151,7 +150,11 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
 
 
 def run_attack_val(
-    attack: Callable, config_file: str, checkpoint_file: str, attack_kwargs: dict
+    attack: Callable,
+    config_file: str,
+    checkpoint_file: str,
+    attack_kwargs: dict,
+    work_dir=str,
 ):
     LOOPS.module_dict.pop("ValLoop")
 
@@ -226,11 +229,13 @@ def run_attack_val(
             )
 
     cfg = Config.fromfile(config_file)
-    cfg.work_dir = "./work_dirs/"
+    cfg.work_dir = work_dir
     cfg.load_from = checkpoint_file
 
     runner = Runner.from_cfg(cfg)
     runner.val()
+
+    # save cfg as json
     runner.log_dir
     destination_file = os.path.join(runner.log_dir, "cfg.json")
     cfg.dump(destination_file)
@@ -243,7 +248,10 @@ def run_attack_val(
     destination_file = os.path.join(destination_folder, "metrics.json")
     shutil.copy(source_file, destination_file)
 
-    return runner
+    # save kwargs as json
+    destination_file = os.path.join(runner.log_dir, "args.json")
+    with open(destination_file, "w") as json_file:
+        json.dump(attack_kwargs, json_file)
 
 
 if __name__ == "__main__":
@@ -293,7 +301,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="./slurm/logs",
+        default="./work_dirs/",
         help="Directory path where result files are saved (default: ./slurm/logs)",
     )
     parser.add_argument(
@@ -338,19 +346,13 @@ if __name__ == "__main__":
     else:
         raise ValueError
 
-    runner = run_attack_val(
+    run_attack_val(
         attack=attack,
         attack_kwargs=attack_kwargs,
         config_file=config_file,
         checkpoint_file=checkpoint_file,
+        work_dir=output_dir,
     )
 
-    # Save args as json
-    args_dict = vars(args)
-    destination_file = os.path.join(runner.log_dir, "args.json")
-    with open(destination_file, "w") as json_file:
-        json.dump(args_dict, json_file)
-
     if collect_results:
-        # Collect and print results
         collect_results()
