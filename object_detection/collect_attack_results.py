@@ -34,5 +34,5 @@ def collect_results(main_folder="work_dirs"):
     df.to_csv(output_file, index=False)
 
 
-if __name__ == __name__:
-    collect_results()
+if __name__ == "__main__":
+    collect_results("slurm/logs/")

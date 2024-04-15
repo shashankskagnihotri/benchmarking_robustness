@@ -154,7 +154,7 @@ def run_attack_val(
     config_file: str,
     checkpoint_file: str,
     attack_kwargs: dict,
-    work_dir=str,
+    work_dir: str,
 ):
     LOOPS.module_dict.pop("ValLoop")
 
@@ -250,6 +250,8 @@ def run_attack_val(
 
     # save kwargs as json
     destination_file = os.path.join(runner.log_dir, "args.json")
+    attack_kwargs["attack"] = attack.__name__
+    print("\nattack_kwargs: ", attack_kwargs)
     with open(destination_file, "w") as json_file:
         json.dump(attack_kwargs, json_file)
 
