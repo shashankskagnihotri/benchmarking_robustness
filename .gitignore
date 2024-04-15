@@ -177,3 +177,11 @@ dataset/
 .flo
 .fio
 object_detection/.vscode/settings.json
+object_detection/work_dirs/attack_results.csv
+object_detection/work_dirs/retinanet_x101-64x4d_fpn_1x_coco.py
+object_detection/work_dirs/20240415_093515/args.json
+object_detection/work_dirs/20240415_093515/cfg.json
+object_detection/work_dirs/20240415_093515/metrics.json
+object_detection/work_dirs/20240415_093515/vis_data/20240415_093515.json
+object_detection/work_dirs/20240415_093515/vis_data/config.py
+object_detection/work_dirs/20240415_093515/vis_data/scalars.json
