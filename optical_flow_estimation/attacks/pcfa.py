@@ -116,8 +116,6 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
     # Set requires_grad attribute of tensor. Important for Attack
     image1.requires_grad = False
     image2.requires_grad = False
-    images_max = torch.max(image1, image2).detach().to(device)
-    images_min = torch.min(image1, image2).detach().to(device)
 
     # initialize perturbation and auxiliary variables:
     delta1 = torch.zeros_like(image1)
@@ -127,7 +125,6 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
 
     nw_input1 = None
     nw_input2 = None
-    nw_delta = None
 
     flow_pred_init = None
 
@@ -145,12 +142,11 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
     nw_input1.requires_grad = True
     nw_input2.requires_grad = True
 
-    perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2)
-
     optimizer = optim.LBFGS([nw_input1, nw_input2], max_iter=10)
 
-    #TODO: ab hier weitermachen
     # Predict the flow
+    perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2)
+    perturbed_inputs["images"].requires_grad_(True)
     flow_pred = model(perturbed_inputs)
     # TDO: maybe have to add brackets? [flow_pred] = ownutilities.postprocess_flow(args.net, padder, flow_pred)
     flow_pred = flow_pred.to(device)
@@ -170,14 +166,7 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
     model.zero_grad()
     optimizer.zero_grad()
 
-    delta_below_threshold=False
-    delta12_min_val = float('inf')
-    aee_adv_tgt_min_val = float('inf')
-    aee_adv_pred_min_val = 0.
-    l2_delta1, l2_delta2, l2_delta12 = 0, 0, 0
-    delta1_min = torch.ones_like(image1).detach()
-    delta2_min = torch.ones_like(image2).detach()
-    flow_pred_min = flow_pred_init.detach().clone()
+    
 
     for steps in range(args.pcfa_steps):
 
@@ -200,21 +189,14 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
 
         def closure():
             optimizer.zero_grad()
-            # TODO: ab hier weiter
-            # TODO: achtung, sowas bist hier vllt auch benötigt, vllt auch weiter oben
-            # perturbed_inputs = replace_images_dic(inputs, image_1, image_2)
-            # perturbed_images = perturbed_inputs["images"]
-            # perturbed_images.requires_grad=True
-            # perturbed_inputs["images"] = perturbed_images
-            perturbed_inputs = replace_images_dic(perturbed_inputs, nw_input1, nw_input2)
             flow_closure = model(perturbed_inputs)
             
-
             # TODO: maybe have to add rbackets? [flow_closure] = ownutilities.postprocess_flow(args.net, padder, flow_closure)
             flow_closure = flow_closure.to(device)
             delta1_closure, delta2_closure = extract_deltas(nw_input1, nw_input2, image1, image2, args.boxconstraint, eps_box=eps_box)
             loss_closure = losses.loss_delta_constraint(flow_closure, target, delta1_closure, delta2_closure, device, delta_bound=args.delta_bound, mu=optim_mu,  f_type=args.loss)
             loss_closure.backward()
+
             return loss_closure
 
         # Update the optimization parameters
@@ -225,93 +207,13 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
         # The nw_inputs remain unchanged in this case, and can be directly fed into the network again for further perturbation training
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
-        flow_pred = ownutilities.compute_flow(model, "scaled_input_model", nw_input1, nw_input2, test_mode=True)
-        [flow_pred] = ownutilities.postprocess_flow(args.net, padder, flow_pred)
+        perturbed_inputs = replace_images_dic(perturbed_inputs, nw_input1, nw_input2)
+        perturbed_inputs["images"].requires_grad_(True)
+        flow_pred = model(perturbed_inputs)
+        # [flow_pred] = ownutilities.postprocess_flow(args.net, padder, flow_pred)
         flow_pred = flow_pred.to(device)
 
-        # More AEE statistics, now for attacked images
-        aee_adv_tgt, aee_adv_pred = logging.calc_metrics_adv(flow_pred, target, flow_pred_init)
-        aee_adv_gt                = logging.calc_metrics_adv_gt(flow_pred, flow) if has_gt else None
-        logging.log_metrics(curr_step, ("aee_predadv-tgt", aee_adv_tgt),
-                                       ("aee_pred-predadv", aee_adv_pred),
-                                       ("aee_predadv-gt", aee_adv_gt))
-
-        l2_delta1, l2_delta2, l2_delta12 = logging.calc_delta_metrics(delta1, delta2, curr_step)
-        logging.log_metrics(curr_step, ("l2_delta1", l2_delta1),
-                                       ("l2_delta2", l2_delta2),
-                                       ("l2_delta-avg", l2_delta12))
-
-        update_minima = False
-        if not delta_below_threshold:
-            if l2_delta12 < delta12_min_val or (l2_delta12 == delta12_min_val and aee_adv_tgt < aee_adv_tgt_min_val):
-
-                update_minima = True
-                if l2_delta12 <= args.delta_bound:
-                    delta_below_threshold = True
-        else:
-            if l2_delta12 <= args.delta_bound and aee_adv_tgt < aee_adv_tgt_min_val:
-                update_minima = True
-
-        if update_minima:
-            delta12_min_val = l2_delta12
-            aee_adv_tgt_min_val = aee_adv_tgt
-            aee_adv_pred_min_val = aee_adv_pred
-            delta1_min = delta1.detach().clone()
-            delta2_min = delta2.detach().clone()
-            flow_pred_min = flow_pred.detach().clone()
-
-        logging.log_metrics(curr_step, ("aee_pred-tgt_min", aee_adv_tgt_min_val),
-                                   ("l2_delta-avg_min", delta12_min_val),
-                                   ("aee_pred-predadv_min", aee_adv_pred_min_val))
-
-
-    # Final saving of images:
-    # ToDo: How can the joint_perturbation flag here be handeled? Even if in theory delta1==delta2, due to clipping the distortions can be different for both images...
-    # No, because this case was explicitely treated by the cropped common perturbation, which fits both images now
-    if ((batch % args.save_frequency == 0 and not args.small_save) or (args.small_save and batch < 32)) and not args.no_save:
-
-        logging.save_tensor(delta1, "delta1_final", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(delta2, "delta2_final", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(delta1_min, "delta1_best", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(delta2_min, "delta2_best", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(image1, "image1", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(image2, "image2", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(target, "target", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(flow_pred, "flow_pred_final", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(flow_pred_min, "flow_pred_best", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_tensor(flow_pred_init, "flow_pred_init", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-        if has_gt:
-            logging.save_tensor(flow, "flow_gt", batch, distortion_folder, unregistered_artifacts=args.unregistered_artifacts)
-
-
-        logging.save_image(image1, batch, distortion_folder, image_name='image1', unit_input=True, normalize_max=None, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_image(image2, batch, distortion_folder, image_name='image2', unit_input=True, normalize_max=None, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_image(image1+delta1_min, batch, distortion_folder, image_name='image1_delta_best', unit_input=True, normalize_max=None, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_image(image2+delta2_min, batch, distortion_folder, image_name='image2_delta_best', unit_input=True, normalize_max=None, unregistered_artifacts=args.unregistered_artifacts)
-
-
-        max_delta = np.max([ownutilities.torchfloat_to_float64(torch.max(torch.abs(delta1_min))),
-                            ownutilities.torchfloat_to_float64(torch.max(torch.abs(delta2_min)))])
-
-        logging.save_image(delta1_min, batch, distortion_folder, image_name='delta1_best', unit_input=True, normalize_max=max_delta, unregistered_artifacts=args.unregistered_artifacts)
-        if not args.joint_perturbation:
-            logging.save_image(delta2_min, batch, distortion_folder, image_name='delta2_best', unit_input=True, normalize_max=max_delta, unregistered_artifacts=args.unregistered_artifacts)
-
-
-        max_flow_gt = 0
-        if has_gt:
-            max_flow_gt = ownutilities.maximum_flow(flow)
-        max_flow = np.max([max_flow_gt,
-                           ownutilities.maximum_flow(flow_pred_init),
-                           ownutilities.maximum_flow(flow_pred_min)])
-
-        logging.save_flow(flow_pred_min, batch, distortion_folder, flow_name='flow_pred_best', auto_scale=False, max_scale=max_flow, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_flow(flow_pred_init, batch, distortion_folder, flow_name='flow_pred_init', auto_scale=False, max_scale=max_flow, unregistered_artifacts=args.unregistered_artifacts)
-        logging.save_flow(target, batch, distortion_folder, flow_name='flow_target', auto_scale=False, max_scale=max_flow, unregistered_artifacts=args.unregistered_artifacts)
-        if has_gt:
-            logging.save_flow(flow, batch, distortion_folder, flow_name='flow_gt', auto_scale=False, max_scale=max_flow, unregistered_artifacts=args.unregistered_artifacts)
-
-    return aee_gt, aee_tgt, aee_gt_tgt, aee_adv_gt, aee_adv_tgt, aee_adv_pred, l2_delta1, l2_delta2, l2_delta12, aee_adv_tgt_min_val, aee_adv_pred_min_val, delta12_min_val
+    return flow_pred
 
 
 # For PCFA
