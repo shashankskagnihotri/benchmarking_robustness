@@ -296,6 +296,9 @@ if __name__ == "__main__":
         default="./slurm/logs",
         help="Directory path where result files are saved (default: ./slurm/logs)",
     )
+    parser.add_argument(
+        "--collect_results", action="store_true", help="Collect attack results"
+    )
 
     args = parser.parse_args()
 
@@ -309,6 +312,7 @@ if __name__ == "__main__":
     config_file = args.config_file
     norm = args.norm
     output_dir = args.output_dir
+    collect_results = args.collect_results
 
     # Select right attack function
     if attack == "pgd":
@@ -347,5 +351,6 @@ if __name__ == "__main__":
     with open(destination_file, "w") as json_file:
         json.dump(args_dict, json_file)
 
-    # Collect and print results
-    collect_results()
+    if collect_results:
+        # Collect and print results
+        collect_results()
