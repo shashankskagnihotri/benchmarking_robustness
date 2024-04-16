@@ -231,12 +231,12 @@ def run_attack_val(
     cfg = Config.fromfile(config_file)
     cfg.work_dir = work_dir
     cfg.load_from = checkpoint_file
+    cfg.checkpoint_config = dict(interval=0)
 
     runner = Runner.from_cfg(cfg)
     runner.val()
 
     # save cfg as json
-    runner.log_dir
     destination_file = os.path.join(runner.log_dir, "cfg.json")
     cfg.dump(destination_file)
 
