@@ -11,12 +11,13 @@ from attacks.adversarial_attacks_pytorch.torchattacks import APGD
 
 def apgd(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
     if args.attack_targeted:
-        attack = APGD(model, eps=args.attack_epsilon, loss=args.attack_loss, verbose=False)
+        # TODO: are iterations the same steps?
+        attack = APGD(model, eps=args.attack_epsilon, loss=args.attack_loss, verbose=False, steps=args.attack_iterations)
         attack.targeted = True
         attack.set_mode_targeted_by_label()
         perturbed_images = attack(inputs["images"], targeted_inputs["flows"])
     else:
-        attack = APGD(model, eps=args.attack_epsilon, loss=args.attack_loss, verbose=False)
+        attack = APGD(model, eps=args.attack_epsilon, loss=args.attack_loss, verbose=False, steps=args.attack_iterations)
         perturbed_images = attack(inputs["images"], inputs["flows"])
     perturbed_inputs = inputs
     perturbed_inputs["images"] = perturbed_images

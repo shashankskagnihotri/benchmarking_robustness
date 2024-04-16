@@ -280,7 +280,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             metrics_mean.values()
         )
         args.output_path.mkdir(parents=True, exist_ok=True)
-        metrics_df.T.to_csv(args.output_path / f"metrics_f{args.attack}_{args.attack_targeted}.csv", header=False)
+        metrics_df.T.to_csv(args.output_path / f"metrics_{args.val_dataset}_{args.attack}_{args.attack_targeted}.csv", header=False)
     metrics_df = metrics_df.round(3)
     return metrics_df
 
