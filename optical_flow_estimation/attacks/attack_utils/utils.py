@@ -19,7 +19,7 @@ def get_image_grads(input_dic: Dict[str, torch.Tensor]):
 def replace_images_dic(input_dic: Dict[str, torch.Tensor], image_1: torch.Tensor, image_2: torch.Tensor, clone: bool = False):
     image_pair_tensor = torch.torch.cat((image_1, image_2)).unsqueeze(0)
     if clone:
-        output_dic = input_dic.clone()
+        output_dic = input_dic.copy()
         output_dic["images"] = image_pair_tensor
         return output_dic
     else:
