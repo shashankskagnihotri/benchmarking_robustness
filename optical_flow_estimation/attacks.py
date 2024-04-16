@@ -107,7 +107,7 @@ def _init_parser() -> ArgumentParser:
     )
     parser.add_argument('--pcfa_boxconstraint', default='change_of_variables', choices=['clipping', 'change_of_variables'],
                 help="the way to enfoce the box constraint on the distortion. Options: 'clipping', 'change_of_variables'.")
-    parser.add_argument('--pcfa_steps', default=10, type=int,
+    parser.add_argument('--pcfa_steps', default=5, type=int,
                 help="the number of optimization steps per image (for non-universal perturbations only).")
     parser.add_argument(
         "--attack_iterations",
@@ -430,7 +430,7 @@ def attack_one_dataloader(
                 case "fab":
                     images, labels, preds, placeholder = fab(args, inputs, model, targeted_inputs)
                 case "pcfa":
-                    images, labels, preds, placeholder = pcfa(args, inputs, model, targeted_inputs)
+                    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(args, model, targeted_inputs)
                 case "none":
                     preds = model(inputs)
             

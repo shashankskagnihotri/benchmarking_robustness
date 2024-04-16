@@ -5,6 +5,7 @@ from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
 import torch.nn as nn
 import attacks.attack_utils.loss_criterion as losses
+import pdb
 
 
 # PCFA parameters
@@ -12,14 +13,12 @@ import torch.optim as optim
 delta_bound=0.005
 
 
-def pcfa(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+def pcfa(args: Namespace, model: BaseModel, targeted_inputs:Dict[str, torch.Tensor]):
     """
     Performs an PCFA attack on a given model and for all images of a specified dataset.
     """
 
     optim_mu = 2500./args.pcfa_delta_bound
-        
-    optimizer_lr = args.pcfa_delta_bound
 
     eps_box = 1e-7
 
@@ -41,13 +40,15 @@ def pcfa(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, tar
     # else:
     
 
-    orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
-    orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
+    orig_image_1 = targeted_inputs["images"][0].clone()[0].unsqueeze(0)
+    orig_image_2 = targeted_inputs["images"][0].clone()[1].unsqueeze(0)
 
-    aee_gt, aee_tgt, aee_gt_tgt, aee_adv_gt, aee_adv_tgt, aee_adv_pred, l2_delta1, l2_delta2, l2_delta12, aee_adv_tgt_min_val, aee_adv_pred_min_val, delta12_min_val = pcfa_attack(model, inputs, targeted_inputs, eps_box, device, optimizer_lr, has_gt, optim_mu, args)
+    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa_attack(model, targeted_inputs, eps_box, device, has_gt, optim_mu, args)
+
+    return preds, l2_delta1, l2_delta2, l2_delta12 
     
 
-def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer_lr, has_gt, optim_mu, args):
+def pcfa_attack(model, targeted_inputs, eps_box, device, has_gt, optim_mu, args):
     """Subroutine to optimize a PCFA perturbation on a given image pair. For a specified number of steps.
 
     Args:
@@ -109,7 +110,7 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
 
     image1, image2 = get_image_tensors(targeted_inputs)
     image1, image2 = image1.to(device), image2.to(device)
-
+    #pdb.set_trace()
     flow = get_flow_tensors(targeted_inputs)
     flow = flow.to(device)
 
@@ -147,8 +148,10 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
     # Predict the flow
     perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2)
     perturbed_inputs["images"].requires_grad_(True)
-    flow_pred = model(perturbed_inputs)
+    preds = model(perturbed_inputs)
+    flow_pred = preds["flows"].squeeze(0)
     # TDO: maybe have to add brackets? [flow_pred] = ownutilities.postprocess_flow(args.net, padder, flow_pred)
+    #pdb.set_trace()
     flow_pred = flow_pred.to(device)
 
     # define the initial flow, the target, and update mu
@@ -166,18 +169,19 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
     model.zero_grad()
     optimizer.zero_grad()
 
-    
+    l2_delta1, l2_delta2, l2_delta12 = 0, 0, 0
 
     for steps in range(args.pcfa_steps):
 
         curr_step = steps
 
         # Calculate the deltas from the quantities that go into the network
-        delta1, delta2 = extract_deltas(nw_input1, nw_input2, image1, image2, args.boxconstraint, eps_box=eps_box)
+        delta1, delta2 = extract_deltas(nw_input1, nw_input2, image1, image2, args.pcfa_boxconstraint, eps_box=eps_box)
 
         # Calculate the loss
         # if args.delta_bound > 0.0:
-        loss = losses.loss_delta_constraint(flow_pred, target, delta1, delta2, device, delta_bound=args.delta_bound, mu=optim_mu,  f_type="aee")
+        # pdb.set_trace()
+        loss = losses.loss_delta_constraint(flow_pred, target, delta1, delta2, device, delta_bound=args.pcfa_delta_bound, mu=optim_mu,  f_type="aee")
 
         # else:
         #     # print('using loss weighted')
@@ -189,12 +193,14 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
 
         def closure():
             optimizer.zero_grad()
-            flow_closure = model(perturbed_inputs)
+            perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2)
+            perturbed_inputs["images"].requires_grad_(True)
+            flow_closure = model(perturbed_inputs)['flows'].squeeze(0)
             
             # TODO: maybe have to add rbackets? [flow_closure] = ownutilities.postprocess_flow(args.net, padder, flow_closure)
             flow_closure = flow_closure.to(device)
-            delta1_closure, delta2_closure = extract_deltas(nw_input1, nw_input2, image1, image2, args.boxconstraint, eps_box=eps_box)
-            loss_closure = losses.loss_delta_constraint(flow_closure, target, delta1_closure, delta2_closure, device, delta_bound=args.delta_bound, mu=optim_mu,  f_type=args.loss)
+            delta1_closure, delta2_closure = extract_deltas(nw_input1, nw_input2, image1, image2, args.pcfa_boxconstraint, eps_box=eps_box)
+            loss_closure = losses.loss_delta_constraint(flow_closure, target, delta1_closure, delta2_closure, device, delta_bound=args.pcfa_delta_bound, mu=optim_mu,  f_type="aee")
             loss_closure.backward()
 
             return loss_closure
@@ -207,13 +213,18 @@ def pcfa_attack(model, inputs, targeted_inputs, flow, eps_box, device, optimizer
         # The nw_inputs remain unchanged in this case, and can be directly fed into the network again for further perturbation training
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
-        perturbed_inputs = replace_images_dic(perturbed_inputs, nw_input1, nw_input2)
+        perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2)
         perturbed_inputs["images"].requires_grad_(True)
-        flow_pred = model(perturbed_inputs)
+        preds = model(perturbed_inputs)
+        flow_pred = preds["flows"].squeeze(0)
         # [flow_pred] = ownutilities.postprocess_flow(args.net, padder, flow_pred)
         flow_pred = flow_pred.to(device)
 
-    return flow_pred
+        l2_delta1 = torchfloat_to_float64(losses.two_norm_avg(delta1))
+        l2_delta2 = torchfloat_to_float64(losses.two_norm_avg(delta2))
+        l2_delta12 = torchfloat_to_float64(losses.two_norm_avg_delta(delta1, delta2))
+
+    return preds, l2_delta1, l2_delta2, l2_delta12
 
 
 # For PCFA
@@ -227,3 +238,17 @@ def extract_deltas(nw_input1, nw_input2, image1, image2, boxconstraint, eps_box=
         delta2 = torch.clamp(nw_input2, 0., 1.) - image2
 
     return delta1, delta2
+
+
+def torchfloat_to_float64(torch_float):
+    """helper function to convert a torch.float to numpy float
+
+    Args:
+        torch_float (torch.float):
+            scalar floating point number in torch
+
+    Returns:
+        numpy.float: floating point number in numpy
+    """
+    float_val = float(torch_float.detach().cpu().numpy())
+    return float_val
