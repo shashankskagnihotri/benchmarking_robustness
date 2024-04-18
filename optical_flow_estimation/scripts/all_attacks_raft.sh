@@ -12,16 +12,17 @@
 
 echo TestAttacks
 
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack bim
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack bim --attack_targeted True
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack fgsm
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack fgsm --attack_targeted True
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack apgd
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack apgd --attack_targeted True
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack cospgd
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack cospgd --attack_targeted True
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack pgd
-python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack pgd --attack_targeted True
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack bim --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack bim --attack_targeted True --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack fgsm --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack fgsm --attack_targeted True --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack apgd --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack apgd --attack_targeted True --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack cospgd --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack cospgd --attack_targeted True --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack pgd --attack_iterations 10
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015+sintel-clean+sintel-final --attack pgd --attack_targeted True --attack_iterations 10
+
 
 
