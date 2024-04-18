@@ -12,16 +12,16 @@
 
 echo TestAttacks
 
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack bim
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack bim --attack_targeted True
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack fgsm
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack fgsm --attack_targeted True
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack apgd
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack apgd --attack_targeted True
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack cospgd
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack cospgd --attack_targeted True
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack pgd
-python attacks.py raft --pretrained_ckpt kitti --val_dataset kitti-2012+kitti-2015 --attack pgd --attack_targeted True
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack bim
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack bim --attack_targeted True
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack fgsm
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack fgsm --attack_targeted True
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack apgd
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack apgd --attack_targeted True
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack cospgd
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack cospgd --attack_targeted True
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack pgd
+python attacks.py raft --pretrained_ckpt things --val_dataset kitti-2012+kitti-2015 --attack pgd --attack_targeted True
 
 
