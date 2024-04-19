@@ -27,11 +27,11 @@ def pcfa(args: Namespace, model: BaseModel, targeted_inputs:Dict[str, torch.Tens
         device = torch.device("cpu")
     else:
         device = torch.device("cuda")
-
-    # Make sure the model is not trained:
-    # for param in model.parameters():
-    #     param.requires_grad = False
     
+    # Make sure the model is not trained:
+    for param in model.parameters():
+        param.requires_grad = False
+
     preds, l2_delta1, l2_delta2, l2_delta12 = pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, args)
 
     return preds, l2_delta1, l2_delta2, l2_delta12 
@@ -134,12 +134,28 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, args):
 
     optimizer = optim.LBFGS([nw_input1, nw_input2], max_iter=10)
 
-    # Predict the flow
-    perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2, clone=True)
-    # perturbed_inputs["images"].requires_grad_(True)
-    preds = model(perturbed_inputs)
-    flow_pred = preds["flows"].squeeze(0)
-    flow_pred = flow_pred.to(device)
+    def predict(model, nw_input1, nw_input2, targeted_inputs, eps_box, args):
+        # Perform the Carlini&Wagner Change of Variables
+        # If variable_change=True was specified for the ScaledInputModel, images1 and 2 are assumed to be not the image information, 
+        # but the w-variable from the Carlini&Wagner model. Hence they are transformed into their image representations, before being fed to to the model.
+        if args.pcfa_boxconstraint == "change_of_variables":
+            nw_input1 = (1./2.) * 1. / (1. - eps_box) * (torch.tanh(nw_input1) + (1 - eps_box) )
+            nw_input2 = (1./2.) * 1. / (1. - eps_box) * (torch.tanh(nw_input2) + (1 - eps_box) )
+        # Clipping case, which will only clip something if change of variables was not defined. otherwise, the change of variables has already brought the iamges into the range [0,1]
+        else:
+            nw_input1 = torch.clamp(nw_input1, 0., 1.)
+            nw_input2 = torch.clamp(nw_input2, 0., 1.)
+        
+        # Predict the flow
+        perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2, clone=True)
+
+        preds = model(perturbed_inputs)
+        flow_pred = preds["flows"].squeeze(0)
+        flow_pred = flow_pred.to(device)
+
+        return preds, flow_pred
+    
+    preds, flow_pred = predict(model, nw_input1, nw_input2, targeted_inputs, eps_box, args)
 
     # define the initial flow, the target, and update mu
     flow_pred_init = flow_pred.detach().clone()
@@ -173,7 +189,6 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, args):
         def closure():
             optimizer.zero_grad()
             perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2, clone=True)
-            # perturbed_inputs["images"].requires_grad_(True)
             flow_closure = model(perturbed_inputs)['flows'].squeeze(0)
             
             flow_closure = flow_closure.to(device)
@@ -191,11 +206,12 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, args):
         # The nw_inputs remain unchanged in this case, and can be directly fed into the network again for further perturbation training
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
-        perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2, clone=True)
-        # perturbed_inputs["images"].requires_grad_(True)
-        preds = model(perturbed_inputs)
-        flow_pred = preds["flows"].squeeze(0)
-        flow_pred = flow_pred.to(device)
+        preds, flow_pred = predict(model, nw_input1, nw_input2, targeted_inputs, eps_box, args)
+        # perturbed_inputs = replace_images_dic(targeted_inputs, nw_input1, nw_input2, clone=True)
+        # # perturbed_inputs["images"].requires_grad_(True)
+        # preds = model(perturbed_inputs)
+        # flow_pred = preds["flows"].squeeze(0)
+        # flow_pred = flow_pred.to(device)
 
         l2_delta1 = torchfloat_to_float64(losses.two_norm_avg(delta1))
         l2_delta2 = torchfloat_to_float64(losses.two_norm_avg(delta2))
