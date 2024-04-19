@@ -122,10 +122,17 @@ def _init_parser() -> ArgumentParser:
         help="Set epsilon to use for adversarial attack.",
     )
     parser.add_argument(
-    "--attack_targeted",
-    type=bool,
-    default=targeted,
-    help="Set if adversarial attack should be targeted.",
+        "--attack_targeted",
+        type=bool,
+        default=targeted,
+        help="Set if adversarial attack should be targeted.",
+    )
+    parser.add_argument(
+        "--attack_target",
+        type=str,
+        default="zero",
+        choices=["zero", "negative"],
+        help="Set the target for a tagreted attack.",
     )
     parser.add_argument(
     "--attack_loss",
@@ -404,9 +411,14 @@ def attack_one_dataloader(
 
             targeted_inputs = None
             if args.attack_targeted or args.attack == 'pcfa':
-                targeted_flow_tensor = torch.zeros_like(inputs["flows"])
-                targeted_inputs = inputs.copy()
-                targeted_inputs["flows"] = targeted_flow_tensor
+                if args.attack_target == "zero":
+                    targeted_flow_tensor = torch.zeros_like(inputs["flows"])
+                    targeted_inputs = inputs.copy()
+                    targeted_inputs["flows"] = targeted_flow_tensor
+                elif args.attack_target == "negative":
+                    targeted_flow_tensor = -inputs["flows"]
+                    targeted_inputs = inputs.copy()
+                    targeted_inputs["flows"] = targeted_flow_tensor
                 with torch.no_grad():
                     orig_preds = model(inputs)
 
