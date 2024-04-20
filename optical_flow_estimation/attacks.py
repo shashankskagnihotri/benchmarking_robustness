@@ -479,7 +479,7 @@ def attack_one_dataloader(
                         inputs[key] = val[:, k : k + 1]
 
             # metrics = model.val_metrics(preds, inputs)
-            if args.attack_targeted:
+            if args.attack_targeted or args.attack == "pcfa":
                 metrics = model.val_metrics(preds, targeted_inputs)
                 metrics_ground_truth = model.val_metrics(preds, inputs)
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
@@ -507,7 +507,7 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if args.attack_targeted:
+            if args.attack_targeted or args.attack == "pcfa":
                 generate_outputs(
                 args, targeted_inputs, preds, dataloader_name, i, targeted_inputs.get("meta")
             )
