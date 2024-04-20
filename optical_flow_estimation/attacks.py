@@ -42,12 +42,13 @@ from ptlflow_attacked.ptlflow.utils.utils import (
     get_list_of_available_models_list,
     tensor_dict_to_numpy,
 )
-from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
+
 from attacks.fgsm import fgsm
 from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
+from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from ptlflow_attacked.validate import validate_one_dataloader, generate_outputs, _get_model_names
 # Import cosPGD functions
 import torch.nn as nn
@@ -56,8 +57,6 @@ epsilon = 8 / 255
 norm = "inf"
 alpha = 0.01
 iterations = 3
-# criterion = nn.CrossEntropyLoss(reduction="none")
-# criterion = nn.MSELoss(reduction="none")
 loss_function = "epe"
 targeted = False
 batch_size = 1
@@ -83,6 +82,7 @@ def _init_parser() -> ArgumentParser:
         "--attack",
         type=str,
         default="none",
+        nargs="*",
         choices=["fgsm", "bim", "pgd", "cospgd", "ffgsm", "apgd", "fab", "pcfa", "none"],
         help="Name of the attack to use.",
     )
@@ -90,6 +90,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_norm",
         type=str,
         default=norm,
+        nargs="*",
         choices=["two", "inf"],
         help="Set norm to use for adversarial attack.",
     )
@@ -97,6 +98,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_epsilon",
         type=float,
         default=epsilon,
+        nargs="*",
         help="Set epsilon to use for adversarial attack.",
     )
     parser.add_argument(
@@ -113,6 +115,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_iterations",
         type=int,
         default=iterations,
+        nargs="*",
         help="Set number of iterations for adversarial attack.",
     )
     parser.add_argument(
@@ -125,12 +128,14 @@ def _init_parser() -> ArgumentParser:
     "--attack_targeted",
     type=bool,
     default=targeted,
+    nargs="*",
     help="Set if adversarial attack should be targeted.",
     )
     parser.add_argument(
     "--attack_loss",
     type=str,
     default=loss_function,
+    nargs="*",
     help="Set the name of the used loss function (mse, epe)",
     )
     parser.add_argument(
@@ -370,6 +375,11 @@ def attack_one_dataloader(
     Dict[str, float]
         The average metric values for this dataloader.
     """
+    # TODO: Further implement parser + adjust csv print
+    attack_args_parser = AttackArgumentParser(args)
+    for ag in attack_args_parser:
+        print(ag)
+
     metrics_sum = {}
 
     metrics_individual = None
