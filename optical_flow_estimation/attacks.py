@@ -125,11 +125,19 @@ def _init_parser() -> ArgumentParser:
         help="Set epsilon to use for adversarial attack.",
     )
     parser.add_argument(
-    "--attack_targeted",
-    type=bool,
-    default=targeted,
-    nargs="*",
-    help="Set if adversarial attack should be targeted.",
+        "--attack_targeted",
+        type=bool,
+        default=targeted,
+        nargs="*",
+        help="Set if adversarial attack should be targeted.",
+    )
+    parser.add_argument(
+        "--attack_target",
+        type=str,
+        default="zero",
+        choices=["zero", "negative"],
+        nargs="*",
+        help="Set the target for a tagreted attack.",
     )
     parser.add_argument(
     "--attack_loss",
@@ -414,9 +422,14 @@ def attack_one_dataloader(
 
             targeted_inputs = None
             if args.attack_targeted or args.attack == 'pcfa':
-                targeted_flow_tensor = torch.zeros_like(inputs["flows"])
-                targeted_inputs = inputs.copy()
-                targeted_inputs["flows"] = targeted_flow_tensor
+                if args.attack_target == "zero":
+                    targeted_flow_tensor = torch.zeros_like(inputs["flows"])
+                    targeted_inputs = inputs.copy()
+                    targeted_inputs["flows"] = targeted_flow_tensor
+                elif args.attack_target == "negative":
+                    targeted_flow_tensor = -inputs["flows"]
+                    targeted_inputs = inputs.copy()
+                    targeted_inputs["flows"] = targeted_flow_tensor
                 with torch.no_grad():
                     orig_preds = model(inputs)
 
@@ -477,7 +490,7 @@ def attack_one_dataloader(
                         inputs[key] = val[:, k : k + 1]
 
             # metrics = model.val_metrics(preds, inputs)
-            if args.attack_targeted:
+            if args.attack_targeted or args.attack == "pcfa":
                 metrics = model.val_metrics(preds, targeted_inputs)
                 metrics_ground_truth = model.val_metrics(preds, inputs)
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
@@ -505,7 +518,7 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if args.attack_targeted:
+            if args.attack_targeted or args.attack == "pcfa":
                 generate_outputs(
                 args, targeted_inputs, preds, dataloader_name, i, targeted_inputs.get("meta")
             )
