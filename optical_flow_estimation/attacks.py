@@ -138,7 +138,6 @@ def _init_parser() -> ArgumentParser:
         default="zero",
         nargs="*",
         choices=["zero", "negative"],
-        nargs="*",
         help="Set the target for a tagreted attack.",
     )
     parser.add_argument(
@@ -426,17 +425,23 @@ def attack_one_dataloader(
 
                 targeted_inputs = None
                 if attack_args["attack_targeted"] or attack_args["attack"] == 'pcfa':
-                    if attack_args["attack_target"] == "zero":
-                        targeted_flow_tensor = torch.zeros_like(inputs["flows"])
-                        targeted_inputs = inputs.copy()
-                        targeted_inputs["flows"] = targeted_flow_tensor
-                    elif attack_args["attack_target"] == "negative":
-                        targeted_flow_tensor = -inputs["flows"]
-                        targeted_inputs = inputs.copy()
-                        targeted_inputs["flows"] = targeted_flow_tensor
                     with torch.no_grad():
                         orig_preds = model(inputs)
-
+                    if "flows" in inputs:
+                        if attack_args["attack_target"] == "zero":
+                            targeted_flow_tensor = torch.zeros_like(inputs["flows"])  
+                        elif attack_args["attack_target"] == "negative":
+                            targeted_flow_tensor = -inputs["flows"]
+                    else:
+                        # Dataset contains no ground truth.
+                        if attack_args["attack_target"] == "zero":
+                            targeted_flow_tensor = torch.zeros_like(orig_preds["flows"])
+                        elif attack_args["attack_target"] == "negative":
+                            targeted_flow_tensor = -orig_preds["flows"]
+                        inputs["flows"] = targeted_flow_tensor    
+                    targeted_inputs = inputs.copy()        
+                    targeted_inputs["flows"] = targeted_flow_tensor
+                    
                 # TODO: figure out what to do with scaled images and labels
                 # print(attack_args["attack_epsilon"])
                 match attack_args["attack"]: # Commit adversarial attack
