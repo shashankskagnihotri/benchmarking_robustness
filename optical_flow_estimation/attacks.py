@@ -427,18 +427,13 @@ def attack_one_dataloader(
                 if attack_args["attack_targeted"] or attack_args["attack"] == 'pcfa':
                     with torch.no_grad():
                         orig_preds = model(inputs)
-                    if "flows" in inputs:
-                        if attack_args["attack_target"] == "zero":
-                            targeted_flow_tensor = torch.zeros_like(inputs["flows"])  
-                        elif attack_args["attack_target"] == "negative":
-                            targeted_flow_tensor = -inputs["flows"]
+                    if attack_args["attack_target"] == "negative":
+                        targeted_flow_tensor = -orig_preds["flows"]
                     else:
-                        # Dataset contains no ground truth.
-                        if attack_args["attack_target"] == "zero":
-                            targeted_flow_tensor = torch.zeros_like(orig_preds["flows"])
-                        elif attack_args["attack_target"] == "negative":
-                            targeted_flow_tensor = -orig_preds["flows"]
-                        inputs["flows"] = targeted_flow_tensor    
+                        targeted_flow_tensor = torch.zeros_like(orig_preds["flows"]) 
+                    if not "flows" in inputs: 
+                        inputs["flows"] = targeted_flow_tensor 
+                    
                     targeted_inputs = inputs.copy()        
                     targeted_inputs["flows"] = targeted_flow_tensor
                     
@@ -466,7 +461,7 @@ def attack_one_dataloader(
                         preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(attack_args, model, targeted_inputs)
                     case "none":
                         preds = model(inputs)
-                
+
                 if args.warm_start:
                     if (
                         "is_seq_start" in inputs["meta"]
