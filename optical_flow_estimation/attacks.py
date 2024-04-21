@@ -23,7 +23,9 @@ import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
+import os
 import cv2 as cv
 import numpy as np
 import pandas as pd
@@ -49,7 +51,7 @@ from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
-from attacks.attack_utils.attack_args_parser import attack_targeted_string
+from attacks.attack_utils.attack_args_parser import attack_targeted_string, attack_arg_string
 from ptlflow_attacked.validate import validate_one_dataloader, generate_outputs, _get_model_names
 # Import cosPGD functions
 import torch.nn as nn
@@ -252,6 +254,11 @@ def _init_parser() -> ArgumentParser:
         action="store_true",
         help="If set, save a table of metrics for every image.",
     )
+    parser.add_argument(
+        "--overwrite_output",
+        type=bool,
+        default=False
+    )
     return parser
 
 
@@ -284,25 +291,39 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     dataloaders = {
         model.val_dataloader_names[i]: dataloaders[i] for i in range(len(dataloaders))
     }
-
-    metrics_df = pd.DataFrame()
-    metrics_df["model"] = [args.model]
-    metrics_df["checkpoint"] = [args.pretrained_ckpt]
-
+    overwrite_flag = args.overwrite_output
+    data = []
+    data.append((f"----ATTACK RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ----", ""))
+    data.append(("model", args.model))
+    data.append(("checkpoint", args.pretrained_ckpt))
+    # metrics_df["model"] = [args.model]
+    # metrics_df["checkpoint"] = [args.pretrained_ckpt]
     # TODO: Further implement parser + adjust csv print
     attack_args_parser = AttackArgumentParser(args)
     for attack_args in attack_args_parser:
+        data.append(("attack_args", attack_arg_string(attack_args)))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
             if args.attack == "none":
                 metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
             else: 
                 metrics_mean = attack_one_dataloader(args, attack_args, model, dl, dataset_name)
-            metrics_df[[f"{dataset_name}-{k}" for k in metrics_mean.keys()]] = list(
-                metrics_mean.values()
-            )
+            data.append(("timestamp", datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            for k in metrics_mean.keys():
+                data.append((f"{dataset_name}-{k}", metrics_mean[k]))
+            # metrics_df[[f"{dataset_name}-{k}" for k in metrics_mean.keys()]] = list(
+            #     metrics_mean.values()
+            # )
+            print(metrics_mean)
+            print(data)
+            metrics_df = pd.DataFrame(data, columns=["Type", "Value"])
             args.output_path.mkdir(parents=True, exist_ok=True)
-            metrics_df.T.to_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=False)
+            if os.path.exists(args.output_path) and not overwrite_flag:
+                metrics_df_old = pd.read_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=None, names=["Type", "Value"])
+                metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
+            metrics_df.to_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=False, index=False)
+            overwrite_flag = False
+            data = []
     metrics_df = metrics_df.round(3)
     return metrics_df
 
