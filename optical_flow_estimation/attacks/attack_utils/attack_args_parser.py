@@ -10,7 +10,7 @@ class AttackArgumentParser:
         self.number_of_args = 0
         self.index = 0
         for arg in vars(args): 
-            if arg.startswith("attack"):
+            if arg.startswith("attack") or arg.startswith("pcfa"):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
         self.number_of_args = len(self.attack_args.keys())
         self.args_list_to_arg_sets()
