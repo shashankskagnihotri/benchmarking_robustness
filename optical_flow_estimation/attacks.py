@@ -135,6 +135,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_target",
         type=str,
         default="zero",
+        nargs="*",
         choices=["zero", "negative"],
         help="Set the target for a tagreted attack.",
     )
