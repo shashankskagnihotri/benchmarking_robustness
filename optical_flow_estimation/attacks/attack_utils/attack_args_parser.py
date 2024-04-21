@@ -6,6 +6,7 @@ fgsm_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_alpha", "at
 bim_pgd_cospgd_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_alpha", "attack_targeted", "attack_target", "attack_loss", "attack_iterations"]
 apgd_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_targeted", "attack_target", "attack_loss", "attack_iterations"]
 pcfa_arguments = ["attack", "attack_targeted", "attack_target", "attack_loss", "pcfa_delta_bound", "pcfa_steps", "pcfa_boxconstraint"]
+no_attack_arguments = ["attack", "attack_targeted"]
 targeted_arguments = ["attack_target"]
 
 class AttackArgumentParser:
@@ -98,6 +99,12 @@ class AttackArgumentParser:
                     for arg_name in entry.keys():
                         if arg_name not in pcfa_arguments:
                             del to_remove[arg_name]
+                case "none":
+                    for arg_name in entry.keys():
+                        if arg_name not in no_attack_arguments:
+                            del to_remove[arg_name]
+                        elif arg_name == "attack_targeted":
+                            to_remove["attack_targeted"] = False
             self.argument_lists[i] = to_remove
 
         indexes_to_remove = set()
@@ -141,6 +148,17 @@ def attack_targeted_string(s):
     else:
         raise ValueError('Not a valid boolean string')
     
+def attack_arg_string(attack_args: Dict[str, object]):
+    string = ""
+    if attack_args["attack"] == "none":
+        string = string + "no attack"
+    else:
+        string = "|"
+        for key, value in attack_args.items():
+            if isinstance(value, float):
+                value = round(value, 2)
+            string = string + key + ":" + str(value) + "|"
+    return string.strip()
 
                 
 
