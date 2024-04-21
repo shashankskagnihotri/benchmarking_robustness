@@ -10,12 +10,12 @@ import torch.optim as optim
 
 
 
-def pcfa(args: Namespace, model: BaseModel, targeted_inputs:Dict[str, torch.Tensor]):
+def pcfa(attack_args: Dict[str, List[object]], model: BaseModel, targeted_inputs:Dict[str, torch.Tensor]):
     """
     Performs an PCFA attack on a given model and for all images of a specified dataset.
     """
 
-    optim_mu = 2500./args.pcfa_delta_bound
+    optim_mu = 2500./attack_args["pcfa_delta_bound"]
 
     eps_box = 1e-7
 
@@ -29,12 +29,12 @@ def pcfa(args: Namespace, model: BaseModel, targeted_inputs:Dict[str, torch.Tens
     for param in model.parameters():
         param.requires_grad = False
 
-    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, args)
+    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args)
 
     return preds, l2_delta1, l2_delta2, l2_delta12 
     
 
-def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
+def pcfa_attack(model, inputs, eps_box, device, optim_mu, attack_args):
     """Subroutine to optimize a PCFA perturbation on a given image pair. For a specified number of steps.
 
     Args:
@@ -119,7 +119,7 @@ def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
     delta1.requires_grad = False
     delta2.requires_grad = False
 
-    if args.pcfa_boxconstraint in ['change_of_variables']:
+    if attack_args["pcfa_boxconstraint"] in ['change_of_variables']:
         nw_input1 = torch.atanh( 2. * (1.- eps_box) * (image1 + delta1) - (1 - eps_box)  )
         nw_input2 = torch.atanh( 2. * (1.- eps_box) * (image2 + delta2) - (1 - eps_box)  )
     else:
@@ -131,11 +131,11 @@ def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
 
     optimizer = optim.LBFGS([nw_input1, nw_input2], max_iter=10)
 
-    def box(nw_input1, nw_input2, eps_box, args):
+    def box(nw_input1, nw_input2, eps_box, attack_args):
         # Perform the Carlini&Wagner Change of Variables
         # If variable_change=True was specified for the ScaledInputModel, images1 and 2 are assumed to be not the image information, 
         # but the w-variable from the Carlini&Wagner model. Hence they are transformed into their image representations, before being fed to to the model.
-        if args.pcfa_boxconstraint == "change_of_variables":
+        if attack_args["pcfa_boxconstraint"] == "change_of_variables":
             nw_input1 = (1./2.) * 1. / (1. - eps_box) * (torch.tanh(nw_input1) + (1 - eps_box) )
             nw_input2 = (1./2.) * 1. / (1. - eps_box) * (torch.tanh(nw_input2) + (1 - eps_box) )
         # Clipping case, which will only clip something if change of variables was not defined. otherwise, the change of variables has already brought the iamges into the range [0,1]
@@ -146,7 +146,7 @@ def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
         return nw_input1, nw_input2
 
     # Predict the flow
-    boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, args)
+    boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
     perturbed_inputs = replace_images_dic(inputs, boxed_input1, boxed_input2, clone=True)
     preds = model(perturbed_inputs)
     flow_pred = preds["flows"].squeeze(0)
@@ -168,11 +168,11 @@ def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
 
     l2_delta1, l2_delta2, l2_delta12 = 0, 0, 0
 
-    for steps in range(args.pcfa_steps):
+    for steps in range(attack_args["pcfa_steps"]):
         # Calculate the deltas from the quantities that go into the network
-        delta1, delta2 = extract_deltas(nw_input1, nw_input2, image1, image2, args.pcfa_boxconstraint, eps_box=eps_box)
+        delta1, delta2 = extract_deltas(nw_input1, nw_input2, image1, image2, attack_args["pcfa_boxconstraint"], eps_box=eps_box)
         # Calculate the loss
-        loss = losses.loss_delta_constraint(flow_pred, target, delta1, delta2, device, delta_bound=args.pcfa_delta_bound, mu=optim_mu,  f_type="aee")
+        loss = losses.loss_delta_constraint(flow_pred, target, delta1, delta2, device, delta_bound=attack_args["pcfa_delta_bound"], mu=optim_mu,  f_type="aee")
         # Update the optimization parameters
         loss.backward()
 
@@ -180,14 +180,14 @@ def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
             optimizer.zero_grad()
 
             # Predict the flow
-            boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, args)
+            boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
             perturbed_inputs = replace_images_dic(inputs, boxed_input1, boxed_input2, clone=True)
             
             flow_closure = model(perturbed_inputs)['flows'].squeeze(0)
             flow_closure = flow_closure.to(device)
 
-            delta1_closure, delta2_closure = extract_deltas(nw_input1, nw_input2, image1, image2, args.pcfa_boxconstraint, eps_box=eps_box)
-            loss_closure = losses.loss_delta_constraint(flow_closure, target, delta1_closure, delta2_closure, device, delta_bound=args.pcfa_delta_bound, mu=optim_mu,  f_type="aee")
+            delta1_closure, delta2_closure = extract_deltas(nw_input1, nw_input2, image1, image2, attack_args["pcfa_boxconstraint"], eps_box=eps_box)
+            loss_closure = losses.loss_delta_constraint(flow_closure, target, delta1_closure, delta2_closure, device, delta_bound=attack_args["pcfa_delta_bound"], mu=optim_mu,  f_type="aee")
             loss_closure.backward()
 
             return loss_closure
@@ -196,11 +196,11 @@ def pcfa_attack(model, inputs, eps_box, device, optim_mu, args):
         optimizer.step(closure)
 
         # calculate the magnitude of the updated distortion, and with it the new network inputs:
-        delta1, delta2 = extract_deltas(nw_input1, nw_input2, image1, image2, args.pcfa_boxconstraint, eps_box=eps_box)
+        delta1, delta2 = extract_deltas(nw_input1, nw_input2, image1, image2, attack_args["pcfa_boxconstraint"], eps_box=eps_box)
         # The nw_inputs remain unchanged in this case, and can be directly fed into the network again for further perturbation training
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
-        boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, args)
+        boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
         perturbed_inputs = replace_images_dic(inputs, boxed_input1, boxed_input2, clone=True)
         preds = model(perturbed_inputs)
         flow_pred = preds["flows"].squeeze(0)

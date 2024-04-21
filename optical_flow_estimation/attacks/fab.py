@@ -10,9 +10,9 @@ from attacks.adversarial_attacks_pytorch.torchattacks import FAB
 # Attack parameters
 
 
-def fab(args: Namespace, inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
-    attack = FAB(model, args.attack_epsilon)
-    if args.attack_targeted:
+def fab(attack_args: Dict[str, List[object]], inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+    attack = FAB(model, attack_args["attack_epsilon"])
+    if attack_args["attack_targeted"]:
         attack.targeted = True
         attack.set_mode_targeted_by_label()
         perturbed_inputs = attack(inputs["images"], targeted_inputs["flows"])

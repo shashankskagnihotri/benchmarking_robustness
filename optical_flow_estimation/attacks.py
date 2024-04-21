@@ -128,7 +128,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_targeted",
         type=bool,
         default=targeted,
-    nargs="*",
+        nargs="*",
         help="Set if adversarial attack should be targeted.",
     )
     parser.add_argument(
@@ -137,6 +137,7 @@ def _init_parser() -> ArgumentParser:
         default="zero",
         nargs="*",
         choices=["zero", "negative"],
+        nargs="*",
         help="Set the target for a tagreted attack.",
     )
     parser.add_argument(

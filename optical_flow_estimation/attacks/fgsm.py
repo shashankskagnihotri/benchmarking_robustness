@@ -9,16 +9,16 @@ from attacks.attack_utils.loss_criterion import LossCriterion
 batch_size = 1
 
 @torch.enable_grad()
-def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+def fgsm(attack_args: Dict[str, List[object]],inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
     # TODO: ADD NORMALIZATION + EPSILON SCALING!
-    criterion = LossCriterion(args.attack_loss)
-    args.attack_alpha = args.attack_epsilon
+    criterion = LossCriterion(attack_args["attack_loss"])
+    attack_args["attack_alpha"] = attack_args["attack_epsilon"]
 
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
     orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
 
     # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
-    if args.attack_targeted:
+    if attack_args["attack_targeted"]:
         labels = targeted_inputs["flows"].squeeze(0)
     else:
         labels = inputs["flows"].squeeze(0)
@@ -35,8 +35,8 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     image_1, image_2 = get_image_tensors(inputs)
     image_1_grad, image_2_grad = get_image_grads(inputs)
 
-    image_1_adv = fgsm_attack(args, image_1, image_1_grad, orig_image_1)
-    image_2_adv = fgsm_attack(args, image_2, image_2_grad, orig_image_2)
+    image_1_adv = fgsm_attack(attack_args, image_1, image_1_grad, orig_image_1)
+    image_2_adv = fgsm_attack(attack_args, image_2, image_2_grad, orig_image_2)
 
     perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv)
     preds = model(perturbed_inputs)
@@ -44,20 +44,20 @@ def fgsm(args: Namespace,inputs: Dict[str, torch.Tensor], model: BaseModel, targ
     return inputs["images"], labels, preds, loss.item()
 
 
-def fgsm_attack(args: Namespace, perturbed_image, data_grad, orig_image):
+def fgsm_attack(attack_args: Dict[str, List[object]], perturbed_image, data_grad, orig_image):
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
     # Create the perturbed image by adjusting each pixel of the input image        
-    if args.attack_targeted:
+    if attack_args["attack_targeted"]:
         sign_data_grad *= -1
-    perturbed_image = perturbed_image.detach() + args.attack_alpha*sign_data_grad
+    perturbed_image = perturbed_image.detach() + attack_args["attack_alpha"]*sign_data_grad
     # Adding clipping to maintain [0,1] range
-    if args.attack_norm == 'inf':
-        delta = torch.clamp(perturbed_image - orig_image, min = -1*args.attack_epsilon, max=args.attack_epsilon)
-    elif args.attack_norm == 'two':
+    if attack_args["attack_norm"] == 'inf':
+        delta = torch.clamp(perturbed_image - orig_image, min = -1*attack_args["attack_epsilon"], max=attack_args["attack_epsilon"])
+    elif attack_args["attack_norm"] == 'two':
         delta = perturbed_image - orig_image
         delta_norms = torch.norm(delta.view(batch_size, -1), p=2, dim=1)
-        factor = args.attack_epsilon / delta_norms
+        factor = attack_args["attack_epsilon"] / delta_norms
         factor = torch.min(factor, torch.ones_like(delta_norms))
         delta = delta * factor.view(-1, 1, 1, 1)
     perturbed_image = torch.clamp(orig_image + delta, 0, 1)
