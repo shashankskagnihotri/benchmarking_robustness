@@ -49,6 +49,7 @@ from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
+from attacks.attack_utils.attack_args_parser import attack_targeted_string
 from ptlflow_attacked.validate import validate_one_dataloader, generate_outputs, _get_model_names
 # Import cosPGD functions
 import torch.nn as nn
@@ -127,7 +128,7 @@ def _init_parser() -> ArgumentParser:
     )
     parser.add_argument(
         "--attack_targeted",
-        type=bool,
+        type=attack_targeted_string,
         default=targeted,
         nargs="*",
         help="Set if adversarial attack should be targeted.",
