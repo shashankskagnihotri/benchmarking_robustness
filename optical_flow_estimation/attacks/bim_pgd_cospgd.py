@@ -1,13 +1,8 @@
-from argparse import Namespace
-from typing import Any, Dict, List, Optional
-
+from typing import Dict, List, Optional
 import torch
-
 from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
-from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic, get_flow_tensors
-# Import cosPGD functions
+from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic
 from cospgd import functions as attack_functions
-import torch.nn as nn
 from attacks.attack_utils.loss_criterion import LossCriterion
 
 @torch.enable_grad()
@@ -79,7 +74,6 @@ def bim_pgd_cospgd(attack_args: Dict[str, List[object]], inputs: Dict[str, torch
     preds = model(perturbed_inputs)
     pred_flows = preds["flows"].squeeze(0)
     
-    # loss = criterion(pred_flows.float(), labels.float())
     loss = criterion.loss(pred_flows.float(), labels.float())
     for t in range(attack_args["attack_iterations"]):
         if attack_args["attack"] == "cospgd":

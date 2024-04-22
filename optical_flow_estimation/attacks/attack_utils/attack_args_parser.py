@@ -1,6 +1,5 @@
 import itertools
-from typing import List, Dict
-from argparse import ArgumentError
+from typing import Dict
 
 fgsm_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_alpha", "attack_targeted", "attack_target", "attack_loss"]
 bim_pgd_cospgd_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_alpha", "attack_targeted", "attack_target", "attack_loss", "attack_iterations"]

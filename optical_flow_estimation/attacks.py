@@ -302,38 +302,30 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
         model.val_dataloader_names[i]: dataloaders[i] for i in range(len(dataloaders))
     }
     overwrite_flag = args.overwrite_output
-    data = []
-    data.append((f"----ATTACK RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ----", ""))
-    data.append(("model", args.model))
-    data.append(("checkpoint", args.pretrained_ckpt))
-    # metrics_df["model"] = [args.model]
-    # metrics_df["checkpoint"] = [args.pretrained_ckpt]
-    # TODO: Further implement parser + adjust csv print
+    output_data = []
+    output_data.append((f"----ATTACK RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ----", ""))
+    output_data.append(("model", args.model))
+    output_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
     for attack_args in attack_args_parser:
-        data.append(("attack_args", attack_arg_string(attack_args)))
+        output_data.append(("attack_args", attack_arg_string(attack_args)))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
             if args.attack == "none":
                 metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
             else: 
                 metrics_mean = attack_one_dataloader(args, attack_args, model, dl, dataset_name)
-            data.append(("timestamp", datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            output_data.append(("timestamp", datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             for k in metrics_mean.keys():
-                data.append((f"{dataset_name}-{k}", metrics_mean[k]))
-            # metrics_df[[f"{dataset_name}-{k}" for k in metrics_mean.keys()]] = list(
-            #     metrics_mean.values()
-            # )
-            print(metrics_mean)
-            print(data)
-            metrics_df = pd.DataFrame(data, columns=["Type", "Value"])
+                output_data.append((f"{dataset_name}-{k}", metrics_mean[k]))
+            metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
             args.output_path.mkdir(parents=True, exist_ok=True)
             if os.path.exists(args.output_path) and not overwrite_flag:
                 metrics_df_old = pd.read_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=None, names=["Type", "Value"])
                 metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
             metrics_df.to_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=False, index=False)
             overwrite_flag = False
-            data = []
+            output_data = []
     metrics_df = metrics_df.round(3)
     return metrics_df
 
@@ -562,7 +554,6 @@ def attack_one_dataloader(
                     generate_outputs(
                         args, inputs, preds, dataloader_name, i, inputs.get("meta")
                     )
-
                 if args.max_samples is not None and i >= (args.max_samples - 1):
                     break
 
