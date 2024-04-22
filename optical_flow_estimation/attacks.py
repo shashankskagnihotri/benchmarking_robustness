@@ -51,10 +51,19 @@ from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
-from attacks.attack_utils.attack_args_parser import attack_targeted_string, attack_arg_string
-from ptlflow_attacked.validate import validate_one_dataloader, generate_outputs, _get_model_names
+from attacks.attack_utils.attack_args_parser import (
+    attack_targeted_string,
+    attack_arg_string,
+)
+from ptlflow_attacked.validate import (
+    validate_one_dataloader,
+    generate_outputs,
+    _get_model_names,
+)
+
 # Import cosPGD functions
 import torch.nn as nn
+
 # Attack parameters
 epsilon = 8 / 255
 norm = "inf"
@@ -67,7 +76,8 @@ batch_size = 1
 
 # PCFA parameters
 import torch.optim as optim
-delta_bound=0.005
+
+delta_bound = 0.005
 
 
 config_logging()
@@ -86,7 +96,17 @@ def _init_parser() -> ArgumentParser:
         type=str,
         default="none",
         nargs="*",
-        choices=["fgsm", "bim", "pgd", "cospgd", "ffgsm", "apgd", "fab", "pcfa", "none"],
+        choices=[
+            "fgsm",
+            "bim",
+            "pgd",
+            "cospgd",
+            "ffgsm",
+            "apgd",
+            "fab",
+            "pcfa",
+            "none",
+        ],
         help="Name of the attack to use.",
     )
     parser.add_argument(
@@ -111,20 +131,55 @@ def _init_parser() -> ArgumentParser:
         nargs="*",
         help="Set delta bound to use for PCFA.",
     )
-    parser.add_argument('--pcfa_boxconstraint', default='change_of_variables', nargs="*", choices=['clipping', 'change_of_variables'],
-                help="the way to enfoce the box constraint on the distortion. Options: 'clipping', 'change_of_variables'.")
-    parser.add_argument('--pcfa_steps', default=5, type=int, nargs="*",
-                help="the number of optimization steps per image (for non-universal perturbations only).")
-    parser.add_argument('--apgd_rho', default=0.75, nargs='*', type=float, 
-                        help="parameter for step-size update (Default: 0.75)")
-    parser.add_argument('--apgd_n_restarts', default=1, nargs='*', type=int,
-                        help='number of random restarts. (Default: 1)')
-    parser.add_argument('--apgd_eot_iter', default=1, nargs='*', type=int,
-                        help= "number of iteration for EOT. (Default: 1)")
-    parser.add_argument('--apgd_seed', default=0, nargs='*', type=int,
-                        help="random seed for the starting point. (Default: 0)")
-    parser.add_argument('--apgd_steps', default=10, nargs='*', type=int,
-                        help="number of steps. (Default: 10)")
+    parser.add_argument(
+        "--pcfa_boxconstraint",
+        default="change_of_variables",
+        nargs="*",
+        choices=["clipping", "change_of_variables"],
+        help="the way to enfoce the box constraint on the distortion. Options: 'clipping', 'change_of_variables'.",
+    )
+    parser.add_argument(
+        "--pcfa_steps",
+        default=5,
+        type=int,
+        nargs="*",
+        help="the number of optimization steps per image (for non-universal perturbations only).",
+    )
+    parser.add_argument(
+        "--apgd_rho",
+        default=0.75,
+        nargs="*",
+        type=float,
+        help="parameter for step-size update (Default: 0.75)",
+    )
+    parser.add_argument(
+        "--apgd_n_restarts",
+        default=1,
+        nargs="*",
+        type=int,
+        help="number of random restarts. (Default: 1)",
+    )
+    parser.add_argument(
+        "--apgd_eot_iter",
+        default=1,
+        nargs="*",
+        type=int,
+        help="number of iteration for EOT. (Default: 1)",
+    )
+    parser.add_argument(
+        "--apgd_seed",
+        default=0,
+        nargs="*",
+        type=int,
+        help="random seed for the starting point. (Default: 0)",
+    )
+    parser.add_argument(
+        "--apgd_steps",
+        default=10,
+        nargs="*",
+        type=int,
+        help="number of steps. (Default: 10)",
+    )
     parser.add_argument(
         "--attack_iterations",
         type=int,
@@ -154,11 +209,11 @@ def _init_parser() -> ArgumentParser:
         help="Set the target for a tagreted attack.",
     )
     parser.add_argument(
-    "--attack_loss",
-    type=str,
-    default=loss_function,
-    nargs="*",
-    help="Set the name of the used loss function (mse, epe)",
+        "--attack_loss",
+        type=str,
+        default=loss_function,
+        nargs="*",
+        help="Set the name of the used loss function (mse, epe)",
     )
     parser.add_argument(
         "--selection",
@@ -264,11 +319,7 @@ def _init_parser() -> ArgumentParser:
         action="store_true",
         help="If set, save a table of metrics for every image.",
     )
-    parser.add_argument(
-        "--overwrite_output",
-        type=bool,
-        default=False
-    )
+    parser.add_argument("--overwrite_output", type=bool, default=False)
     return parser
 
 
@@ -303,7 +354,9 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     }
     overwrite_flag = args.overwrite_output
     output_data = []
-    output_data.append((f"----ATTACK RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ----", ""))
+    output_data.append(
+        (f"----ATTACK RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ----", "")
+    )
     output_data.append(("model", args.model))
     output_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
@@ -313,17 +366,29 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
         for dataset_name, dl in dataloaders.items():
             if args.attack == "none":
                 metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
-            else: 
-                metrics_mean = attack_one_dataloader(args, attack_args, model, dl, dataset_name)
-            output_data.append(("timestamp", datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            else:
+                metrics_mean = attack_one_dataloader(
+                    args, attack_args, model, dl, dataset_name
+                )
+            output_data.append(
+                ("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            )
             for k in metrics_mean.keys():
                 output_data.append((f"{dataset_name}-{k}", metrics_mean[k]))
             metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
             args.output_path.mkdir(parents=True, exist_ok=True)
             if os.path.exists(args.output_path) and not overwrite_flag:
-                metrics_df_old = pd.read_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=None, names=["Type", "Value"])
+                metrics_df_old = pd.read_csv(
+                    args.output_path / f"metrics_{args.val_dataset}.csv",
+                    header=None,
+                    names=["Type", "Value"],
+                )
                 metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
-            metrics_df.to_csv(args.output_path / f"metrics_{args.val_dataset}.csv", header=False, index=False)
+            metrics_df.to_csv(
+                args.output_path / f"metrics_{args.val_dataset}.csv",
+                header=False,
+                index=False,
+            )
             overwrite_flag = False
             output_data = []
     metrics_df = metrics_df.round(3)
@@ -413,7 +478,6 @@ def attack_one_dataloader(
     Dict[str, float]
         The average metric values for this dataloader.
     """
-    
 
     metrics_sum = {}
 
@@ -423,139 +487,158 @@ def attack_one_dataloader(
 
     losses = torch.zeros(len(dataloader))
     with tqdm(dataloader) as tdl:
-            prev_preds = None
-            for i, inputs in enumerate(tdl):
-                if args.scale_factor is not None:
-                    scale_factor = args.scale_factor
-                else:
-                    scale_factor = (
-                        None
-                        if args.max_forward_side is None
-                        else float(args.max_forward_side) / min(inputs["images"].shape[-2:])
+        prev_preds = None
+        for i, inputs in enumerate(tdl):
+            if args.scale_factor is not None:
+                scale_factor = args.scale_factor
+            else:
+                scale_factor = (
+                    None
+                    if args.max_forward_side is None
+                    else float(args.max_forward_side) / min(inputs["images"].shape[-2:])
+                )
+
+            io_adapter = IOAdapter(
+                model,
+                inputs["images"].shape[-2:],
+                target_scale_factor=scale_factor,
+                cuda=torch.cuda.is_available(),
+                fp16=args.fp16,
+            )
+            inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
+            inputs["prev_preds"] = prev_preds
+
+            if inputs["images"].max() > 1.0:
+                attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
+
+            targeted_inputs = None
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+                if attack_args["attack_target"] == "zero":
+                    targeted_flow_tensor = torch.zeros_like(inputs["flows"])
+                    targeted_inputs = inputs.copy()
+                    targeted_inputs["flows"] = targeted_flow_tensor
+                elif attack_args["attack_target"] == "negative":
+                    targeted_flow_tensor = -inputs["flows"]
+                    targeted_inputs = inputs.copy()
+                    targeted_inputs["flows"] = targeted_flow_tensor
+                with torch.no_grad():
+                    orig_preds = model(inputs)
+
+            # TODO: figure out what to do with scaled images and labels
+            # print(attack_args["attack_epsilon"])
+            match attack_args["attack"]:  # Commit adversarial attack
+                case "fgsm":
+                    # inputs["images"] = fgsm(args, inputs, model)
+                    images, labels, preds, placeholder = fgsm(
+                        attack_args, inputs, model, targeted_inputs
                     )
-
-                io_adapter = IOAdapter(
-                    model,
-                    inputs["images"].shape[-2:],
-                    target_scale_factor=scale_factor,
-                    cuda=torch.cuda.is_available(),
-                    fp16=args.fp16,
-                )
-                inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
-                inputs["prev_preds"] = prev_preds
-
-                if inputs["images"].max() > 1.0:
-                    attack_args["attack_epsilon"] = attack_args["attack_epsilon"]*255
-
-                targeted_inputs = None
-                if attack_args["attack_targeted"] or attack_args["attack"] == 'pcfa':
-                    if attack_args["attack_target"] == "zero":
-                        targeted_flow_tensor = torch.zeros_like(inputs["flows"])
-                        targeted_inputs = inputs.copy()
-                        targeted_inputs["flows"] = targeted_flow_tensor
-                    elif attack_args["attack_target"] == "negative":
-                        targeted_flow_tensor = -inputs["flows"]
-                        targeted_inputs = inputs.copy()
-                        targeted_inputs["flows"] = targeted_flow_tensor
-                    with torch.no_grad():
-                        orig_preds = model(inputs)
-
-                # TODO: figure out what to do with scaled images and labels
-                # print(attack_args["attack_epsilon"])
-                match attack_args["attack"]: # Commit adversarial attack
-                    case "fgsm":
-                        # inputs["images"] = fgsm(args, inputs, model)
-                        images, labels, preds, placeholder = fgsm(attack_args, inputs, model, targeted_inputs)
-                    case "pgd":
-                        # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
-                    case "cospgd":
-                        # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
-                    case "bim":
-                        # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
-                    case "apgd":
-                        # inputs["images"] = fgsm(args, inputs, model)
-                        images, labels, preds, placeholder = apgd(attack_args, inputs, model, targeted_inputs)
-                    case "fab":
-                        images, labels, preds, placeholder = fab(attack_args, inputs, model, targeted_inputs)
-                    case "pcfa":
-                        preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(attack_args, model, targeted_inputs)
-                    case "none":
-                        preds = model(inputs)
-                
-                if args.warm_start:
-                    if (
-                        "is_seq_start" in inputs["meta"]
-                        and inputs["meta"]["is_seq_start"][0]
-                    ):
-                        prev_preds = None
-                    else:
-                        prev_preds = preds
-                        for k, v in prev_preds.items():
-                            if isinstance(v, torch.Tensor):
-                                prev_preds[k] = v.detach()
-
-                inputs = io_adapter.unscale(inputs, image_only=True)
-                preds = io_adapter.unscale(preds)
-
-                if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
-                    if args.seq_val_mode == "first":
-                        k = 0
-                    elif args.seq_val_mode == "middle":
-                        k = inputs["images"].shape[1] // 2
-                    elif args.seq_val_mode == "last":
-                        k = inputs["flows"].shape[1] - 1
-                    for key, val in inputs.items():
-                        if key == "meta":
-                            inputs["meta"]["image_paths"] = inputs["meta"]["image_paths"][
-                                k : k + 1
-                            ]
-                        elif key == "images":
-                            inputs[key] = val[:, k : k + 2]
-                        elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
-                            inputs[key] = val[:, k : k + 1]
-
-                # metrics = model.val_metrics(preds, inputs)
-                if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
-                    metrics = model.val_metrics(preds, targeted_inputs)
-                    metrics_ground_truth = model.val_metrics(preds, inputs)
-                    metrics_orig_preds = model.val_metrics(preds, orig_preds)
-                    metrics['val/epe_ground_truth'] = metrics_ground_truth['val/epe']
-                    metrics['val/epe_orig_preds'] = metrics_orig_preds['val/epe']
-                else:
-                    metrics = model.val_metrics(preds, inputs)
-
-                for k in metrics.keys():
-                    if metrics_sum.get(k) is None:
-                        metrics_sum[k] = 0.0
-                    metrics_sum[k] += metrics[k].item()
-                tdl.set_postfix(
-                    epe=metrics_sum["val/epe"] / (i + 1),
-                    outlier=metrics_sum["val/outlier"] / (i + 1),
-                )
-
-                filename = ""
-                if "sintel" in inputs["meta"]["dataset_name"][0].lower():
-                    filename = f'{Path(inputs["meta"]["image_paths"][0][0]).parent.name}/'
-                filename += Path(inputs["meta"]["image_paths"][0][0]).stem
-
-                if metrics_individual is not None:
-                    metrics_individual["filename"].append(filename)
-                    metrics_individual["epe"].append(metrics["val/epe"].item())
-                    metrics_individual["outlier"].append(metrics["val/outlier"].item())
-
-                if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
-                    generate_outputs(
-                    args, targeted_inputs, preds, dataloader_name, i, targeted_inputs.get("meta")
-                )
-                else:
-                    generate_outputs(
-                        args, inputs, preds, dataloader_name, i, inputs.get("meta")
+                case "pgd":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs
                     )
-                if args.max_samples is not None and i >= (args.max_samples - 1):
-                    break
+                case "cospgd":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "bim":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "apgd":
+                    # inputs["images"] = fgsm(args, inputs, model)
+                    images, labels, preds, placeholder = apgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "fab":
+                    images, labels, preds, placeholder = fab(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "pcfa":
+                    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
+                        attack_args, model, targeted_inputs
+                    )
+                case "none":
+                    preds = model(inputs)
+
+            if args.warm_start:
+                if (
+                    "is_seq_start" in inputs["meta"]
+                    and inputs["meta"]["is_seq_start"][0]
+                ):
+                    prev_preds = None
+                else:
+                    prev_preds = preds
+                    for k, v in prev_preds.items():
+                        if isinstance(v, torch.Tensor):
+                            prev_preds[k] = v.detach()
+
+            inputs = io_adapter.unscale(inputs, image_only=True)
+            preds = io_adapter.unscale(preds)
+
+            if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
+                if args.seq_val_mode == "first":
+                    k = 0
+                elif args.seq_val_mode == "middle":
+                    k = inputs["images"].shape[1] // 2
+                elif args.seq_val_mode == "last":
+                    k = inputs["flows"].shape[1] - 1
+                for key, val in inputs.items():
+                    if key == "meta":
+                        inputs["meta"]["image_paths"] = inputs["meta"]["image_paths"][
+                            k : k + 1
+                        ]
+                    elif key == "images":
+                        inputs[key] = val[:, k : k + 2]
+                    elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
+                        inputs[key] = val[:, k : k + 1]
+
+            # metrics = model.val_metrics(preds, inputs)
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+                metrics = model.val_metrics(preds, targeted_inputs)
+                metrics_ground_truth = model.val_metrics(preds, inputs)
+                metrics_orig_preds = model.val_metrics(preds, orig_preds)
+                metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
+                metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
+            else:
+                metrics = model.val_metrics(preds, inputs)
+
+            for k in metrics.keys():
+                if metrics_sum.get(k) is None:
+                    metrics_sum[k] = 0.0
+                metrics_sum[k] += metrics[k].item()
+            tdl.set_postfix(
+                epe=metrics_sum["val/epe"] / (i + 1),
+                outlier=metrics_sum["val/outlier"] / (i + 1),
+            )
+
+            filename = ""
+            if "sintel" in inputs["meta"]["dataset_name"][0].lower():
+                filename = f'{Path(inputs["meta"]["image_paths"][0][0]).parent.name}/'
+            filename += Path(inputs["meta"]["image_paths"][0][0]).stem
+
+            if metrics_individual is not None:
+                metrics_individual["filename"].append(filename)
+                metrics_individual["epe"].append(metrics["val/epe"].item())
+                metrics_individual["outlier"].append(metrics["val/outlier"].item())
+
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+                generate_outputs(
+                    args,
+                    targeted_inputs,
+                    preds,
+                    dataloader_name,
+                    i,
+                    targeted_inputs.get("meta"),
+                )
+            else:
+                generate_outputs(
+                    args, inputs, preds, dataloader_name, i, inputs.get("meta")
+                )
+            if args.max_samples is not None and i >= (args.max_samples - 1):
+                break
 
     if args.write_individual_metrics:
         ind_df = pd.DataFrame(metrics_individual)
@@ -599,5 +682,3 @@ if __name__ == "__main__":
         attack(args, model)
     else:
         attack_list_of_models(args)
-
-

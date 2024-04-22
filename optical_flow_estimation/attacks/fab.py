@@ -4,7 +4,12 @@ from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
 from attacks.adversarial_attacks_pytorch.torchattacks import FAB
 
 
-def fab(attack_args: Dict[str, List[object]], inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+def fab(
+    attack_args: Dict[str, List[object]],
+    inputs: Dict[str, torch.Tensor],
+    model: BaseModel,
+    targeted_inputs: Optional[Dict[str, torch.Tensor]],
+):
     attack = FAB(model, attack_args["attack_epsilon"])
     if attack_args["attack_targeted"]:
         attack.targeted = True

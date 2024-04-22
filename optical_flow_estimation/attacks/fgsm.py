@@ -1,13 +1,23 @@
 from typing import Dict, List, Optional
 import torch
 from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
-from attacks.attack_utils.utils import get_image_tensors, get_image_grads, replace_images_dic
+from attacks.attack_utils.utils import (
+    get_image_tensors,
+    get_image_grads,
+    replace_images_dic,
+)
 from attacks.attack_utils.loss_criterion import LossCriterion
 
 batch_size = 1
 
+
 @torch.enable_grad()
-def fgsm(attack_args: Dict[str, List[object]],inputs: Dict[str, torch.Tensor], model: BaseModel, targeted_inputs: Optional[Dict[str, torch.Tensor]]):
+def fgsm(
+    attack_args: Dict[str, List[object]],
+    inputs: Dict[str, torch.Tensor],
+    model: BaseModel,
+    targeted_inputs: Optional[Dict[str, torch.Tensor]],
+):
     # TODO: ADD NORMALIZATION + EPSILON SCALING!
     criterion = LossCriterion(attack_args["attack_loss"])
     attack_args["attack_alpha"] = attack_args["attack_epsilon"]
@@ -42,17 +52,25 @@ def fgsm(attack_args: Dict[str, List[object]],inputs: Dict[str, torch.Tensor], m
     return inputs["images"], labels, preds, loss.item()
 
 
-def fgsm_attack(attack_args: Dict[str, List[object]], perturbed_image, data_grad, orig_image):
+def fgsm_attack(
+    attack_args: Dict[str, List[object]], perturbed_image, data_grad, orig_image
+):
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
-    # Create the perturbed image by adjusting each pixel of the input image        
+    # Create the perturbed image by adjusting each pixel of the input image
     if attack_args["attack_targeted"]:
         sign_data_grad *= -1
-    perturbed_image = perturbed_image.detach() + attack_args["attack_alpha"]*sign_data_grad
+    perturbed_image = (
+        perturbed_image.detach() + attack_args["attack_alpha"] * sign_data_grad
+    )
     # Adding clipping to maintain [0,1] range
-    if attack_args["attack_norm"] == 'inf':
-        delta = torch.clamp(perturbed_image - orig_image, min = -1*attack_args["attack_epsilon"], max=attack_args["attack_epsilon"])
-    elif attack_args["attack_norm"] == 'two':
+    if attack_args["attack_norm"] == "inf":
+        delta = torch.clamp(
+            perturbed_image - orig_image,
+            min=-1 * attack_args["attack_epsilon"],
+            max=attack_args["attack_epsilon"],
+        )
+    elif attack_args["attack_norm"] == "two":
         delta = perturbed_image - orig_image
         delta_norms = torch.norm(delta.view(batch_size, -1), p=2, dim=1)
         factor = attack_args["attack_epsilon"] / delta_norms
