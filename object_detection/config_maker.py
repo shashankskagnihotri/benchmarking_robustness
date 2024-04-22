@@ -1,6 +1,5 @@
 import os
 from mmengine.config import Config
-from mmengine.runner import Runner
 from rich.traceback import install
 
 install()
@@ -21,7 +20,7 @@ model_conf_folders = [
     "fsaf",
     "centernet",
     "libra_rcnn",
-    "tridentnet",
+    # "tridentnet", #! only caffe implemetation
     "fcos",
     "reppoints",
     "free_anchor",
@@ -116,6 +115,60 @@ files_to_use_to_change = [
     "./mmdetection/configs/ddod/ddod_r50_fpn_1x_coco.py",
     "./mmdetection/configs/conditional_detr/conditional-detr_r50_8xb2-50e_coco.py",
     "./mmdetection/configs/dab_detr/dab-detr_r50_8xb2-50e_coco.py",
+    #! added more but not sure if right
+    "./mmdetection/configs/fast_rcnn/fast-rcnn_r50_fpn_2x_coco.py",  #! not pretrained might have to train
+    "./mmdetection/configs/faster_rcnn/faster-rcnn_r50_fpn_ms-3x_coco.py",  #! not pretrained might have to train
+    "./mmdetection/configs/rpn/rpn_r50_fpn_2x_coco.py",
+    "./mmdetection/configs/retinanet/retinanet_r50_fpn_ms-640-800-3x_coco.py",
+    "./mmdetection/configs/cascade_rcnn/cascade-rcnn_r50_fpn_20e_coco.py",
+    "./mmdetection/configs/cascade_rcnn/cascade-mask-rcnn_r50_fpn_ms-3x_coco.py",
+    "./mmdetection/configs/grid_rcnn/grid-rcnn_r50_fpn_gn-head_2x_coco.py",
+    "./mmdetection/configs/fsaf/fsaf_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/libra_rcnn/libra-faster-rcnn_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/reppoints/reppoints-moment_r50_fpn-gn_head-gn_2x_coco.py",
+    "./mmdetection/configs/free_anchor/freeanchor_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/foveabox/fovea_r50_fpn_gn-head-align_ms-640-800-4xb4-2x_coco.py",
+    "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/atss/atss_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/sabl/sabl-cascade-rcnn_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/detr/detr_r50_8xb2-150e_coco.py",
+    "./mmdetection/configs/paa/paa_r50_fpn_ms-3x_coco.py",
+    "./mmdetection/configs/vfnet/vfnet_r50-mdconv-c3-c5_fpn_ms-2x_coco.py",
+    "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r50_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
+    "./mmdetection/configs/deformable_detr/deformable-detr-refine-twostage_r50_16xb2-50e_coco.py",
+    "./mmdetection/configs/tood/tood_r50_fpn_ms-2x_coco.py",
+    "./mmdetection/configs/ddod/ddod_r50_fpn_1x_coco.py",
+    "./mmdetection/configs/conditional_detr/conditional-detr_r50_8xb2-50e_coco.py",
+    "./mmdetection/configs/dab_detr/dab-detr_r50_8xb2-50e_coco.py",
+    "./mmdetection/configs/dino/dino-4scale_r50_improved_8xb2-12e_coco.py",
+    "./mmdetection/configs/ddq/ddq-detr-5scale_r50_8xb2-12e_coco.py",
+    "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
+    "./mmdetection/projects/CO-DETR/configs/codino/co_dino_5scale_r50_lsj_8xb2_3x_coco.py",
+    "./mmdetection/configs/fast_rcnn/fast-rcnn_r101_fpn_2x_coco.py",
+    "./mmdetection/configs/faster_rcnn/faster-rcnn_r101_fpn_ms-3x_coco.py",
+    "./mmdetection/configs/rpn/rpn_r101_fpn_2x_coco.py",
+    "./mmdetection/configs/retinanet/retinanet_r101_fpn_ms-640-800-3x_coco.py",
+    "./mmdetection/configs/cascade_rcnn/cascade-rcnn_r101_fpn_20e_coco.py",
+    "./mmdetection/configs/cascade_rcnn/cascade-mask-rcnn_r101_fpn_ms-3x_coco.py",
+    "./mmdetection/configs/grid_rcnn/grid-rcnn_r101_fpn_gn-head_2x_coco.py",
+    "./mmdetection/configs/fsaf/fsaf_r101_fpn_1x_coco.py",
+    "./mmdetection/configs/libra_rcnn/libra-faster-rcnn_r101_fpn_1x_coco.py",
+    "./mmdetection/configs/reppoints/reppoints-moment_r101-dconv-c3-c5_fpn-gn_head-gn_2x_coco.py",
+    "./mmdetection/configs/free_anchor/freeanchor_r101_fpn_1x_coco.py",
+    "./mmdetection/configs/foveabox/fovea_r101_fpn_gn-head-align_ms-640-800-4xb4-2x_coco.py",
+    "./mmdetection/configs/atss/atss_r101_fpn_1x_coco.py",
+    "./mmdetection/configs/sabl/sabl-cascade-rcnn_r101_fpn_1x_coco.py",
+    "./mmdetection/configs/paa/paa_r101_fpn_ms-3x_coco.py",
+    "./mmdetection/configs/vfnet/vfnet_r101-mdconv-c3-c5_fpn_ms-2x_coco.py",
+    "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
+    "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",
+    #! should add swin-b and convnext files such that they do not get retrained unnecessarily
+    "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
+    #! add swin-b
+    "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py"
+    "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_4xb32-100e_coco.py",
+    #! add swin-l when everything is done
 ]
 
 
@@ -185,7 +238,6 @@ new_backbone_configs = {
 
 
 #! Add SWIN-L -> Ask supervisor
-
 new_neck_configs = {
     "swin-b": {"in_channels": [256, 512, 1024]},
     "convnext-b": {"in_channels": [256, 512, 1024]},
@@ -262,9 +314,53 @@ new_val_evaluator = {
     ),
 }
 
-
-necks_we_want = ["double_heads", "dynamic_rcnn"]
-backbones_we_want = ["swin-b", "convnext-b", "r50"]
+#! extend to all
+# necks_we_want = ["double_heads", "dynamic_rcnn", ]
+necks_we_want = [
+    # ? got to go through till yolo
+    "fast_rcnn",
+    "faster_rcnn",
+    "rpn",
+    "ssd",
+    "retinanet",
+    "cascade_rcnn",
+    "yolo",  #!
+    "cornernet",
+    "grid_rcnn",
+    "guided_anchoring",
+    "fsaf",
+    "centernet",  #! only caffe or r18 implemetation
+    "libra_rcnn",
+    "tridentnet",
+    "fcos",  #! only caffe or resnext implemetation
+    "reppoints",
+    "free_anchor",
+    "cascade_rpn",
+    "foveabox",
+    "double_heads",
+    "atss",
+    "nas_fcos",
+    "centripetalnet",
+    "autoassign",  #! only caffe implemetation
+    "sabl",
+    "dynamic_rcnn",
+    "detr",
+    "paa",
+    "vfnet",
+    "sparse_rcnn",
+    "yolof",
+    "yolox",  #!
+    "deformable_detr",
+    "tood",
+    "ddod",
+    "rtmdet",
+    "conditional_detr",
+    "dab_detr",
+    "dino",
+    "glip",  #! only swin T and L
+    "ddq",
+]
+backbones_we_want = ["swin-b", "convnext-b", "r50"]  #! extend for swin-l when ready
 datasets_we_want = ["coco", "lvis"]
 
 
@@ -329,53 +425,118 @@ for n in necks_we_want:
         for d in datasets_we_want:
             all_combis[(n, b, d)] = False
 
+
+# print(all_combis)
+
 for file in files_to_use_to_change:
     backbone, neck, dataset = which(file)
     if backbone and neck and dataset:
         all_combis[(neck, backbone, dataset)] = True
 
-print(all_combis)
+# print(all_combis)
 
 
 #! Take in more files
 reference_configs = {
     "double_heads": "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
     "dynamic_rcnn": "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
+    #! added some but not sure if right
+    "fast_rcnn": "./mmdetection/configs/fast_rcnn/fast-rcnn_r50_fpn_2x_coco.py",
+    "faster_rcnn": "./mmdetection/configs/faster_rcnn/faster-rcnn_r50_fpn_ms-3x_coco.py",
+    "rpn": "./mmdetection/configs/rpn/rpn_r50_fpn_2x_coco.py",
+    "retinanet": "./mmdetection/configs/retinanet/retinanet_r50_fpn_ms-640-800-3x_coco.py",
+    "cascade_rcnn": "./mmdetection/configs/cascade_rcnn/cascade-rcnn_r50_fpn_20e_coco.py",
+    # "cascade_rcnn": "./mmdetection/configs/cascade_rcnn/cascade-mask-rcnn_r50_fpn_ms-3x_coco.py",
+    "grid_rcnn": "./mmdetection/configs/grid_rcnn/grid-rcnn_r50_fpn_gn-head_2x_coco.py",
+    "fsaf": "./mmdetection/configs/fsaf/fsaf_r50_fpn_1x_coco.py",
+    "libra_rcnn": "./mmdetection/configs/libra_rcnn/libra-faster-rcnn_r50_fpn_1x_coco.py",
+    "reppoints": "./mmdetection/configs/reppoints/reppoints-moment_r50_fpn-gn_head-gn_2x_coco.py",
+    "free_anchor": "./mmdetection/configs/free_anchor/freeanchor_r50_fpn_1x_coco.py",
+    "foveabox": "./mmdetection/configs/foveabox/fovea_r50_fpn_gn-head-align_ms-640-800-4xb4-2x_coco.py",
+    # "double_heads": "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
+    "atss": "./mmdetection/configs/atss/atss_r50_fpn_1x_coco.py",
+    "sabl": "./mmdetection/configs/sabl/sabl-cascade-rcnn_r50_fpn_1x_coco.py",
+    # "dynamic_rcnn": "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
+    "detr": "./mmdetection/configs/detr/detr_r50_8xb2-150e_coco.py",
+    "paa": "./mmdetection/configs/paa/paa_r50_fpn_ms-3x_coco.py",
+    "vfnet": "./mmdetection/configs/vfnet/vfnet_r50-mdconv-c3-c5_fpn_ms-2x_coco.py",
+    "sparse_rcnn": "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r50_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
+    "deformable_detr": "./mmdetection/configs/deformable_detr/deformable-detr-refine-twostage_r50_16xb2-50e_coco.py",
+    "tood": "./mmdetection/configs/tood/tood_r50_fpn_ms-2x_coco.py",
+    "ddod": "./mmdetection/configs/ddod/ddod_r50_fpn_1x_coco.py",
+    "conditional_detr": "./mmdetection/configs/conditional_detr/conditional-detr_r50_8xb2-50e_coco.py",
+    "dab_detr": "./mmdetection/configs/dab_detr/dab-detr_r50_8xb2-50e_coco.py",
+    "dino": "./mmdetection/configs/dino/dino-4scale_r50_improved_8xb2-12e_coco.py",
+    "ddq": "./mmdetection/configs/ddq/ddq-detr-5scale_r50_8xb2-12e_coco.py",
+    "DiffusionDet": "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
+    "CO-DETR": "./mmdetection/projects/CO-DETR/configs/codino/co_dino_5scale_r50_lsj_8xb2_3x_coco.py",
+    # "fast_rcnn": "./mmdetection/configs/fast_rcnn/fast-rcnn_r101_fpn_2x_coco.py",
+    # "faster_rcnn": "./mmdetection/configs/faster_rcnn/faster-rcnn_r101_fpn_ms-3x_coco.py",
+    # "rpn": "./mmdetection/configs/rpn/rpn_r101_fpn_2x_coco.py",
+    # "retinanet": "./mmdetection/configs/retinanet/retinanet_r101_fpn_ms-640-800-3x_coco.py",
+    # "cascade_rcnn": "./mmdetection/configs/cascade_rcnn/cascade-rcnn_r101_fpn_20e_coco.py",
+    # "cascade_rcnn": "./mmdetection/configs/cascade_rcnn/cascade-mask-rcnn_r101_fpn_ms-3x_coco.py",
+    # "grid_rcnn": "./mmdetection/configs/grid_rcnn/grid-rcnn_r101_fpn_gn-head_2x_coco.py",
+    # "fsaf": "./mmdetection/configs/fsaf/fsaf_r101_fpn_1x_coco.py",
+    # "libra_rcnn": "./mmdetection/configs/libra_rcnn/libra-faster-rcnn_r101_fpn_1x_coco.py",
+    # "reppoints": "./mmdetection/configs/reppoints/reppoints-moment_r101-dconv-c3-c5_fpn-gn_head-gn_2x_coco.py",
+    # "free_anchor": "./mmdetection/configs/free_anchor/freeanchor_r101_fpn_1x_coco.py",
+    # "foveabox": "./mmdetection/configs/foveabox/fovea_r101_fpn_gn-head-align_ms-640-800-4xb4-2x_coco.py",
+    # "atss": "./mmdetection/configs/atss/atss_r101_fpn_1x_coco.py",
+    # "sabl": "./mmdetection/configs/sabl/sabl-cascade-rcnn_r101_fpn_1x_coco.py",
+    # "paa": "./mmdetection/configs/paa/paa_r101_fpn_ms-3x_coco.py",
+    # "vfnet": "./mmdetection/configs/vfnet/vfnet_r101-mdconv-c3-c5_fpn_ms-2x_coco.py",
+    # "sparse_rcnn": "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
+    # "tood": "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",
 }
+
+missing_refrences = set()
 
 for (neck, backbone, dataset), found in all_combis.items():
     if not found:
-        reference_file = reference_configs[neck]
-        backbone_ref, neck_ref, dataset_ref = which(reference_file)
-        cfg = Config.fromfile(reference_file)
+        if neck in reference_configs.keys():
+            reference_file = reference_configs[neck]
+            backbone_ref, neck_ref, dataset_ref = which(reference_file)
+            cfg = Config.fromfile(reference_file)
 
-        assert (
-            neck == neck_ref
-        ), f"Neck mismatch: {neck} != {neck_ref}, make neck is in refercence list"
+            assert (
+                neck == neck_ref
+            ), f"Neck mismatch: {neck} != {neck_ref}, make neck in refercence list"
 
-        if backbone != backbone_ref:
-            cfg.model.backbone = new_backbone_configs[backbone]
-            cfg.model.neck.in_channels = new_neck_configs[backbone]["in_channels"]
+            if backbone != backbone_ref:
+                cfg.model.backbone = new_backbone_configs[backbone]
+                print(f"{neck, backbone, dataset}")
+                if neck == "libra_rcnn":
+                    cfg.model.neck[0].in_channels = new_neck_configs[backbone][
+                        "in_channels"
+                    ]
+                else:
+                    cfg.model.neck.in_channels = new_neck_configs[backbone][
+                        "in_channels"
+                    ]
 
-        if dataset != dataset_ref:
-            cfg.dataset_type = new_dataset_type[dataset]
-            cfg.val_dataloader = new_val_dataloader[dataset]
-            cfg.val_evaluator = new_val_evaluator[dataset]
-            cfg.test_dataloader = new_val_dataloader[dataset]
-            cfg.test_evaluator = new_val_evaluator[dataset]
+            if dataset != dataset_ref:
+                cfg.dataset_type = new_dataset_type[dataset]
+                cfg.val_dataloader = new_val_dataloader[dataset]
+                cfg.val_evaluator = new_val_evaluator[dataset]
+                cfg.test_dataloader = new_val_dataloader[dataset]
+                cfg.test_evaluator = new_val_evaluator[dataset]
 
-        destination_file = os.path.join(
-            "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
-        )
-        cfg.dump(destination_file)
-        all_combis[(neck, backbone, dataset)] = True
+            destination_file = os.path.join(
+                "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
+            )
+            cfg.dump(destination_file)
+            all_combis[(neck, backbone, dataset)] = True
+        else:
+            print(f"Missing reference for {neck}")
+            missing_refrences.add(neck)
 
 
-print(all_combis)
+# print(all_combis)
 print(
     f"{sum(all_combis.values())} files created, {len(all_combis) - sum(all_combis.values())} missing"
 )
-
+print(f"References are needed for {missing_refrences}")
 #! only for testing
 # for configs_train in os.listdir("./configs_to_train"):
 #     print(configs_train)
