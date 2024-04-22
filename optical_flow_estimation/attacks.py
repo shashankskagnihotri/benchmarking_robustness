@@ -115,6 +115,16 @@ def _init_parser() -> ArgumentParser:
                 help="the way to enfoce the box constraint on the distortion. Options: 'clipping', 'change_of_variables'.")
     parser.add_argument('--pcfa_steps', default=5, type=int, nargs="*",
                 help="the number of optimization steps per image (for non-universal perturbations only).")
+    parser.add_argument('--apgd_rho', default=0.75, nargs='*', type=float, 
+                        help="parameter for step-size update (Default: 0.75)")
+    parser.add_argument('--apgd_n_restarts', default=1, nargs='*', type=int,
+                        help='number of random restarts. (Default: 1)')
+    parser.add_argument('--apgd_eot_iter', default=1, nargs='*', type=int,
+                        help= "number of iteration for EOT. (Default: 1)")
+    parser.add_argument('--apgd_seed', default=0, nargs='*', type=int,
+                        help="random seed for the starting point. (Default: 0)")
+    parser.add_argument('--apgd_steps', default=10, nargs='*', type=int,
+                        help="number of steps. (Default: 10)")
     parser.add_argument(
         "--attack_iterations",
         type=int,

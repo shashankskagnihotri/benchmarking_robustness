@@ -4,7 +4,7 @@ from argparse import ArgumentError
 
 fgsm_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_alpha", "attack_targeted", "attack_target", "attack_loss"]
 bim_pgd_cospgd_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_alpha", "attack_targeted", "attack_target", "attack_loss", "attack_iterations"]
-apgd_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_targeted", "attack_target", "attack_loss", "attack_iterations"]
+apgd_arguments = ["attack", "attack_norm", "attack_epsilon", "attack_targeted", "attack_target", "attack_loss", "apgd_rho", "apgd_n_restarts", "apgd_eot_iter", "apgd_seed", "apgd_steps"]
 pcfa_arguments = ["attack", "attack_targeted", "attack_target", "attack_loss", "pcfa_delta_bound", "pcfa_steps", "pcfa_boxconstraint"]
 no_attack_arguments = ["attack", "attack_targeted"]
 targeted_arguments = ["attack_target"]
@@ -16,7 +16,7 @@ class AttackArgumentParser:
         self.number_of_args = 0
         self.index = 0
         for arg in vars(args): 
-            if arg.startswith("attack") or arg.startswith("pcfa"):
+            if arg.startswith("attack") or arg.startswith("pcfa") or arg.startswith("apgd"):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
         self.number_of_args = len(self.attack_args.keys())
         self.args_list_to_arg_sets()
