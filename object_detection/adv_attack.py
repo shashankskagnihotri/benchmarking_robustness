@@ -14,7 +14,7 @@ import logging
 from typing import Callable
 import shutil
 import os
-from collect_attack_results import collect_results
+import collect_attack_results
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
 
@@ -127,6 +127,67 @@ def fgsm_attack(
     return data_batch_prepro
 
 
+def bim_attack(
+    data_batch: dict,
+    runner,
+    epsilon: float,
+    alpha: float,
+    norm: str,
+    targeted: bool,
+    steps: int,
+):
+    """see https://arxiv.org/pdf/1607.02533.pdf"""
+    data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
+
+    images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
+    assert isinstance(images, torch.Tensor)
+
+    # from retinanet_r50_fpn.py. TODO: read from runner.model
+    mean = [123.675, 116.28, 103.53]
+    std = [58.395, 57.12, 57.375]
+
+    images = denorm(images, mean, std)
+    adv_images = images.clone().float().detach().to("cuda")
+
+    for _ in range(steps):
+        # Get gradient
+        adv_images.requires_grad = True
+        data_batch_prepro["inputs"][0] = adv_images
+        losses = runner.model(**data_batch_prepro, mode="loss")
+        cost, _ = runner.model.parse_losses(losses)
+        grad = torch.autograd.grad(
+            cost, adv_images, retain_graph=False, create_graph=False
+        )
+        grad = torch.cat(grad, dim=0)
+
+        # Collect the element-wise sign of the data gradient
+        sign_data_grad = grad.sign()
+
+        # Create the perturbed image by adjusting each pixel of the input image
+        if targeted:
+            sign_data_grad *= -1
+        adv_images = adv_images.detach() + alpha * sign_data_grad
+
+        # Adding clipping to maintain [0,1] range
+        if norm == "inf":
+            delta = torch.clamp(adv_images - images, min=-1 * epsilon, max=epsilon)
+        elif norm == "two":
+            delta = adv_images - images
+            batch_size = images.shape[0]
+            delta_norms = torch.norm(delta.view(batch_size, -1), p=2, dim=1)
+            factor = epsilon / delta_norms
+            factor = torch.min(factor, torch.ones_like(delta_norms))
+            delta = delta * factor.view(-1, 1, 1, 1)
+        adv_images = torch.clamp(images + delta, 0, 255)
+
+    # Return the perturbed image
+    adv_images.requires_grad = False
+    transforms.Normalize(mean, std, inplace=True)(adv_images)
+    data_batch_prepro["inputs"][0] = adv_images
+
+    return data_batch_prepro
+
+
 # restores the tensors to their original scale
 # https://pytorch.org/tutorials/beginner/fgsm_tutorial.html
 def denorm(batch, mean=[0.1307], std=[0.3081]):
@@ -154,7 +215,7 @@ def run_attack_val(
     config_file: str,
     checkpoint_file: str,
     attack_kwargs: dict,
-    work_dir: str,
+    log_dir: str,
 ):
     LOOPS.module_dict.pop("ValLoop")
 
@@ -229,27 +290,32 @@ def run_attack_val(
             )
 
     cfg = Config.fromfile(config_file)
-    cfg.work_dir = work_dir
+    slurm_job_id = os.getenv("SLURM_JOB_ID")
+    if slurm_job_id:
+        log_dir = os.path.join(log_dir, slurm_job_id)
+
+    cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
     cfg.checkpoint_config = dict(interval=0)
+    cfg.default_hooks.logger.interval = 100
 
     runner = Runner.from_cfg(cfg)
     runner.val()
 
     # save cfg as json
-    destination_file = os.path.join(runner.log_dir, "cfg.json")
+    destination_file = os.path.join(runner.work_dir, "cfg.json")
     cfg.dump(destination_file)
 
     # copy metrics json into right folder
-    source_file = os.path.join(runner.log_dir, "vis_data", "scalars.json")
-    destination_folder = runner.log_dir
+    source_file = os.path.join(runner.work_dir, "vis_data", "scalars.json")
+    destination_folder = runner.work_dir
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
     destination_file = os.path.join(destination_folder, "metrics.json")
     shutil.copy(source_file, destination_file)
 
     # save kwargs as json
-    destination_file = os.path.join(runner.log_dir, "args.json")
+    destination_file = os.path.join(runner.work_dir, "args.json")
     attack_kwargs["attack"] = attack.__name__
     print("\nattack_kwargs: ", attack_kwargs)
     with open(destination_file, "w") as json_file:
@@ -277,7 +343,7 @@ if __name__ == "__main__":
         "--attack",
         type=str,
         default="pgd",
-        choices=["pgd", "fgsm", "cospgd", "none"],
+        choices=["pgd", "fgsm", "bim", "cospgd", "none"],
         help="Type of attack (default: pgd)",
     )
     parser.add_argument(
@@ -345,6 +411,15 @@ if __name__ == "__main__":
             "targeted": targeted,
             "norm": norm,
         }
+    elif attack == "bim":
+        attack = bim_attack
+        attack_kwargs = {
+            "epsilon": epsilon,
+            "alpha": alpha,
+            "targeted": targeted,
+            "norm": norm,
+            "steps": steps,
+        }
     else:
         raise ValueError
 
@@ -353,8 +428,8 @@ if __name__ == "__main__":
         attack_kwargs=attack_kwargs,
         config_file=config_file,
         checkpoint_file=checkpoint_file,
-        work_dir=output_dir,
+        log_dir=output_dir,
     )
 
     if collect_results:
-        collect_results()
+        collect_attack_results.collect_results()

@@ -28,12 +28,11 @@ def collect_results(main_folder="work_dirs"):
         df_subfolder = df_args.join(df_metrics)
         df = pd.concat([df, df_subfolder])
 
-    df.drop(columns=["data_time", "time"])
+    df.sort_index(inplace=True)
     print(tabulate(df, headers=df.columns))
-
     output_file = os.path.join(main_folder, "attack_results.csv")
     df.to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":
-    collect_results("slurm/logs/")
+    collect_results("slurm/results/")
