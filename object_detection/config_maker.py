@@ -20,7 +20,7 @@ model_conf_folders = [
     "fsaf",
     "centernet",
     "libra_rcnn",
-    # "tridentnet", #! only caffe implemetation
+    "tridentnet",
     "fcos",
     "reppoints",
     "free_anchor",
@@ -29,7 +29,7 @@ model_conf_folders = [
     "double_heads",
     "atss",
     "nas_fcos",
-    "centripetalnet",
+    # "centripetalnet",
     "autoassign",
     "sabl",
     "dynamic_rcnn",
@@ -163,11 +163,25 @@ files_to_use_to_change = [
     "./mmdetection/configs/vfnet/vfnet_r101-mdconv-c3-c5_fpn_ms-2x_coco.py",
     "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
     "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",
+    "./mmdetection/configs/centernet/centernet-update_r50_fpn_8xb8-amp-lsj-200e_coco.py",
+    "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    "./mmdetection/configs/centernet/centernet-update_r101_fpn_8xb8-amp-lsj-200e_coco.py",
+    "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     #! should add swin-b and convnext files such that they do not get retrained unnecessarily
     "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
     #! add swin-b
-    "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py"
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_4xb32-100e_coco.py",
+    "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
+    "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
+    #! others
+    "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",
+    "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py",
+    "./mmdetection/configs/guided_anchoring/ga-faster-rcnn_x101-64x4d_fpn_1x_coco.py",
+    "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py",
+    "./mmdetection/configs/yolox/yolox_x_8xb8-300e_coco.py",
+    "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
+    "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
+    "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
     #! add swin-l when everything is done
 ]
 
@@ -179,8 +193,8 @@ new_backbone_configs = {
         "type": "SwinTransformer",
         "pretrain_img_size": 384,
         "embed_dims": 128,
-        "depths": [2, 2, 18, 2],
-        "num_heads": [4, 8, 16, 32],
+        "depths": [2, 2, 18, 2, 1],
+        "num_heads": [4, 8, 16, 32, 64],
         "window_size": 12,
         "mlp_ratio": 4,
         "qkv_bias": True,
@@ -189,7 +203,7 @@ new_backbone_configs = {
         "attn_drop_rate": 0.0,
         "drop_path_rate": 0.3,
         "patch_norm": True,
-        "out_indices": (1, 2, 3),
+        "out_indices": [1, 2, 3, 4],
         "with_cp": True,
         "convert_weights": True,
         "init_cfg": dict(
@@ -321,17 +335,17 @@ necks_we_want = [
     "fast_rcnn",
     "faster_rcnn",
     "rpn",
-    "ssd",
+    "ssd",  #! only caffe implemetation
     "retinanet",
     "cascade_rcnn",
-    "yolo",  #!
-    "cornernet",
+    "yolo",
+    # "cornernet",  #! has neck=none
     "grid_rcnn",
     "guided_anchoring",
     "fsaf",
-    "centernet",  #! only caffe or r18 implemetation
+    "centernet",
     "libra_rcnn",
-    "tridentnet",
+    "tridentnet",  # ! only caffe implemetation
     "fcos",  #! only caffe or resnext implemetation
     "reppoints",
     "free_anchor",
@@ -340,7 +354,7 @@ necks_we_want = [
     "double_heads",
     "atss",
     "nas_fcos",
-    "centripetalnet",
+    # "centripetalnet", #! has none neck
     "autoassign",  #! only caffe implemetation
     "sabl",
     "dynamic_rcnn",
@@ -348,8 +362,8 @@ necks_we_want = [
     "paa",
     "vfnet",
     "sparse_rcnn",
-    "yolof",
-    "yolox",  #!
+    "yolof",  #! only caffe implemetation
+    "yolox",
     "deformable_detr",
     "tood",
     "ddod",
@@ -357,8 +371,9 @@ necks_we_want = [
     "conditional_detr",
     "dab_detr",
     "dino",
-    "glip",  #! only swin T and L
+    "glip",
     "ddq",
+    # "vitdet", #! too complicated
 ]
 backbones_we_want = ["swin-b", "convnext-b", "r50"]  #! extend for swin-l when ready
 datasets_we_want = ["coco", "lvis"]
@@ -433,7 +448,11 @@ for file in files_to_use_to_change:
     if backbone and neck and dataset:
         all_combis[(neck, backbone, dataset)] = True
 
-# print(all_combis)
+print(all_combis)
+if None in all_combis.keys():
+    print(f"In keys {True}")
+if None in all_combis.values():
+    print(f"In values {True}")
 
 
 #! Take in more files
@@ -487,8 +506,24 @@ reference_configs = {
     # "paa": "./mmdetection/configs/paa/paa_r101_fpn_ms-3x_coco.py",
     # "vfnet": "./mmdetection/configs/vfnet/vfnet_r101-mdconv-c3-c5_fpn_ms-2x_coco.py",
     # "sparse_rcnn": "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
-    # "tood": "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",
+    # "tood": "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",#
+    "centernet": "./mmdetection/configs/centernet/centernet-update_r50_fpn_8xb8-amp-lsj-200e_coco.py",
+    "fcos": "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    # "./mmdetection/configs/centernet": "./mmdetection/configs/centernet/centernet-update_r101_fpn_8xb8-amp-lsj-200e_coco.py",
+    # "./mmdetection/configs/fcos": "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    "yolo": "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",
+    # "cornernet": "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py", #! has none neck
+    "guided_anchoring": "./mmdetection/configs/guided_anchoring/ga-faster-rcnn_x101-64x4d_fpn_1x_coco.py",
+    # "centripetalnet": "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py", #! has none neck
+    "yolox": "./mmdetection/configs/yolox/yolox_x_8xb8-300e_coco.py",
+    "rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
+    # "./mmdetection/configs/rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
+    "glip": "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
+    "EfficientDet": "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
+    "ViTDet": "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
+    "Detic": "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
 }
+
 
 missing_refrences = set()
 
@@ -505,7 +540,7 @@ for (neck, backbone, dataset), found in all_combis.items():
 
             if backbone != backbone_ref:
                 cfg.model.backbone = new_backbone_configs[backbone]
-                print(f"{neck, backbone, dataset}")
+                # print(f"{neck, backbone, dataset}")
                 if neck == "libra_rcnn":
                     cfg.model.neck[0].in_channels = new_neck_configs[backbone][
                         "in_channels"
@@ -525,10 +560,13 @@ for (neck, backbone, dataset), found in all_combis.items():
             destination_file = os.path.join(
                 "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
             )
+            # destination_file = os.path.join(
+            #     "./configs_to_train", f"{neck}_{cfg.model.backbone.type}_{dataset}.py"
+            # )
             cfg.dump(destination_file)
             all_combis[(neck, backbone, dataset)] = True
         else:
-            print(f"Missing reference for {neck}")
+            # print(f"Missing reference for {neck}")
             missing_refrences.add(neck)
 
 
@@ -537,32 +575,3 @@ print(
     f"{sum(all_combis.values())} files created, {len(all_combis) - sum(all_combis.values())} missing"
 )
 print(f"References are needed for {missing_refrences}")
-#! only for testing
-# for configs_train in os.listdir("./configs_to_train"):
-#     print(configs_train)
-#     cfg = Config.fromfile(f"./configs_to_train/{configs_train}")
-#     cfg.work_dir = "./work_dirs/"
-#     cfg.total_epochs = 1
-#     runner = Runner.from_cfg(cfg)
-#     runner.train()
-
-
-#! implement dataset
-# https://github.com/open-mmlab/mmdetection/blob/main/configs/glip/lvis/glip_atss_swin-t_a_fpn_dyhead_pretrain_zeroshot_lvis.py
-# dataset_type = 'LVISV1Dataset'
-# data_root = 'data/coco/'
-
-# val_dataloader = dict(
-#     dataset=dict(
-#         data_root=data_root,
-#         type=dataset_type,
-#         ann_file='annotations/lvis_od_val.json',
-#         data_prefix=dict(img='')))
-# test_dataloader = val_dataloader
-
-# # numpy < 1.24.0
-# val_evaluator = dict(
-#     _delete_=True,
-#     type='LVISFixedAPMetric',
-#     ann_file=data_root + 'annotations/lvis_od_val.json')
-# test_evaluator = val_evaluator
