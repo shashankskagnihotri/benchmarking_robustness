@@ -171,8 +171,8 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
 
     # Predict the flow
     boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
-    perturbed_inputs = replace_images_dic(targeted_
-        inputs, boxed_input1, boxed_input2, clone=True
+    perturbed_inputs = replace_images_dic(
+        targeted_inputs, boxed_input1, boxed_input2, clone=True
     )
     preds = model(perturbed_inputs)
     flow_pred = preds["flows"].squeeze(0)
@@ -222,8 +222,8 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
 
             # Predict the flow
             boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
-            perturbed_inputs = replace_images_dic(targeted_
-                inputs, boxed_input1, boxed_input2, clone=True
+            perturbed_inputs = replace_images_dic(
+                targeted_inputs, boxed_input1, boxed_input2, clone=True
             )
 
             flow_closure = model(perturbed_inputs)["flows"].squeeze(0)
@@ -267,8 +267,8 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
         boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
-        perturbed_inputs = replace_images_dic(targeted_
-            inputs, boxed_input1, boxed_input2, clone=True
+        perturbed_inputs = replace_images_dic(
+            targeted_inputs, boxed_input1, boxed_input2, clone=True
         )
         preds = model(perturbed_inputs)
         flow_pred = preds["flows"].squeeze(0)

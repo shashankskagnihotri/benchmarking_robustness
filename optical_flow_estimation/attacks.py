@@ -512,41 +512,55 @@ def attack_one_dataloader(
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
 
                 targeted_inputs = None
-                if attack_args["attack_targeted"] or attack_args["attack"] == 'pcfa':
+                if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                     with torch.no_grad():
                         orig_preds = model(inputs)
                     if attack_args["attack_target"] == "negative":
                         targeted_flow_tensor = -orig_preds["flows"]
                     else:
-                        targeted_flow_tensor = torch.zeros_like(orig_preds["flows"]) 
-                    if not "flows" in inputs: 
-                        inputs["flows"] = targeted_flow_tensor 
-                    
-                    targeted_inputs = inputs.copy()        
+                        targeted_flow_tensor = torch.zeros_like(orig_preds["flows"])
+                    if not "flows" in inputs:
+                        inputs["flows"] = targeted_flow_tensor
+
+                    targeted_inputs = inputs.copy()
                     targeted_inputs["flows"] = targeted_flow_tensor
-                    
+
                 # TODO: figure out what to do with scaled images and labels
                 # print(attack_args["attack_epsilon"])
-                match attack_args["attack"]: # Commit adversarial attack
+                match attack_args["attack"]:  # Commit adversarial attack
                     case "fgsm":
                         # inputs["images"] = fgsm(args, inputs, model)
-                        images, labels, preds, placeholder = fgsm(attack_args, inputs, model, targeted_inputs)
+                        images, labels, preds, placeholder = fgsm(
+                            attack_args, inputs, model, targeted_inputs
+                        )
                     case "pgd":
                         # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
+                        images, labels, preds, losses[i] = bim_pgd_cospgd(
+                            attack_args, inputs, model, targeted_inputs
+                        )
                     case "cospgd":
                         # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
+                        images, labels, preds, losses[i] = bim_pgd_cospgd(
+                            attack_args, inputs, model, targeted_inputs
+                        )
                     case "bim":
                         # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
+                        images, labels, preds, losses[i] = bim_pgd_cospgd(
+                            attack_args, inputs, model, targeted_inputs
+                        )
                     case "apgd":
                         # inputs["images"] = fgsm(args, inputs, model)
-                        images, labels, preds, placeholder = apgd(attack_args, inputs, model, targeted_inputs)
+                        images, labels, preds, placeholder = apgd(
+                            attack_args, inputs, model, targeted_inputs
+                        )
                     case "fab":
-                        images, labels, preds, placeholder = fab(attack_args, inputs, model, targeted_inputs)
+                        images, labels, preds, placeholder = fab(
+                            attack_args, inputs, model, targeted_inputs
+                        )
                     case "pcfa":
-                        preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(attack_args, model, targeted_inputs)
+                        preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
+                            attack_args, model, targeted_inputs
+                        )
                     case "none":
                         preds = model(inputs)
 
