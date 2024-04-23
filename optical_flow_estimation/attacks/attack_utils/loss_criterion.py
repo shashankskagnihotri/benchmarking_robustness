@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class LossCriterion:
     def __init__(self, name="epe"):
         self.name = name
@@ -17,7 +18,7 @@ class LossCriterion:
 
 # From FlowUnderAttack
 def epe(flow1, flow2):
-    """"
+    """ "
     Compute the  endpoint errors (EPEs) between two flow fields.
     The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
     (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
@@ -34,7 +35,7 @@ def epe(flow1, flow2):
     Returns:
         float: scalar average endpoint error
     """
-    diff_squared = (flow1 - flow2)**2
+    diff_squared = (flow1 - flow2) ** 2
     if len(diff_squared.size()) == 3:
         # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
         epe = torch.sum(diff_squared, dim=0).sqrt()
@@ -42,12 +43,17 @@ def epe(flow1, flow2):
         # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
         epe = torch.sum(diff_squared, dim=1).sqrt()
     else:
-        raise ValueError("The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: " + str(flow1.size()) + " and " + str(flow1.size()))
+        raise ValueError(
+            "The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: "
+            + str(flow1.size())
+            + " and "
+            + str(flow1.size())
+        )
     return epe
 
 
 def avg_epe(flow1, flow2):
-    """"
+    """ "
     Compute the average endpoint errors (AEE) between two flow fields.
     The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
     (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
@@ -64,7 +70,7 @@ def avg_epe(flow1, flow2):
     Returns:
         float: scalar average endpoint error
     """
-    diff_squared = (flow1 - flow2)**2
+    diff_squared = (flow1 - flow2) ** 2
     if len(diff_squared.size()) == 3:
         # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
         epe = torch.mean(torch.sum(diff_squared, dim=0).sqrt())
@@ -72,8 +78,14 @@ def avg_epe(flow1, flow2):
         # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
         epe = torch.mean(torch.sum(diff_squared, dim=1).sqrt())
     else:
-        raise ValueError("The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: " + str(flow1.size()) + " and " + str(flow1.size()))
+        raise ValueError(
+            "The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: "
+            + str(flow1.size())
+            + " and "
+            + str(flow1.size())
+        )
     return epe
+
 
 def avg_mse(flow1, flow2):
     """Computes mean squared error between two flow fields.
@@ -87,7 +99,8 @@ def avg_mse(flow1, flow2):
     Returns:
         float: scalar average squared end-point-error
     """
-    return torch.mean((flow1 - flow2)**2)
+    return torch.mean((flow1 - flow2) ** 2)
+
 
 def f_epe(pred, target):
     """Wrapper function to compute the average endpoint error between prediction and target
@@ -148,8 +161,11 @@ def two_norm_avg_delta(delta1, delta2):
     """
     numels_delta1 = torch.numel(delta1)
     numels_delta2 = torch.numel(delta2)
-    sqrt_numels = (numels_delta1 + numels_delta2)**(0.5)
-    two_norm = torch.sqrt(torch.sum(torch.pow(torch.flatten(delta1), 2)) + torch.sum(torch.pow(torch.flatten(delta2), 2)))
+    sqrt_numels = (numels_delta1 + numels_delta2) ** (0.5)
+    two_norm = torch.sqrt(
+        torch.sum(torch.pow(torch.flatten(delta1), 2))
+        + torch.sum(torch.pow(torch.flatten(delta2), 2))
+    )
     return two_norm / sqrt_numels
 
 
@@ -168,7 +184,9 @@ def two_norm_avg_delta_squared(delta1, delta2):
     numels_delta1 = torch.numel(delta1)
     numels_delta2 = torch.numel(delta2)
     numels = numels_delta1 + numels_delta2
-    two_norm = torch.sum(torch.pow(torch.flatten(delta1), 2)) + torch.sum(torch.pow(torch.flatten(delta2), 2))
+    two_norm = torch.sum(torch.pow(torch.flatten(delta1), 2)) + torch.sum(
+        torch.pow(torch.flatten(delta2), 2)
+    )
     return two_norm / numels
 
 
@@ -215,7 +233,11 @@ def get_loss(f_type, pred, target):
     elif f_type == "mse":
         similarity_term = f_mse(pred, target)
     else:
-        raise(NotImplementedError, "The requested loss type %s does not exist. Please choose one of 'epe', 'mse' or 'cosim'" % (f_type))
+        raise (
+            NotImplementedError,
+            "The requested loss type %s does not exist. Please choose one of 'epe', 'mse' or 'cosim'"
+            % (f_type),
+        )
 
     return similarity_term
 
@@ -238,12 +260,18 @@ def relu_penalty(delta1, delta2, device, delta_bound=0.001):
     Returns:
         float: scalar penalty value
     """
-    zero_tensor = torch.tensor(0.).to(device)
-    delta_minus_bound = two_norm_avg_delta_squared(delta1, delta2) - torch.tensor(delta_bound**2).to(device)
-    return torch.max(zero_tensor, delta_minus_bound) # This is relu( ||delta||**2-delta_bond**2).
+    zero_tensor = torch.tensor(0.0).to(device)
+    delta_minus_bound = two_norm_avg_delta_squared(delta1, delta2) - torch.tensor(
+        delta_bound**2
+    ).to(device)
+    return torch.max(
+        zero_tensor, delta_minus_bound
+    )  # This is relu( ||delta||**2-delta_bond**2).
 
 
-def loss_delta_constraint(pred, target, delta1, delta2, device, delta_bound=0.001, mu=100., f_type="epe"):
+def loss_delta_constraint(
+    pred, target, delta1, delta2, device, delta_bound=0.001, mu=100.0, f_type="epe"
+):
     """Penalty method to optimize the perturbations.
     An exact penalty function is used to transform the inequality constrained problem into an
     unconstrained optimization problem.
@@ -271,12 +299,14 @@ def loss_delta_constraint(pred, target, delta1, delta2, device, delta_bound=0.00
     """
 
     similarity_term = get_loss(f_type, pred, target)
-    penalty_term = relu_penalty(delta1, delta2, device, delta_bound) # This is relu( ||delta||**2-delta_bond**2).
+    penalty_term = relu_penalty(
+        delta1, delta2, device, delta_bound
+    )  # This is relu( ||delta||**2-delta_bond**2).
 
     return similarity_term + mu * penalty_term
 
 
-def loss_weighted(pred, target, delta1, delta2, c=1., f_type="epe"):
+def loss_weighted(pred, target, delta1, delta2, c=1.0, f_type="epe"):
 
     similarity_term = get_loss(f_type, pred, target)
 

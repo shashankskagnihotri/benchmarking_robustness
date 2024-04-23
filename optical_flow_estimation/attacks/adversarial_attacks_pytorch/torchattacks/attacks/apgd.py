@@ -9,7 +9,6 @@ from ..attack import Attack
 from ....attack_utils.loss_criterion import LossCriterion
 
 
-
 class APGD(Attack):
     r"""
     APGD in the paper 'Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks'
@@ -66,7 +65,6 @@ class APGD(Attack):
         self.verbose = verbose
         self.supported_mode = ["default", "targeted"]
 
-
     def forward(self, images, labels):
         r"""
         Overridden.
@@ -82,8 +80,6 @@ class APGD(Attack):
         _, adv_images = self.perturb(images, labels, cheap=True)
 
         return adv_images
-
-
 
     def check_oscillation(self, x, j, k, y5, k3=0.75):
         t = np.zeros(x.shape[1])
@@ -106,8 +102,16 @@ class APGD(Attack):
         ) / (x_sorted[:, -1] - x_sorted[:, -3] + 1e-12)
 
     def attack_single_run(self, images_orig, lables_orig):
-        images = images_orig.clone() if len(images_orig.shape) == 4 else images_orig.clone().unsqueeze(0)
-        lables = lables_orig.clone() if len(lables_orig.shape) == 4 else lables_orig.clone().unsqueeze(0)
+        images = (
+            images_orig.clone()
+            if len(images_orig.shape) == 4
+            else images_orig.clone().unsqueeze(0)
+        )
+        lables = (
+            lables_orig.clone()
+            if len(lables_orig.shape) == 4
+            else lables_orig.clone().unsqueeze(0)
+        )
 
         image_1 = images[0].unsqueeze(0)
         image_2 = images[1].unsqueeze(0)
@@ -125,9 +129,9 @@ class APGD(Attack):
         if self.norm == "Linf":
             # image 1 Linf-norm
             t = 2 * torch.rand(image_1.shape).to(self.device).detach() - 1
-            image_1_adv = image_1.detach() + self.eps * torch.ones([image_1.shape[0], 1, 1, 1]).to(
-                self.device
-            ).detach() * t / (
+            image_1_adv = image_1.detach() + self.eps * torch.ones(
+                [image_1.shape[0], 1, 1, 1]
+            ).to(self.device).detach() * t / (
                 t.reshape([t.shape[0], -1])
                 .abs()
                 .max(dim=1, keepdim=True)[0]
@@ -135,9 +139,9 @@ class APGD(Attack):
             )  # nopep8
             # image 2 Linf-norm
             t = 2 * torch.rand(image_2.shape).to(self.device).detach() - 1
-            image_2_adv = image_2.detach() + self.eps * torch.ones([image_2.shape[0], 1, 1, 1]).to(
-                self.device
-            ).detach() * t / (
+            image_2_adv = image_2.detach() + self.eps * torch.ones(
+                [image_2.shape[0], 1, 1, 1]
+            ).to(self.device).detach() * t / (
                 t.reshape([t.shape[0], -1])
                 .abs()
                 .max(dim=1, keepdim=True)[0]
@@ -146,16 +150,16 @@ class APGD(Attack):
             # image 1 L2-norm
         elif self.norm == "L2":
             t = torch.randn(image_1.shape).to(self.device).detach()
-            image_1_adv = image_1.detach() + self.eps * torch.ones([image_1.shape[0], 1, 1, 1]).to(
-                self.device
-            ).detach() * t / (
-                (t ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
+            image_1_adv = image_1.detach() + self.eps * torch.ones(
+                [image_1.shape[0], 1, 1, 1]
+            ).to(self.device).detach() * t / (
+                (t**2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
             )  # nopep8
             t = torch.randn(image_2.shape).to(self.device).detach()
-            image_2_adv = image_2.detach() + self.eps * torch.ones([image_2.shape[0], 1, 1, 1]).to(
-                self.device
-            ).detach() * t / (
-                (t ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
+            image_2_adv = image_2.detach() + self.eps * torch.ones(
+                [image_2.shape[0], 1, 1, 1]
+            ).to(self.device).detach() * t / (
+                (t**2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
             )  # nopep8
         image_1_adv = image_1_adv.clamp(0.0, 1.0)
         image_2_adv = image_2_adv.clamp(0.0, 1.0)
@@ -163,15 +167,14 @@ class APGD(Attack):
         images_best = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
         images_best_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
 
-        #loss_steps = torch.zeros([self.steps, x.shape[0]])
-        #loss_best_steps = torch.zeros([self.steps + 1, x.shape[0]])
-        #acc_steps = torch.zeros_like(loss_best_steps)
+        # loss_steps = torch.zeros([self.steps, x.shape[0]])
+        # loss_best_steps = torch.zeros([self.steps + 1, x.shape[0]])
+        # acc_steps = torch.zeros_like(loss_best_steps)
         loss_steps = torch.zeros([self.steps, 1])
         loss_best_steps = torch.zeros([self.steps + 1, 1])
         # epe_steps = torch.zeros_like(loss_best_steps)
 
-        
-        #TODO: implement losses correctly
+        # TODO: implement losses correctly
         if self.loss == "ce":
             # criterion_indiv = nn.CrossEntropyLoss(reduction="none")
             raise ValueError("only epe or mse")
@@ -180,7 +183,6 @@ class APGD(Attack):
             # criterion_indiv = self.dlr_loss
             raise ValueError("dlr not implemented")
         criterion_indiv = LossCriterion(self.loss)
-
 
         images_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
         images_adv.requires_grad_(True)
@@ -196,7 +198,7 @@ class APGD(Attack):
                 loss = loss_indiv.mean()
 
             # 1 backward pass (eot_iter = 1)
-            
+
             grad += torch.autograd.grad(loss, images_adv)[0].detach()
         grad /= float(self.eot_iter)
         if self.targeted:
@@ -209,7 +211,7 @@ class APGD(Attack):
         #     epe_score = epe(preds, lables)
         # TODO: what is this used for? Was acc steps
         # epe_steps[0] = epe_score + 0
-        loss_best = loss_indiv.detach().view(len(loss_indiv),-1).mean(dim=1)
+        loss_best = loss_indiv.detach().view(len(loss_indiv), -1).mean(dim=1)
         step_size = (
             self.eps
             * torch.ones([1, 1, 1, 1]).to(self.device).detach()
@@ -223,8 +225,7 @@ class APGD(Attack):
 
         loss_best_last_check = loss_best.clone()
         reduced_last_check = np.zeros(loss_best.shape) == np.zeros(loss_best.shape)
-        
-        
+
         # n_reduced = 0
         for i in range(self.steps):
             # gradient step
@@ -234,30 +235,33 @@ class APGD(Attack):
                 images_adv_old = images_adv.clone()
 
                 a = 0.75 if i > 0 else 1.0
-                
+
                 image_1_adv = images_adv.squeeze(0)[0].unsqueeze(0)
                 image_2_adv = images_adv.squeeze(0)[1].unsqueeze(0)
 
                 grad2_i1 = grad2.squeeze(0)[0].unsqueeze(0)
                 grad2_i2 = grad2.squeeze(0)[1].unsqueeze(0)
 
-                grad_i1 = grad.squeeze(0)[0].unsqueeze(0) 
-                grad_i2 = grad.squeeze(0)[1].unsqueeze(0) 
+                grad_i1 = grad.squeeze(0)[0].unsqueeze(0)
+                grad_i2 = grad.squeeze(0)[1].unsqueeze(0)
 
-                
-                
                 if self.norm == "Linf":
                     # image_1_adv Linf-norm
                     image_1_adv_v1 = image_1_adv + step_size * torch.sign(grad_i1)
                     image_1_adv_v1 = torch.clamp(
-                        torch.min(torch.max(image_1_adv_v1, image_1 - self.eps), image_1 + self.eps),
+                        torch.min(
+                            torch.max(image_1_adv_v1, image_1 - self.eps),
+                            image_1 + self.eps,
+                        ),
                         0.0,
                         1.0,
                     )
                     image_1_adv_v1 = torch.clamp(
                         torch.min(
                             torch.max(
-                                image_1_adv + (image_1_adv_v1 - image_1_adv) * a + grad2_i1 * (1 - a),
+                                image_1_adv
+                                + (image_1_adv_v1 - image_1_adv) * a
+                                + grad2_i1 * (1 - a),
                                 image_1 - self.eps,
                             ),
                             image_1 + self.eps,
@@ -268,14 +272,19 @@ class APGD(Attack):
                     # image_2_adv Linf-norm
                     image_2_adv_v1 = image_2_adv + step_size * torch.sign(grad_i2)
                     image_2_adv_v1 = torch.clamp(
-                        torch.min(torch.max(image_2_adv_v1, image_2 - self.eps), image_2 + self.eps),
+                        torch.min(
+                            torch.max(image_2_adv_v1, image_2 - self.eps),
+                            image_2 + self.eps,
+                        ),
                         0.0,
                         1.0,
                     )
                     image_2_adv_v1 = torch.clamp(
                         torch.min(
                             torch.max(
-                                image_2_adv + (image_2_adv_v1 - image_2_adv) * a + grad2_i2 * (1 - a),
+                                image_2_adv
+                                + (image_2_adv_v1 - image_2_adv) * a
+                                + grad2_i2 * (1 - a),
                                 image_2 - self.eps,
                             ),
                             image_2 + self.eps,
@@ -288,17 +297,20 @@ class APGD(Attack):
                     # image_1_adv L2-norm
                     # TODO: are the dimensions here correct? What is exaclty happening?
                     image_1_adv_v1 = image_1_adv + step_size * grad_i1 / (
-                        (grad_i1 ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
+                        (grad_i1**2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
                     )  # nopep8
                     image_1_adv_v1 = torch.clamp(
                         image_1
                         + (image_1_adv_v1 - image_1)
                         / (
-                            ((image_1_adv_v1 - image_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_1_adv_v1 - image_1) ** 2)
+                            .sum(dim=(1, 2, 3), keepdim=True)
+                            .sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(image_1.shape).to(self.device).detach(),
+                            self.eps
+                            * torch.ones(image_1.shape).to(self.device).detach(),
                             ((image_1_adv_v1 - image_1) ** 2)
                             .sum(dim=(1, 2, 3), keepdim=True)
                             .sqrt(),
@@ -306,37 +318,48 @@ class APGD(Attack):
                         0.0,
                         1.0,
                     )  # nopep8
-                    image_1_adv_v1 = image_1_adv + (image_1_adv_v1 - image_1_adv) * a + grad2_i1 * (1 - a)
+                    image_1_adv_v1 = (
+                        image_1_adv
+                        + (image_1_adv_v1 - image_1_adv) * a
+                        + grad2_i1 * (1 - a)
+                    )
                     image_1_adv_v1 = torch.clamp(
                         image_1
                         + (image_1_adv_v1 - image_1)
                         / (
-                            ((image_1_adv_v1 - image_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_1_adv_v1 - image_1) ** 2)
+                            .sum(dim=(1, 2, 3), keepdim=True)
+                            .sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(image_1.shape).to(self.device).detach(),
-                            ((image_1_adv_v1 - image_1) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            self.eps
+                            * torch.ones(image_1.shape).to(self.device).detach(),
+                            ((image_1_adv_v1 - image_1) ** 2)
+                            .sum(dim=(1, 2, 3), keepdim=True)
+                            .sqrt()
                             + 1e-12,
                         ),
                         0.0,
                         1.0,
                     )  # nopep8
 
-
                     # image_2_adv L2-norm
                     image_2_adv_v1 = image_2_adv + step_size * grad_i2 / (
-                        (grad_i2 ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
+                        (grad_i2**2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
                     )  # nopep8
                     image_2_adv_v1 = torch.clamp(
                         image_2
                         + (image_2_adv_v1 - image_2)
                         / (
-                            ((image_2_adv_v1 - image_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_2_adv_v1 - image_2) ** 2)
+                            .sum(dim=(1, 2, 3), keepdim=True)
+                            .sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(image_2.shape).to(self.device).detach(),
+                            self.eps
+                            * torch.ones(image_2.shape).to(self.device).detach(),
                             ((image_2_adv_v1 - image_2) ** 2)
                             .sum(dim=(1, 2, 3), keepdim=True)
                             .sqrt(),
@@ -344,28 +367,36 @@ class APGD(Attack):
                         0.0,
                         1.0,
                     )  # nopep8
-                    image_2_adv_v1 = image_2_adv + (image_2_adv_v1 - image_2_adv) * a + grad2_i2 * (1 - a)
+                    image_2_adv_v1 = (
+                        image_2_adv
+                        + (image_2_adv_v1 - image_2_adv) * a
+                        + grad2_i2 * (1 - a)
+                    )
                     image_2_adv_v1 = torch.clamp(
                         image_2
                         + (image_2_adv_v1 - image_2)
                         / (
-                            ((image_2_adv_v1 - image_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((image_2_adv_v1 - image_2) ** 2)
+                            .sum(dim=(1, 2, 3), keepdim=True)
+                            .sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(image_2.shape).to(self.device).detach(),
-                            ((image_2_adv_v1 - image_2) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            self.eps
+                            * torch.ones(image_2.shape).to(self.device).detach(),
+                            ((image_2_adv_v1 - image_2) ** 2)
+                            .sum(dim=(1, 2, 3), keepdim=True)
+                            .sqrt()
                             + 1e-12,
                         ),
                         0.0,
                         1.0,
                     )  # nopep8
 
-                #x_adv = x_adv_1 + 0.0
+                # x_adv = x_adv_1 + 0.0
                 image_1_adv = image_1_adv_v1 + 0.0
                 image_2_adv = image_2_adv_v1 + 0.0
                 images_adv = torch.cat((image_1_adv, image_2_adv)).unsqueeze(0)
-                
 
             # get gradient
             images_adv.requires_grad_(True)
@@ -393,17 +424,17 @@ class APGD(Attack):
             # TODO: what is this used for? Was acc steps
             # epe_steps[0] = epe_score + 0
 
-            #x_best_adv[(pred == 0).nonzero().squeeze()] = (
+            # x_best_adv[(pred == 0).nonzero().squeeze()] = (
             #    x_adv[(pred == 0).nonzero().squeeze()] + 0.0
-            #)  # nopep8
+            # )  # nopep8
             images_best_adv = images_adv
             if self.verbose:
                 print("iteration: {} - Best loss: {:.6f}".format(i, loss_best.sum()))
 
             # check step size
             with torch.no_grad():
-                y1 = loss_indiv.detach().clone().view(len(loss_indiv),-1).mean(dim=1)
-                
+                y1 = loss_indiv.detach().clone().view(len(loss_indiv), -1).mean(dim=1)
+
                 loss_steps[i] = y1.cpu() + 0
                 if self.targeted:
                     ind = (y1 < loss_best).nonzero().squeeze()
@@ -415,7 +446,6 @@ class APGD(Attack):
                 loss_best_steps[i + 1] = loss_best + 0
 
                 counter3 += 1
-                
 
                 if counter3 == k:
                     fl_oscillation = self.check_oscillation(
@@ -448,9 +478,17 @@ class APGD(Attack):
 
     def perturb(self, images_orig, labels_orig, best_loss=False, cheap=True):
         assert self.norm in ["Linf", "L2"]
-        images = images_orig.clone() if len(images_orig.shape) == 4 else images_orig.clone().unsqueeze(0)
-        lables = labels_orig.clone() if len(labels_orig.shape) == 4 else labels_orig.clone().unsqueeze(0)
-        
+        images = (
+            images_orig.clone()
+            if len(images_orig.shape) == 4
+            else images_orig.clone().unsqueeze(0)
+        )
+        lables = (
+            labels_orig.clone()
+            if len(labels_orig.shape) == 4
+            else labels_orig.clone().unsqueeze(0)
+        )
+
         images_adv = images.clone()
         # pred_dic = self.get_logits(get_input_format(images))
         epe_score = None
@@ -478,7 +516,7 @@ class APGD(Attack):
                 for counter in range(self.n_restarts):
                     # ind_to_fool = acc.nonzero().squeeze()
                     # if len(ind_to_fool.shape) == 0:
-                        # ind_to_fool = ind_to_fool.unsqueeze(0)
+                    # ind_to_fool = ind_to_fool.unsqueeze(0)
 
                     images_to_fool, lables_to_fool = (
                         images.clone(),
@@ -493,9 +531,9 @@ class APGD(Attack):
                         images_to_fool, lables_to_fool
                     )  # nopep8
                     images_adv = images_adv_curr.clone()
-                    #ind_curr = (acc_curr == 0).nonzero().squeeze()
-                    #acc[ind_to_fool[ind_curr]] = 0
-                    #adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
+                    # ind_curr = (acc_curr == 0).nonzero().squeeze()
+                    # acc[ind_to_fool[ind_curr]] = 0
+                    # adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
                     if self.verbose:
                         print(
                             "restart {}  - cum. time: {:.1f} s".format(
@@ -507,13 +545,14 @@ class APGD(Attack):
 
         else:
             images_adv_best = images.detach().clone()
-            loss_best = torch.ones([1]).to(self.device) * (
-                -float("inf")
-            )  # nopep8
+            loss_best = torch.ones([1]).to(self.device) * (-float("inf"))  # nopep8
             import pdb
+
             pdb.set_trace()
             for counter in range(self.n_restarts):
-                images_best_curr, _, loss_curr, _ = self.attack_single_run(images, lables)
+                images_best_curr, _, loss_curr, _ = self.attack_single_run(
+                    images, lables
+                )
                 ind_curr = (loss_curr > loss_best).nonzero().squeeze()
                 images_adv_best[ind_curr] = images_best_curr[ind_curr] + 0.0
                 loss_best[ind_curr] = loss_curr[ind_curr] + 0.0
@@ -522,7 +561,7 @@ class APGD(Attack):
                     print("restart {} - loss: {:.5f}".format(counter, loss_best.sum()))
 
             return loss_best, images_adv_best
-        
+
 
 @staticmethod
 def get_input_format(input):

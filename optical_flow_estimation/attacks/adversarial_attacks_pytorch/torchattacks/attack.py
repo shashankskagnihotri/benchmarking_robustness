@@ -154,7 +154,7 @@ class Attack(object):
         self.targeted = True
         self.attack_mode = mode
         # if not quiet:
-             # print("Attack mode is changed to '%s'." % mode)
+        # print("Attack mode is changed to '%s'." % mode)
 
     @wrapper_method
     def set_mode_targeted_by_function(self, target_map_function, quiet=False):
