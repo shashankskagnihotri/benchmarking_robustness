@@ -56,7 +56,7 @@ class SintelDataset(data.Dataset):
         super(SintelDataset, self).__init__()
 
         self.datadir = datadir
-        self.split = split
+        self.split = split # this variable is not used 
         self._read_data()
         self._augmentation()
 
