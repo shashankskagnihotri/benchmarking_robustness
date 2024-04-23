@@ -377,7 +377,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
                 output_data.append((f"{dataset_name}-{k}", metrics_mean[k]))
             metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
             args.output_path.mkdir(parents=True, exist_ok=True)
-            if os.path.exists(args.output_path) and not overwrite_flag:
+            if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
                 metrics_df_old = pd.read_csv(
                     args.output_path / f"metrics_{args.val_dataset}.csv",
                     header=None,
