@@ -11,7 +11,7 @@ import copy
 
 
 # SceneFlow dataloader from CFNet
-class SceneFlow(Dataset):
+class SceneFlowDataloader(Dataset):
     def __init__(self, datapath, list_filename:list, training:bool):
         self.datapath = datapath
         self.left_filenames, self.right_filenames, self.disp_filenames = self.load_path(list_filename)
@@ -46,14 +46,14 @@ class SceneFlow(Dataset):
         elif self.model_name == 'PSMNet':
             return self.get_item_PSMNet(left_img, right_img, disparity)
         elif self.model_name == 'GWCNet':
-            pass
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         elif self.model_name == 'HSMNet':
-            pass
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         elif self.model_name == 'STTR':
-            pass
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         
         else:
-            raise NotImplemented(f"No dataloder for {model_name} implemented")
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
 
 
 
