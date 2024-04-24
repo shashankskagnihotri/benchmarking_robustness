@@ -278,7 +278,7 @@ necks_we_want = [
     "fast_rcnn",
     "faster_rcnn",
     "rpn",
-    "ssd",  #! only caffe implemetation
+    # "ssd",  #! only caffe implemetation
     "retinanet",
     "cascade_rcnn",
     "yolo",
@@ -288,24 +288,24 @@ necks_we_want = [
     "fsaf",
     "centernet",
     "libra_rcnn",
-    "tridentnet",  # ! only caffe implemetation
-    "fcos",  #! only caffe or resnext implemetation
+    # "tridentnet",  # ! only caffe implemetation
+    # "fcos",  #! only caffe or resnext implemetation
     "reppoints",
     "free_anchor",
-    "cascade_rpn",
+    # "cascade_rpn", #! only caffe implemetation
     "foveabox",
     "double_heads",
     "atss",
-    "nas_fcos",
+    # "nas_fcos", #! only caffe implemetation
     # "centripetalnet", #! has none neck
-    "autoassign",  #! only caffe implemetation
+    # "autoassign",  #! only caffe implemetation
     "sabl",
     "dynamic_rcnn",
     "detr",
     "paa",
     "vfnet",
     "sparse_rcnn",
-    "yolof",  #! only caffe implemetation
+    # "yolof",  #! only caffe implemetation
     "yolox",
     "deformable_detr",
     "tood",
@@ -533,3 +533,13 @@ print(
     f"{sum(all_combis.values())} files created, {len(all_combis) - sum(all_combis.values())} missing"
 )
 print(f"References are needed for {missing_refrences}")
+
+
+folder_path = "./configs_to_train"
+files = os.listdir(folder_path)
+
+for file in files:
+    if "None" in file:
+        file_path = os.path.join(folder_path, file)
+        os.remove(file_path)
+        print(f"Deleted file: {file_path}")
