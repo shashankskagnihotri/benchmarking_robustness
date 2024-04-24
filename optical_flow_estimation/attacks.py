@@ -50,6 +50,7 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
+from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
@@ -64,8 +65,6 @@ from ptlflow_attacked.validate import (
 # Import cosPGD functions
 import torch.nn as nn
 
-# Import common corruptions
-from imagecorruptions.imagecorruptions import corrupt, get_corruption_names
 
 # Attack parameters
 epsilon = 8 / 255
@@ -597,6 +596,8 @@ def attack_one_dataloader(
                     preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
                         attack_args, model, targeted_inputs
                     )
+                case "common_corruptions":
+                    preds = common_corrupt(attack_args, inputs, model, args)
                 case "none":
                     preds = model(inputs)
 
