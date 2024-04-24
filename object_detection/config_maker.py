@@ -5,63 +5,6 @@ from rich.traceback import install
 install()
 
 
-paths = ["./configs/", "./projects/"]
-model_conf_folders = [
-    "fast_rcnn",
-    "faster_rcnn",
-    "rpn",
-    "ssd",
-    "retinanet",
-    "cascade_rcnn",
-    "yolo",
-    "cornernet",
-    "grid_rcnn",
-    "guided_anchoring",
-    "fsaf",
-    "centernet",
-    "libra_rcnn",
-    "tridentnet",
-    "fcos",
-    "reppoints",
-    "free_anchor",
-    "cascade_rpn",
-    "foveabox",
-    "double_heads",
-    "atss",
-    "nas_fcos",
-    # "centripetalnet",
-    "autoassign",
-    "sabl",
-    "dynamic_rcnn",
-    "detr",
-    "paa",
-    "vfnet",
-    "sparse_rcnn",
-    "yolof",
-    "yolox",
-    "deformable_detr",
-    "tood",
-    "ddod",
-    "rtmdet",
-    "conditional_detr",
-    "dab_detr",
-    "dino",
-    "glip",
-    "ddq",
-]
-model_proj_folders = [
-    "DiffusionDet/configs",
-    "EfficientDet/configs",
-    "Detic_new/configs",
-    "CO-DETR/configs/codino",
-]
-
-model_conf_folders = [paths[0] + folder for folder in model_conf_folders]
-model_proj_folders = [paths[1] + folder for folder in model_proj_folders]
-
-combined_folders = model_conf_folders + model_proj_folders
-
-
 # for searching
 old_swin_b_backbones = ["swin_b", "swin-b"]
 old_swin_l_backbones = ["swin-l", "swinl", "swin_l"]
@@ -143,7 +86,6 @@ files_to_use_to_change = [
     "./mmdetection/configs/dab_detr/dab-detr_r50_8xb2-50e_coco.py",
     "./mmdetection/configs/dino/dino-4scale_r50_improved_8xb2-12e_coco.py",
     "./mmdetection/configs/ddq/ddq-detr-5scale_r50_8xb2-12e_coco.py",
-    "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
     "./mmdetection/projects/CO-DETR/configs/codino/co_dino_5scale_r50_lsj_8xb2_3x_coco.py",
     "./mmdetection/configs/fast_rcnn/fast-rcnn_r101_fpn_2x_coco.py",
     "./mmdetection/configs/faster_rcnn/faster-rcnn_r101_fpn_ms-3x_coco.py",
@@ -167,6 +109,7 @@ files_to_use_to_change = [
     "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     "./mmdetection/configs/centernet/centernet-update_r101_fpn_8xb8-amp-lsj-200e_coco.py",
     "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
     #! should add swin-b and convnext files such that they do not get retrained unnecessarily
     "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
     #! add swin-b
@@ -175,13 +118,13 @@ files_to_use_to_change = [
     "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
     #! others
     "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",
-    "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py",
+    # "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py",
     "./mmdetection/configs/guided_anchoring/ga-faster-rcnn_x101-64x4d_fpn_1x_coco.py",
-    "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py",
+    # "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py",
     "./mmdetection/configs/yolox/yolox_x_8xb8-300e_coco.py",
     "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
     "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
-    "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
+    # "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
     #! add swin-l when everything is done
 ]
 
@@ -373,9 +316,18 @@ necks_we_want = [
     "dino",
     "glip",
     "ddq",
+    "Detic",
+    "EfficientDet",
+    "DiffusionDet",
+    "codino",
     # "vitdet", #! too complicated
 ]
-backbones_we_want = ["swin-b", "convnext-b", "r50"]  #! extend for swin-l when ready
+backbones_we_want = [
+    "swin-b",
+    "convnext-b",
+    "r50",
+    "r101",
+]  #! extend for swin-l when ready
 datasets_we_want = ["coco", "lvis"]
 
 
@@ -395,7 +347,10 @@ def which(path):
                     return backbone
 
     def which_neck(path):
-        return path.split("/")[-2]
+        neck = path.split("/")[-2]
+        if neck == "configs":
+            neck = path.split("/")[-3]
+        return neck
 
     def which_dataset(path):
         if "coco" in path:
@@ -449,7 +404,7 @@ for file in files_to_use_to_change:
         all_combis[(neck, backbone, dataset)] = True
 
 print(all_combis)
-if None in all_combis.keys():
+if "configs" in all_combis.keys():
     print(f"In keys {True}")
 if None in all_combis.values():
     print(f"In values {True}")
@@ -488,7 +443,7 @@ reference_configs = {
     "dino": "./mmdetection/configs/dino/dino-4scale_r50_improved_8xb2-12e_coco.py",
     "ddq": "./mmdetection/configs/ddq/ddq-detr-5scale_r50_8xb2-12e_coco.py",
     "DiffusionDet": "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
-    "CO-DETR": "./mmdetection/projects/CO-DETR/configs/codino/co_dino_5scale_r50_lsj_8xb2_3x_coco.py",
+    "codino": "./mmdetection/projects/CO-DETR/configs/codino/co_dino_5scale_r50_lsj_8xb2_3x_coco.py",
     # "fast_rcnn": "./mmdetection/configs/fast_rcnn/fast-rcnn_r101_fpn_2x_coco.py",
     # "faster_rcnn": "./mmdetection/configs/faster_rcnn/faster-rcnn_r101_fpn_ms-3x_coco.py",
     # "rpn": "./mmdetection/configs/rpn/rpn_r101_fpn_2x_coco.py",
@@ -520,7 +475,7 @@ reference_configs = {
     # "./mmdetection/configs/rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
     "glip": "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
     "EfficientDet": "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
-    "ViTDet": "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
+    # "ViTDet": "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
     "Detic": "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
 }
 
@@ -530,6 +485,9 @@ missing_refrences = set()
 for (neck, backbone, dataset), found in all_combis.items():
     if not found:
         if neck in reference_configs.keys():
+            # if reference_configs[neck] == "configs":
+            #     neck = "EfficientDet"
+
             reference_file = reference_configs[neck]
             backbone_ref, neck_ref, dataset_ref = which(reference_file)
             cfg = Config.fromfile(reference_file)
