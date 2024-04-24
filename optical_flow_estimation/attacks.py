@@ -64,6 +64,9 @@ from ptlflow_attacked.validate import (
 # Import cosPGD functions
 import torch.nn as nn
 
+# Import common corruptions
+from imagecorruptions.imagecorruptions import corrupt, get_corruption_names
+
 # Attack parameters
 epsilon = 8 / 255
 norm = "inf"
@@ -105,9 +108,42 @@ def _init_parser() -> ArgumentParser:
             "apgd",
             "fab",
             "pcfa",
+            "common_corruptions",
             "none",
         ],
         help="Name of the attack to use.",
+    )
+    parser.add_argument(
+        "--cc_name",
+        type=str,
+        default="gaussian_noise",
+        nargs="*",
+        choices=[
+            "gaussian_noise",
+            "shot_noise",
+            "impulse_noise",
+            "defocus_blur",
+            "glass_blur",
+            "motion_blur",
+            "zoom_blur",
+            "snow",
+            "frost",
+            "fog",
+            "brightness",
+            "contrast",
+            "elastic_transform",
+            "pixelate",
+            "jpeg_compression",
+        ],
+        help="Name of the common corruption to use on the input images.",
+    )
+    parser.add_argument(
+        "--cc_severity",
+        type=int,
+        default=1,
+        nargs="*",
+        choices=[1,2,3,4,5],
+        help="Severity of the common corruption to use on the input images.",
     )
     parser.add_argument(
         "--attack_norm",
@@ -511,70 +547,70 @@ def attack_one_dataloader(
             if inputs["images"].max() > 1.0:
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
 
-                targeted_inputs = None
-                if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
-                    with torch.no_grad():
-                        orig_preds = model(inputs)
-                    if attack_args["attack_target"] == "negative":
-                        targeted_flow_tensor = -orig_preds["flows"]
-                    else:
-                        targeted_flow_tensor = torch.zeros_like(orig_preds["flows"])
-                    if not "flows" in inputs:
-                        inputs["flows"] = targeted_flow_tensor
+            targeted_inputs = None
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+                with torch.no_grad():
+                    orig_preds = model(inputs)
+                if attack_args["attack_target"] == "negative":
+                    targeted_flow_tensor = -orig_preds["flows"]
+                else:
+                    targeted_flow_tensor = torch.zeros_like(orig_preds["flows"])
+                if not "flows" in inputs:
+                    inputs["flows"] = targeted_flow_tensor
 
-                    targeted_inputs = inputs.copy()
-                    targeted_inputs["flows"] = targeted_flow_tensor
+                targeted_inputs = inputs.copy()
+                targeted_inputs["flows"] = targeted_flow_tensor
 
-                # TODO: figure out what to do with scaled images and labels
-                # print(attack_args["attack_epsilon"])
-                match attack_args["attack"]:  # Commit adversarial attack
-                    case "fgsm":
-                        # inputs["images"] = fgsm(args, inputs, model)
-                        images, labels, preds, placeholder = fgsm(
-                            attack_args, inputs, model, targeted_inputs
-                        )
-                    case "pgd":
-                        # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(
-                            attack_args, inputs, model, targeted_inputs
-                        )
-                    case "cospgd":
-                        # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(
-                            attack_args, inputs, model, targeted_inputs
-                        )
-                    case "bim":
-                        # inputs["images"] = cos_pgd(args, inputs, model)
-                        images, labels, preds, losses[i] = bim_pgd_cospgd(
-                            attack_args, inputs, model, targeted_inputs
-                        )
-                    case "apgd":
-                        # inputs["images"] = fgsm(args, inputs, model)
-                        images, labels, preds, placeholder = apgd(
-                            attack_args, inputs, model, targeted_inputs
-                        )
-                    case "fab":
-                        images, labels, preds, placeholder = fab(
-                            attack_args, inputs, model, targeted_inputs
-                        )
-                    case "pcfa":
-                        preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
-                            attack_args, model, targeted_inputs
-                        )
-                    case "none":
-                        preds = model(inputs)
+            # TODO: figure out what to do with scaled images and labels
+            # print(attack_args["attack_epsilon"])
+            match attack_args["attack"]:  # Commit adversarial attack
+                case "fgsm":
+                    # inputs["images"] = fgsm(args, inputs, model)
+                    images, labels, preds, placeholder = fgsm(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "pgd":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "cospgd":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "bim":
+                    # inputs["images"] = cos_pgd(args, inputs, model)
+                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "apgd":
+                    # inputs["images"] = fgsm(args, inputs, model)
+                    images, labels, preds, placeholder = apgd(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "fab":
+                    images, labels, preds, placeholder = fab(
+                        attack_args, inputs, model, targeted_inputs
+                    )
+                case "pcfa":
+                    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
+                        attack_args, model, targeted_inputs
+                    )
+                case "none":
+                    preds = model(inputs)
 
-                if args.warm_start:
-                    if (
-                        "is_seq_start" in inputs["meta"]
-                        and inputs["meta"]["is_seq_start"][0]
-                    ):
-                        prev_preds = None
-                    else:
-                        prev_preds = preds
-                        for k, v in prev_preds.items():
-                            if isinstance(v, torch.Tensor):
-                                prev_preds[k] = v.detach()
+            if args.warm_start:
+                if (
+                    "is_seq_start" in inputs["meta"]
+                    and inputs["meta"]["is_seq_start"][0]
+                ):
+                    prev_preds = None
+                else:
+                    prev_preds = preds
+                    for k, v in prev_preds.items():
+                        if isinstance(v, torch.Tensor):
+                            prev_preds[k] = v.detach()
 
             inputs = io_adapter.unscale(inputs, image_only=True)
             preds = io_adapter.unscale(preds)
