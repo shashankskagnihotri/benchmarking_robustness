@@ -106,9 +106,9 @@ files_to_use_to_change = [
     "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
     "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",
     "./mmdetection/configs/centernet/centernet-update_r50_fpn_8xb8-amp-lsj-200e_coco.py",
-    "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    # "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     "./mmdetection/configs/centernet/centernet-update_r101_fpn_8xb8-amp-lsj-200e_coco.py",
-    "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    # "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
     #! should add swin-b and convnext files such that they do not get retrained unnecessarily
     "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
@@ -463,7 +463,7 @@ reference_configs = {
     # "sparse_rcnn": "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
     # "tood": "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",#
     "centernet": "./mmdetection/configs/centernet/centernet-update_r50_fpn_8xb8-amp-lsj-200e_coco.py",
-    "fcos": "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
+    # "fcos": "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     # "./mmdetection/configs/centernet": "./mmdetection/configs/centernet/centernet-update_r101_fpn_8xb8-amp-lsj-200e_coco.py",
     # "./mmdetection/configs/fcos": "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     "yolo": "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",

@@ -1,5 +1,6 @@
 auto_scale_lr = dict(base_batch_size=16, enable=False)
 backend_args = None
+checkpoint_config = dict(interval=0)
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'
 default_hooks = dict(
@@ -17,88 +18,50 @@ env_cfg = dict(
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
+max_epochs = 24
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-            1,
-        ],
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
-        init_cfg=dict(
-            checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
-            type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
-        out_indices=[
+        depth=50,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet50', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=(
+            0,
             1,
             2,
             3,
-            4,
-        ],
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        ),
+        style='pytorch',
+        type='ResNet'),
     bbox_head=dict(
-        anchor_generator=dict(
-            octave_base_scale=8,
-            ratios=[
-                1.0,
-            ],
-            scales_per_octave=1,
-            strides=[
-                8,
-                16,
-                32,
-                64,
-                128,
-            ],
-            type='AnchorGenerator'),
-        bbox_coder=dict(
-            target_means=[
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-            ],
-            target_stds=[
-                0.1,
-                0.1,
-                0.2,
-                0.2,
-            ],
-            type='DeltaXYWHBBoxCoder'),
         feat_channels=256,
+        gradient_mul=0.1,
         in_channels=256,
-        loss_bbox=dict(loss_weight=2.0, type='GIoULoss'),
-        loss_centerness=dict(
-            loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=True),
+        loss_bbox_init=dict(beta=0.11, loss_weight=0.5, type='SmoothL1Loss'),
+        loss_bbox_refine=dict(beta=0.11, loss_weight=1.0, type='SmoothL1Loss'),
         loss_cls=dict(
             alpha=0.25,
             gamma=2.0,
             loss_weight=1.0,
             type='FocalLoss',
             use_sigmoid=True),
+        norm_cfg=dict(num_groups=32, requires_grad=True, type='GN'),
         num_classes=80,
-        stacked_convs=4,
-        type='ATSSHead'),
+        num_points=9,
+        point_base_scale=4,
+        point_feat_channels=256,
+        point_strides=[
+            8,
+            16,
+            32,
+            64,
+            128,
+        ],
+        stacked_convs=3,
+        transform_method='moment',
+        type='RepPointsHead'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -114,12 +77,14 @@ model = dict(
         ],
         type='DetDataPreprocessor'),
     neck=dict(
-        add_extra_convs='on_output',
+        add_extra_convs='on_input',
         in_channels=[
             256,
             512,
             1024,
+            2048,
         ],
+        norm_cfg=dict(num_groups=32, requires_grad=True, type='GN'),
         num_outs=5,
         out_channels=256,
         start_level=1,
@@ -127,15 +92,27 @@ model = dict(
     test_cfg=dict(
         max_per_img=100,
         min_bbox_size=0,
-        nms=dict(iou_threshold=0.6, type='nms'),
+        nms=dict(iou_threshold=0.5, type='nms'),
         nms_pre=1000,
         score_thr=0.05),
     train_cfg=dict(
-        allowed_border=-1,
-        assigner=dict(topk=9, type='ATSSAssigner'),
-        debug=False,
-        pos_weight=-1),
-    type='ATSS')
+        init=dict(
+            allowed_border=-1,
+            assigner=dict(pos_num=1, scale=4, type='PointAssigner'),
+            debug=False,
+            pos_weight=-1),
+        refine=dict(
+            allowed_border=-1,
+            assigner=dict(
+                ignore_iof_thr=-1,
+                min_pos_iou=0,
+                neg_iou_thr=0.4,
+                pos_iou_thr=0.5,
+                type='MaxIoUAssigner'),
+            debug=False,
+            pos_weight=-1)),
+    type='RepPointsDetector')
+norm_cfg = dict(num_groups=32, requires_grad=True, type='GN')
 optim_wrapper = dict(
     optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0001),
     type='OptimWrapper')
@@ -145,11 +122,11 @@ param_scheduler = [
     dict(
         begin=0,
         by_epoch=True,
-        end=12,
+        end=24,
         gamma=0.1,
         milestones=[
-            8,
-            11,
+            16,
+            22,
         ],
         type='MultiStepLR'),
 ]
@@ -208,8 +185,7 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(
-    max_epochs=12, total_epochs=1, type='EpochBasedTrainLoop', val_interval=1)
+train_cfg = dict(max_epochs=1, type='EpochBasedTrainLoop', val_interval=1)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
     batch_size=2,

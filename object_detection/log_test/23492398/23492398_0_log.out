@@ -1,0 +1,19 @@
+submitit INFO (2024-04-25 08:56:52,342) - Starting with JobEnvironment(job_id=23492398, hostname=uc2n261.localdomain, local_rank=0(1), node=0(1), global_rank=0(1))
+submitit INFO (2024-04-25 08:56:52,343) - Loading pickle: /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/log_test/23492398/23492398_submitted.pkl
+submitit INFO (2024-04-25 08:56:52,356) - Job completed successfully
+submitit INFO (2024-04-25 08:56:52,358) - Exiting after successful completion
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n261
+Job ID: 23492398
+Cluster: uc2
+User/Group: ma_ruweber/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 2
+CPU Utilized: 00:00:01
+CPU Efficiency: 1.39% of 00:01:12 core-walltime
+Job Wall-clock time: 00:00:36
+Memory Utilized: 3.76 MB
+Memory Efficiency: 0.17% of 2.20 GB
