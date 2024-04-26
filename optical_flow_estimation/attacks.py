@@ -115,7 +115,7 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--cc_name",
         type=str,
-        default="gaussian_noise",
+        default=["gaussian_noise"],
         nargs="*",
         choices=[
             "gaussian_noise",
@@ -139,7 +139,7 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--cc_severity",
         type=int,
-        default=1,
+        default=[1],
         nargs="*",
         choices=[1,2,3,4,5],
         help="Severity of the common corruption to use on the input images.",
