@@ -50,6 +50,8 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
+import ast
+from attacks.weather_interg import weather_ds
 from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
@@ -75,6 +77,16 @@ loss_function = "epe"
 targeted = False
 batch_size = 1
 
+weather_steps=750
+lr=0.00001 
+alph_motion=1000
+alph_motionoffset=1000
+depth_check_differentiable=False 
+
+learn_offset=True 
+learn_motionoffset=True
+learn_color=True  
+learn_transparency=True     
 
 # PCFA parameters
 import torch.optim as optim
@@ -107,6 +119,7 @@ def _init_parser() -> ArgumentParser:
             "apgd",
             "fab",
             "pcfa",
+            "weather",
             "common_corruptions",
             "none",
         ],
@@ -136,6 +149,71 @@ def _init_parser() -> ArgumentParser:
         ],
         help="Name of the common corruption to use on the input images.",
     )
+
+     # parser for weather
+    parser.add_argument('--weatherdat', default='/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_npz',
+                help="the npz files.") 
+    parser.add_argument('--weather_steps', default=750, type=int,
+                help="the number of optimization steps per image.")
+    
+    parser.add_argument('--lr', type=float, default=0.00001,
+                help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001.")
+    parser.add_argument('--depth_check_differentiable', default=False, type=ast.literal_eval,
+                help="if specified, the rendering check for particle occlusion by objects is included into the compute graph.")
+    parser.add_argument('--loss', default='aee', choices=['aee', 'mse', 'cosim'],
+            help="specify the loss function as one of 'aee', 'cosim' or 'mse'")
+
+
+    parser.add_argument('--learn_offset', default=True, type=ast.literal_eval,
+                help="if specified, initial position of the particles will be optimized.")
+    parser.add_argument('--learn_motionoffset', default=True, type=ast.literal_eval,
+                help="if specified, the endpoint of the particle motion will be optimized (along with the starting point).")
+    parser.add_argument('--learn_color', default=True, type=ast.literal_eval,
+                help="if specified, the color of the particle will be optimized.")
+    parser.add_argument('--learn_transparency', default=True, type=ast.literal_eval,
+                help="if specified, the transparency of the particles will be optimized.")
+    parser.add_argument('--alph_motion', default=1000., type=float,
+                help="weighting for the motion loss.")  
+    parser.add_argument('--alph_motionoffset', default=1000., type=float,
+                help="weighting for the motion offset loss.")     
+
+
+    parser.add_argument('--weather_data', default='/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_png',
+                help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.")
+    parser.add_argument('--num_flakes', default=1000, type=int,
+                help="the number of particles that will be generated initially.")
+    parser.add_argument('--flakesize_max', default=71, type=int,
+                help="the maximal size for particles in pixels.")
+    parser.add_argument('--depth_decay', default=10, type=float,
+                help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.")
+    parser.add_argument('--motion_y', default=0., type=float,
+                help="the motion in y-direction for all particles between frames.")
+    parser.add_argument('--flake_template_folder', default="particles",
+                help="the folder within flake_folder, from where the flake templates are loaded. Useful to differentiate between particles / dust billboards.")
+    parser.add_argument('--flake_r', default=255, type=int,
+            help="the R value for the particle RGB")
+    parser.add_argument('--flake_g', default=255, type=int,
+            help="the G value for the particle RGB")
+    parser.add_argument('--flake_b', default=255, type=int,
+            help="the B value for the particle RGB")                                        
+    parser.add_argument('--rendering_method', default='additive', choices=['meshkin', 'additive'],
+            help="choose a method rendering the particle color. 'meshkin' use alpha-blending with order-independent transparency calculation, while 'additive' adds the color value to the image. Default: 'meshkin', choices: [meshkin, additive].")
+    parser.add_argument('--transparency_scale', default=1., type=float,
+            help="a scaling factor, by which the tansparency for every particle is multiplied.")
+    parser.add_argument('--depth_check', default=False, type=ast.literal_eval,
+            help="if specified, particles will not be rendered if behind an object.")
+    parser.add_argument('--do_motionblur', default=True, type=ast.literal_eval,
+            help="control if particles are rendered with motion blur (default=True).")
+
+        # Dataset arguments
+    parser.add_argument("--dataset", default="Sintel",nargs="*",
+        help="specify the dataset which should be used for evaluation")
+    parser.add_argument('--dataset_stage', default='training', choices=['training', 'evaluation'],
+        help="specify the dataset stage ('training' or 'evaluation') that should be used.")
+    parser.add_argument('--small_run', action='store_true',
+        help="for testing purposes: if specified the dataloader will on load 32 images")     
+
+
     parser.add_argument(
         "--cc_severity",
         type=int,
@@ -547,7 +625,7 @@ def attack_one_dataloader(
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
 
             targeted_inputs = None
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather" :
                 with torch.no_grad():
                     orig_preds = model(inputs)
                 if attack_args["attack_target"] == "negative":
@@ -596,6 +674,10 @@ def attack_one_dataloader(
                     preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
                         attack_args, model, targeted_inputs
                     )
+                case "weather":
+                    preds= weather_ds(
+                        attack_args, model, targeted_inputs
+                    )   
                 case "common_corruptions":
                     preds = common_corrupt(attack_args, inputs, model, args)
                 case "none":
@@ -643,6 +725,17 @@ def attack_one_dataloader(
             else:
                 metrics = model.val_metrics(preds, inputs)
 
+            if attack_args["attack_targeted"] or attack_args["attack"] == "weather":
+                metrics = model.val_metrics(preds, targeted_inputs)
+                metrics_ground_truth = model.val_metrics(preds, inputs)
+                metrics_orig_preds = model.val_metrics(preds, orig_preds)
+                metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
+                metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
+            else:
+                metrics = model.val_metrics(preds, inputs)
+
+
+
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
@@ -662,7 +755,7 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather":
                 generate_outputs(
                     args,
                     targeted_inputs,

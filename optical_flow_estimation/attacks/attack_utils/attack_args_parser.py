@@ -20,6 +20,7 @@ bim_pgd_cospgd_arguments = [
     "attack_loss",
     "attack_iterations",
 ]
+
 apgd_arguments = [
     "attack",
     "attack_norm",
@@ -42,9 +43,31 @@ pcfa_arguments = [
     "pcfa_steps",
     "pcfa_boxconstraint",
 ]
+weather_arguments = [
+    "attack",
+    "attack_targeted",
+    "attack_target",
+    "attack_loss",
+    "weather_data",
+    "weatherdat",
+    "loss",
+    "learn_offset",
+    "learn_motionoffset",
+    "learn_transparency",
+    "learn_color",
+    "weather_steps",
+    "alph_motion",
+    "alph_motionoffset",
+    "dataset",
+    "dataset_stage",
+    "small_run",
+    
+]
+
 no_attack_arguments = ["attack", "attack_targeted"]
 targeted_arguments = ["attack_target"]
 
+#weather_args_dict = {arg: None for arg in weather_arguments}
 
 class AttackArgumentParser:
     def __init__(self, args) -> None:
@@ -57,6 +80,7 @@ class AttackArgumentParser:
                 arg.startswith("attack")
                 or arg.startswith("pcfa")
                 or arg.startswith("apgd")
+                or arg.startswith("weather")
             ):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
         self.number_of_args = len(self.attack_args.keys())
@@ -141,7 +165,14 @@ class AttackArgumentParser:
                 case "pcfa":
                     for arg_name in entry.keys():
                         if arg_name not in pcfa_arguments:
-                            del to_remove[arg_name]
+                            del to_remove[arg_name]    
+                case "weather":
+                    for arg_name in entry.keys():
+                        if arg_name not in weather_arguments:
+                            del to_remove[arg_name] 
+                    if targeted == False:
+                        for targeted_args in targeted_arguments:
+                            del to_remove[targeted_args]     
                 case "none":
                     for arg_name in entry.keys():
                         if arg_name not in no_attack_arguments:
@@ -164,6 +195,7 @@ class AttackArgumentParser:
                 new_argument_list.append(self.argument_lists[i])
         self.argument_lists = new_argument_list
         self.filter_pcfa_untargeted()
+        self.filter_weather_untargeted()
 
     def filter_pcfa_untargeted(self):
         pcfa_targeted_flag = False
@@ -185,6 +217,27 @@ class AttackArgumentParser:
                     new_argument_list.append(self.argument_lists[i])
             self.argument_lists = new_argument_list
 
+    def filter_weather_untargeted(self):
+        weather_targeted_flag = False
+        weather_untargeted_indices = []
+        for i in range(0, len(self.argument_lists)):
+            if not self.argument_lists[i]["attack"] == "weather":
+                continue
+            else:
+                if not self.argument_lists[i]["attack_targeted"]:
+                    weather_untargeted_indices.append(i)
+                else:
+                    weather_targeted_flag = (
+                        weather_targeted_flag or self.argument_lists[i]["attack_targeted"]
+                    )
+        if weather_targeted_flag and len(weather_untargeted_indices) > 0:
+            new_argument_list = []
+            for i in range(0, len(self.argument_lists)):
+                if i not in weather_untargeted_indices:
+                    new_argument_list.append(self.argument_lists[i])
+            self.argument_lists = new_argument_list
+
+# weather_parser = AttackArgumentParser(weather_args_dict)
 
 def attack_targeted_string(s):
     if s.upper() in {"TRUE", "1"}:
