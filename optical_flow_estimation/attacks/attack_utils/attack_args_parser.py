@@ -45,23 +45,37 @@ pcfa_arguments = [
 ]
 weather_arguments = [
     "attack",
+    "weatherdat",
+    "weather_steps",
+    "weather_learn_offset",
+    "weather_learn_motionoffset",
+    "weather_learn_color",
+    "weather_learn_transparency",
+    "weather_alph_motion",
+    "weather_alph_motionoffset",
+    "weather_data",
+    "weather_dataset",
+    "weather_dataset_stage",
+    "weather_small_run",
     "attack_targeted",
     "attack_target",
     "attack_loss",
-    "weather_data",
-    "weatherdat",
-    "loss",
-    "learn_offset",
-    "learn_motionoffset",
-    "learn_transparency",
-    "learn_color",
-    "weather_steps",
-    "alph_motion",
-    "alph_motionoffset",
-    "dataset",
-    "dataset_stage",
-    "small_run",
-    
+    "weather_optimizer",
+    "weather_target",
+    "weather_dstype",
+    "weather_single_scene",
+    "weather_from_scene",
+    "weather_frame_per_scene",
+    "weather_from_frame",
+    "weather_scene_scale",
+    "weather_recolor",
+    "weather_do_motionblur",
+    "weather_motionblur_scale",
+    "weather_motionblur_samples",
+    "weather_depth_check",
+    "weather_depth_check_differentiable",
+    "weather_rendering_method",
+    "weather_transparency_scale",
 ]
 
 no_attack_arguments = ["attack", "attack_targeted"]
@@ -82,11 +96,22 @@ class AttackArgumentParser:
                 or arg.startswith("apgd")
                 or arg.startswith("weather")
             ):
-                self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
+                #print("类中args是：",args) #全部
+                #print("以weather开头",arg.startswith("weather"))
+                self.attack_args[arg] = list(set(self.to_list(getattr(args, arg)))) 
+                #print("self.attack_args[arg] 是",self.attack_args[arg])
         self.number_of_args = len(self.attack_args.keys())
+        
+        #print("self.attack_args 是",self.attack_args)
+        
+        #print("长度是：", self.number_of_args)
+        
         self.args_list_to_arg_sets()
         self.filter_arguments()
-
+        # Populate attack_args with filtered arguments
+        self.attack_args = self.argument_lists
+        #print("self.argument_lists 是是是",self.argument_lists)
+        
     def __iter__(self):
         return self
 
@@ -170,9 +195,9 @@ class AttackArgumentParser:
                     for arg_name in entry.keys():
                         if arg_name not in weather_arguments:
                             del to_remove[arg_name] 
-                    if targeted == False:
-                        for targeted_args in targeted_arguments:
-                            del to_remove[targeted_args]     
+                    # if targeted == False:
+                    #     for targeted_args in targeted_arguments:
+                    #         del to_remove[targeted_args]     
                 case "none":
                     for arg_name in entry.keys():
                         if arg_name not in no_attack_arguments:
@@ -195,7 +220,7 @@ class AttackArgumentParser:
                 new_argument_list.append(self.argument_lists[i])
         self.argument_lists = new_argument_list
         self.filter_pcfa_untargeted()
-        self.filter_weather_untargeted()
+        # self.filter_weather_untargeted()
 
     def filter_pcfa_untargeted(self):
         pcfa_targeted_flag = False
@@ -217,27 +242,25 @@ class AttackArgumentParser:
                     new_argument_list.append(self.argument_lists[i])
             self.argument_lists = new_argument_list
 
-    def filter_weather_untargeted(self):
-        weather_targeted_flag = False
-        weather_untargeted_indices = []
-        for i in range(0, len(self.argument_lists)):
-            if not self.argument_lists[i]["attack"] == "weather":
-                continue
-            else:
-                if not self.argument_lists[i]["attack_targeted"]:
-                    weather_untargeted_indices.append(i)
-                else:
-                    weather_targeted_flag = (
-                        weather_targeted_flag or self.argument_lists[i]["attack_targeted"]
-                    )
-        if weather_targeted_flag and len(weather_untargeted_indices) > 0:
-            new_argument_list = []
-            for i in range(0, len(self.argument_lists)):
-                if i not in weather_untargeted_indices:
-                    new_argument_list.append(self.argument_lists[i])
-            self.argument_lists = new_argument_list
-
-# weather_parser = AttackArgumentParser(weather_args_dict)
+#     def filter_weather_untargeted(self):
+#         weather_targeted_flag = False
+#         weather_untargeted_indices = []
+#         for i in range(0, len(self.argument_lists)):
+#             if not self.argument_lists[i]["attack"] == "weather":
+#                 continue
+#             else:
+#                 if not self.argument_lists[i]["attack_targeted"]:
+#                     weather_untargeted_indices.append(i)
+#                 else:
+#                     weather_targeted_flag = (
+#                         weather_targeted_flag or self.argument_lists[i]["attack_targeted"]
+#                     )
+#         if weather_targeted_flag and len(weather_untargeted_indices) > 0:
+#             new_argument_list = []
+#             for i in range(0, len(self.argument_lists)):
+#                 if i not in weather_untargeted_indices:
+#                     new_argument_list.append(self.argument_lists[i])
+#             self.argument_lists = new_argument_list
 
 def attack_targeted_string(s):
     if s.upper() in {"TRUE", "1"}:
@@ -259,3 +282,5 @@ def attack_arg_string(attack_args: Dict[str, object]):
                 value = round(value, 2)
             string = string + key + ":" + str(value) + "|"
     return string.strip()
+    #return print("打印attack_arg_string方法", string.strip())
+
