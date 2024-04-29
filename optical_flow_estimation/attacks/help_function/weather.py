@@ -17,7 +17,7 @@ torch.multiprocessing.set_start_method('spawn', force=True)
 
 
 from attacks.help_function.render import threeD_to_twoD, matmul3D
-from attacks.help_function import utils
+from attacks.attack_utils import utils
 
 
 def scale_flake_alpha(flake, depth, args):
