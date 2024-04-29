@@ -51,7 +51,7 @@ from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
 import ast
-from attacks.weather_interg import weather_ds
+from attacks.weather import weather_ds
 from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
@@ -77,11 +77,12 @@ loss_function = "epe"
 targeted = False
 batch_size = 1
 
+dataset = "Sintel"
 weather_steps=750
-lr=0.00001 
+lr=0.001 
 alph_motion=1000
 alph_motionoffset=1000
-depth_check_differentiable=False 
+
 
 learn_offset=True 
 learn_motionoffset=True
@@ -125,6 +126,172 @@ def _init_parser() -> ArgumentParser:
         ],
         help="Name of the attack to use.",
     )
+     # parser for weather
+    parser.add_argument(
+        "--weatherdat", 
+        type=str,
+        default=str(Path("/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_npz")),
+        help="the npz files."
+        ) 
+    parser.add_argument(
+        "--weather_steps", 
+        type=int,
+        default=750,
+        nargs="*",
+        help="the number of optimization steps per image."
+        )
+    # parser.add_argument(
+    #     "--lr", 
+    #     type=float, 
+    #     default=0.00001,
+    #     nargs="*",
+    #     help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001."
+    #     )
+
+    # parser.add_argument(
+    #     "--loss",
+    #     type=str,
+    #     default="aee",
+    #     nargs="*",
+    #     choices=["aee", "mse", "cosim"],
+    #     help="specify the loss function as one of 'aee', 'cosim' or 'mse'"
+    #     )
+    parser.add_argument(
+        "--weather_learn_offset",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, initial position of the particles will be optimized."
+        )
+    parser.add_argument(
+        "--weather_learn_motionoffset",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the endpoint of the particle motion will be optimized (along with the starting point)."
+        )
+    parser.add_argument(
+        "--weather_learn_color",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the color of the particle will be optimized."
+        )
+    parser.add_argument(
+        "--weather_learn_transparency",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the transparency of the particles will be optimized.")
+    parser.add_argument(
+        "--weather_alph_motion",
+        default=1000.,
+        type=float,
+        help="weighting for the motion loss.")  
+    parser.add_argument(
+        "--weather_alph_motionoffset",
+        default=1000., 
+        type=float,
+        help="weighting for the motion offset loss."
+        )     
+    parser.add_argument(
+        "--weather_data",
+        default="/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_png",
+        help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.")
+    # parser.add_argument(
+    #     "--num_flakes",
+    #     default=1000,
+    #     type=int,
+    #     help="the number of particles that will be generated initially.")
+    # parser.add_argument(
+    #     "--flakesize_max",
+    #     default=71,
+    #     type=int,
+    #     help="the maximal size for particles in pixels.")
+    # parser.add_argument(
+    #     "--depth_decay",
+    #     default=10,
+    #     type=float,
+    #     help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.")
+    # parser.add_argument(
+    #     "--motion_y",
+    #     default=0.,
+    #     type=float,
+    #     help="the motion in y-direction for all particles between frames."
+    #     )
+    # parser.add_argument(
+    #     "--flake_template_folder",
+    #     default="particles",
+    #     help="the folder within flake_folder, from where the flake templates are loaded. Useful to differentiate between particles / dust billboards.")
+    # parser.add_argument(
+    #     "--flake_r",
+    #     default=255,
+    #     type=int,
+    #     help="the R value for the particle RGB"
+    #     )
+    # parser.add_argument(
+    #     "--flake_g",
+    #     default=255,
+    #     type=int,
+    #     help="the G value for the particle RGB"
+    #     )
+    # parser.add_argument(
+    #     "--flake_b",
+    #     default=255,
+    #     type=int,
+    #     help="the B value for the particle RGB"
+    #     )                                        
+
+    parser.add_argument(
+        "--weather_dataset",
+        default="Sintel",
+        nargs="*",
+        help="specify the dataset which should be used for evaluation"
+        )
+    parser.add_argument(
+        "--weather_dataset_stage",
+        default="training",
+        choices=["training", "evaluation"],
+        help="specify the dataset stage ('training' or 'evaluation') that should be used."
+        )
+    parser.add_argument('--weather_small_run', action='store_true',
+        help="for testing purposes: if specified the dataloader will on load 32 images")   
+    parser.add_argument('--weather_optimizer', default="Adam",
+                help="the optimizer used for the perturbations.")
+    parser.add_argument('--weather_target', default='zero', choices=['zero'],
+        help="specify the attack target.")
+    # Sintel specific:
+    parser.add_argument('--weather_dstype', default='final', choices=['clean', 'final'],
+        help="[only sintel] specify the dataset type for the sintel dataset")
+    parser.add_argument('--weather_single_scene', default='',
+        help='if a scene name is added, only this sintel-scene is in the dataset.')
+    parser.add_argument('--weather_from_scene', default='',
+        help='if a scene is specified as from_scene, then all subsequent scenes (alphabetic order, including the specified scene) are added to the dataset.')
+    parser.add_argument('--weather_frame_per_scene', default=0, type=int,
+        help="the number of optimization scenes per sintel-sequence (if 0, all scenes per sequence are taken).")
+    parser.add_argument('--weather_from_frame', default=0, type=int,
+        help='For all scenes, the dataset starts from specified frame number. 0 takes all frames, 1 all except first, etc.')
+    parser.add_argument('--weather_scene_scale', default=1.0, type=float,
+        help="A global scaling to the scene depth. If the value is > 1, all scenes will appear bigger and more particles will show up in the foreground.")
+
+    parser.add_argument('--weather_recolor', default=False, type=ast.literal_eval,
+            help="If specified, all weather is recolored with the given r,g,b value (no variations).")
+       # Motionblur arguments
+    parser.add_argument('--weather_do_motionblur', default=True, type=ast.literal_eval,
+            help="control if particles are rendered with motion blur (default=True).")
+    parser.add_argument('--weather_motionblur_scale', default=.025, type=float,
+            help="a scaling factor in [0,1], by which the motion blur is shortened. No motion blur appears for 0, while the full blur vector is used with 1. A full motion blur might need a higher number of motionblur_samples.")
+    parser.add_argument('--weather_motionblur_samples', default=10, type=int,
+            help="the number of flakes that is drawn per blurred flake. More samples are needed for faster objects or a larger motionblur_scale.")
+        # Universal rendering arguments (also needed if flake data given)
+    parser.add_argument('--weather_rendering_method', default='additive', choices=['meshkin', 'additive'],
+            help="choose a method rendering the particle color. 'meshkin' use alpha-blending with order-independent transparency calculation, while 'additive' adds the color value to the image. Default: 'meshkin', choices: [meshkin, additive].")
+    parser.add_argument('--weather_transparency_scale', default=1., type=float,
+            help="a scaling factor, by which the tansparency for every particle is multiplied.")
+        
+    parser.add_argument("--weather_depth_check", default=False, type=ast.literal_eval,
+        help="if specified, particles will not be rendered if behind an object."
+        )
+    parser.add_argument("--weather_depth_check_differentiable", type=ast.literal_eval, default=False, nargs="*",
+        help="if specified, the rendering check for particle occlusion by objects is included into the compute graph."
+        )
+
     parser.add_argument(
         "--cc_name",
         type=str,
@@ -150,69 +317,10 @@ def _init_parser() -> ArgumentParser:
         help="Name of the common corruption to use on the input images.",
     )
 
-     # parser for weather
-    parser.add_argument('--weatherdat', default='/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_npz',
-                help="the npz files.") 
-    parser.add_argument('--weather_steps', default=750, type=int,
-                help="the number of optimization steps per image.")
+
+
     
-    parser.add_argument('--lr', type=float, default=0.00001,
-                help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001.")
-    parser.add_argument('--depth_check_differentiable', default=False, type=ast.literal_eval,
-                help="if specified, the rendering check for particle occlusion by objects is included into the compute graph.")
-    parser.add_argument('--loss', default='aee', choices=['aee', 'mse', 'cosim'],
-            help="specify the loss function as one of 'aee', 'cosim' or 'mse'")
-
-
-    parser.add_argument('--learn_offset', default=True, type=ast.literal_eval,
-                help="if specified, initial position of the particles will be optimized.")
-    parser.add_argument('--learn_motionoffset', default=True, type=ast.literal_eval,
-                help="if specified, the endpoint of the particle motion will be optimized (along with the starting point).")
-    parser.add_argument('--learn_color', default=True, type=ast.literal_eval,
-                help="if specified, the color of the particle will be optimized.")
-    parser.add_argument('--learn_transparency', default=True, type=ast.literal_eval,
-                help="if specified, the transparency of the particles will be optimized.")
-    parser.add_argument('--alph_motion', default=1000., type=float,
-                help="weighting for the motion loss.")  
-    parser.add_argument('--alph_motionoffset', default=1000., type=float,
-                help="weighting for the motion offset loss.")     
-
-
-    parser.add_argument('--weather_data', default='/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_png',
-                help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.")
-    parser.add_argument('--num_flakes', default=1000, type=int,
-                help="the number of particles that will be generated initially.")
-    parser.add_argument('--flakesize_max', default=71, type=int,
-                help="the maximal size for particles in pixels.")
-    parser.add_argument('--depth_decay', default=10, type=float,
-                help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.")
-    parser.add_argument('--motion_y', default=0., type=float,
-                help="the motion in y-direction for all particles between frames.")
-    parser.add_argument('--flake_template_folder', default="particles",
-                help="the folder within flake_folder, from where the flake templates are loaded. Useful to differentiate between particles / dust billboards.")
-    parser.add_argument('--flake_r', default=255, type=int,
-            help="the R value for the particle RGB")
-    parser.add_argument('--flake_g', default=255, type=int,
-            help="the G value for the particle RGB")
-    parser.add_argument('--flake_b', default=255, type=int,
-            help="the B value for the particle RGB")                                        
-    parser.add_argument('--rendering_method', default='additive', choices=['meshkin', 'additive'],
-            help="choose a method rendering the particle color. 'meshkin' use alpha-blending with order-independent transparency calculation, while 'additive' adds the color value to the image. Default: 'meshkin', choices: [meshkin, additive].")
-    parser.add_argument('--transparency_scale', default=1., type=float,
-            help="a scaling factor, by which the tansparency for every particle is multiplied.")
-    parser.add_argument('--depth_check', default=False, type=ast.literal_eval,
-            help="if specified, particles will not be rendered if behind an object.")
-    parser.add_argument('--do_motionblur', default=True, type=ast.literal_eval,
-            help="control if particles are rendered with motion blur (default=True).")
-
-        # Dataset arguments
-    parser.add_argument("--dataset", default="Sintel",nargs="*",
-        help="specify the dataset which should be used for evaluation")
-    parser.add_argument('--dataset_stage', default='training', choices=['training', 'evaluation'],
-        help="specify the dataset stage ('training' or 'evaluation') that should be used.")
-    parser.add_argument('--small_run', action='store_true',
-        help="for testing purposes: if specified the dataloader will on load 32 images")     
-
+    
 
     parser.add_argument(
         "--cc_severity",
@@ -473,6 +581,8 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     output_data.append(("model", args.model))
     output_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
+    #print("args是：", args) #打印正常
+    
     for attack_args in attack_args_parser:
         output_data.append(("attack_args", attack_arg_string(attack_args)))
         print(attack_args)
@@ -504,9 +614,8 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             )
             overwrite_flag = False
             output_data = []
-    metrics_df = metrics_df.round(3)
-    return metrics_df
-
+        #metrics_df = metrics_df.round(3)
+    return print("运行结束")
 
 def attack_list_of_models(args: Namespace) -> None:
     """Perform the validation.
