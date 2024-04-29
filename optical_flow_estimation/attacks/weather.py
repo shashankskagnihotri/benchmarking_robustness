@@ -10,7 +10,7 @@ from attacks.attack_utils.utils import (
     get_flow_tensors,
 )
 
-from attacks.help_function import ownutilities,  parsing_file, targets, logging
+from attacks.help_function import ownutilities
 # from attacks.help_function.config_specs import Conf
 from attacks.help_function.render import render
 from attacks.help_function.weather import get_weather, recolor_weather
@@ -89,11 +89,9 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
         device = torch.device("cpu")
     else:
         device = torch.device("cuda")
-    #print("字典是",targeted_inputs)
+
     image1, image2 = get_image_tensors(targeted_inputs)
-    # print("image1是：",image1)
-    # print("image2是：",image2)
-    # print("device是：",device)
+
     image1, image2 = image1.to(device), image2.to(device)
      
         
@@ -119,12 +117,7 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     rel_mat.requires_grad = False
     
     scene_data = full_P, ext1, rel_mat, gt1_depth, gt2_depth
-    # print("full_P有什么：", full_P) #RIGHT!
-    # print("ext1有什么：", ext1) #RIGHT!
 
-    # print("scene_data有什么：", weather)
-    # print("weather有什么：", weather)
-    # print(len(weather))
     initpos, motion, flakes, flakes_color, flakes_transp = weather
     
 
