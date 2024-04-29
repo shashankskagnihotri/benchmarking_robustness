@@ -62,8 +62,6 @@ def weather_ds(
             (root,), (split,), (seq,), (base,), (frame,), (weatherdat,) = extra
             weather = get_weather(has_weather, weatherdat, scene_data, args=attack_args, seed=None, load_only=True)
 
-            # print("scene_data有什么：", weather)
-            # print("weather有什么：", weather)
             scene_data = [i.to(device) for i in scene_data]
             weather = [i.to(device) for i in weather]
             image1, image2 = image1.to(device), image2.to(device)
@@ -71,13 +69,6 @@ def weather_ds(
 
             preds = attack_image(model, targeted_inputs, attack_args, device, scene_data, weather)
             print("preds", preds)
-    # has_weather=True
-    # weather = get_weather(has_weather, weatherdat, scene_data, attack_args, seed=None, load_only=True)
-        
-    # scene_data = [i.to(device) for i in scene_data]
-    # weather = [i.to(device) for i in weather]
-    
-    # preds = attack_image(model, targeted_inputs, device, weather, scene_data, attack_args)
 
     return preds
 
@@ -177,16 +168,6 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     flow_weather_pred = flow_weather_pred.to(device)
     flow_weather_init = flow_weather_pred.detach().clone()
     flow_weather_init.requires_grad = False
-    # from DistractingDownpour.helper_functions.own_models import ScaledInputWeatherModel
-    # # 创建 ScaledInputWeatherModel 的实例
-    # modelw = ScaledInputWeatherModel(args=attack_args, model="GMA", make_unit_input=False)
-    # pred_flow = modelw.forward(rendered_image1, rendered_image2, weather=weather, scene_data=scene_data, args_=attack_args, test_mode=True)
-    # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
-    # flow_weather_pred = pred_flow["flows"].squeeze(0)  #flow_pred =...
-    # flow_weather_pred = flow_weather_pred.to(device)
-    # define the initial flow, the target, and update mu
-    # flow_weather_init = flow_weather_pred.detach().clone()
-    # flow_weather_init.requires_grad = False
 
     rendered_image1_init, rendered_image2_init = render(image1, image2, scene_data, weather, args=attack_args)
     perturbed_inputs_init = replace_images_dic(
@@ -197,16 +178,6 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     targeted_inputs_init = targeted_inputs_init.to(device).detach()
 
     
-    # flow_init = ScaledInputWeatherModel.forward(rendered_image1_init, rendered_image2_init, weather=None, scene_data=None, args_=None, test_mode=True)
-    # perturbed_inputs_init = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
-    # targeted_inputs_init = flow_init["flows"].squeeze(0) 
-    # targeted_inputs_init = targeted_inputs_init.to(device).detach()
-
-    # define target (potentially based on first flow prediction)
-    # define attack target
-    # target = targets.get_target(attack_args["weather_target"], flow_init, device=device)
-    # target = target.to(device)
-    # target.requires_grad = False
     target = get_flow_tensors(targeted_inputs)
     target = target.to(device)
     target.requires_grad = False
@@ -237,15 +208,6 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
         flakes_color_img = (1./2.) * 1. / (1. - eps_box) * (torch.tanh(flakes_color_inf) + (1 - eps_box) )
         weather = (initpos+offsets, motion+motion_offsets, flakes, flakes_color_img, flakes_transp)
 
-
-        # flow_weather = ownutilities.compute_flow(model, "scaled_input_weather_model", image1, image2, weather=weather, scene_data=scene_data, test_mode=True, args_=args)
-        # [flow_weather] = ownutilities.postprocess_flow(args.net, padder, flow_weather)
-        # flow_weather = flow_weather.to(device)
-
-        # pred_flow = ScaledInputWeatherModel.forward(rendered_image1, rendered_image2, weather=weather, scene_data=scene_data, args_=None, test_mode=True)
-        # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
-        # flow_weather_pred = pred_flow["flows"].squeeze(0)  #flow_pred =...
-        # flow_weather_pred = flow_weather_pred.to(device)
 
         pred_flow = model(perturbed_inputs)
         flow_weather_pred = pred_flow["flows"].squeeze(0)
