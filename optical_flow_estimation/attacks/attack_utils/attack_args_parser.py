@@ -96,21 +96,15 @@ class AttackArgumentParser:
                 or arg.startswith("apgd")
                 or arg.startswith("weather")
             ):
-                #print("类中args是：",args) #全部
-                #print("以weather开头",arg.startswith("weather"))
+                
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg)))) 
-                #print("self.attack_args[arg] 是",self.attack_args[arg])
+              
         self.number_of_args = len(self.attack_args.keys())
-        
-        #print("self.attack_args 是",self.attack_args)
-        
-        #print("长度是：", self.number_of_args)
         
         self.args_list_to_arg_sets()
         self.filter_arguments()
         # Populate attack_args with filtered arguments
         self.attack_args = self.argument_lists
-        #print("self.argument_lists 是是是",self.argument_lists)
         
     def __iter__(self):
         return self
@@ -282,5 +276,5 @@ def attack_arg_string(attack_args: Dict[str, object]):
                 value = round(value, 2)
             string = string + key + ":" + str(value) + "|"
     return string.strip()
-    #return print("打印attack_arg_string方法", string.strip())
+
 
