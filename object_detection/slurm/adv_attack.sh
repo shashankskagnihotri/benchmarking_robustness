@@ -21,7 +21,7 @@ STEPS=1
 EPSILON=8
 ATTACK="pgd"  # "pgd", "fgsm", "cospgd", "none"
 
-cd .. # expects mmdetection/slurm to be the working directory
+cd .. # expects object_detection/slurm to be the working directory
 
 echo "#########  START ATTACK ###########"
 echo "CHECKPOINT_FILE="${CHECKPOINT_FILE}

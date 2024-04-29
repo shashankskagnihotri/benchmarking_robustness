@@ -178,3 +178,7 @@ dataset/
 .fio
 object_detection/.vscode/
 object_detection/slurm/logs
+object_detection/slurm/logs copy/
+object_detection/slurm/work_dir/
+object_detection/slurm/work_dir/*py
+object_detection/work_dirs/
