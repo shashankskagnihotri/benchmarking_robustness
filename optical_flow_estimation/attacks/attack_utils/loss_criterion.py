@@ -311,3 +311,37 @@ def loss_weighted(pred, target, delta1, delta2, c=1.0, f_type="epe"):
     similarity_term = get_loss(f_type, pred, target)
 
     return two_norm_avg_delta(delta1, delta2) + c * similarity_term
+
+def avg_sq_dist(dist):
+    return torch.mean(torch.sum(dist**2, dim=-1))
+
+def avg_sq_dist_weighted_depth(dist, depth):
+    eps = 1e-7
+    return torch.mean(torch.sum(dist**2, dim=-1)/(depth**2+eps))
+
+def mse_transparency_change(transparency, transparency_init):
+    tr   = 1./2. * (torch.tanh(transparency) + 1)
+    tr_i = 1./2. * (torch.tanh(transparency_init) + 1)
+    return torch.mean((tr-tr_i)**2)
+
+def loss_weather(pred, target, f_type="aee", init_pos=None, offsets=None, alph_offsets=50, motion_offsets=None, alph_motion=100, flakes_transp=None, flakes_transp_init=None, alph_transp=10):
+
+    similarity_term = get_loss(f_type, pred, target)
+
+    offset_term = 0.
+    motion_offset_term = 0.
+    transp_term = 0.
+
+    if init_pos is not None:
+
+        if alph_motion != 0 or alph_offsets != 0:
+            depths = init_pos[...,2]
+            if alph_offsets != 0:
+                offset_term = alph_offsets*avg_sq_dist_weighted_depth(offsets[...,:3], depths)
+            if alph_motion != 0:
+                motion_offset_term = alph_motion*avg_sq_dist_weighted_depth(motion_offsets[...,:3], depths)
+        if alph_transp != 0:
+            transp_term = alph_transp*mse_transparency_change(flakes_transp, flakes_transp_init)
+
+    return similarity_term + offset_term + motion_offset_term + transp_term
+
