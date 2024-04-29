@@ -8,7 +8,7 @@ import os
 import os.path as osp
 import sys
 #required to prevent ModuleNotFoundError for 'flow_plot'. The flow_library is a submodule, which imports its own functions and can therefore not be imported with flow_library.flow_plot
-sys.path.append("flow_library")
+# sys.path.append("flow_library")
 
 from typing import Any, Dict, List, Optional
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
