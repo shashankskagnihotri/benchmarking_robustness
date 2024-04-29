@@ -40,7 +40,7 @@ def weather_ds(
     model: BaseModel,
     targeted_inputs: Dict[str, torch.Tensor],
     ):
-    print("打印所有键",attack_args)
+    print("Print all keys",attack_args)
 
      # Define what device we are using
     if not torch.cuda.is_available():
@@ -48,7 +48,7 @@ def weather_ds(
     else:
         device = torch.device("cuda")
     
-    print("现在正在运行的是：", device)
+    print("Device now is：", device)
     
     data_loader, has_gt, has_cam, has_weather = ownutilities.prepare_dataloader(args=attack_args, shuffle=False, get_weather=True)
     
@@ -70,7 +70,7 @@ def weather_ds(
             flow = flow.to(device)
 
             preds = attack_image(model, targeted_inputs, attack_args, device, scene_data, weather)
-            print("打印preds", preds)
+            print("preds", preds)
     # has_weather=True
     # weather = get_weather(has_weather, weatherdat, scene_data, attack_args, seed=None, load_only=True)
         
@@ -175,10 +175,7 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     
 
     rendered_image1, rendered_image2 = render(image1, image2, scene_data, weather, args=attack_args)
-    # print("image1是：",image1)
-    # print("image2是：",image2)
-    # print("rendered_image1是：",rendered_image1)
-    # print("rendered_image1是：",rendered_image2)
+
     perturbed_inputs = replace_images_dic(
         targeted_inputs, rendered_image1, rendered_image2, clone=True
     )
@@ -237,7 +234,7 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
         # Calculate loss
         loss = losses.loss_weather(flow_weather_pred, target, f_type=attack_args["attack_loss"], init_pos=initpos, offsets=offsets, motion_offsets=motion_offsets, flakes_transp=flakes_transp, flakes_transp_init=flakes_transp_init, alph_offsets=attack_args["weather_alph_motion"], alph_motion=attack_args["weather_alph_motionoffset"], alph_transp=0)
  
-        #loss.backward()
+        loss.backward()
 
         if attack_args["weather_optimizer"] in ['Adam']:
             optimizer.step()
@@ -261,6 +258,6 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
         flow_weather_pred = pred_flow["flows"].squeeze(0)
         flow_weather_pred = flow_weather_pred.to(device)
         print("PRINT",flow_weather_pred)
-    loss.backward()
+    
     return pred_flow
 
