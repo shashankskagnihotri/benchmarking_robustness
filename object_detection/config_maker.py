@@ -1,5 +1,14 @@
 import os
 from mmengine.config import Config
+from mmdetection.configs._base_.datasets.voc0712 import (
+    data_root as voc0712_data_root,
+    dataset_type as voc0712_dataset_type,
+    train_pipeline as voc0712_train_pipeline,
+    test_pipeline as voc0712_test_pipeline,
+    train_dataloader as voc0712_train_dataloader,
+    val_dataloader as voc0712_val_dataloader,
+)
+
 from rich.traceback import install
 
 install()
@@ -138,6 +147,7 @@ new_backbone_configs = {
         "embed_dims": 128,
         "depths": [2, 2, 18, 2, 1],
         "num_heads": [4, 8, 16, 32, 64],
+        "strides": [4, 2, 2, 2, 2],
         "window_size": 12,
         "mlp_ratio": 4,
         "qkv_bias": True,
@@ -155,7 +165,7 @@ new_backbone_configs = {
         ),
     },
     "convnext-b": {
-        "_delete_": True,
+        # "_delete_": True, # gave errors when tried to train
         "type": "mmpretrain.ConvNeXt",
         "arch": "base",
         "out_indices": [1, 2, 3],
@@ -166,7 +176,7 @@ new_backbone_configs = {
         "init_cfg": dict(
             type="Pretrained",
             checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth",
-            prefix="backbone.",
+            prefix="backbone.",  # ? maybe get rid of prefix
         ),
     },
     "r101": {
@@ -196,80 +206,112 @@ new_backbone_configs = {
 
 #! Add SWIN-L -> Ask supervisor
 new_neck_configs = {
-    "swin-b": {"in_channels": [256, 512, 1024]},
+    "swin-b": {"in_channels": [256, 512, 1024, 2048]},
     "convnext-b": {"in_channels": [256, 512, 1024]},
     "r101": {"in_channels": [256, 512, 1024, 2048]},
     "r50": {"in_channels": [256, 512, 1024, 2048]},
 }
 
 
-new_dataset_type = {
-    "coco": "CocoDataset",
-    "lvis": "LVISV1Dataset",
-}
+# new_dataset_type = {
+#     "coco": "CocoDataset",
+#     "voc0712": "VOCDataset",
+#     # "lvis": "LVISV1Dataset",
+# }
 
-new_val_dataloader = {
-    "coco": dict(
-        batch_size=1,
-        dataset=dict(
-            ann_file="annotations/instances_val2017.json",
-            backend_args=None,
-            data_prefix=dict(img="val2017/"),
-            data_root="data/coco/",
-            pipeline=[
-                dict(backend_args=None, type="LoadImageFromFile"),
-                dict(
-                    keep_ratio=True,
-                    scale=(
-                        1333,
-                        800,
-                    ),
-                    type="Resize",
-                ),
-                dict(type="LoadAnnotations", with_bbox=True),
-                dict(
-                    meta_keys=(
-                        "img_id",
-                        "img_path",
-                        "ori_shape",
-                        "img_shape",
-                        "scale_factor",
-                    ),
-                    type="PackDetInputs",
-                ),
-            ],
-            test_mode=True,
-            type="CocoDataset",
-        ),
-        drop_last=False,
-        num_workers=2,
-        persistent_workers=True,
-        sampler=dict(shuffle=False, type="DefaultSampler"),
-    ),
-    "lvis": dict(
-        dataset=dict(
-            data_root="data/coco/",
-            type="LVISV1Dataset",
-            ann_file="annotations/lvis_od_val.json",
-            data_prefix=dict(img=""),
-        )
-    ),
-}
+#! seperatly set "data_root": "data/coco/" ???
+#! came till here with checking
+# new_train_dataloader_dataset = {
+#     "voc0712": dict(
+#         dataset=dict(
+#             ignore_keys=["dataset_type"],
+#             datasets=[
+#                 dict(
+#                     type="VOCDataset",
+#                     data_root="data/VOCdevkit/",
+#                     ann_file="VOC2007/ImageSets/Main/trainval.txt",
+#                     data_prefix=dict(sub_data_root="VOC2007/"),
+#                     filter_cfg=dict(filter_empty_gt=True, min_size=32),
+#                     pipeline=train_pipeline,
+#                 ),
+#                 dict(
+#                     type="VOCDataset",
+#                     data_root="data/VOCdevkit/",
+#                     ann_file="VOC2012/ImageSets/Main/trainval.txt",
+#                     data_prefix=dict(sub_data_root="VOC2012/"),
+#                     filter_cfg=dict(filter_empty_gt=True, min_size=32),
+#                     pipeline=train_pipeline,
+#                 ),
+#             ],
+#         )
+#     ),
+# }
 
-new_val_evaluator = {
-    "coco": dict(
-        ann_file="data/coco/annotations/instances_val2017.json",
-        backend_args=None,
-        format_only=False,
-        metric="bbox",
-        type="CocoMetric",
-    ),
-    "lvis": dict(
-        _delete_=True,
-        type="LVISFixedAPMetric",
-        ann_file="data/coco/" + "annotations/lvis_od_val.json",
-    ),
-}
+
+# new_val_dataloader = {
+#     "coco": dict(
+#         batch_size=1,
+#         dataset=dict(
+#             ann_file="annotations/instances_val2017.json",
+#             backend_args=None,
+#             data_prefix=dict(img="val2017/"),
+#             data_root="data/coco/",
+#             pipeline=[
+#                 dict(backend_args=None, type="LoadImageFromFile"),
+#                 dict(
+#                     keep_ratio=True,
+#                     scale=(
+#                         1333,
+#                         800,
+#                     ),
+#                     type="Resize",
+#                 ),
+#                 dict(type="LoadAnnotations", with_bbox=True),
+#                 dict(
+#                     meta_keys=(
+#                         "img_id",
+#                         "img_path",
+#                         "ori_shape",
+#                         "img_shape",
+#                         "scale_factor",
+#                     ),
+#                     type="PackDetInputs",
+#                 ),
+#             ],
+#             test_mode=True,
+#             type="CocoDataset",
+#         ),
+#         drop_last=False,
+#         num_workers=2,
+#         persistent_workers=True,
+#         sampler=dict(shuffle=False, type="DefaultSampler"),
+#     ),
+# "voc0712": dict(),
+# "lvis": dict(
+#     dataset=dict(
+#         data_root="data/coco/",
+#         type="LVISV1Dataset",
+#         ann_file="annotations/lvis_od_val.json",
+#         data_prefix=dict(img=""),
+#     )
+# ),
+# }
+
+# new_val_evaluator = {
+#     "coco": dict(
+#         ann_file="data/coco/annotations/instances_val2017.json",
+#         backend_args=None,
+#         format_only=False,
+#         metric="bbox",
+#         type="CocoMetric",
+#     ),
+#     "voc0712": dict(),
+#     # "lvis": dict(
+#     #     _delete_=True,
+#     #     type="LVISFixedAPMetric",
+#     #     ann_file="data/coco/" + "annotations/lvis_od_val.json",
+#     # ),
+# }
 
 #! extend to all
 # necks_we_want = ["double_heads", "dynamic_rcnn", ]
@@ -328,7 +370,11 @@ backbones_we_want = [
     "r50",
     "r101",
 ]  #! extend for swin-l when ready
-datasets_we_want = ["coco", "lvis"]
+datasets_we_want = [
+    "coco",
+    "voc0712",
+    # "lvis"
+]
 
 
 def which(path):
@@ -508,12 +554,37 @@ for (neck, backbone, dataset), found in all_combis.items():
                         "in_channels"
                     ]
 
+            # data_root as voc0712_data_root,
+            # dataset_type as voc0712_dataset_type,
+            # train_pipeline as voc0712_train_pipeline,
+            # test_pipeline as voc0712_test_pipeline,
+            # train_dataloader as voc0712_train_dataloader,
+            # val_dataloader as voc0712_val_dataloader
+
             if dataset != dataset_ref:
-                cfg.dataset_type = new_dataset_type[dataset]
-                cfg.val_dataloader = new_val_dataloader[dataset]
-                cfg.val_evaluator = new_val_evaluator[dataset]
-                cfg.test_dataloader = new_val_dataloader[dataset]
-                cfg.test_evaluator = new_val_evaluator[dataset]
+                #! traindataloader
+                cfg.data_root = voc0712_data_root
+                cfg.dataset_type = voc0712_dataset_type
+
+                cfg.train_pipeline = voc0712_train_pipeline
+                cfg.test_pipeline = voc0712_test_pipeline
+
+                cfg.train_dataloader = voc0712_train_dataloader
+                cfg.val_dataloader = voc0712_val_dataloader
+                cfg.test_dataloader = voc0712_val_dataloader
+
+                cfg.val_evaluator = dict(
+                    type="VOCMetric", metric="mAP", eval_mode="11points"
+                )
+                cfg.test_evaluator = dict(
+                    type="VOCMetric", metric="mAP", eval_mode="11points"
+                )
+
+                # cfg.dataset_type = new_dataset_type[dataset]
+                # cfg.val_dataloader = new_val_dataloader[dataset]
+                # cfg.val_evaluator = new_val_evaluator[dataset]
+                # cfg.test_dataloader = new_val_dataloader[dataset]
+                # cfg.test_evaluator = new_val_evaluator[dataset]
 
             destination_file = os.path.join(
                 "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"

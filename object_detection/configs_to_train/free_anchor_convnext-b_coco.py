@@ -33,7 +33,6 @@ log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 model = dict(
     backbone=dict(
-        _delete_=True,
         arch='base',
         drop_path_rate=0.7,
         gap_before_final_norm=False,

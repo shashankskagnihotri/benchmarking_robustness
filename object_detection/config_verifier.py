@@ -35,17 +35,16 @@ for log_folder in os.listdir(log_folder_path):
                         #! move to different location such that not retrained
 
 
-# TODO extend training script to multiple GPUS
 # TODO logging from Simon
 
-original_config_files = os.listdir("./configs_to_test")  #! to_train
+original_config_files = os.listdir("./configs_to_train")  #! change to_train
 original_config_files = [
-    original_config_files[8],
-    original_config_files[9],
+    original_config_files[149],  # retinanet_swin-b_coco.py
+    original_config_files[145],  # ddod_swin-b_coco.py
 ]  # ? for testing purposes
 
 for config_file in original_config_files:
-    cfg = Config.fromfile(f"./configs_to_test/{config_file}")  #! to_train
+    cfg = Config.fromfile(f"./configs_to_train/{config_file}")  #! to_train
 
     if cfg.train_cfg.type == "IterBasedTrainLoop":
         cfg.train_cfg.max_iters = 10
@@ -61,7 +60,7 @@ for config_file in original_config_files:
 
 one_epoch_configs = os.listdir("./configs_to_verify_one_epoch")
 
-GPU_NUM = 1  #! change when know it works as expected
+GPU_NUM = 2  #! change when know it works as expected
 
 # Submit jobs for each config
 
@@ -77,7 +76,7 @@ for config_file in one_epoch_configs:
     executor = submitit.AutoExecutor(folder=work_dir)
 
     executor.update_parameters(
-        slurm_partition="dev_gpu_4_a100",
+        slurm_partition="dev_gpu_4",
         slurm_gres=f"gpu:{GPU_NUM}",
         slurm_time="00:30:00",
         nodes=1,
@@ -97,28 +96,6 @@ for config_file in one_epoch_configs:
         # result_dir,  #! worked with train
     )
     jobs.append(job)
-
-    # script_path = "./mmdetection/tools/slurm_train.sh"
-    # cmd = ["bash", script_path, config_path, str(GPU_NUM)]
-    # job = executor.submit(submitit.helpers.CommandFunction(cmd))
-
-    # valid_parameters = executor._valid_parameters()
-    # print(valid_parameters)
-
-    # #! change settings for slurm
-    # executor.update_parameters(
-    #     slurm_partition="dev_gpu_4_a100",  #! change to gpu_4
-    #     # slurm_gres=f"gpu:{GPU_NUM}",
-    #     slurm_time="00:30:00",  #! change
-    #     slurm_nodes=1,  # ?
-    #     gpus_per_node=GPU_NUM,  # ?
-    #     cpus_per_task=1,  #! change 16? Is this acrtually the gpus?
-    #     tasks_per_node=1,
-    #     slurm_mem="10G",  #! change
-    #     slurm_mail_type="ALL",
-    #     slurm_mail_user="ruben.weber@students.uni-mannheim.de",
-    #     slurm_ntasks_per_node=1,  # ?
-    # )
 
 
 outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]

@@ -77,6 +77,13 @@ model = dict(
         pretrain_img_size=384,
         qk_scale=None,
         qkv_bias=True,
+        strides=[
+            4,
+            2,
+            2,
+            2,
+            2,
+        ],
         type='SwinTransformer',
         window_size=12,
         with_cp=True),
@@ -152,6 +159,7 @@ model = dict(
             256,
             512,
             1024,
+            2048,
         ],
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),

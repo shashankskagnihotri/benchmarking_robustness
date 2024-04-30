@@ -31,7 +31,6 @@ log_processor = dict(
     _scope_='mmdet', by_epoch=False, type='LogProcessor', window_size=50)
 model = dict(
     backbone=dict(
-        _delete_=True,
         arch='base',
         drop_path_rate=0.7,
         gap_before_final_norm=False,
