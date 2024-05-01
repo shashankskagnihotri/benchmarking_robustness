@@ -5,7 +5,7 @@ import torch.utils.data as data
 from PIL import Image
 from natsort import natsorted
 
-from preprocess import augment
+from .preprocess import augment
 
 def disparity_read(filename):
     """ Return disparity read from filename. """
@@ -18,9 +18,10 @@ def disparity_read(filename):
     return depth
 
 class MPISintelDataset(data.Dataset):
-    def __init__(self, datadir):
+    def __init__(self, datadir, model_name='PSMNet'):
         super(MPISintelDataset, self).__init__()
         
+        self.model_name = model_name
         self.datadir = datadir
         self._read_data()
         self._augmentation()
