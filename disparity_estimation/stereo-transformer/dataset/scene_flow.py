@@ -85,11 +85,13 @@ class SceneFlowFlyingThingsDataset(data.Dataset):
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))]
 
+        # Folders A, B, C
         seq_folders = []
         for sub_folder in sub_folders:
             seq_folders += [os.path.join(sub_folder, seq) for seq in os.listdir(sub_folder) if
                             os.path.isdir(os.path.join(sub_folder, seq))]
 
+        # Folders with numbers
         self.left_data = []
         for seq_folder in seq_folders:
             self.left_data += [os.path.join(seq_folder, 'left', img) for img in
