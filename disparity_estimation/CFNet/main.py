@@ -21,6 +21,7 @@ import gc
 
 
 from dataloader import SceneFlowFlyingThings3DDataset
+from dataloader import get_dataset
 
 cudnn.benchmark = True
 
@@ -59,8 +60,10 @@ logger = SummaryWriter(args.logdir)
 
 # dataset, dataloader
 # StereoDataset = __datasets__[args.dataset]
-train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
-test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
+# train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
+# test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
+train_dataset = get_dataset(args.datapath, args.dataset, architeture_name="CFNet", split='train')
+test_dataset  = get_dataset(args.datapath, args.dataset, architeture_name="CFNet", split='test')
 
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
@@ -102,6 +105,7 @@ def train():
             
         # training
         for batch_idx, sample in enumerate(TrainImgLoader):
+            print(sample['left'].shape)
             global_step = len(TrainImgLoader) * epoch_idx + batch_idx
             start_time = time.time()
             do_summary = global_step % args.summary_freq == 0
