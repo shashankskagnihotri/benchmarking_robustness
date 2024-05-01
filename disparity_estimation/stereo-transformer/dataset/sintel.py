@@ -12,32 +12,32 @@ from natsort import natsorted
 from dataset.preprocess import augment
 
 
-def disparity_write(filename, disparity, bitdepth=16):
-    """ Write disparity to file.
+# def disparity_write(filename, disparity, bitdepth=16):
+#     """ Write disparity to file.
 
-    bitdepth can be either 16 (default) or 32.
+#     bitdepth can be either 16 (default) or 32.
 
-    The maximum disparity is 1024, since the image width in Sintel
-    is 1024.
-    """
-    d = disparity.copy()
+#     The maximum disparity is 1024, since the image width in Sintel
+#     is 1024.
+#     """
+#     d = disparity.copy()
 
-    # Clip disparity.
-    d[d > 1024] = 1024
-    d[d < 0] = 0
+#     # Clip disparity.
+#     d[d > 1024] = 1024
+#     d[d < 0] = 0
 
-    d_r = (d / 4.0).astype('uint8')
-    d_g = ((d * (2.0 ** 6)) % 256).astype('uint8')
+#     d_r = (d / 4.0).astype('uint8')
+#     d_g = ((d * (2.0 ** 6)) % 256).astype('uint8')
 
-    out = np.zeros((d.shape[0], d.shape[1], 3), dtype='uint8')
-    out[:, :, 0] = d_r
-    out[:, :, 1] = d_g
+#     out = np.zeros((d.shape[0], d.shape[1], 3), dtype='uint8')
+#     out[:, :, 0] = d_r
+#     out[:, :, 1] = d_g
 
-    if bitdepth > 16:
-        d_b = (d * (2 ** 14) % 256).astype('uint8')
-        out[:, :, 2] = d_b
+#     if bitdepth > 16:
+#         d_b = (d * (2 ** 14) % 256).astype('uint8')
+#         out[:, :, 2] = d_b
 
-    Image.fromarray(out, 'RGB').save(filename, 'PNG')
+#     Image.fromarray(out, 'RGB').save(filename, 'PNG')
 
 
 def disparity_read(filename):
