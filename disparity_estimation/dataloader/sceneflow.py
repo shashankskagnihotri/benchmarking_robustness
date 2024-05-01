@@ -3,7 +3,7 @@ import random
 from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
-from datasets.data_io import get_transform, read_all_lines, pfm_imread
+from .gwcnet_data_io import get_transform, read_all_lines, pfm_imread
 from . import flow_transforms
 import torchvision
 import cv2
