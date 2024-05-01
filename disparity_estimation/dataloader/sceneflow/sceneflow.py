@@ -3,21 +3,22 @@ import random
 from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
-from .CFNet_data_io import get_transform, read_all_lines, pfm_imread
 import torchvision
 import torch
 import torchvision.transforms as transforms
 import copy
-
-
 from albumentations import Compose, OneOf
+from natsort import natsorted
+
+
 from . import CFNet_flow_transforms as flow_transforms
 from .sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBShiftStereo, \
     RandomBrightnessContrastStereo, random_crop, horizontal_flip
 from .sttr_preprocess import augment
-from natsort import natsorted
 
+from .CFNet_data_io import get_transform_cfnet, read_all_lines_cfnet, pfm_imread_cfnet
 
+from .psmnet_preprocess import get_transform_psmnet
 
 
 # SceneFlow dataloader from CFNet
@@ -62,7 +63,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         return Image.open(filename).convert('RGB')
 
     def load_disp(self, filename):
-        return pfm_imread(filename)[0]
+        return pfm_imread_cfnet(filename)[0]
     
 
     def __len__(self):
@@ -78,7 +79,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         if self.model_name == 'CFNet':
             return self.get_item_CFNet(img_left, img_right, disp_left)
         elif self.model_name == 'PSMNet':
-            return self.get_item_PSMNet(img_left, img_right, disp_left, disp_right)
+            return self.get_item_PSMNet(img_left, img_right, disp_left)
         elif self.model_name == 'GWCNet':
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         elif self.model_name == 'HSMNet':
@@ -158,16 +159,11 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
 
-    def get_item_PSMNet(self, left_img, right_img, disparity) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def get_item_PSMNet(self, left_img:Image, right_img:Image, disparity:Image) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         
-        def get_transform():
-            mean = [0.485, 0.456, 0.406]
-            std = [0.229, 0.224, 0.225]
-
-            return transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize(mean=mean, std=std),
-            ])
+        left_img = np.ascontiguousarray(np.array(left_img))
+        right_img = np.ascontiguousarray(np.array(right_img))
+        disparity = np.ascontiguousarray(np.array(disparity)).astype(np.float32)
         
         if self.training:  
             w, h = left_img.size
@@ -179,18 +175,18 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             left_img = left_img.crop((x1, y1, x1 + tw, y1 + th))
             right_img = right_img.crop((x1, y1, x1 + tw, y1 + th))
 
-            dataL = dataL[y1:y1 + th, x1:x1 + tw]
+            disparity = disparity[y1:y1 + th, x1:x1 + tw]
 
-            processed = get_transform(augment=False)  
+            processed = get_transform_psmnet(augment=False)  
             left_img   = processed(left_img)
             right_img  = processed(right_img)
 
-            return left_img, right_img, dataL
+            return left_img, right_img, disparity
         else:
-            processed = get_transform(augment=False)  
+            processed = get_transform_psmnet(augment=False)  
             left_img       = processed(left_img)
             right_img      = processed(right_img) 
-            return left_img, right_img, dataL
+            return left_img, right_img, disparity
 
 
 
@@ -253,7 +249,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             # w, h = left_img.size
 
             disparity = np.ascontiguousarray(disparity, dtype=np.float32)
-            processed = get_transform()
+            processed = get_transform_cfnet()
             left_img = processed(left_img)
             right_img = processed(right_img)
 
@@ -270,7 +266,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             right_img = right_img.crop((w - crop_w, h - crop_h, w, h))
             disparity = disparity[h - crop_h:h, w - crop_w: w]
 
-            processed = get_transform()
+            processed = get_transform_cfnet()
             left_img = processed(left_img)
             right_img = processed(right_img)
 

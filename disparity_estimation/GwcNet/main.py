@@ -65,8 +65,8 @@ logger = SummaryWriter(args.logdir)
 # TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 # TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
 
-train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
-test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
+train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="GWCNet", train=True)
+test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="GWCNet", train=False)
 
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)

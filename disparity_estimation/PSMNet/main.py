@@ -10,8 +10,9 @@ import torch.nn.functional as F
 import numpy as np
 import time
 import math
-from dataloader import listflowfile as lt
+# from dataloader import listflowfile as lt
 from dataloader import SceneFlowFlyingThings3DDataset
+from torch.utils.data import DataLoader
 from models import *
 
 parser = argparse.ArgumentParser(description='PSMNet')
@@ -19,11 +20,11 @@ parser.add_argument('--maxdisp', type=int ,default=192,
                     help='maxium disparity')
 parser.add_argument('--model', default='stackhourglass',
                     help='select model')
-parser.add_argument('--datapath', default='/media/jiaren/ImageNet/SceneFlowData/',
+parser.add_argument('--datapath', required=True,
                     help='datapath')
 parser.add_argument('--epochs', type=int, default=10,
                     help='number of epochs to train')
-parser.add_argument('--loadmodel', default= None,
+parser.add_argument('--loadmodel', default=None,
                     help='load model')
 parser.add_argument('--savemodel', default='./',
                     help='save model')
@@ -38,15 +39,22 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = lt.dataloader(args.datapath)
+# all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = lt.dataloader(args.datapath)
 
-TrainImgLoader = torch.utils.data.DataLoader(
-         SceneFlowFlyingThings3DDataset(all_left_img,all_right_img,all_left_disp, True), 
-         batch_size= 12, shuffle= True, num_workers= 8, drop_last=False)
+# TrainImgLoader = torch.utils.data.DataLoader(
+#          SceneFlowFlyingThings3DDataset(all_left_img,all_right_img,all_left_disp, True), 
+#          batch_size= 12, shuffle= True, num_workers= 8, drop_last=False)
 
-TestImgLoader = torch.utils.data.DataLoader(
-         SceneFlowFlyingThings3DDataset(test_left_img,test_right_img,test_left_disp, False), 
-         batch_size= 8, shuffle= False, num_workers= 4, drop_last=False)
+# TestImgLoader = torch.utils.data.DataLoader(
+#          SceneFlowFlyingThings3DDataset(test_left_img,test_right_img,test_left_disp, False), 
+#          batch_size= 8, shuffle= False, num_workers= 4, drop_last=False)
+
+train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="PSMNet", train=True)
+test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="PSMNet", train=False)
+
+TrainImgLoader = DataLoader(train_dataset, batch_size=12, shuffle=True, num_workers=8, drop_last=True)
+TestImgLoader = DataLoader(test_dataset, batch_size=8, shuffle=False, num_workers=4, drop_last=False)
+
 
 
 if args.model == 'stackhourglass':
