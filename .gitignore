@@ -188,3 +188,7 @@ data/
 sample_data/
 run/
 *.dat
+
+
+checkpoints/
+!*.ckpt

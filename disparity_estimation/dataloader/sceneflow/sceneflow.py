@@ -3,37 +3,35 @@ import random
 from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
-from datasets.data_io import get_transform, read_all_lines, pfm_imread
+from .CFNet_data_io import get_transform, read_all_lines, pfm_imread
 import torchvision
 import torch
 import torchvision.transforms as transforms
-import cv2
 import copy
 
 
-
-
+from albumentations import Compose, OneOf
 from . import CFNet_flow_transforms as flow_transforms
-from .sttr_stereo_albumentation import random_crop, horizontal_flip
+from .sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBShiftStereo, \
+    RandomBrightnessContrastStereo, random_crop, horizontal_flip
 from .sttr_preprocess import augment
 from natsort import natsorted
 
 
+
+
 # SceneFlow dataloader from CFNet
-class SceneFlowFlyingThings3DDataloader(Dataset):
-    def __init__(self, datadir, split='train'):
-        super(SceneFlowFlyingThings3DDataloader, self).__init__()
+class SceneFlowFlyingThings3DDataset(Dataset):
+    def __init__(self, datadir:str, model_name:str, train:bool=True):
+        super().__init__()
 
         self.datadir = datadir
-        self.split = split
+        self.model_name = model_name
 
-        if self.split == 'train':
-            self.split_folder = 'TRAIN'
-        else:
-            self.split_folder = 'TEST'
+        self.split_folder = 'TRAIN' if train else 'TEST'
+        self.training = train
 
         self._read_data()
-        self._augmentation()
 
     def _read_data(self):
         directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
@@ -45,31 +43,40 @@ class SceneFlowFlyingThings3DDataloader(Dataset):
             seq_folders += [os.path.join(sub_folder, seq) for seq in os.listdir(sub_folder) if
                             os.path.isdir(os.path.join(sub_folder, seq))]
 
-        self.left_data = []
+        self.img_left_filenames = []
         for seq_folder in seq_folders:
-            self.left_data += [os.path.join(seq_folder, 'left', img) for img in
+            self.img_left_filenames += [os.path.join(seq_folder, 'left', img) for img in
                                os.listdir(os.path.join(seq_folder, 'left'))]
 
-        self.left_data = natsorted(self.left_data)
+        self.img_left_filenames = natsorted(self.img_left_filenames)
+        self.img_right_filenames = [img_path.replace('left', 'right') for img_path in self.img_left_filenames]
+
+        self.disp_left_filenames = [img.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img in self.img_left_filenames]
+        self.disp_right_filenames = [img.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img in self.img_right_filenames]
 
         directory = os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
         self.occ_data = [os.path.join(directory, occ) for occ in os.listdir(directory)]
         self.occ_data = natsorted(self.occ_data)
 
+    def load_image(self, filename):
+        return Image.open(filename).convert('RGB')
+
+    def load_disp(self, filename):
+        return pfm_imread(filename)[0]
     
 
     def __len__(self):
-        return len(self.left_data)
+        return len(self.img_left_filenames)
 
     
     def __getitem__(self, index):
-        img_left = self.load_image(os.path.join(self.datapath, self.img_left_filenames[index]))
-        img_right = self.load_image(os.path.join(self.datapath, self.img_right_filenames[index]))
-        disp_left = self.load_disp(os.path.join(self.datapath, self.disp_left_filenames[index]))
-        disp_right = self.load_disp(os.path.join(self.datapath, self.disp_right_filenames[index]))
+        img_left = self.load_image(self.img_left_filenames[index])
+        img_right = self.load_image(self.img_right_filenames[index])
+        disp_left = self.load_disp(self.disp_left_filenames[index])
+        disp_right = self.load_disp(self.disp_right_filenames[index])
 
         if self.model_name == 'CFNet':
-            return self.getitem_CFNet(img_left, img_right, disp_left)
+            return self.get_item_CFNet(img_left, img_right, disp_left)
         elif self.model_name == 'PSMNet':
             return self.get_item_PSMNet(img_left, img_right, disp_left, disp_right)
         elif self.model_name == 'GWCNet':
@@ -138,7 +145,14 @@ class SceneFlowFlyingThings3DDataloader(Dataset):
             result['disp'] = left_disp
             result['disp_right'] = right_disp
 
-        result = augment(result, self.transformation)
+        result = augment(result, Compose([
+                RandomShiftRotate(always_apply=True),
+                RGBShiftStereo(always_apply=True, p_asym=0.3),
+                OneOf([
+                    GaussNoiseStereo(always_apply=True, p_asym=1.0),
+                    RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
+                ], p=1.0)
+            ]))
 
         return result
 
@@ -183,7 +197,6 @@ class SceneFlowFlyingThings3DDataloader(Dataset):
     def get_item_CFNet(self, left_img, right_img, disparity) -> dict:
         
         if self.training:
-
             th, tw = 256, 512
             #th, tw = 288, 512
             random_brightness = np.random.uniform(0.5, 2.0, 2)
@@ -195,8 +208,8 @@ class SceneFlowFlyingThings3DDataloader(Dataset):
             right_img = torchvision.transforms.functional.adjust_brightness(right_img, random_brightness[1])
             right_img = torchvision.transforms.functional.adjust_gamma(right_img, random_gamma[1])
             right_img = torchvision.transforms.functional.adjust_contrast(right_img, random_contrast[1])
-            right_img = np.asarray(right_img)
-            left_img = np.asarray(left_img)
+            right_img = np.array(right_img)
+            left_img = np.array(left_img)
 
             # w, h  = left_img.size
             # th, tw = 256, 512
@@ -229,6 +242,7 @@ class SceneFlowFlyingThings3DDataloader(Dataset):
 
             # randomly occlude a region
             right_img.flags.writeable = True
+
             if np.random.binomial(1,0.5):
               sx = int(np.random.uniform(35,100))
               sy = int(np.random.uniform(25,75))
@@ -245,9 +259,9 @@ class SceneFlowFlyingThings3DDataloader(Dataset):
 
 
 
-            return {"left": left_img,
-                    "right": right_img,
-                    "disparity": disparity}
+            return {"left": torch.Tensor(left_img),
+                    "right": torch.Tensor(right_img),
+                    "disparity": torch.Tensor(disparity)}
         else:
             w, h = left_img.size
             crop_w, crop_h = 960, 512

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -x
-DATAPATH="/home2/dataset/scene_flow/"
-CUDA_VISIBLE_DEVICES=1 python main.py --dataset sceneflow \
-    --datapath $DATAPATH --trainlist ./filenames/sceneflow_train.txt --testlist ./filenames/sceneflow_test.txt \
+DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D"
+CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/CFNet/checkpoints/sceneflow_pretraining.ckpt"
+
+python main.py --dataset sceneflow \
+    --datapath $DATAPATH \
     --epochs 20 --lr 0.001 --lrepochs "12,16,18,20:2" --batch_size 1 --maxdisp 256 \
     --model cfnet --logdir ./checkpoints/sceneflow/uniform_sample_d256  \
     --test_batch_size 1

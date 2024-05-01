@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 import gc
 
 
-from dataloader import SceneFlowFlyingThings3DDataloader
+from dataloader import SceneFlowFlyingThings3DDataset
 
 cudnn.benchmark = True
 
@@ -30,8 +30,8 @@ parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity'
 
 parser.add_argument('--dataset', required=True, help='dataset name')
 parser.add_argument('--datapath', required=True, help='data path')
-parser.add_argument('--trainlist', required=True, help='training list')
-parser.add_argument('--testlist', required=True, help='testing list')
+# parser.add_argument('--trainlist', required=True, help='training list')
+# parser.add_argument('--testlist', required=True, help='testing list')
 
 parser.add_argument('--lr', type=float, default=0.001, help='base learning rate')
 parser.add_argument('--batch_size', type=int, default=4, help='training batch size')
@@ -59,11 +59,12 @@ logger = SummaryWriter(args.logdir)
 
 # dataset, dataloader
 # StereoDataset = __datasets__[args.dataset]
-StereoDataset = SceneFlowFlyingThings3DDataloader(args.datapath, 'train')
-train_dataset = StereoDataset(args.datapath, args.trainlist, True)
-test_dataset = StereoDataset(args.datapath, args.testlist, False)
+train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
+test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
+
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
+
 
 # model, optimizer
 model = __models__[args.model](args.maxdisp)
@@ -95,9 +96,10 @@ print("start at epoch {}".format(start_epoch))
 def train():
     bestepoch = 0
     error = 100
+    print("Batch size: ", TestImgLoader.batch_size)
     for epoch_idx in range(start_epoch, args.epochs):
         adjust_learning_rate(optimizer, epoch_idx, args.lr, args.lrepochs)
-
+            
         # training
         for batch_idx, sample in enumerate(TrainImgLoader):
             global_step = len(TrainImgLoader) * epoch_idx + batch_idx
@@ -167,7 +169,7 @@ def train_sample(sample, compute_metrics=False):
     image_outputs = {"disp_est": disp_ests, "disp_gt": disp_gt, "imgL": imgL, "imgR": imgR}
     if compute_metrics:
         with torch.no_grad():
-            image_outputs["errormap"] = [disp_error_image_func()(disp_est, disp_gt) for disp_est in disp_ests]
+            image_outputs["errormap"] = [disp_error_image_func.apply(disp_est, disp_gt) for disp_est in disp_ests]
             scalar_outputs["EPE"] = [EPE_metric(disp_est, disp_gt, mask) for disp_est in disp_ests]
             scalar_outputs["D1"] = [D1_metric(disp_est, disp_gt, mask) for disp_est in disp_ests]
             scalar_outputs["Thres1"] = [Thres_metric(disp_est, disp_gt, mask, 1.0) for disp_est in disp_ests]

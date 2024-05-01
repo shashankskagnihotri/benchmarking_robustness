@@ -13,11 +13,15 @@ import torch.nn.functional as F
 import numpy as np
 import time
 from tensorboardX import SummaryWriter
-from datasets import __datasets__
+# from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
 from torch.utils.data import DataLoader
 import gc
+
+
+from dataloader import SceneFlowFlyingThings3DDataset
+
 
 cudnn.benchmark = True
 
@@ -27,8 +31,8 @@ parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity'
 
 parser.add_argument('--dataset', required=True, help='dataset name', choices=__datasets__.keys())
 parser.add_argument('--datapath', required=True, help='data path')
-parser.add_argument('--trainlist', required=True, help='training list')
-parser.add_argument('--testlist', required=True, help='testing list')
+# parser.add_argument('--trainlist', required=True, help='training list')
+# parser.add_argument('--testlist', required=True, help='testing list')
 
 parser.add_argument('--lr', type=float, default=0.001, help='base learning rate')
 parser.add_argument('--batch_size', type=int, default=16, help='training batch size')
@@ -55,11 +59,18 @@ print("creating new summary file")
 logger = SummaryWriter(args.logdir)
 
 # dataset, dataloader
-StereoDataset = __datasets__[args.dataset]
-train_dataset = StereoDataset(args.datapath, args.trainlist, True)
-test_dataset = StereoDataset(args.datapath, args.testlist, False)
+# StereoDataset = __datasets__[args.dataset]
+# train_dataset = StereoDataset(args.datapath, args.trainlist, True)
+# test_dataset = StereoDataset(args.datapath, args.testlist, False)
+# TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
+# TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
+
+train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
+test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
+
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
+
 
 # model, optimizer
 model = __models__[args.model](args.maxdisp)
