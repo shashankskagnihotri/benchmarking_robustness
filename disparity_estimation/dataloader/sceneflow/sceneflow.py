@@ -4,7 +4,6 @@ from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
 from datasets.data_io import get_transform, read_all_lines, pfm_imread
-from . import flow_transforms
 import torchvision
 import torch
 import torchvision.transforms as transforms
@@ -12,10 +11,18 @@ import cv2
 import copy
 
 
+
+
+from . import CFNet_flow_transforms as flow_transforms
+from .sttr_stereo_albumentation import random_crop, horizontal_flip
+from .sttr_preprocess import augment
+from natsort import natsorted
+
+
 # SceneFlow dataloader from CFNet
-class SceneFlowFlyingThingsDataset(Dataset):
+class SceneFlowFlyingThings3DDataloader(Dataset):
     def __init__(self, datadir, split='train'):
-        super(SceneFlowFlyingThingsDataset, self).__init__()
+        super(SceneFlowFlyingThings3DDataloader, self).__init__()
 
         self.datadir = datadir
         self.split = split
@@ -49,32 +56,22 @@ class SceneFlowFlyingThingsDataset(Dataset):
         self.occ_data = [os.path.join(directory, occ) for occ in os.listdir(directory)]
         self.occ_data = natsorted(self.occ_data)
 
-    def _augmentation(self):
-        if self.split == 'train':
-            self.transformation = Compose([
-                RandomShiftRotate(always_apply=True),
-                RGBShiftStereo(always_apply=True, p_asym=0.3),
-                OneOf([
-                    GaussNoiseStereo(always_apply=True, p_asym=1.0),
-                    RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
-                ], p=1.0)
-            ])
-        else:
-            self.transformation = None
+    
 
     def __len__(self):
         return len(self.left_data)
 
     
     def __getitem__(self, index):
-        left_img = self.load_image(os.path.join(self.datapath, self.left_filenames[index]))
-        right_img = self.load_image(os.path.join(self.datapath, self.right_filenames[index]))
-        disparity = self.load_disp(os.path.join(self.datapath, self.disp_filenames[index]))
-        
+        img_left = self.load_image(os.path.join(self.datapath, self.img_left_filenames[index]))
+        img_right = self.load_image(os.path.join(self.datapath, self.img_right_filenames[index]))
+        disp_left = self.load_disp(os.path.join(self.datapath, self.disp_left_filenames[index]))
+        disp_right = self.load_disp(os.path.join(self.datapath, self.disp_right_filenames[index]))
+
         if self.model_name == 'CFNet':
-            return self.getitem_CFNet(left_img, right_img, disparity)
+            return self.getitem_CFNet(img_left, img_right, disp_left)
         elif self.model_name == 'PSMNet':
-            return self.get_item_PSMNet(left_img, right_img, disparity)
+            return self.get_item_PSMNet(img_left, img_right, disp_left, disp_right)
         elif self.model_name == 'GWCNet':
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         elif self.model_name == 'HSMNet':
@@ -103,7 +100,7 @@ class SceneFlowFlyingThingsDataset(Dataset):
 
 
 
-    def get_item_STTR(self, left_img, right_img, disparity) -> dict:
+    def get_item_STTR(self, left_img, right_img, left_disp, right_disp, left_occ, right_occ) -> dict:
         result = {}
 
         # left_fname = self.left_data[idx]
@@ -114,19 +111,21 @@ class SceneFlowFlyingThingsDataset(Dataset):
         # result['right'] = np.array(Image.open(right_fname)).astype(np.uint8)[..., :3]
         result['right'] = right_img
 
-        occ_right_fname = self.occ_data[idx].replace('left', 'right')
-        occ_left = np.array(Image.open(self.occ_data[idx])).astype(bool)
-        occ_right = np.array(Image.open(occ_right_fname)).astype(bool)
+        # occ_right_fname = self.occ_data[idx].replace('left', 'right')
+        # occ_left = np.array(Image.open(self.occ_data[idx])).astype(bool)
+        # occ_right = np.array(Image.open(occ_right_fname)).astype(bool)
 
         # disp_left_fname = left_fname.replace('frames_finalpass', 'disparity').replace('.png', '.pfm')
         # disp_right_fname = right_fname.replace('frames_finalpass', 'disparity').replace('.png', '.pfm')
         # disp_left, _ = readPFM(disp_left_fname)
         # disp_right, _ = readPFM(disp_right_fname)
 
+
+
         if self.split == "train":
             # horizontal flip
             result['left'], result['right'], result['occ_mask'], result['occ_mask_right'], disp, disp_right \
-                = horizontal_flip(result['left'], result['right'], occ_left, occ_right, disp_left, disp_right,
+                = horizontal_flip(result['left'], result['right'], left_occ, right_occ, left_disp, disp_right,
                                   self.split)
             result['disp'] = np.nan_to_num(disp, nan=0.0)
             result['disp_right'] = np.nan_to_num(disp_right, nan=0.0)
@@ -134,10 +133,10 @@ class SceneFlowFlyingThingsDataset(Dataset):
             # random crop        
             result = random_crop(360, 640, result, self.split)
         else:
-            result['occ_mask'] = occ_left
-            result['occ_mask_right'] = occ_right
-            result['disp'] = disp_left
-            result['disp_right'] = disp_right
+            result['occ_mask'] = left_occ
+            result['occ_mask_right'] = right_occ
+            result['disp'] = left_disp
+            result['disp_right'] = right_disp
 
         result = augment(result, self.transformation)
 

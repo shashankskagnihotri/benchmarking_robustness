@@ -13,11 +13,14 @@ import torch.nn.functional as F
 import numpy as np
 import time
 from tensorboardX import SummaryWriter
-from datasets import __datasets__
+# from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
 from torch.utils.data import DataLoader
 import gc
+
+
+from dataloader import SceneFlowFlyingThings3DDataloader
 
 cudnn.benchmark = True
 
@@ -25,7 +28,7 @@ parser = argparse.ArgumentParser(description='Cascade and Fused Cost Volume for 
 parser.add_argument('--model', default='cfnet', help='select a model structure', choices=__models__.keys())
 parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity')
 
-parser.add_argument('--dataset', required=True, help='dataset name', choices=__datasets__.keys())
+parser.add_argument('--dataset', required=True, help='dataset name')
 parser.add_argument('--datapath', required=True, help='data path')
 parser.add_argument('--trainlist', required=True, help='training list')
 parser.add_argument('--testlist', required=True, help='testing list')
@@ -55,7 +58,8 @@ print("creating new summary file")
 logger = SummaryWriter(args.logdir)
 
 # dataset, dataloader
-StereoDataset = __datasets__[args.dataset]
+# StereoDataset = __datasets__[args.dataset]
+StereoDataset = SceneFlowFlyingThings3DDataloader(args.datapath, 'train')
 train_dataset = StereoDataset(args.datapath, args.trainlist, True)
 test_dataset = StereoDataset(args.datapath, args.testlist, False)
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
