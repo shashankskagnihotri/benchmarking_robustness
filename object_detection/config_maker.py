@@ -574,10 +574,13 @@ for (neck, backbone, dataset), found in all_combis.items():
                 cfg.test_dataloader = voc0712_val_dataloader
 
                 cfg.val_evaluator = dict(
-                    type="VOCMetric", metric="mAP", eval_mode="11points"
+                    type="CocoMetric",
+                    metric="bbox",
+                    eval_mode="11points",
+                    # type="VOCMetric", metric="mAP", eval_mode="11points"
                 )
                 cfg.test_evaluator = dict(
-                    type="VOCMetric", metric="mAP", eval_mode="11points"
+                    type="CocoMetric", metric="bbox", eval_mode="11points"
                 )
 
                 # cfg.dataset_type = new_dataset_type[dataset]
