@@ -6,36 +6,66 @@ import numpy as np
 from datasets.data_io import get_transform, read_all_lines, pfm_imread
 from . import flow_transforms
 import torchvision
+import torch
+import torchvision.transforms as transforms
 import cv2
 import copy
 
 
 # SceneFlow dataloader from CFNet
-class SceneFlowDataloader(Dataset):
-    def __init__(self, datapath, list_filename:list, training:bool):
-        self.datapath = datapath
-        self.left_filenames, self.right_filenames, self.disp_filenames = self.load_path(list_filename)
-        self.training = training
+class SceneFlowFlyingThingsDataset(Dataset):
+    def __init__(self, datadir, split='train'):
+        super(SceneFlowFlyingThingsDataset, self).__init__()
 
-    def load_path(self, list_filename):
-        lines = read_all_lines(list_filename)
-        splits = [line.split() for line in lines]
-        left_images = [x[0] for x in splits]
-        right_images = [x[1] for x in splits]
-        disp_images = [x[2] for x in splits]
-        return left_images, right_images, disp_images
+        self.datadir = datadir
+        self.split = split
 
-    def load_image(self, filename):
-        return Image.open(filename).convert('RGB')
+        if self.split == 'train':
+            self.split_folder = 'TRAIN'
+        else:
+            self.split_folder = 'TEST'
 
-    def load_disp(self, filename):
-        data, scale = pfm_imread(filename)
-        data = np.ascontiguousarray(data, dtype=np.float32)
-        return data
+        self._read_data()
+        self._augmentation()
+
+    def _read_data(self):
+        directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
+        sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
+                       os.path.isdir(os.path.join(directory, subset))]
+
+        seq_folders = []
+        for sub_folder in sub_folders:
+            seq_folders += [os.path.join(sub_folder, seq) for seq in os.listdir(sub_folder) if
+                            os.path.isdir(os.path.join(sub_folder, seq))]
+
+        self.left_data = []
+        for seq_folder in seq_folders:
+            self.left_data += [os.path.join(seq_folder, 'left', img) for img in
+                               os.listdir(os.path.join(seq_folder, 'left'))]
+
+        self.left_data = natsorted(self.left_data)
+
+        directory = os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
+        self.occ_data = [os.path.join(directory, occ) for occ in os.listdir(directory)]
+        self.occ_data = natsorted(self.occ_data)
+
+    def _augmentation(self):
+        if self.split == 'train':
+            self.transformation = Compose([
+                RandomShiftRotate(always_apply=True),
+                RGBShiftStereo(always_apply=True, p_asym=0.3),
+                OneOf([
+                    GaussNoiseStereo(always_apply=True, p_asym=1.0),
+                    RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
+                ], p=1.0)
+            ])
+        else:
+            self.transformation = None
 
     def __len__(self):
-        return len(self.left_filenames)
+        return len(self.left_data)
 
+    
     def __getitem__(self, index):
         left_img = self.load_image(os.path.join(self.datapath, self.left_filenames[index]))
         right_img = self.load_image(os.path.join(self.datapath, self.right_filenames[index]))
@@ -50,7 +80,7 @@ class SceneFlowDataloader(Dataset):
         elif self.model_name == 'HSMNet':
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         elif self.model_name == 'STTR':
-            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+            return self.item_
         
         else:
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
@@ -73,11 +103,59 @@ class SceneFlowDataloader(Dataset):
 
 
 
+    def get_item_STTR(self, left_img, right_img, disparity) -> dict:
+        result = {}
 
+        # left_fname = self.left_data[idx]
+        # result['left'] = np.array(Image.open(left_fname)).astype(np.uint8)[..., :3]
+        result['left'] = left_img
+
+        # right_fname = left_fname.replace('left', 'right')
+        # result['right'] = np.array(Image.open(right_fname)).astype(np.uint8)[..., :3]
+        result['right'] = right_img
+
+        occ_right_fname = self.occ_data[idx].replace('left', 'right')
+        occ_left = np.array(Image.open(self.occ_data[idx])).astype(bool)
+        occ_right = np.array(Image.open(occ_right_fname)).astype(bool)
+
+        # disp_left_fname = left_fname.replace('frames_finalpass', 'disparity').replace('.png', '.pfm')
+        # disp_right_fname = right_fname.replace('frames_finalpass', 'disparity').replace('.png', '.pfm')
+        # disp_left, _ = readPFM(disp_left_fname)
+        # disp_right, _ = readPFM(disp_right_fname)
+
+        if self.split == "train":
+            # horizontal flip
+            result['left'], result['right'], result['occ_mask'], result['occ_mask_right'], disp, disp_right \
+                = horizontal_flip(result['left'], result['right'], occ_left, occ_right, disp_left, disp_right,
+                                  self.split)
+            result['disp'] = np.nan_to_num(disp, nan=0.0)
+            result['disp_right'] = np.nan_to_num(disp_right, nan=0.0)
+
+            # random crop        
+            result = random_crop(360, 640, result, self.split)
+        else:
+            result['occ_mask'] = occ_left
+            result['occ_mask_right'] = occ_right
+            result['disp'] = disp_left
+            result['disp_right'] = disp_right
+
+        result = augment(result, self.transformation)
+
+        return result
 
 
 
     def get_item_PSMNet(self, left_img, right_img, disparity) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        
+        def get_transform():
+            mean = [0.485, 0.456, 0.406]
+            std = [0.229, 0.224, 0.225]
+
+            return transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std),
+            ])
+        
         if self.training:  
             w, h = left_img.size
             th, tw = 256, 512
@@ -90,13 +168,13 @@ class SceneFlowDataloader(Dataset):
 
             dataL = dataL[y1:y1 + th, x1:x1 + tw]
 
-            processed = preprocess.get_transform(augment=False)  
+            processed = get_transform(augment=False)  
             left_img   = processed(left_img)
             right_img  = processed(right_img)
 
             return left_img, right_img, dataL
         else:
-            processed = preprocess.get_transform(augment=False)  
+            processed = get_transform(augment=False)  
             left_img       = processed(left_img)
             right_img      = processed(right_img) 
             return left_img, right_img, dataL
