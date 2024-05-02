@@ -182,7 +182,7 @@ test_cfg = dict(type="TestLoop")
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        ann_file="VOC2007/ImageSets/Main/test.txt",
+        ann_file="VOC2007/ImageSets/Main/test.txt",  #!.json
         backend_args=None,
         data_prefix=dict(sub_data_root="VOC2007/"),
         data_root="data/VOCdevkit/",
@@ -218,7 +218,7 @@ test_dataloader = dict(
 )
 test_evaluator = [
     dict(
-        ann_file="data/VOCdevkit/VOC2007/ImageSets/Main/test.txt",
+        ann_file="data/voc_coco_format/voc07_test.json",
         backend_args=None,
         format_only=False,
         metric="bbox",
@@ -337,58 +337,168 @@ train_pipeline = [
     dict(type="PackDetInputs"),
 ]
 val_cfg = dict(type="ValLoop")
+# val_dataloader = dict(
+#     batch_size=1,
+#     dataset=dict(
+#         dataset=dict(
+#             datasets=[
+#                 dict(
+#                     ann_file="VOC2007/ImageSets/Main/val.txt",  #!.json
+#                     backend_args=None,
+#                     data_prefix=dict(sub_data_root="VOC2007/"),
+#                     data_root="data/VOCdevkit/",
+# pipeline=[
+#     dict(backend_args=None, type="LoadImageFromFile"),
+#     dict(
+#         keep_ratio=True,
+#         scale=(
+#             1000,
+#             600,
+#         ),
+#         type="Resize",
+#     ),
+#     dict(type="LoadAnnotations", with_bbox=True),
+#     dict(
+#         meta_keys=(
+#             "img_id",
+#             "img_path",
+#             "ori_shape",
+#             "img_shape",
+#             "scale_factor",
+#         ),
+#         type="PackDetInputs",
+#     ),
+# ],
+#                     test_mode=True,
+#                     type="VOCDataset",
+#                 ),
+#                 dict(
+#                     ann_file="VOC2012/ImageSets/Main/val.txt",  #!.json
+#                     backend_args=None,
+#                     data_prefix=dict(sub_data_root="VOC2012/"),
+#                     data_root="data/VOCdevkit/",
+#                     pipeline=[
+#                         dict(backend_args=None, type="LoadImageFromFile"),
+#                         dict(
+#                             keep_ratio=True,
+#                             scale=(
+#                                 1000,
+#                                 600,
+#                             ),
+#                             type="Resize",
+#                         ),
+#                         dict(type="LoadAnnotations", with_bbox=True),
+#                         dict(
+#                             meta_keys=(
+#                                 "img_id",
+#                                 "img_path",
+#                                 "ori_shape",
+#                                 "img_shape",
+#                                 "scale_factor",
+#                             ),
+#                             type="PackDetInputs",
+#                         ),
+#                     ],
+#                     test_mode=True,
+#                     type="VOCDataset",
+#                 ),
+#             ],ignore_keys=[
+#             "dataset_type",
+#         ],
+#         type="ConcatDataset",
+#         ),
+
+#     ),
+#     drop_last=False,
+#     num_workers=2,
+#     persistent_workers=True,
+#     sampler=dict(shuffle=False, type="DefaultSampler"),
+# )
 val_dataloader = dict(
-    batch_size=1,
+    batch_sampler=dict(type="AspectRatioBatchSampler"),
+    batch_size=2,
     dataset=dict(
-        ann_file="VOC2007/ImageSets/Main/test.txt",
-        backend_args=None,
-        data_prefix=dict(sub_data_root="VOC2007/"),
-        data_root="data/VOCdevkit/",
-        pipeline=[
-            dict(backend_args=None, type="LoadImageFromFile"),
-            dict(
-                keep_ratio=True,
-                scale=(
-                    1000,
-                    600,
+        dataset=dict(
+            datasets=[
+                dict(
+                    ann_file="VOC2007/ImageSets/Main/val.txt",
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root="VOC2007/"),
+                    data_root="data/VOCdevkit/",
+                    pipeline=[
+                        dict(backend_args=None, type="LoadImageFromFile"),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type="Resize",
+                        ),
+                        dict(type="LoadAnnotations", with_bbox=True),
+                        dict(
+                            meta_keys=(
+                                "img_id",
+                                "img_path",
+                                "ori_shape",
+                                "img_shape",
+                                "scale_factor",
+                            ),
+                            type="PackDetInputs",
+                        ),
+                    ],
+                    type="VOCDataset",
                 ),
-                type="Resize",
-            ),
-            dict(type="LoadAnnotations", with_bbox=True),
-            dict(
-                meta_keys=(
-                    "img_id",
-                    "img_path",
-                    "ori_shape",
-                    "img_shape",
-                    "scale_factor",
+                dict(
+                    ann_file="VOC2012/ImageSets/Main/val.txt",
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root="VOC2012/"),
+                    data_root="data/VOCdevkit/",
+                    pipeline=[
+                        dict(backend_args=None, type="LoadImageFromFile"),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type="Resize",
+                        ),
+                        dict(type="LoadAnnotations", with_bbox=True),
+                        dict(
+                            meta_keys=(
+                                "img_id",
+                                "img_path",
+                                "ori_shape",
+                                "img_shape",
+                                "scale_factor",
+                            ),
+                            type="PackDetInputs",
+                        ),
+                    ],
+                    type="VOCDataset",
                 ),
-                type="PackDetInputs",
-            ),
-        ],
-        test_mode=True,
-        type="VOCDataset",
+            ],
+            ignore_keys=[
+                "dataset_type",
+            ],
+            type="ConcatDataset",
+        ),
+        times=3,
+        type="RepeatDataset",
     ),
-    drop_last=False,
     num_workers=2,
     persistent_workers=True,
-    sampler=dict(shuffle=False, type="DefaultSampler"),
+    sampler=dict(shuffle=True, type="DefaultSampler"),
 )
 val_evaluator = [
     dict(
-        ann_file="data/VOCdevkit/VOC2007/ImageSets/Main/val.txt",
+        ann_file="data/voc_coco_format/voc0712_val.json",
         backend_args=None,
         format_only=False,
         metric="bbox",
         type="CocoMetric",
     ),
-    # dict(
-    #     ann_file="VOC2012/ImageSets/Main/val.txt",
-    #     backend_args=None,
-    #     format_only=False,
-    #     metric="bbox",
-    #     type="CocoMetric",
-    # ),
 ]
 vis_backends = [
     dict(type="LocalVisBackend"),
