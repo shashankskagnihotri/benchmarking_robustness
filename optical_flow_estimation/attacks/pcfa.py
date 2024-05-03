@@ -24,7 +24,7 @@ def pcfa(
     """
 
     optim_mu = 2500.0 / attack_args["pcfa_delta_bound"]
-    if attack_args["target"] not in ["zero"]:
+    if attack_args["attack_target"] not in ["zero"]:
             optim_mu = 1.5*optim_mu
 
     eps_box = 1e-7

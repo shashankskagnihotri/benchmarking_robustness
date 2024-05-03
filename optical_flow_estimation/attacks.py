@@ -62,11 +62,10 @@ from ptlflow_attacked.validate import (
     _get_model_names,
 )
 
-# Import cosPGD functions
-import torch.nn as nn
+from torch.nn.functional import cosine_similarity
+from attacks.attack_utils.utils import get_flow_tensors
 
-
-# Attack parameters
+# Default Attack parameters
 epsilon = 8 / 255
 norm = "inf"
 alpha = 0.01
@@ -74,10 +73,6 @@ iterations = 3
 loss_function = "epe"
 targeted = False
 batch_size = 1
-
-
-# PCFA parameters
-import torch.optim as optim
 
 delta_bound = 0.005
 
@@ -545,17 +540,18 @@ def attack_one_dataloader(
 
             if inputs["images"].max() > 1.0:
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
-
+            has_ground_truth = True
             targeted_inputs = None
+            with torch.no_grad():
+                orig_preds = model(inputs)
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
-                with torch.no_grad():
-                    orig_preds = model(inputs)
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
                 else:
                     targeted_flow_tensor = torch.zeros_like(orig_preds["flows"])
                 if not "flows" in inputs:
                     inputs["flows"] = targeted_flow_tensor
+                    has_ground_truth = False
 
                 targeted_inputs = inputs.copy()
                 targeted_inputs["flows"] = targeted_flow_tensor
@@ -633,15 +629,19 @@ def attack_one_dataloader(
                     elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
                         inputs[key] = val[:, k : k + 1]
 
-            # metrics = model.val_metrics(preds, inputs)
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                 metrics = model.val_metrics(preds, targeted_inputs)
-                metrics_ground_truth = model.val_metrics(preds, inputs)
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
-                metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
+                metrics["val/cosim_target"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(targeted_inputs)))
+                metrics["val/cosim_orig_preds"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(targeted_inputs)))
+                if has_ground_truth:
+                    metrics_ground_truth = model.val_metrics(preds, inputs)
+                    metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
+                    metrics["val/cosim_ground_truth"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs)))
             else:
                 metrics = model.val_metrics(preds, inputs)
+                metrics["val/cosim"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs)))
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
