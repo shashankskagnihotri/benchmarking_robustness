@@ -50,4 +50,4 @@ def apgd(
     images = None
     labels = None
 
-    return images, labels, preds, None
+    return preds # images, labels, preds, None

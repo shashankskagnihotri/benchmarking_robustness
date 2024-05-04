@@ -110,7 +110,7 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--cc_name",
         type=str,
-        default=["gaussian_noise"],
+        default="gaussian_noise",
         nargs="*",
         choices=[
             "gaussian_noise",
@@ -134,7 +134,7 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--cc_severity",
         type=int,
-        default=[1],
+        default=1,
         nargs="*",
         choices=[1,2,3,4,5],
         help="Severity of the common corruption to use on the input images.",
@@ -391,6 +391,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     output_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
     for attack_args in attack_args_parser:
+        #pdb.set_trace()
         output_data.append(("attack_args", attack_arg_string(attack_args)))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
@@ -556,44 +557,37 @@ def attack_one_dataloader(
                 targeted_inputs = inputs.copy()
                 targeted_inputs["flows"] = targeted_flow_tensor
 
-            # TODO: figure out what to do with scaled images and labels
-            # print(attack_args["attack_epsilon"])
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, placeholder = fgsm(
+                    preds = fgsm(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pgd":
-                    # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                    preds = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "cospgd":
-                    # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                    preds = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "bim":
-                    # inputs["images"] = cos_pgd(args, inputs, model)
-                    images, labels, preds, losses[i] = bim_pgd_cospgd(
+                    preds = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "apgd":
-                    # inputs["images"] = fgsm(args, inputs, model)
-                    images, labels, preds, placeholder = apgd(
+                    preds = apgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "fab":
-                    images, labels, preds, placeholder = fab(
+                    preds = fab(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pcfa":
-                    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
+                    preds = pcfa(
                         attack_args, model, targeted_inputs
                     )
                 case "common_corruptions":
-                    preds = common_corrupt(attack_args, inputs, model, args)
+                    preds = common_corrupt(attack_args, inputs, model)
                 case "none":
                     preds = model(inputs)
 

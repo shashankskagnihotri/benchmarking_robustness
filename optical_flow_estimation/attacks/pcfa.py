@@ -43,7 +43,7 @@ def pcfa(
         model, targeted_inputs, eps_box, device, optim_mu, attack_args
     )
 
-    return preds, l2_delta1, l2_delta2, l2_delta12
+    return preds #, l2_delta1, l2_delta2, l2_delta12
 
 
 def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
