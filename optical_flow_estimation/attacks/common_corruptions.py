@@ -8,11 +8,10 @@ from attacks.attack_utils.utils import (
 )
 
 from imagecorruptions.imagecorruptions import corrupt
-import pdb
 
 def common_corrupt(attack_args: Dict[str, List[object]],
                    inputs: Dict[str, torch.Tensor],
-                model: BaseModel, args
+                model: BaseModel
                 ):
     # Define what device we are using
     if not torch.cuda.is_available():
@@ -32,8 +31,8 @@ def common_corrupt(attack_args: Dict[str, List[object]],
     image_2_numpy = (image_2_permuted * 255).clamp(0, 255).byte().cpu().numpy()
 
     # Create corruption on each input image
-    image_1_corrupt = corrupt(image_1_numpy, corruption_name=args.cc_name[0], severity=args.cc_severity[0])
-    image_2_corrupt = corrupt(image_2_numpy, corruption_name=args.cc_name[0], severity=args.cc_severity[0])
+    image_1_corrupt = corrupt(image_1_numpy, corruption_name=attack_args["cc_name"], severity=attack_args["cc_severity"])
+    image_2_corrupt = corrupt(image_2_numpy, corruption_name=attack_args["cc_name"], severity=attack_args["cc_severity"])
 
     # Rescale the numpy images to [0, 1] and convert them back to tensors
     image_1 = torch.from_numpy(image_1_corrupt / 255).to(device).float()

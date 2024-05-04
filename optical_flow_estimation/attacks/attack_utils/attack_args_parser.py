@@ -42,6 +42,12 @@ pcfa_arguments = [
     "pcfa_steps",
     "pcfa_boxconstraint",
 ]
+cc_arguments = [
+    "attack",
+    "attack_targeted",
+    "cc_name",
+    "cc_severity",
+]
 no_attack_arguments = ["attack", "attack_targeted"]
 targeted_arguments = ["attack_target"]
 
@@ -57,6 +63,7 @@ class AttackArgumentParser:
                 arg.startswith("attack")
                 or arg.startswith("pcfa")
                 or arg.startswith("apgd")
+                or arg.startswith("cc")
             ):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
         self.number_of_args = len(self.attack_args.keys())
@@ -142,6 +149,12 @@ class AttackArgumentParser:
                     for arg_name in entry.keys():
                         if arg_name not in pcfa_arguments:
                             del to_remove[arg_name]
+                case "common_corruptions":
+                    for arg_name in entry.keys():
+                        if arg_name not in cc_arguments:
+                            del to_remove[arg_name]
+                        elif arg_name == "attack_targeted":
+                            to_remove["attack_targeted"] = False
                 case "none":
                     for arg_name in entry.keys():
                         if arg_name not in no_attack_arguments:
