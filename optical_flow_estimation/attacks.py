@@ -24,6 +24,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from datetime import datetime
+import json
 
 import os
 import cv2 as cv
@@ -384,15 +385,20 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     }
     overwrite_flag = args.overwrite_output
     output_data = []
+    start_time = datetime.now()
     output_data.append(
-        (f"----ATTACK RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ----", "")
+        ("start_time", start_time.strftime('%Y-%m-%d %H:%M:%S'))
     )
     output_data.append(("model", args.model))
     output_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
     for attack_args in attack_args_parser:
-        #pdb.set_trace()
-        output_data.append(("attack_args", attack_arg_string(attack_args)))
+        for key, value in attack_args.items():
+            if "_" in key:
+                key = key.split("_")[1]
+            if isinstance(value, float):
+                value = round(value, 2)
+            output_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
             if args.attack == "none":
@@ -401,29 +407,55 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
                 metrics_mean = attack_one_dataloader(
                     args, attack_args, model, dl, dataset_name
                 )
+
+            end_time = datetime.now()
             output_data.append(
-                ("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                ("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S"))
             )
+            time_difference = end_time - start_time
+            hours = time_difference.seconds // 3600
+            minutes = (time_difference.seconds % 3600) // 60
+            seconds = time_difference.seconds % 60
+            time_difference_str = "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
+            output_data.append(("duration", time_difference_str))
+
+            output_data.append(("dataset", dataset_name))
             for k in metrics_mean.keys():
-                output_data.append((f"{dataset_name}-{k}", metrics_mean[k]))
-            metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
+                output_data.append((k, metrics_mean[k]))
+            
             args.output_path.mkdir(parents=True, exist_ok=True)
-            if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
-                metrics_df_old = pd.read_csv(
-                    args.output_path / f"metrics_{args.val_dataset}.csv",
-                    header=None,
-                    names=["Type", "Value"],
-                )
-                metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
-            metrics_df.to_csv(
-                args.output_path / f"metrics_{args.val_dataset}.csv",
-                header=False,
-                index=False,
-            )
-            overwrite_flag = False
-            output_data = []
-    metrics_df = metrics_df.round(3)
-    return metrics_df
+            # metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
+            # if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
+            #     metrics_df_old = pd.read_csv(
+            #         args.output_path / f"metrics_{args.val_dataset}.csv",
+            #         header=None,
+            #         names=["Type", "Value"],
+            #     )
+            #     metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
+            # metrics_df.to_csv(
+            #     args.output_path / f"metrics_{args.val_dataset}.csv",
+            #     header=False,
+            #     index=False,
+            # )
+            output_dict = {}
+            for key, value in output_data:
+                if "val" in key:
+                    output_dict.setdefault("metrics", {})[key.split("/")[1]] = value
+                else:
+                    output_dict[key] = value
+            output_filename = args.output_path / f"metrics_{args.val_dataset}.json"
+
+            if os.path.exists(output_filename) and not overwrite_flag:
+                with open(output_filename, 'r') as json_file:
+                    metrics = json.load(json_file)
+            else:
+                metrics = {"experiments": []}
+
+            metrics["experiments"].append(output_dict)
+
+            with open(output_filename, 'w') as json_file:
+                json.dump(metrics, json_file, indent=4)
+    # return metrics_df
 
 
 def attack_list_of_models(args: Namespace) -> None:
@@ -628,7 +660,7 @@ def attack_one_dataloader(
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
                 metrics["val/cosim_target"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(targeted_inputs)))
-                metrics["val/cosim_orig_preds"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(targeted_inputs)))
+                metrics["val/cosim_orig_preds"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(orig_preds)))
                 if has_ground_truth:
                     metrics_ground_truth = model.val_metrics(preds, inputs)
                     metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
