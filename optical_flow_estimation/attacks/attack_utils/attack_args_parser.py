@@ -38,8 +38,8 @@ pcfa_arguments = [
     "attack_targeted",
     "attack_target",
     "attack_loss",
-    "pcfa_delta_bound",
-    "pcfa_steps",
+    "attack_epsilon",
+    "attack_alpha" "attack_iterations",
     "pcfa_boxconstraint",
 ]
 tdcc_arguments = [
@@ -48,7 +48,12 @@ tdcc_arguments = [
     "3dcc_intensity",
     "attack_targeted",
 ]
-
+cc_arguments = [
+    "attack",
+    "attack_targeted",
+    "cc_name",
+    "cc_severity",
+]
 no_attack_arguments = ["attack", "attack_targeted"]
 targeted_arguments = ["attack_target"]
 
@@ -65,6 +70,7 @@ class AttackArgumentParser:
                 or arg.startswith("pcfa")
                 or arg.startswith("apgd")
                 or arg.startswith("3dcc")
+                or arg.startswith("cc")
             ):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
         self.number_of_args = len(self.attack_args.keys())
@@ -153,6 +159,12 @@ class AttackArgumentParser:
                 case "3dcc":
                     for arg_name in entry.keys():
                         if arg_name not in tdcc_arguments:
+                            del to_remove[arg_name]
+                        elif arg_name == "attack_targeted":
+                            to_remove["attack_targeted"] = False
+                case "common_corruptions":
+                    for arg_name in entry.keys():
+                        if arg_name not in cc_arguments:
                             del to_remove[arg_name]
                         elif arg_name == "attack_targeted":
                             to_remove["attack_targeted"] = False

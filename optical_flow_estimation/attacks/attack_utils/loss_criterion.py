@@ -211,7 +211,7 @@ def get_loss(f_type, pred, target):
 
     Args:
         f_type (str):
-            specifies the returned metric. Options: [aee | mse | cosim]
+            specifies the returned metric. Options: [epe | mse | cosim]
         pred (tensor):
             predicted flow field (must have same dimensions as target)
         target (tensor):
@@ -226,7 +226,7 @@ def get_loss(f_type, pred, target):
 
     similarity_term = None
 
-    if f_type == "aee":
+    if f_type == "epe":
         similarity_term = f_epe(pred, target)
     elif f_type == "cosim":
         similarity_term = f_cosim(pred, target)
@@ -235,7 +235,7 @@ def get_loss(f_type, pred, target):
     else:
         raise (
             NotImplementedError,
-            "The requested loss type %s does not exist. Please choose one of 'aee', 'mse' or 'cosim'"
+            "The requested loss type %s does not exist. Please choose one of 'epe', 'mse' or 'cosim'"
             % (f_type),
         )
 
@@ -270,7 +270,7 @@ def relu_penalty(delta1, delta2, device, delta_bound=0.001):
 
 
 def loss_delta_constraint(
-    pred, target, delta1, delta2, device, delta_bound=0.001, mu=100.0, f_type="aee"
+    pred, target, delta1, delta2, device, delta_bound=0.001, mu=100.0, f_type="epe"
 ):
     """Penalty method to optimize the perturbations.
     An exact penalty function is used to transform the inequality constrained problem into an
@@ -292,7 +292,7 @@ def loss_delta_constraint(
         mu (_type_, optional):
             penalty parameter which enforces the unconstrained the specified constraint. Defaults to 100..
         f_type (str, optional):
-            specifies the metric used for comparing prediction and target. Options: [aee | mse | cosim]. Defaults to "aee".
+            specifies the metric used for comparing prediction and target. Options: [epe | mse | cosim]. Defaults to "epe".
 
     Returns:
         _type_: _description_
@@ -306,7 +306,7 @@ def loss_delta_constraint(
     return similarity_term + mu * penalty_term
 
 
-def loss_weighted(pred, target, delta1, delta2, c=1.0, f_type="aee"):
+def loss_weighted(pred, target, delta1, delta2, c=1.0, f_type="epe"):
 
     similarity_term = get_loss(f_type, pred, target)
 
