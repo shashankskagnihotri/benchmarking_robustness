@@ -20,4 +20,7 @@ CONFIG_FILE="mmdetection/configs/retinanet/retinanet_x101-64x4d_fpn_1x_coco.py"
 
 python mmdetection/tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE}
 
+CHECKPOINT_FILE="mmdetection/checkpoints/retinanet_r50_fpn_1x_voc0712_20200617-47cbdd0e.pth"
+CONFIG_FILE="mmdetection/configs/pascal_voc/retinanet_r50_fpn_1x_voc0712.py"
 
+python mmdetection/tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE}
