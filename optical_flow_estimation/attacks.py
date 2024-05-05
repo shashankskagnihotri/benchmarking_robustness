@@ -177,6 +177,13 @@ def _init_parser() -> ArgumentParser:
         help="the number of optimization steps per image (for non-universal perturbations only).",
     )
     parser.add_argument(
+        "--pcfa_eps_box",
+        default=1e-7,
+        type=float,
+        nargs="*",
+        help="The epsilon box for pcfa.",
+    )
+    parser.add_argument(
         "--apgd_rho",
         default=0.75,
         nargs="*",

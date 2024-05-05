@@ -41,6 +41,7 @@ pcfa_arguments = [
     "pcfa_delta_bound",
     "pcfa_steps",
     "pcfa_boxconstraint",
+    "pcfa_eps_box",
 ]
 cc_arguments = [
     "attack",

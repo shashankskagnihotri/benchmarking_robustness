@@ -27,7 +27,7 @@ def pcfa(
     if attack_args["attack_target"] not in ["zero"]:
             optim_mu = 1.5*optim_mu
 
-    eps_box = 1e-7
+    eps_box = attack_args["pcfa_eps_box"]
 
     # Define what device we are using
     if not torch.cuda.is_available():
