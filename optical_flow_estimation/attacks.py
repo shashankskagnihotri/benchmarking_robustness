@@ -156,33 +156,33 @@ def _init_parser() -> ArgumentParser:
         help="Set epsilon to use for adversarial attack.",
     )
     parser.add_argument(
-        "--pcfa_delta_bound",
-        type=float,
-        default=delta_bound,
-        nargs="*",
-        help="Set delta bound to use for PCFA.",
-    )
-    parser.add_argument(
         "--pcfa_boxconstraint",
         default="change_of_variables",
         nargs="*",
         choices=["clipping", "change_of_variables"],
         help="the way to enfoce the box constraint on the distortion. Options: 'clipping', 'change_of_variables'.",
     )
-    parser.add_argument(
-        "--pcfa_steps",
-        default=5,
-        type=int,
-        nargs="*",
-        help="the number of optimization steps per image (for non-universal perturbations only).",
-    )
-    parser.add_argument(
-        "--pcfa_eps_box",
-        default=1e-7,
-        type=float,
-        nargs="*",
-        help="The epsilon box for pcfa.",
-    )
+    # parser.add_argument(
+    #     "--pcfa_delta_bound",
+    #     type=float,
+    #     default=delta_bound,
+    #     nargs="*",
+    #     help="Set delta bound to use for PCFA.",
+    # )
+    # parser.add_argument(
+    #     "--pcfa_steps",
+    #     default=5,
+    #     type=int,
+    #     nargs="*",
+    #     help="the number of optimization steps per image (for non-universal perturbations only).",
+    # )
+    # parser.add_argument(
+    #     "--pcfa_eps_box",
+    #     default=1e-7,
+    #     type=float,
+    #     nargs="*",
+    #     help="The epsilon box for pcfa.",
+    # )
     parser.add_argument(
         "--apgd_rho",
         default=0.75,

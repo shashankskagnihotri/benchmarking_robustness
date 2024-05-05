@@ -23,11 +23,11 @@ def pcfa(
     Performs an PCFA attack on a given model and for all images of a specified dataset.
     """
 
-    optim_mu = 2500.0 / attack_args["pcfa_delta_bound"]
+    optim_mu = 2500.0 / attack_args["attack_epsilon"]
     if attack_args["attack_target"] not in ["zero"]:
             optim_mu = 1.5*optim_mu
 
-    eps_box = attack_args["pcfa_eps_box"]
+    eps_box = attack_args["attack_alpha"]
 
     # Define what device we are using
     if not torch.cuda.is_available():
@@ -169,7 +169,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
 
     l2_delta1, l2_delta2, l2_delta12 = 0, 0, 0
 
-    for steps in range(attack_args["pcfa_steps"]):
+    for steps in range(attack_args["attack_iterations"]):
         # Calculate the deltas from the quantities that go into the network
         delta1, delta2 = extract_deltas(
             nw_input1,
@@ -186,7 +186,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
             delta1,
             delta2,
             device,
-            delta_bound=attack_args["pcfa_delta_bound"],
+            delta_bound=attack_args["attack_epsilon"],
             mu=optim_mu,
             f_type=attack_args["attack_loss"],
         )
@@ -214,7 +214,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
                 delta1_closure,
                 delta2_closure,
                 device,
-                delta_bound=attack_args["pcfa_delta_bound"],
+                delta_bound=attack_args["attack_epsilon"],
                 mu=optim_mu,
                 f_type=attack_args["attack_loss"],
             )
