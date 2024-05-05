@@ -50,6 +50,7 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
+from attacks.tdcc import get_dataset_3DCC
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
@@ -60,6 +61,7 @@ from ptlflow_attacked.validate import (
     generate_outputs,
     _get_model_names,
 )
+
 
 # Import cosPGD functions
 import torch.nn as nn
@@ -105,6 +107,7 @@ def _init_parser() -> ArgumentParser:
             "apgd",
             "fab",
             "pcfa",
+            "3dcc",
             "none",
         ],
         help="Name of the attack to use.",
@@ -214,6 +217,31 @@ def _init_parser() -> ArgumentParser:
         default=loss_function,
         nargs="*",
         help="Set the name of the used loss function (mse, epe)",
+    )
+    parser.add_argument(
+        "--3dcc_intensity",
+        type=int,
+        choices=[1, 2, 3, 4, 5],
+        default=3,
+        nargs="*",
+        help="Set the the intensity of the 3DCC corruption, int between 1 and 5",
+    )
+    parser.add_argument(
+        "--3dcc_corruption",
+        type=str,
+        default="far_focus",
+        nargs="*",
+        choices=[
+            "far_focus",
+            "near_focus",
+            "fog",
+            "color_quant",
+            "iso_noise",
+            "low_light",
+            "xy_motion_blur",
+            "z_motion_blur",
+        ],
+        help="Set the type of 3DCC",
     )
     parser.add_argument(
         "--selection",
@@ -347,7 +375,6 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
         model = model.cuda()
         if args.fp16:
             model = model.half()
-
     dataloaders = model.val_dataloader()
     dataloaders = {
         model.val_dataloader_names[i]: dataloaders[i] for i in range(len(dataloaders))
@@ -377,7 +404,10 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
                 output_data.append((f"{dataset_name}-{k}", metrics_mean[k]))
             metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
             args.output_path.mkdir(parents=True, exist_ok=True)
-            if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
+            if (
+                os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv")
+                and not overwrite_flag
+            ):
                 metrics_df_old = pd.read_csv(
                     args.output_path / f"metrics_{args.val_dataset}.csv",
                     header=None,
@@ -480,7 +510,13 @@ def attack_one_dataloader(
     """
 
     metrics_sum = {}
-
+    if attack_args["attack"] == "3dcc":
+        dataloader = get_dataset_3DCC(
+            model,
+            dataloader_name,
+            attack_args["3dcc_corruption"],
+            attack_args["3dcc_intensity"],
+        )
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -560,7 +596,7 @@ def attack_one_dataloader(
                     preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
                         attack_args, model, targeted_inputs
                     )
-                case "none":
+                case "3dcc" | "none":
                     preds = model(inputs)
 
             if args.warm_start:
