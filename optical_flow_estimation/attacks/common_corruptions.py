@@ -6,8 +6,7 @@ from attacks.attack_utils.utils import (
     get_image_tensors,
     replace_images_dic,
 )
-
-from imagecorruptions.imagecorruptions import corrupt
+from imagecorruptions import corrupt
 
 def common_corrupt(attack_args: Dict[str, List[object]],
                    inputs: Dict[str, torch.Tensor],
