@@ -63,7 +63,8 @@ from ptlflow_attacked.validate import (
     generate_outputs,
     _get_model_names,
 )
-
+from torch.nn.functional import cosine_similarity
+from attacks.attack_utils.utils import get_flow_tensors
 # Import cosPGD functions
 import torch.nn as nn
 
@@ -77,7 +78,7 @@ loss_function = "epe"
 targeted = False
 batch_size = 1
 
-dataset = "Sintel"
+
 weather_steps=750
 lr=0.001 
 alph_motion=1000
@@ -193,60 +194,17 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--weather_data",
         default="/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/DistractingDownpour/particles_3000_png",
-        help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.")
-    # parser.add_argument(
-    #     "--num_flakes",
-    #     default=1000,
-    #     type=int,
-    #     help="the number of particles that will be generated initially.")
-    # parser.add_argument(
-    #     "--flakesize_max",
-    #     default=71,
-    #     type=int,
-    #     help="the maximal size for particles in pixels.")
-    # parser.add_argument(
-    #     "--depth_decay",
-    #     default=10,
-    #     type=float,
-    #     help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.")
-    # parser.add_argument(
-    #     "--motion_y",
-    #     default=0.,
-    #     type=float,
-    #     help="the motion in y-direction for all particles between frames."
-    #     )
-    # parser.add_argument(
-    #     "--flake_template_folder",
-    #     default="particles",
-    #     help="the folder within flake_folder, from where the flake templates are loaded. Useful to differentiate between particles / dust billboards.")
-    # parser.add_argument(
-    #     "--flake_r",
-    #     default=255,
-    #     type=int,
-    #     help="the R value for the particle RGB"
-    #     )
-    # parser.add_argument(
-    #     "--flake_g",
-    #     default=255,
-    #     type=int,
-    #     help="the G value for the particle RGB"
-    #     )
-    # parser.add_argument(
-    #     "--flake_b",
-    #     default=255,
-    #     type=int,
-    #     help="the B value for the particle RGB"
-    #     )                                        
-
+        help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.")                             
     parser.add_argument(
         "--weather_dataset",
         default="Sintel",
+        type= str,
         nargs="*",
         help="specify the dataset which should be used for evaluation"
         )
     parser.add_argument(
         "--weather_dataset_stage",
-        default="training",
+        default="evaluation",
         choices=["training", "evaluation"],
         help="specify the dataset stage ('training' or 'evaluation') that should be used."
         )
@@ -286,11 +244,13 @@ def _init_parser() -> ArgumentParser:
             help="a scaling factor, by which the tansparency for every particle is multiplied.")
         
     parser.add_argument("--weather_depth_check", default=False, type=ast.literal_eval,
-        help="if specified, particles will not be rendered if behind an object."
-        )
+        help="if specified, particles will not be rendered if behind an object.")
     parser.add_argument("--weather_depth_check_differentiable", type=ast.literal_eval, default=False, nargs="*",
-        help="if specified, the rendering check for particle occlusion by objects is included into the compute graph."
-        )
+        help="if specified, the rendering check for particle occlusion by objects is included into the compute graph.")
+    parser.add_argument('--weather_unregistered_artifacts', default=True, type=ast.literal_eval,
+        help="if True, artifacts are saved to the output folder but not registered. Saves time and memory during training.")
+    parser.add_argument('--weather_output_folder', default='experiment_data',
+        help="data that is logged during training and evaluation will be saved there")
 
     parser.add_argument(
         "--cc_name",
@@ -316,12 +276,6 @@ def _init_parser() -> ArgumentParser:
         ],
         help="Name of the common corruption to use on the input images.",
     )
-
-
-
-    
-    
-
     parser.add_argument(
         "--cc_severity",
         type=int,
@@ -589,10 +543,13 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
         for dataset_name, dl in dataloaders.items():
             if args.attack == "none":
                 metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
-            else:
-                metrics_mean = attack_one_dataloader(
-                    args, attack_args, model, dl, dataset_name
-                )
+
+            elif attack_args["attack"] == "weather":
+                metrics_mean = attack_on_weather_dataloader(args,attack_args, model, dl, dataset_name)
+            # else:
+            #     metrics_mean = attack_one_dataloader(
+            #         args, attack_args, model, dl, dataset_name
+            #     )
             output_data.append(
                 ("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
@@ -673,6 +630,177 @@ def attack_list_of_models(args: Namespace) -> None:
                     logging.warning("Skipping model %s due to exception %s", mname, e)
                     break
 
+from attacks.help_function import ownutilities
+from attacks.weather import attack_image
+from attacks.help_function.weather import get_weather
+@torch.enable_grad()
+def attack_on_weather_dataloader(    
+    args: Namespace,
+    attack_args: Dict[str, List[object]],
+    model: BaseModel,
+    dataloader: DataLoader,
+    dataloader_name: str,)-> Dict[str, float]:
+    
+    metrics_sum = {}
+
+    metrics_individual = None
+    if args.write_individual_metrics:
+        metrics_individual = {"filename": [], "epe": [], "outlier": []}
+
+    # Run self dataloader
+    data_loader, has_gt, has_cam, has_weather = ownutilities.prepare_dataloader(attack_args, shuffle=False, get_weather=True)
+    losses = torch.zeros(len(data_loader))
+    prev_preds = None
+    couter_in = 0
+    for i, datachunk in enumerate(tqdm(data_loader)):
+        if couter_in ==0:
+           for j, inputs in enumerate(tqdm(dataloader)): 
+                if args.scale_factor is not None:
+                    scale_factor = args.scale_factor
+                else:
+                    scale_factor = (
+                        None
+                        if args.max_forward_side is None
+                        else float(args.max_forward_side) / min(inputs["images"].shape[-2:])
+                        )
+                print(inputs)
+                io_adapter = IOAdapter(
+                    model,
+                    inputs["images"].shape[-2:],
+                    target_scale_factor=scale_factor,
+                    cuda=torch.cuda.is_available(),
+                    fp16=args.fp16,
+                )
+                inputs = io_adapter.prepare_inputs(inputs=inputs, image_only=True)
+                inputs["prev_preds"] = prev_preds
+
+                if inputs["images"].max() > 1.0:
+                    attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
+                has_ground_truth = True
+                targeted_inputs = None
+                with torch.no_grad():
+                    orig_preds = model(inputs)
+                couter_in +=1
+                print("couter_in is",couter_in)
+        else:
+            continue
+
+
+       
+        if has_weather:
+            (image1, image2, image1_weather, image2_weather, flow, _, scene_data, extra) = datachunk
+        else:
+            raise ValueError("Cannot evaluate weather without weather data. Please pass --weather_data to the argument parser.")
+        (root,), (split,), (seq,), (base,), (frame,), (weatherdat,) = extra
+        weather = get_weather(has_weather, weatherdat, scene_data, attack_args, seed=None, load_only=True)
+   
+        # scene_data = [i.to(device) for i in scene_data]
+        # weather = [i.to(device) for i in weather]
+        # image1, image2 = image1.to(device), image2.to(device)
+        # flow = flow.to(device)
+
+        #inputs["flows"] = targeted_flow_tensor
+
+        # inputs["scenedata"] = scene_data
+        # inputs["weather"] = weather
+
+        targeted_inputs = inputs.copy()
+
+        preds= weather_ds(attack_args, model, targeted_inputs, weather, scene_data) 
+
+        if args.warm_start:
+            if (
+                "is_seq_start" in inputs["meta"]
+                and inputs["meta"]["is_seq_start"][0]
+                ):
+                    prev_preds = None
+            else:
+                prev_preds = preds
+                for k, v in prev_preds.items():
+                    if isinstance(v, torch.Tensor):
+                        prev_preds[k] = v.detach()
+
+            inputs = io_adapter.unscale(inputs, image_only=True)
+            preds = io_adapter.unscale(preds) 
+
+            if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
+                if args.seq_val_mode == "first":
+                    k = 0
+                elif args.seq_val_mode == "middle":
+                    k = inputs["images"].shape[1] // 2
+                elif args.seq_val_mode == "last":
+                    k = inputs["flows"].shape[1] - 1
+                for key, val in inputs.items():
+                    if key == "meta":
+                        inputs["meta"]["image_paths"] = inputs["meta"]["image_paths"][
+                            k : k + 1
+                        ]
+                    elif key == "images":
+                        inputs[key] = val[:, k : k + 2]
+                    elif isinstance(val, torch.Tensor) and len(val.shape) == 5:
+                        inputs[key] = val[:, k : k + 1]
+
+            if attack_args["attack_targeted"]:
+                metrics = model.val_metrics(preds, targeted_inputs)
+                metrics_orig_preds = model.val_metrics(preds, orig_preds)
+                metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
+                metrics["val/cosim_target"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(targeted_inputs)))
+                metrics["val/cosim_orig_preds"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(orig_preds)))
+                if has_ground_truth:
+                    metrics_ground_truth = model.val_metrics(preds, inputs)
+                    metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
+                    metrics["val/cosim_ground_truth"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs)))
+            else:
+                metrics = model.val_metrics(preds, inputs)
+                metrics["val/cosim"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs)))
+
+            for k in metrics.keys():
+                if metrics_sum.get(k) is None:
+                    metrics_sum[k] = 0.0
+                metrics_sum[k] += metrics[k].item()
+            dataloader.set_postfix(
+                epe=metrics_sum["val/epe"] / (i + 1),
+                outlier=metrics_sum["val/outlier"] / (i + 1),
+            )
+
+            filename = ""
+            if "sintel" in inputs["meta"]["dataset_name"][0].lower():
+                filename = f'{Path(inputs["meta"]["image_paths"][0][0]).parent.name}/'
+            filename += Path(inputs["meta"]["image_paths"][0][0]).stem
+
+            if metrics_individual is not None:
+                metrics_individual["filename"].append(filename)
+                metrics_individual["epe"].append(metrics["val/epe"].item())
+                metrics_individual["outlier"].append(metrics["val/outlier"].item())
+
+            if attack_args["attack_targeted"]:
+                generate_outputs(
+                    args,
+                    targeted_inputs,
+                    preds,
+                    dataloader_name,
+                    i,
+                    targeted_inputs.get("meta"),
+                )
+            else:
+                generate_outputs(
+                    args, inputs, preds, dataloader_name, i, inputs.get("meta")
+                )
+            if args.max_samples is not None and i >= (args.max_samples - 1):
+                break
+
+    if args.write_individual_metrics:
+        ind_df = pd.DataFrame(metrics_individual)
+        args.output_path.mkdir(parents=True, exist_ok=True)
+        ind_df.to_csv(
+            Path(args.output_path) / f"{dataloader_name}_epe_outlier.csv", index=None
+        )
+
+    metrics_mean = {}
+    for k, v in metrics_sum.items():
+        metrics_mean[k] = v / len(dataloader)
+    return metrics_mean
+
 
 @torch.enable_grad()
 def attack_one_dataloader(
@@ -734,7 +862,7 @@ def attack_one_dataloader(
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
 
             targeted_inputs = None
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather" :
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" :
                 with torch.no_grad():
                     orig_preds = model(inputs)
                 if attack_args["attack_target"] == "negative":
@@ -783,10 +911,11 @@ def attack_one_dataloader(
                     preds, l2_delta1, l2_delta2, l2_delta12 = pcfa(
                         attack_args, model, targeted_inputs
                     )
-                case "weather":
-                    preds= weather_ds(
-                        attack_args, model, targeted_inputs
-                    )   
+                # case "weather":
+
+                #     preds= weather_ds(
+                #         attack_args, model, targeted_inputs
+                #     )   
                 case "common_corruptions":
                     preds = common_corrupt(attack_args, inputs, model, args)
                 case "none":
