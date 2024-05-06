@@ -1,6 +1,7 @@
 #from __future__ import print_function
 from argparse import Namespace
 from typing import Any, Dict, List, Optional
+from torch.utils.data import DataLoader
 
 from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import (
@@ -9,11 +10,14 @@ from attacks.attack_utils.utils import (
     replace_images_dic,
     get_flow_tensors,
 )
-
-from attacks.help_function import ownutilities
+#,  parsing_file, targets
+from attacks.help_function import ownutilities, logging, weather_model, datasets, config_specs
 # from attacks.help_function.config_specs import Conf
+from attacks.help_function.config_specs import Paths
 from attacks.help_function.render import render
 from attacks.help_function.weather import get_weather, recolor_weather
+
+
 # from attacks.help_function.utils import load_weather
 import torch
 import torch.nn as nn
@@ -73,16 +77,12 @@ def weather_ds(
     return preds
 
 
-def attack_image(model, targeted_inputs, attack_args, device, scene_data, weather):
+def attack_image(model, targeted_inputs, attack_args, device, scene_data, weather, batch_size, distortion_folder):
 
-    torch.autograd.set_detect_anomaly(True)
-    if not torch.cuda.is_available():
-        device = torch.device("cpu")
-    else:
-        device = torch.device("cuda")
+    # torch.autograd.set_detect_anomaly(True)
+    model = weather_model.ScaledInputWeatherModel(model)
 
     image1, image2 = get_image_tensors(targeted_inputs)
-
     image1, image2 = image1.to(device), image2.to(device)
      
         
@@ -108,9 +108,7 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     rel_mat.requires_grad = False
     
     scene_data = full_P, ext1, rel_mat, gt1_depth, gt2_depth
-
     initpos, motion, flakes, flakes_color, flakes_transp = weather
-    
 
      # ===== ATTACK OPTIMIZATION =====
 
@@ -120,7 +118,7 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     offsets = torch.zeros_like(initpos).detach().clone()
     motion_offsets = torch.zeros_like(initpos)
 
-    flow_weather_init = None
+    flow_weather_pred_init = None
     flakes_transp_init = flakes_transp.clone().detach()
     flakes_color_init = flakes_color.clone().detach()
     offset_init = offsets.detach().clone()
@@ -157,33 +155,49 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
     flakes_color_img = (1./2.) * 1. / (1. - eps_box) * (torch.tanh(flakes_color_inf) + (1 - eps_box) )
     weather = (initpos+offsets, motion+motion_offsets, flakes, flakes_color_img, flakes_transp)
     
+    #rendered_image1, rendered_image2 = render(image1, image2, scene_data, weather, args=attack_args)
 
-    rendered_image1, rendered_image2 = render(image1, image2, scene_data, weather, args=attack_args)
-
-    perturbed_inputs = replace_images_dic(
-        targeted_inputs, rendered_image1, rendered_image2, clone=True
-    )
-    preds = model(perturbed_inputs)
+   # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
+    preds = model( image1, image2, weather=weather, scene_data=scene_data, args_=attack_args)
     flow_weather_pred = preds["flows"].squeeze(0)
     flow_weather_pred = flow_weather_pred.to(device)
-    flow_weather_init = flow_weather_pred.detach().clone()
-    flow_weather_init.requires_grad = False
 
-    rendered_image1_init, rendered_image2_init = render(image1, image2, scene_data, weather, args=attack_args)
-    perturbed_inputs_init = replace_images_dic(
-        targeted_inputs, rendered_image1_init, rendered_image2_init, clone=True
-    )
-    flow_init = model(perturbed_inputs_init)
-    targeted_inputs_init = flow_init["flows"].squeeze(0)
-    targeted_inputs_init = targeted_inputs_init.to(device).detach()
+    # define the initial flow, the target, and update mu
+    flow_weather_pred_init = flow_weather_pred.detach().clone()
+    flow_weather_pred_init.requires_grad = False
 
-    
+    preds_init = model( image1, image2, weather=None, scene_data=None, args_=attack_args)
+    flow_init = preds_init["flows"].squeeze(0)
+    flow_init = flow_init.to(device).detach()
+
+    # from DistractingDownpour.helper_functions.own_models import ScaledInputWeatherModel
+    # # 创建 ScaledInputWeatherModel 的实例
+    # modelw = ScaledInputWeatherModel(args=attack_args, model="GMA", make_unit_input=False)
+    # pred_flow = modelw.forward(rendered_image1, rendered_image2, weather=weather, scene_data=scene_data, args_=attack_args, test_mode=True)
+    # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
+    # flow_weather_pred = pred_flow["flows"].squeeze(0)  #flow_pred =...
+    # flow_weather_pred = flow_weather_pred.to(device)
+    # define the initial flow, the target, and update mu
+    # flow_weather_init = flow_weather_pred.detach().clone()
+    # flow_weather_init.requires_grad = False
+
+  
+    # flow_init = ScaledInputWeatherModel.forward(rendered_image1_init, rendered_image2_init, weather=None, scene_data=None, args_=None, test_mode=True)
+    # perturbed_inputs_init = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
+    # targeted_inputs_init = flow_init["flows"].squeeze(0) 
+    # targeted_inputs_init = targeted_inputs_init.to(device).detach()
+
+    # define target (potentially based on first flow prediction)
+    # define attack target
+    # target = targets.get_target(attack_args["weather_target"], flow_init, device=device)
+    # target = target.to(device)
+    # target.requires_grad = False
     target = get_flow_tensors(targeted_inputs)
     target = target.to(device)
     target.requires_grad = False
 
 
-    flow_weather_min = flow_weather_init.clone().detach()
+    flow_weather_min = flow_weather_pred_init.clone().detach()
     offsets_min = offsets.clone().detach()
     motion_offsets_min = motion_offsets.clone().detach()
     flakes_color_min = flakes_color_img.clone().detach()
@@ -195,10 +209,10 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
 
     for steps in range(attack_args["weather_steps"]):
         print("into Schleife")
-        # Calculate loss
+            # Calculate loss
         loss = losses.loss_weather(flow_weather_pred, target, f_type=attack_args["attack_loss"], init_pos=initpos, offsets=offsets, motion_offsets=motion_offsets, flakes_transp=flakes_transp, flakes_transp_init=flakes_transp_init, alph_offsets=attack_args["weather_alph_motion"], alph_motion=attack_args["weather_alph_motionoffset"], alph_transp=0)
- 
-        loss.backward()
+    
+        loss.backward(retain_graph=True)
 
         if attack_args["weather_optimizer"] in ['Adam']:
             optimizer.step()
@@ -209,10 +223,26 @@ def attack_image(model, targeted_inputs, attack_args, device, scene_data, weathe
         weather = (initpos+offsets, motion+motion_offsets, flakes, flakes_color_img, flakes_transp)
 
 
-        pred_flow = model(perturbed_inputs)
-        flow_weather_pred = pred_flow["flows"].squeeze(0)
+        # flow_weather = ownutilities.compute_flow(model, "scaled_input_weather_model", image1, image2, weather=weather, scene_data=scene_data, test_mode=True, args_=args)
+        # [flow_weather] = ownutilities.postprocess_flow(args.net, padder, flow_weather)
+        # flow_weather = flow_weather.to(device)
+
+        # pred_flow = ScaledInputWeatherModel.forward(rendered_image1, rendered_image2, weather=weather, scene_data=scene_data, args_=None, test_mode=True)
+        # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
+        # flow_weather_pred = pred_flow["flows"].squeeze(0)  #flow_pred =...
+        # flow_weather_pred = flow_weather_pred.to(device)
+
+        preds= model(image1, image2)
+        flow_weather_pred = preds["flows"].squeeze(0)
         flow_weather_pred = flow_weather_pred.to(device)
-        print("PRINT",flow_weather_pred)
-    
-    return pred_flow
+        print("PRINT Pred is: ",flow_weather_pred)
+
+    # save image
+    weather_min = (initpos+offsets_min, motion+motion_offsets_min, flakes, flakes_color_min, flakes_transp_min)
+    image1_weather, image2_weather = render(image1.detach().clone(), image2.detach().clone(), scene_data, weather_min, attack_args)
+
+    logging.save_image(image1_weather, batch_size, distortion_folder, image_name='img1_best', unit_input=True, normalize_max=None, unregistered_artifacts= attack_args["weather_unregistered_artifacts"])
+    logging.save_image(image2_weather, batch_size, distortion_folder, image_name='img2_best', unit_input=True, normalize_max=None, unregistered_artifacts= attack_args["weather_unregistered_artifacts"])
+
+    return preds
 
