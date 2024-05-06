@@ -27,13 +27,12 @@ from datetime import datetime
 import json
 
 import os
-import cv2 as cv
-import numpy as np
+
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from torchvision.transforms import Normalize
+
 import ptlflow
 from ptlflow_attacked.ptlflow import get_model, get_model_reference
 from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel

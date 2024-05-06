@@ -39,7 +39,7 @@ pcfa_arguments = [
     "attack_target",
     "attack_loss",
     "attack_epsilon",
-    "attack_alpha"
+    "attack_alpha",
     "attack_iterations",
     "pcfa_boxconstraint",
 ]
