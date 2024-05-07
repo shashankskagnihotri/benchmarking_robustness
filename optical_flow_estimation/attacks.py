@@ -274,7 +274,7 @@ def _init_parser() -> ArgumentParser:
         choices=[
             "far_focus",
             "near_focus",
-            "fog",
+            "fog_3d",
             "color_quant",
             "iso_noise",
             "low_light",

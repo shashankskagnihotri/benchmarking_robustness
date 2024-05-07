@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=02:59:00
+#SBATCH --time=00:59:00
 #SBATCH --job-name=sintel_training_clean_3DCCfocus
 #SBATCH --output=slurm/sintel_training_clean_3DCCfocus.out
 #SBATCH --cpus-per-task=16
