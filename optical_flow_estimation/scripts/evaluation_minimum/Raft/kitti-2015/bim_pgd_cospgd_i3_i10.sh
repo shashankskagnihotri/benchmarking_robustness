@@ -18,7 +18,7 @@ targets="negative zero negative"
 norms="inf two"
 attacks="bim pgd cospgd"
 iterations="3 10"
-#jobnum=0
+jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 
 cd ../../../../
@@ -68,10 +68,9 @@ do
                                                 --attack_epsilon $epsilon \
                                                 --attack_targeted $targeted \
                                                 --attack_target $target                                       
-                                            jobnum=$((jobnum + 1))
-                                            export jobnum
                                             #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                                         fi
+                                        jobnum=$((jobnum + 1))
                                     done
                                 done
                             done
@@ -94,10 +93,9 @@ do
                                            --attack_epsilon $epsilon \
                                             --attack_targeted $targeted \
                                            --attack_target "zero"
-                                        jobnum=$((jobnum + 1))
-                                        export jobnum
                                         #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                                     fi
+                                    jobnum=$((jobnum + 1))
                                 done
                             done
                         fi
