@@ -30,7 +30,12 @@ class KITTIBaseDataset(data.Dataset):
 
         self.left_fold = 'image_2/'
         self.right_fold = 'image_3/'
-        self.disp_fold = 'disp_occ_0/'  # we read disp data with occlusion since we compute occ directly
+        self.disp_fold = 'disp_occ_0/' 
+        # if split=='train':
+        #     self.disp_fold = 'disp_occ_0/'  # we read disp data with occlusion since we compute occ directly
+        # else:
+        #     self.disp_fold = None
+
 
         self._read_data()
         self._augmentation()

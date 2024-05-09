@@ -57,7 +57,7 @@ logger = SummaryWriter(args.logdir)
 
 # Initialize your dataset
 train_dataset = KITTIBaseDataset(datadir=args.datapath, model_name=args.model, split='train')
-test_dataset = KITTIBaseDataset(datadir=args.datapath, model_name=args.model, split='test')
+test_dataset = KITTIBaseDataset(datadir=args.datapath, model_name=args.model, split='validation_all')
 
 # Use your dataset in DataLoader
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
