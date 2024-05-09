@@ -32,7 +32,8 @@ parser.add_argument('--datapath', required=True, help='data path')
 # parser.add_argument('--trainlist', required=True, help='training list')
 # parser.add_argument('--testlist', required=True, help='testing list')
 
-parser.add_argument('--eval',type=bool,  default=False, help='to do evaluation')
+# parser.add_argument('--eval',type=bool,  default=False, help='to do evaluation')
+parser.add_argument('--eval', action='store_true', help='to do evaluation')
 parser.add_argument('--lr', type=float, default=0.001, help='base learning rate')
 parser.add_argument('--batch_size', type=int, default=16, help='training batch size')
 parser.add_argument('--test_batch_size', type=int, default=8, help='testing batch size')
@@ -218,7 +219,7 @@ def test_sample(sample, compute_metrics=True):
 
 
 if __name__ == '__main__':
-    if args.eval==True:
+    if args.eval:
         avg_test_scalars = AverageMeterDict()
         epoch_idx = 1
         test(epoch_idx,avg_test_scalars,TestImgLoader)
