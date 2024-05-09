@@ -17,7 +17,7 @@ source activate openmmlab
 
 cd mmsegmentation
 
-python tools/train.py configs/internimage/upernet_internimage_s_512_160k_ade20k.py
+python tools/train.py ../configs/internimage/upernet_internimage_s_160k_voc12aug_512x512.py --work-dir ../work_dirs/upernet_internimage_s_160k_voc12aug_512x512
 
 end='date +%s'
 runtime=$((end-start))

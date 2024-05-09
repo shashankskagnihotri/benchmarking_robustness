@@ -4,11 +4,26 @@
 # Licensed under The MIT License [see LICENSE for details]
 # --------------------------------------------------------
 _base_ = [
-    '../../mmsegmentation/configs/_base_/models/upernet_r50.py', '../../mmsegmentation/configs/_base_/datasets/pascal_voc12_aug.py',
+    '../../mmsegmentation/configs/_base_/models/upernet_r50.py', '../../mmsegmentation/configs/_base_/datasets/ade20k.py',
     '../../mmsegmentation/configs/_base_/default_runtime.py', '../../mmsegmentation/configs/_base_/schedules/schedule_160k.py'
 ]
 pretrained = 'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_s_1k_224.pth'
+
+train_dataloader = dict(
+    batch_size=2
+)
+
+data_preprocessor = dict(
+    type='SegDataPreProcessor',
+    mean=[123.675, 116.28, 103.53],
+    std=[58.395, 57.12, 57.375],
+    bgr_to_rgb=True,
+    pad_val=0,
+    seg_pad_val=255,
+    size=(2048,512))
+
 model = dict(
+    data_preprocessor=data_preprocessor,
     backbone=dict(
         _delete_=True,
         type='InternImage',
