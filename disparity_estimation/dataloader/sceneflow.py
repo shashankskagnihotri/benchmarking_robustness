@@ -11,20 +11,20 @@ from albumentations import Compose, OneOf
 from natsort import natsorted
 
 # Import CFNet files
-from . import cfnet_flow_transforms
-from .cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
+from ..cfnet import cfnet_flow_transforms
+from .cfnet.cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
 
 
 # Import STTR files
-from .sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBShiftStereo, \
+from .sttr.sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBShiftStereo, \
     RandomBrightnessContrastStereo, random_crop, horizontal_flip
-from .sttr_preprocess import augment
+from .sceneflow.sttr_preprocess import augment
 
 # Import GWCNet files
 from .gwcnet_data_io import get_transform_gwcnet
 
 # Import PSMNet files
-from .psmnet_preprocess import get_transform_psmnet
+from ..psmnet.psmnet_preprocess import get_transform_psmnet
 
 
 # SceneFlow dataloader from CFNet
