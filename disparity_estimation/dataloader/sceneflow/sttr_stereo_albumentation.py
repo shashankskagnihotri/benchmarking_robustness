@@ -61,6 +61,9 @@ def horizontal_flip(img_left, img_right, occ_left, occ_right, disp_left, disp_ri
     :param split: train/validation split, string
     :return: updated data
     """
+
+    split = split.lower()
+        
     if split == 'validation':
         p = 0.0
     else:
