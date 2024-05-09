@@ -16,7 +16,8 @@ from .sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBS
     RandomBrightnessContrastStereo, random_crop, horizontal_flip
 from .sttr_preprocess import augment
 
-from .CFNet_data_io import get_transform_cfnet, read_all_lines_cfnet, pfm_imread_cfnet
+from .CFNet_data_io import get_transform_cfnet, pfm_imread_cfnet
+from .GWCNet_data_io import get_transform_gwcnet
 
 from .psmnet_preprocess import get_transform_psmnet
 
@@ -77,11 +78,13 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         disp_right = self.load_disp(self.disp_right_filenames[index])
 
         if self.model_name == 'CFNet':
-            return self.get_item_CFNet(img_left, img_right, disp_left)
+            a = self.get_item_CFNet(img_left, img_right, disp_left)
+            print(a["left"].shape, a["right"].shape, a["disparity"].shape)
+            return a
         elif self.model_name == 'PSMNet':
             return self.get_item_PSMNet(img_left, img_right, disp_left)
         elif self.model_name == 'GWCNet':
-            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+            return self.get_item_GWCNet(img_left, img_right, disp_left)
         elif self.model_name == 'HSMNet':
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
         elif self.model_name == 'STTR':
@@ -267,6 +270,57 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             disparity = disparity[h - crop_h:h, w - crop_w: w]
 
             processed = get_transform_cfnet()
+            left_img = processed(left_img)
+            right_img = processed(right_img)
+
+            return {"left": left_img,
+                    "right": right_img,
+                    "disparity": disparity,
+                    "top_pad": 0,
+                    "right_pad": 0}
+
+
+
+
+
+
+
+    def get_item_GWCNet(self, left_img:Image, right_img:Image, disparity:Image) -> dict:
+        
+        if self.training:
+            w, h = left_img.size
+            crop_w, crop_h = 512, 256
+
+            x1 = random.randint(0, w - crop_w)
+            y1 = random.randint(0, h - crop_h)
+
+            # random crop
+            left_img = left_img.crop((x1, y1, x1 + crop_w, y1 + crop_h))
+            right_img = right_img.crop((x1, y1, x1 + crop_w, y1 + crop_h))
+            disparity = disparity[y1:y1 + crop_h, x1:x1 + crop_w]
+
+            left_img = np.ascontiguousarray(np.array(left_img))
+            right_img = np.ascontiguousarray(np.array(right_img))
+            disparity = np.ascontiguousarray(np.array(disparity)).astype(np.float32)
+
+
+            # to tensor, normalize
+            processed = get_transform_gwcnet()
+            left_img = processed(left_img)
+            right_img = processed(right_img)
+
+            return {"left": left_img,
+                    "right": right_img,
+                    "disparity": disparity}
+        else:
+            w, h = left_img.size
+            crop_w, crop_h = 960, 512
+
+            left_img = left_img.crop((w - crop_w, h - crop_h, w, h))
+            right_img = right_img.crop((w - crop_w, h - crop_h, w, h))
+            disparity = disparity[h - crop_h:h, w - crop_w: w]
+
+            processed = get_transform_gwcnet()
             left_img = processed(left_img)
             right_img = processed(right_img)
 

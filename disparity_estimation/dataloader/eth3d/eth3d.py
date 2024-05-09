@@ -1,11 +1,11 @@
 import os, torch, torch.utils.data as data
 from PIL import Image
 import numpy as np
-from . import flow_transforms
+from .. import flow_transforms
 import pdb
 import torchvision
 import warnings
-from . import readpfm as rp
+from .. import readpfm as rp
 from datasets.data_io import get_transform, read_all_lines
 warnings.filterwarnings('ignore', '.*output shape of zoom.*')
 
@@ -32,7 +32,7 @@ def disparity_loader(path):
         return data
 
 # ETH3D dataloader from CFNET
-class ETH3D(data.Dataset):
+class ETH3DDataset(data.Dataset):
 
     def __init__(self, model_name, left, right, left_disparity, training, right_disparity=None, loader=default_loader, dploader=disparity_loader):
         

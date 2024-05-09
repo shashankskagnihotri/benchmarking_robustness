@@ -7,7 +7,7 @@ import torch
 from PIL import Image
 from natsort import natsorted
 
-from .preprocess import augment
+from ..preprocess import augment
 
 def disparity_read(filename):
     """ Return disparity read from filename. """

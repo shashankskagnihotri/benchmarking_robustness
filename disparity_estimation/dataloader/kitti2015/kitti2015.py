@@ -23,7 +23,7 @@ def disparity_loader(path):
     return Image.open(path)
 
 
-class Kitti2015Dataloader(data.Dataset):
+class Kitti2015Dataset(data.Dataset):
     def __init__(self, left, right, left_disparity, training, loader=default_loader, dploader= disparity_loader):
  
         self.left = left
