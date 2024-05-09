@@ -15,7 +15,7 @@ from torchvision import transforms
 
 # Imports
 from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
-
+from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastStereo, random_crop
 
 
 # from dataloader.kitti2015.sttr_preprocess import augment, normalization
