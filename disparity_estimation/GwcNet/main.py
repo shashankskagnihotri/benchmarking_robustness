@@ -28,9 +28,11 @@ parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity'
 
 parser.add_argument('--dataset', required=True, help='dataset name')
 parser.add_argument('--datapath', required=True, help='data path')
-parser.add_argument('--trainlist', required=True, help='training list')
-parser.add_argument('--testlist', required=True, help='testing list')
+# parser.add_argument('--eval',type=bool, required=True, help='data path')
+# parser.add_argument('--trainlist', required=True, help='training list')
+# parser.add_argument('--testlist', required=True, help='testing list')
 
+parser.add_argument('--eval',type=bool,  default=False, help='to do evaluation')
 parser.add_argument('--lr', type=float, default=0.001, help='base learning rate')
 parser.add_argument('--batch_size', type=int, default=16, help='training batch size')
 parser.add_argument('--test_batch_size', type=int, default=8, help='testing batch size')
@@ -75,6 +77,7 @@ model = nn.DataParallel(model)
 model.cuda()
 optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999))
 
+
 # load parameters
 start_epoch = 0
 if args.resume:
@@ -94,6 +97,29 @@ elif args.loadckpt:
     state_dict = torch.load(args.loadckpt)
     model.load_state_dict(state_dict['model'])
 print("start at epoch {}".format(start_epoch))
+
+
+def test( epoch_idx,avg_test_scalars,TestImgLoader):
+    # testing
+    # avg_test_scalars = AverageMeterDict()
+    for batch_idx, sample in enumerate(TestImgLoader):
+        global_step = len(TestImgLoader) * epoch_idx + batch_idx
+        start_time = time.time()
+        do_summary = global_step % args.summary_freq == 0
+        loss, scalar_outputs, image_outputs = test_sample(sample, compute_metrics=do_summary)
+        if do_summary:
+            save_scalars(logger, 'test', scalar_outputs, global_step)
+            save_images(logger, 'test', image_outputs, global_step)
+        avg_test_scalars.update(scalar_outputs)
+        del scalar_outputs, image_outputs
+        print('Epoch {}/{}, Iter {}/{}, test loss = {:.3f}, time = {:3f}'.format(epoch_idx, args.epochs,
+                                                                                    batch_idx,
+                                                                                    len(TestImgLoader), loss,
+                                                                                    time.time() - start_time))
+
+    return avg_test_scalars
+
+
 
 
 def train():
@@ -122,25 +148,12 @@ def train():
 
         # testing
         avg_test_scalars = AverageMeterDict()
-        for batch_idx, sample in enumerate(TestImgLoader):
-            global_step = len(TestImgLoader) * epoch_idx + batch_idx
-            start_time = time.time()
-            do_summary = global_step % args.summary_freq == 0
-            loss, scalar_outputs, image_outputs = test_sample(sample, compute_metrics=do_summary)
-            if do_summary:
-                save_scalars(logger, 'test', scalar_outputs, global_step)
-                save_images(logger, 'test', image_outputs, global_step)
-            avg_test_scalars.update(scalar_outputs)
-            del scalar_outputs, image_outputs
-            print('Epoch {}/{}, Iter {}/{}, test loss = {:.3f}, time = {:3f}'.format(epoch_idx, args.epochs,
-                                                                                     batch_idx,
-                                                                                     len(TestImgLoader), loss,
-                                                                                     time.time() - start_time))
+        avg_test_scalars = test(epoch_idx, avg_test_scalars,TestImgLoader)
+       
         avg_test_scalars = avg_test_scalars.mean()
         save_scalars(logger, 'fulltest', avg_test_scalars, len(TrainImgLoader) * (epoch_idx + 1))
         print("avg_test_scalars", avg_test_scalars)
         gc.collect()
-
 
 # train one sample
 def train_sample(sample, compute_metrics=False):
@@ -205,4 +218,9 @@ def test_sample(sample, compute_metrics=True):
 
 
 if __name__ == '__main__':
-    train()
+    if args.eval==True:
+        avg_test_scalars = AverageMeterDict()
+        epoch_idx = 1
+        test(epoch_idx,avg_test_scalars,TestImgLoader)
+    else:
+        train()

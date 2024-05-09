@@ -1,3 +1,4 @@
+
 # sttr Kitti2015 datasetloader as base kittidataloader 
 import os
 import numpy as np
@@ -12,6 +13,7 @@ from dataloader.Kitti2015.sttr_preprocess import augment, normalization
 from dataloader.Kitti2015.sttr_stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastStereo, random_crop
 from dataloader.Kitti2015.gwcnet_data_io import get_transform
 import torch
+from torchvision import transforms as T
 
 
 
@@ -203,45 +205,37 @@ class KITTIBaseDataset(data.Dataset):
 
     def process_for_evaluation(self, left_img, right_img, disparity):
         # Apply the same preprocessing steps as in data_io.py
-        # transform = get_transform()
-        # left_img = transform(left_img)
-        # right_img = transform(right_img)
+        transform = T.Compose([
+            T.Resize((384, 1248)),  # Resize to the target size
+            T.ToTensor(),           # Convert PIL image to tensor
+        ])
 
-
-
-        # add additional preprocessing steps specific for GWCNet 
-        w, h = left_img.size
-
-
-        transform = get_transform()
         left_img = transform(left_img)
         right_img = transform(right_img)
-        # normalize
-        # left_img = F.to_tensor(left_img).numpy()
-        # right_img = F.to_tensor(right_img).numpy()
 
-        # pad to size 1248x384
-        top_pad = 384 - h
-        right_pad = 1248 - w
-        assert top_pad > 0 and right_pad > 0
-        # pad images
-        left_img = F.pad(left_img, (0, right_pad, top_pad, 0))
-        right_img = F.pad(right_img, (0, right_pad, top_pad, 0))
-        # left_img = np.lib.pad(left_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
-        # right_img = np.lib.pad(right_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
-        # pad disparity gt
+        # Pad disparity gt if not None
         if disparity is not None:
-            assert len(disparity.shape) == 2
-            disparity = np.lib.pad(disparity, ((top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
+            # Resize the disparity map
+            disparity = Image.fromarray(disparity)
+            disparity = disparity.resize((1248, 384), Image.NEAREST)
+            disparity = np.array(disparity, dtype=np.float32) / 256.
 
         if disparity is not None:
             return {"left": left_img,
                     "right": right_img,
-                    "disparity": disparity,
-                    "top_pad": top_pad,
-                    "right_pad": right_pad}
+                    "disparity": disparity}
         else:
             return {"left": left_img,
-                    "right": right_img,
-                    "top_pad": top_pad,
-                    "right_pad": right_pad}
+                    "right": right_img}
+
+        # if disparity is not None:
+        #     return {"left": left_img,
+        #             "right": right_img,
+        #             "disparity": disparity,
+        #             "top_pad": pad_height,
+        #             "right_pad": pad_width}
+        # else:
+        #     return {"left": left_img,
+        #             "right": right_img,
+        #             "top_pad": pad_height,
+        #             "right_pad": pad_width}
