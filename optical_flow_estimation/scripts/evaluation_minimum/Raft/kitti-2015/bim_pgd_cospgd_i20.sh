@@ -12,7 +12,7 @@
 
 models="raft"
 datasets="kitti-2015"
-checkpoints="kitti"
+checkpoint="kitti"
 targeteds="True False"
 targets="negative zero negative"
 norms="inf two"
