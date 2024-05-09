@@ -12,7 +12,7 @@ import torchvision.utils as vutils
 import torch.nn.functional as F
 import numpy as np
 import time
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 # from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
