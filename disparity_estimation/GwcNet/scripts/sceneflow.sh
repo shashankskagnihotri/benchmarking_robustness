@@ -4,7 +4,7 @@ set -x
 # Change directory to the directory containing main.py
 
 DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D"
-CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/GwcNet/pretrained_weights/sceneflow/gwcnet-gc/checkpoint_000015.ckpt"
+CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/GwcNet/sceneflow/gwcnet-gc/checkpoint_000015.ckpt"
 
 python main.py --dataset sceneflow \
     --datapath $DATAPATH \
