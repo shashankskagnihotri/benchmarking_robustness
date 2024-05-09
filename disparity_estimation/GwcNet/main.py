@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 import gc
 
 
-from dataloader import SceneFlowFlyingThings3DDataset
+from dataloader import get_dataset
 
 
 cudnn.benchmark = True
@@ -65,8 +65,8 @@ logger = SummaryWriter(args.logdir)
 # TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 # TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
 
-train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="GWCNet", train=True)
-test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="GWCNet", train=False)
+train_dataset = get_dataset(args.dataset, args.datapath, split="train", architeture_name="GWCNet")
+test_dataset  = get_dataset(args.dataset, args.datapath, split="test",  architeture_name="GWCNet")
 
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
