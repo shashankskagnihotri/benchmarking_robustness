@@ -5,8 +5,8 @@ from .. import flow_transforms
 import pdb
 import torchvision
 import warnings
-from .. import readpfm as rp
-from datasets.data_io import get_transform, read_all_lines
+from . import readpfm as rp
+from .gwcnet_data_io import get_transform, read_all_lines
 warnings.filterwarnings('ignore', '.*output shape of zoom.*')
 
 IMG_EXTENSIONS = [

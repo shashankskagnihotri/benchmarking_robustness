@@ -1,7 +1,8 @@
 from .sceneflow.sceneflow import SceneFlowFlyingThings3DDataset
-from .kitti2015.kitti2015 import Kitti2015Dataset
-# from .eth3d.eth3d         import ETH3DDataset
-# from .mpisintel.mpisintel import MPISintelDataset
+from .kitti2015 import Kitti2015Dataloader
+from .Kitti2015.kitti2015 import KITTIBaseDataset
+# from .eth3d     import ETH3DDataloader
+from .mpisintel import MPISintelDataloader
 
 def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
     print(f'Loading {dataset_name} dataset')
