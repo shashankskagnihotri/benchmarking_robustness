@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torch
 from PIL import Image
 from natsort import natsorted
+from . import cf_net_flow_transforms
 
 from ..psmnet_preprocess import augment
 
@@ -18,6 +19,24 @@ def disparity_read(filename):
 
     depth = d_r * 4 + d_g / (2 ** 6) + d_b / (2 ** 14)
     return depth
+
+def convert_items_to_tensor(input_data_raw):
+    input_data_processed = {}
+    for key, value in input_data_raw.items():
+        input_data_processed[key] = torch.from_numpy(value)
+    return input_data_processed
+
+def convert_items_to_numpy(input_data_raw):
+    input_data_processed = {}
+    for key, value in input_data_raw.items():
+        input_data_processed[key] = value.numpy()
+    return input_data_processed
+
+def convert_items_from_pil_image_to_numpy(input_data_raw):
+    input_data_processed = {}
+    for key, value in input_data_raw.items():
+        input_data_processed[key] = np.array(value)
+    return input_data_processed
 
 class MPISintelDataset(data.Dataset):
     def __init__(self, datadir, model_name='psmnet'):
@@ -63,30 +82,11 @@ class MPISintelDataset(data.Dataset):
             input_data_processed['left'] = input_data_processed['left'].squeeze() # here dimension is ([3, 436, 1024]) numpay array
             input_data_processed['right'] = input_data_processed['right'].squeeze() # here dimension is ([3, 436, 1024]) numpay array
 
-            print(input_data_processed['disparity'].shape, input_data_processed['left'].shape, input_data_processed['right'].shape)
-            print(type(input_data_processed['disparity']))
-            # input_data_processed['disparity'] = input_data_processed['disparity'][:432, :]
-            # input_data_processed['left'] = input_data_processed['left'][:, :432, :]
-            # input_data_processed['right'] = input_data_processed['right'][:, :432, :]
+            random_crop_cf_net = cf_net_flow_transforms.RandomCrop((256, 512))
+            input_data_processed['left'], input_data_processed['right'], input_data_processed['disparity'] = random_crop_cf_net(input_data_processed['left'], input_data_processed['right'], input_data_processed['disparity'])
 
-            input_data_processed['disparity'] = torch.from_numpy(input_data_processed['disparity'])
-            # input_data_processed['left'] = torch.from_numpy(input_data_processed['left'])
-            # input_data_processed['right'] = torch.from_numpy(input_data_processed['right'])
-
-            target_size = (3, 256, 512)
-            input_data_processed['disparity'] = F.interpolate(input_data_processed['disparity'], size=(256, 512), mode='bilinear', align_corners=False)
-            input_data_processed['left'] = F.interpolate(input_data_processed['left'], size=target_size, mode='bilinear', align_corners=False)
-            input_data_processed['right'] = F.interpolate(input_data_processed['right'], size=target_size, mode='bilinear', align_corners=False)
-            
-            input_data_processed['disparity'] = input_data_processed['disparity'].numpy()
-            # input_data_processed['left'] = input_data_processed['left'].numpy()
-            # input_data_processed['right'] = input_data_processed['right'].numpy()
-
-            # (436, 1024) torch.Size([3, 436, 1024]) torch.Size([3, 436, 1024])
-            print('new: ',input_data_processed['disparity'].shape, input_data_processed['left'].shape, input_data_processed['right'].shape)
-            
-            
             return input_data_processed
+        
         elif self.model_name == 'psmnet':
             input_data_processed = self.preprocess_item_STTR(input_data_raw)
             return (input_data_processed['left'], input_data_processed['right'], input_data_processed['disp'])
