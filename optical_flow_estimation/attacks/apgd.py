@@ -50,4 +50,4 @@ def apgd(
     images = None
     labels = None
 
-    return preds # images, labels, preds, None
+    return preds, perturbed_inputs # images, labels, preds, None

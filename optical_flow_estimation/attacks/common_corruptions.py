@@ -46,4 +46,4 @@ def common_corrupt(attack_args: Dict[str, List[object]],
     # Make prediction
     preds = model(perturbed_inputs)
 
-    return preds
+    return preds, perturbed_inputs

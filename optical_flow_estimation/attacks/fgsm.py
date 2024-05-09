@@ -49,7 +49,7 @@ def fgsm(
     perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv)
     preds = model(perturbed_inputs)
 
-    return preds # inputs["images"], labels, preds, loss.item()
+    return preds, perturbed_inputs # inputs["images"], labels, preds, loss.item()
 
 
 def fgsm_attack(

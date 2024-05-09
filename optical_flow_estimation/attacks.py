@@ -28,6 +28,8 @@ import json
 
 import os
 
+import cv2 as cv
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -57,8 +59,6 @@ from attacks.attack_utils.attack_args_parser import (
     attack_arg_string,
 )
 from ptlflow_attacked.validate import (
-    validate_one_dataloader,
-    generate_outputs,
     _get_model_names,
 )
 
@@ -407,12 +407,9 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             output_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
-            if args.attack == "none":
-                metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
-            else:
-                metrics_mean = attack_one_dataloader(
-                    args, attack_args, model, dl, dataset_name
-                )
+            metrics_mean = attack_one_dataloader(
+                args, attack_args, model, dl, dataset_name
+            )
 
             end_time = datetime.now()
             output_data.append(
@@ -554,7 +551,6 @@ def attack_one_dataloader(
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
 
-    losses = torch.zeros(len(dataloader))
     with tqdm(dataloader) as tdl:
         prev_preds = None
         for i, inputs in enumerate(tdl):
@@ -597,35 +593,36 @@ def attack_one_dataloader(
 
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    preds = fgsm(
+                    preds, perturbed_inputs = fgsm(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pgd":
-                    preds = bim_pgd_cospgd(
+                    preds, perturbed_inputs = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "cospgd":
-                    preds = bim_pgd_cospgd(
+                    preds, perturbed_inputs = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "bim":
-                    preds = bim_pgd_cospgd(
+                    preds, perturbed_inputs = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "apgd":
-                    preds = apgd(
+                    preds, perturbed_inputs = apgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "fab":
-                    preds = fab(
+                    preds, perturbed_inputs = fab(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pcfa":
-                    preds = pcfa(
+                    # TODO: return perturbed inputs
+                    preds, perturbed_inputs = pcfa(
                         attack_args, model, targeted_inputs
                     )
                 case "common_corruptions":
-                    preds = common_corrupt(attack_args, inputs, model)
+                    preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
                     preds = model(inputs)
 
@@ -694,14 +691,15 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+            if attack_args["attack"] is not "none":
                 generate_outputs(
                     args,
-                    targeted_inputs,
+                    inputs,
                     preds,
                     dataloader_name,
                     i,
-                    targeted_inputs.get("meta"),
+                    inputs.get("meta"),
+                    perturbed_inputs,
                 )
             else:
                 generate_outputs(
@@ -721,6 +719,92 @@ def attack_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
     return metrics_mean
+
+
+def generate_outputs(
+    args: Namespace,
+    preds: Dict[str, torch.Tensor],
+    dataloader_name: str,
+    batch_idx: int,
+    metadata: Optional[Dict[str, Any]] = None,
+    perturbed_inputs: Optional[Dict[str, torch.Tensor]] = None,
+) -> None:
+    """Display on screen and/or save outputs to disk, if required.
+
+    Parameters
+    ----------
+    args : Namespace
+        The arguments with the required values to manage the outputs.
+    inputs : Dict[str, torch.Tensor]
+        The inputs loaded from the dataset (images, groundtruth).
+    preds : Dict[str, torch.Tensor]
+        The model predictions (optical flow and others).
+    dataloader_name : str
+        A string to identify from which dataloader these inputs came from.
+    batch_idx : int
+        Indicates in which position of the loader this input is.
+    metadata : Dict[str, Any], optional
+        Metadata about this input, if available.
+    """
+    # pdb.set_trace()
+    # inputs = tensor_dict_to_numpy(inputs)
+    # inputs["flows_viz"] = flow_utils.flow_to_rgb(inputs["flows"])[:, :, ::-1]
+    # if inputs.get("flows_b") is not None:
+    #     inputs["flows_b_viz"] = flow_utils.flow_to_rgb(inputs["flows_b"])[:, :, ::-1]
+    preds = tensor_dict_to_numpy(preds)
+    preds["flows_viz"] = flow_utils.flow_to_rgb(preds["flows"])[:, :, ::-1]
+    if preds.get("flows_b") is not None:
+        preds["flows_b_viz"] = flow_utils.flow_to_rgb(preds["flows_b"])[:, :, ::-1]
+
+    if args.write_outputs:
+        _write_to_file(args, preds, dataloader_name, batch_idx, metadata)
+        if perturbed_inputs is not None:
+            perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
+            # TODO: save perturbed images
+            pass
+
+
+def _write_to_file(
+    args: Namespace,
+    preds: Dict[str, torch.Tensor],
+    dataloader_name: str,
+    batch_idx: int,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> None:
+    out_root_dir = Path(args.output_path) / dataloader_name
+    # pdb.set_trace()
+    extra_dirs = ""
+    if metadata is not None:
+        img_path = Path(metadata["image_paths"][0][0])
+        image_name = img_path.stem
+        if "sintel" in dataloader_name:
+            seq_name = img_path.parts[-2]
+            extra_dirs = seq_name
+    else:
+        image_name = f"{batch_idx:08d}"
+
+    if args.flow_format != "original":
+        flow_ext = args.flow_format
+    else:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
+            flow_ext = "png"
+        else:
+            flow_ext = "flo"
+
+    for k, v in preds.items():
+        if isinstance(v, np.ndarray):
+            out_dir = out_root_dir / k / extra_dirs
+            out_dir.mkdir(parents=True, exist_ok=True)
+            if k == "flows" or k == "flows_b":
+                flow_utils.flow_write(out_dir / f"{image_name}.{flow_ext}", v)
+            elif len(v.shape) == 2 or (
+                len(v.shape) == 3 and (v.shape[2] == 1 or v.shape[2] == 3)
+            ):
+                if v.max() <= 1:
+                    v = v * 255
+                pdb.set_trace()
+                cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
+
 
 
 if __name__ == "__main__":
