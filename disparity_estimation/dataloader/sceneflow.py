@@ -10,21 +10,8 @@ import copy
 from albumentations import Compose, OneOf
 from natsort import natsorted
 
-# Import CFNet files
-from ..cfnet import cfnet_flow_transforms
-from .cfnet.cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
-
-
-# Import STTR files
-from .sttr.sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBShiftStereo, \
-    RandomBrightnessContrastStereo, random_crop, horizontal_flip
-from .sceneflow.sttr_preprocess import augment
-
-# Import GWCNet files
-from .gwcnet_data_io import get_transform_gwcnet
-
-# Import PSMNet files
-from ..psmnet.psmnet_preprocess import get_transform_psmnet
+# Imports
+from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
 
 
 # SceneFlow dataloader from CFNet
@@ -71,7 +58,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         return Image.open(filename).convert('RGB')
 
     def load_disp(self, filename) -> np.ndarray[np.float32]:
-        return pfm_imread_cfnet(filename)[0].astype(np.float32)
+        return cfnet.data_io.pfm_imread(filename)[0].astype(np.float32)
     
     def load_occ(self, filename) -> np.ndarray[bool]:
         return np.array(Image.open(filename)).astype(bool)
@@ -192,13 +179,13 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
             disparity = disparity[y1:y1 + th, x1:x1 + tw]
 
-            processed = get_transform_psmnet(augment=False)  
+            processed = psmnet.preprocess.get_transform(augment=False)  
             left_img   = processed(left_img)
             right_img  = processed(right_img)
 
             return left_img, right_img, disparity
         else:
-            processed = get_transform_psmnet(augment=False)  
+            processed = psmnet.preprocess.get_transform(augment=False)  
             left_img       = processed(left_img)
             right_img      = processed(right_img) 
             return left_img, right_img, disparity
@@ -242,10 +229,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
                 # px = 2
                 angle = 0.05
                 px = 1
-            co_transform = cfnet_flow_transforms.Compose([
+            co_transform = cfnet.flow_transforms.Compose([
                 # flow_transforms.RandomVdisp(angle, px),
                 # flow_transforms.Scale(np.random.uniform(self.rand_scale[0], self.rand_scale[1]), order=self.order),
-                cfnet_flow_transforms.RandomCrop((th, tw)),
+                cfnet.flow_transforms.RandomCrop((th, tw)),
             ])
             augmented, disparity = co_transform([left_img, right_img], disparity)
             left_img = augmented[0]
@@ -264,7 +251,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             # w, h = left_img.size
 
             disparity = np.ascontiguousarray(disparity, dtype=np.float32)
-            processed = get_transform_cfnet()
+            processed = cfnet.data_io.get_transform()
             left_img = processed(left_img)
             right_img = processed(right_img)
 
@@ -281,7 +268,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             right_img = right_img.crop((w - crop_w, h - crop_h, w, h))
             disparity = disparity[h - crop_h:h, w - crop_w: w]
 
-            processed = get_transform_cfnet()
+            processed = cfnet.data_io.get_transform()
             left_img = processed(left_img)
             right_img = processed(right_img)
 
@@ -317,7 +304,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
             # to tensor, normalize
-            processed = get_transform_gwcnet()
+            processed = gwcnet.data_io.get_transform()
             left_img = processed(left_img)
             right_img = processed(right_img)
 
@@ -332,7 +319,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             right_img = right_img.crop((w - crop_w, h - crop_h, w, h))
             disparity = disparity[h - crop_h:h, w - crop_w: w]
 
-            processed = get_transform_gwcnet()
+            processed = gwcnet.data_io.get_transform()
             left_img = processed(left_img)
             right_img = processed(right_img)
 

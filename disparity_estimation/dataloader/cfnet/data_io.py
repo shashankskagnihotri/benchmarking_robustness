@@ -3,7 +3,7 @@ import re
 import torchvision.transforms as transforms
 
 
-def get_transform_cfnet():
+def get_transform():
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
@@ -14,14 +14,14 @@ def get_transform_cfnet():
 
 
 # read all lines in a file
-def read_all_lines_cfnet(filename):
+def read_all_lines(filename):
     with open(filename) as f:
         lines = [line.rstrip() for line in f.readlines()]
     return lines
 
 
 # read an .pfm file into numpy array, used to load SceneFlow disparity files
-def pfm_imread_cfnet(filename) -> tuple[np.ndarray, float]:
+def pfm_imread(filename) -> tuple[np.ndarray, float]:
     file = open(filename, 'rb')
     color = None
     width = None

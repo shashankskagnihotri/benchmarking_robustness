@@ -20,7 +20,6 @@ from torch.utils.data import DataLoader
 import gc
 
 
-from dataloader import SceneFlowFlyingThings3DDataset
 from dataloader import get_dataset
 
 cudnn.benchmark = True
@@ -62,8 +61,8 @@ logger = SummaryWriter(args.logdir)
 # StereoDataset = __datasets__[args.dataset]
 # train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
 # test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
-train_dataset = get_dataset(args.datapath, args.dataset, architeture_name="CFNet", split='train')
-test_dataset  = get_dataset(args.datapath, args.dataset, architeture_name="CFNet", split='test')
+train_dataset = get_dataset(args.dataset, args.datapath, architeture_name="CFNet", split='train')
+test_dataset  = get_dataset(args.dataset, args.datapath, architeture_name="CFNet", split='test')
 
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)

@@ -69,6 +69,29 @@ class RandomCrop(object):
         return inputs, target[y1: y1 + th,x1: x1 + tw]
 
 
+# modified to accept left and right img instead of input array
+class RandomCropAmaan(object):
+    """ Randomly crop images """
+
+    def __init__(self, size):
+        if isinstance(size, numbers.Number):
+            self.size = (int(size), int(size))
+        else:
+            self.size = size
+
+    def __call__(self, left, right,target):
+        _, h, w, = left.shape
+        th, tw = self.size
+        if w < tw: tw=w
+        if h < th: th=h
+
+        x1 = random.randint(0, w - tw)
+        y1 = random.randint(0, h - th)
+        left = left[:, y1: y1 + th,x1: x1 + tw]
+        right = right[:, y1: y1 + th,x1: x1 + tw]
+        target = target[y1: y1 + th,x1: x1 + tw]
+        return left, right, target
+
 class RandomVdisp(object):
     """Random vertical disparity augmentation
     """
