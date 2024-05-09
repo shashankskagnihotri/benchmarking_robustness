@@ -70,7 +70,7 @@ class RandomCrop(object):
 
 
 # modified to accept left and right img instead of input array
-class RandomCropAmaan(object):
+class RandomCropMPISintel(object):
     """ Randomly crop images """
 
     def __init__(self, size):

@@ -6,9 +6,10 @@ import torch.nn.functional as F
 import torch
 from PIL import Image
 from natsort import natsorted
-from . import cf_net_flow_transforms
 
-from ..psmnet_preprocess import augment
+# Imports
+from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
+
 
 def disparity_read(filename):
     """ Return disparity read from filename. """
@@ -39,11 +40,13 @@ def convert_items_from_pil_image_to_numpy(input_data_raw):
     return input_data_processed
 
 class MPISintelDataset(data.Dataset):
-    def __init__(self, datadir, model_name='psmnet'):
+    def __init__(self, datadir:str, model_name:str, train:bool=True):
         super(MPISintelDataset, self).__init__()
         
         self.model_name = model_name.lower()
         self.datadir = datadir
+        self.training = train
+        
         self._read_data()
         self._augmentation()
 
@@ -82,7 +85,7 @@ class MPISintelDataset(data.Dataset):
             input_data_processed['left'] = input_data_processed['left'].squeeze() # here dimension is ([3, 436, 1024]) numpay array
             input_data_processed['right'] = input_data_processed['right'].squeeze() # here dimension is ([3, 436, 1024]) numpay array
 
-            random_crop_cf_net = cf_net_flow_transforms.RandomCrop((256, 512))
+            random_crop_cf_net = cfnet.flow_transforms.RandomCropMPISintel((256, 512))
             input_data_processed['left'], input_data_processed['right'], input_data_processed['disparity'] = random_crop_cf_net(input_data_processed['left'], input_data_processed['right'], input_data_processed['disparity'])
 
             return input_data_processed
@@ -117,7 +120,7 @@ class MPISintelDataset(data.Dataset):
 
     def preprocess_item_STTR(self, input_data_raw):
 
-        return augment(input_data_raw, self.transformation)
+        return sttr.preprocess.augment(input_data_raw, self.transformation)
 
 # ---------------------------------------------------------------------------- FROM STTR ---------------------------------------------------------------------------- #
 #  Authors: Zhaoshuo Li, Xingtong Liu, Francis X. Creighton, Russell H. Taylor, and Mathias Unberath
