@@ -28,7 +28,7 @@ def pfm_imread(filename) -> tuple[np.ndarray, float]:
     height = None
     scale = None
     endian = None
-
+    print(filename)
     header = file.readline().decode('utf-8').rstrip()
     if header == 'PF':
         color = True

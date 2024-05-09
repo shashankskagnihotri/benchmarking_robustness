@@ -68,8 +68,8 @@ logger = SummaryWriter(args.logdir)
 # TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 # TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
 
-train_dataset = get_dataset(args.dataset, args.datapath, split="train", architeture_name="GWCNet")
-test_dataset  = get_dataset(args.dataset, args.datapath, split="validation_all",  architeture_name="GWCNet")
+train_dataset = get_dataset(args.dataset, args.datapath, split="train", architeture_name=args.model)
+test_dataset  = get_dataset(args.dataset, args.datapath, split="validation_all",  architeture_name=args.model)
 
 TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)

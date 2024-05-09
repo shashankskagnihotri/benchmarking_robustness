@@ -9,25 +9,33 @@ from natsort import natsorted
 import random
 import re
 import torchvision.transforms.functional as F
-from dataloader.Kitti2015.sttr_preprocess import augment, normalization
-from dataloader.Kitti2015.sttr_stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastStereo, random_crop
-from dataloader.Kitti2015.gwcnet_data_io import get_transform
 import torch
 from torchvision import transforms
 
 
-from .kitti2015 import psmnet_preprocess 
-from .cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
+# Imports
+from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
+
+
+
+# from dataloader.kitti2015.sttr_preprocess import augment, normalization
+# from dataloader.kitti2015.sttr_stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastStereo, random_crop
+# from dataloader.kitti2015.gwcnet_data_io import get_transform
+
+
+
+# from .kitti2015 import psmnet_preprocess 
+# from .cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
 
 
 
 class KITTIBaseDataset(data.Dataset):
-    def __init__(self, datadir,model_name, split='train'):
+    def __init__(self, datadir, architecture_name, split='train'):
         super(KITTIBaseDataset, self).__init__()
 
         self.datadir = datadir
         self.split = split
-        self.model_name = model_name
+        self.architecture_name = architecture_name
 
         if split == 'train' or split == 'validation' or split == 'validation_all':
             self.sub_folder = 'training/'
@@ -71,7 +79,7 @@ class KITTIBaseDataset(data.Dataset):
                 self.disp_data = self.disp_data[int(len(self.disp_data) * train_val_frac):]
 
     def _augmentation(self):
-        if self.model_name == 'STTR':
+        if self.architecture_name == 'STTR':
             if self.split == 'train':
                 self.transformation = Compose([
                     RGBShiftStereo(always_apply=True, p_asym=0.5),
@@ -92,8 +100,8 @@ class KITTIBaseDataset(data.Dataset):
         return Image.open(filename).convert('RGB')
 
     def load_disp(self, filename) -> np.ndarray[np.float32]:
-        return pfm_imread_cfnet(filename)[0].astype(np.float32)
-    
+        return np.array(Image.open(filename), dtype=np.float32) / 256.
+        
     def load_occ(self, filename) -> np.ndarray[bool]:
         return np.array(Image.open(filename)).astype(bool)
     
@@ -107,22 +115,22 @@ class KITTIBaseDataset(data.Dataset):
         
         
         
-        if self.model_name == 'STTR':
+        if self.architecture_name == 'STTR':
             return self.get_item_STTR(img_left, img_right, disp_left)
         
-        elif self.model_name == 'gwcnet-g' or self.model_name == 'gwcnet-gc':
+        elif self.architecture_name == 'gwcnet-g' or self.architecture_name == 'gwcnet-gc':
             return self.get_item_GWCNET(img_left, img_right, disp_left)
 
-        elif self.model_name == 'CFNet':
-            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+        elif self.architecture_name == 'CFNet':
+            raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
 
-        elif self.model_name == 'HSMNet':
-            raise NotImplemented(f"No dataloder for {self.model_name} implemented") 
+        elif self.architecture_name == 'HSMNet':
+            raise NotImplemented(f"No dataloder for {self.architecture_name} implemented") 
         
-        elif self.model_name == 'PSMNet':
+        elif self.architecture_name == 'PSMNet':
             return self.get_item_PSMNet(img_left, img_right, disp_left)
         else:
-            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+            raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
 
    
     def get_item_PSMNet(self, left_img, right_img, dataL) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -140,7 +148,7 @@ class KITTIBaseDataset(data.Dataset):
            dataL = np.ascontiguousarray(dataL,dtype=np.float32)/256
            dataL = dataL[y1:y1 + th, x1:x1 + tw]
 
-           processed = psmnet_preprocess.get_transform(augment=False)  
+           processed = psmnet.preprocess.get_transform(augment=False)  
            left_img   = processed(left_img)
            right_img  = processed(right_img)
 
@@ -155,7 +163,7 @@ class KITTIBaseDataset(data.Dataset):
            dataL = dataL.crop((w-1232, h-368, w, h))
            dataL = np.ascontiguousarray(dataL,dtype=np.float32)/256
 
-           processed = psmnet_preprocess.get_transform(augment=False)  
+           processed = psmnet.preprocess.get_transform(augment=False)  
            left_img       = processed(left_img)
            right_img      = processed(right_img)
 
@@ -188,9 +196,9 @@ class KITTIBaseDataset(data.Dataset):
             if self.split == 'train':
                 input_data = random_crop(200, 640, input_data, self.split)
 
-            input_data = augment(input_data, self.transformation)
+            input_data = sttr.preprocess.augment(input_data, self.transformation)
         else:
-            input_data = normalization(**input_data)
+            input_data = sttr.preprocess.normalization(**input_data)
 
         return input_data
         
@@ -234,7 +242,7 @@ class KITTIBaseDataset(data.Dataset):
             right_img = right_img.crop((x1, y1, x1 + crop_w, y1 + crop_h))
             disparity = disparity[y1:y1 + crop_h, x1:x1 + crop_w]
 
-            transform = get_transform()
+            transform = gwcnet.data_io.get_transform()
             left_img = transform(left_img)
             right_img = transform(right_img)
 
