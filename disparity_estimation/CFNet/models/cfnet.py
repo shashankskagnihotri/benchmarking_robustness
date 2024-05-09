@@ -144,11 +144,24 @@ class feature_extraction(nn.Module):
 
         concat5 = torch.cat((l5, self.upconv6(l6)), dim=1)
         decov_5 = self.iconv5(concat5)
+        #print(self.upconv5(decov_5).shape, l4.shape)
+        #torch.Size([1, 192, 56, 128]) torch.Size([1, 192, 55, 128])
+        # if self.upconv5(decov_5).shape[2] != l4.shape[2]:
+        #     l4 = F.pad(l4, (0, 0, 0, 1))
         concat4 = torch.cat((l4, self.upconv5(decov_5)), dim=1)
         # concat4 = torch.cat((l4, self.upconv5(l5)), dim=1)
         decov_4 = self.iconv4(concat4)
+        # print(self.upconv4(decov_4).shape, l3.shape)
+        # # torch.Size([1, 128, 112, 256]) torch.Size([1, 128, 109, 256])
+        # if self.upconv4(decov_4).shape[2] != l3.shape[2]:
+        #     l3 = F.pad(l3, (0, 0, 0, 3))
+        # print(self.upconv4(decov_4).shape, l3.shape)
         concat3 = torch.cat((l3, self.upconv4(decov_4)), dim=1)
         decov_3 = self.iconv3(concat3)
+        # print(self.upconv3(decov_3).shape, l2.shape)
+        # # torch.Size([1, 64, 224, 512]) torch.Size([1, 64, 218, 512])
+        # if self.upconv3(decov_3).shape[2] != l2.shape[2]:
+        #     l2 = F.pad(l2, (0, 0, 0, 6))
         concat2 = torch.cat((l2, self.upconv3(decov_3)), dim=1)
         decov_2 = self.iconv2(concat2)
         # decov_1 = self.upconv2(decov_2)
