@@ -1,12 +1,13 @@
 from .sceneflow.sceneflow import SceneFlowFlyingThings3DDataset
 from .kitti2015.kitti2015 import Kitti2015Dataset
-from .eth3d.eth3d         import ETH3DDataset
-from .mpisintel.mpisintel import MPISintelDataset
+# from .eth3d.eth3d         import ETH3DDataset
+# from .mpisintel.mpisintel import MPISintelDataset
 
-def get_dataset(datadir : str , dataset_name : str, split : str, architeture_name: str):
-    if dataset_name == 'sceneflow':
+def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
+    print(f'Loading {dataset_name} dataset')
+    if dataset_name.lower() == 'sceneflow':
         isTrain = True if split == 'train' else False
-        return SceneFlowFlyingThings3DDataset(datadir, isTrain, architeture_name)
+        return SceneFlowFlyingThings3DDataset(datadir, architeture_name, isTrain)
     elif dataset_name == 'sintel':
         return MPISintelDataset(datadir, architeture_name)
     # elif dataset_name == 'kitti2015':

@@ -10,15 +10,20 @@ import copy
 from albumentations import Compose, OneOf
 from natsort import natsorted
 
+# Import CFNet files
+from . import cfnet_flow_transforms
+from .cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
 
-from . import CFNet_flow_transforms as flow_transforms
+
+# Import STTR files
 from .sttr_stereo_albumentation import RandomShiftRotate, GaussNoiseStereo, RGBShiftStereo, \
     RandomBrightnessContrastStereo, random_crop, horizontal_flip
 from .sttr_preprocess import augment
 
-from .CFNet_data_io import get_transform_cfnet, pfm_imread_cfnet
-from .GWCNet_data_io import get_transform_gwcnet
+# Import GWCNet files
+from .gwcnet_data_io import get_transform_gwcnet
 
+# Import PSMNet files
 from .psmnet_preprocess import get_transform_psmnet
 
 
@@ -28,7 +33,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         super().__init__()
 
         self.datadir = datadir
-        self.model_name = model_name
+        self.model_name = model_name.lower()
 
         self.split_folder = 'TRAIN' if train else 'TEST'
         self.training = train
@@ -53,21 +58,26 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         self.img_left_filenames = natsorted(self.img_left_filenames)
         self.img_right_filenames = [img_path.replace('left', 'right') for img_path in self.img_left_filenames]
 
-        self.disp_left_filenames = [img.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img in self.img_left_filenames]
-        self.disp_right_filenames = [img.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img in self.img_right_filenames]
+        self.disp_left_filenames = [img_path.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img_path in self.img_left_filenames]
+        self.disp_right_filenames = [img_path.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img_path in self.img_right_filenames]
 
         directory = os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
-        self.occ_data = [os.path.join(directory, occ) for occ in os.listdir(directory)]
-        self.occ_data = natsorted(self.occ_data)
+        self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)]
+        self.occ_left_filenames = natsorted(self.occ_left_filenames)
+        self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
+        
 
-    def load_image(self, filename):
+    def load_image(self, filename) -> Image:
         return Image.open(filename).convert('RGB')
 
-    def load_disp(self, filename):
-        return pfm_imread_cfnet(filename)[0]
+    def load_disp(self, filename) -> np.ndarray[np.float32]:
+        return pfm_imread_cfnet(filename)[0].astype(np.float32)
+    
+    def load_occ(self, filename) -> np.ndarray[bool]:
+        return np.array(Image.open(filename)).astype(bool)
     
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.img_left_filenames)
 
     
@@ -76,19 +86,21 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         img_right = self.load_image(self.img_right_filenames[index])
         disp_left = self.load_disp(self.disp_left_filenames[index])
         disp_right = self.load_disp(self.disp_right_filenames[index])
-
-        if self.model_name == 'CFNet':
-            a = self.get_item_CFNet(img_left, img_right, disp_left)
+        occ_left = self.load_occ(self.occ_left_filenames[index])
+        occ_right = self.load_occ(self.occ_right_filenames[index])
+        
+        if self.model_name == 'cfnet':
+            a = self.get_item_cfnet(img_left, img_right, disp_left)
             print(a["left"].shape, a["right"].shape, a["disparity"].shape)
             return a
-        elif self.model_name == 'PSMNet':
-            return self.get_item_PSMNet(img_left, img_right, disp_left)
-        elif self.model_name == 'GWCNet':
-            return self.get_item_GWCNet(img_left, img_right, disp_left)
-        elif self.model_name == 'HSMNet':
+        elif self.model_name == 'psmnet':
+            return self.get_item_psmnet(img_left, img_right, disp_left)
+        elif self.model_name == 'gwcnet':
+            return self.get_item_gwcnet(img_left, img_right, disp_left)
+        elif self.model_name == 'sttr':
+            return self.get_item_sttr(img_left, img_right, disp_left, disp_right, occ_left, occ_right)
+        elif self.model_name == 'hsmnet':
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
-        elif self.model_name == 'STTR':
-            return self.item_
         
         else:
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
@@ -111,16 +123,16 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
 
-    def get_item_STTR(self, left_img, right_img, left_disp, right_disp, left_occ, right_occ) -> dict:
+    def get_item_sttr(self, left_img:Image, right_img:Image, left_disp:np.ndarray[np.float32], right_disp:np.ndarray[np.float32], left_occ:np.ndarray[bool], right_occ:np.ndarray[bool]) -> dict:
         result = {}
 
         # left_fname = self.left_data[idx]
         # result['left'] = np.array(Image.open(left_fname)).astype(np.uint8)[..., :3]
-        result['left'] = left_img
+        result['left'] = np.array(left_img).astype(np.uint8)
 
         # right_fname = left_fname.replace('left', 'right')
         # result['right'] = np.array(Image.open(right_fname)).astype(np.uint8)[..., :3]
-        result['right'] = right_img
+        result['right'] = np.array(right_img).astype(np.uint8)
 
         # occ_right_fname = self.occ_data[idx].replace('left', 'right')
         # occ_left = np.array(Image.open(self.occ_data[idx])).astype(bool)
@@ -133,16 +145,16 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
 
-        if self.split == "train":
+        if self.training:
             # horizontal flip
             result['left'], result['right'], result['occ_mask'], result['occ_mask_right'], disp, disp_right \
                 = horizontal_flip(result['left'], result['right'], left_occ, right_occ, left_disp, disp_right,
-                                  self.split)
+                                  self.split_folder)
             result['disp'] = np.nan_to_num(disp, nan=0.0)
             result['disp_right'] = np.nan_to_num(disp_right, nan=0.0)
 
             # random crop        
-            result = random_crop(360, 640, result, self.split)
+            result = random_crop(360, 640, result, self.split_folder)
         else:
             result['occ_mask'] = left_occ
             result['occ_mask_right'] = right_occ
@@ -162,7 +174,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
 
-    def get_item_PSMNet(self, left_img:Image, right_img:Image, disparity:Image) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def get_item_psmnet(self, left_img:Image, right_img:Image, disparity:Image) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         
         left_img = np.ascontiguousarray(np.array(left_img))
         right_img = np.ascontiguousarray(np.array(right_img))
@@ -193,7 +205,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
 
-    def get_item_CFNet(self, left_img, right_img, disparity) -> dict:
+    def get_item_cfnet(self, left_img, right_img, disparity) -> dict:
         
         if self.training:
             th, tw = 256, 512
@@ -230,10 +242,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
                 # px = 2
                 angle = 0.05
                 px = 1
-            co_transform = flow_transforms.Compose([
+            co_transform = cfnet_flow_transforms.Compose([
                 # flow_transforms.RandomVdisp(angle, px),
                 # flow_transforms.Scale(np.random.uniform(self.rand_scale[0], self.rand_scale[1]), order=self.order),
-                flow_transforms.RandomCrop((th, tw)),
+                cfnet_flow_transforms.RandomCrop((th, tw)),
             ])
             augmented, disparity = co_transform([left_img, right_img], disparity)
             left_img = augmented[0]
@@ -285,7 +297,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
 
 
-    def get_item_GWCNet(self, left_img:Image, right_img:Image, disparity:Image) -> dict:
+    def get_item_gwcnet(self, left_img:Image, right_img:Image, disparity:Image) -> dict:
         
         if self.training:
             w, h = left_img.size
