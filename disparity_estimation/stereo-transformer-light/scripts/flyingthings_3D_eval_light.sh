@@ -6,4 +6,4 @@ python main.py  --batch_size 1\
                 --eval\
                 --dataset sceneflow\
                 --dataset_directory /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/FlyingThings3D\
-                --resume sttr_light_sceneflow_pretrained_model.pth.tar
+                --resume /pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/stereo-transformer-light/sttr_light_sceneflow_pretrained_model.pth.tar
