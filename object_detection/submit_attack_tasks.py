@@ -7,18 +7,19 @@ import re
 import logging
 from rich.logging import RichHandler
 import os
+from submitit.core.utils import FailedJobError
+from fractions import Fraction
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(message)s",
     datefmt="[%X]",  # Custom date format
-    handlers=[RichHandler()],
+    handlers=[RichHandler(rich_tracebacks=True)],
 )
 
 # Create a logger
 logger = logging.getLogger("rich")
-
 WORK_DIR = "slurm/work_dir/attacks/%j"
 TARGETED = False
 RANDOM_START = False
@@ -30,19 +31,24 @@ ATTACKS = {
     "BIM": bim_attack,
 }
 STEPS_ATTACK = {
-    "PGD": [2],
-    "FGSM": [1],
-    "BIM": [2],
+    "PGD": [5, 10, 20],
+    "FGSM": None,
+    "BIM": [5, 10, 20],
 }
 EPSILONS = {
-    "PGD": [32],
-    "FGSM": [32],
-    "BIM": [32],
+    "PGD": [1 / 255, 2 / 255, 4 / 255, 8 / 255],
+    "FGSM": [1 / 255, 2 / 255, 4 / 255, 8 / 255],
+    "BIM": [1 / 255, 2 / 255, 4 / 255, 8 / 255],
 }
 ALPHAS = {
-    "PGD": [8],
-    "FGSM": [8],
-    "BIM": [8],
+    "PGD": [0.01],
+    "FGSM": [0.01],
+    "BIM": [0.01],
+}
+NORMS = {
+    "PGD": [None],
+    "FGSM": ["inf"],
+    "BIM": ["inf"],
 }
 
 
@@ -92,18 +98,8 @@ def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_di
         logger.info(f"Skipping {result_dir} as it already exists")
         return None
     else:
-        logger.info(
-            f"Running attack {attack_name} with epsilon {epsilon}, alpha {alpha}, steps {steps}, random start {RANDOM_START}"
-        )
-
-    job = executor.submit(
-        run_attack_val,
-        attack,
-        config_file,
-        checkpoint_file,
-        attack_kwargs,
-        result_dir,
-    )
+        logger.info(f"Running attack {attack.__name__} with {attack_kwargs}")
+        logger.info(f"saving results to {result_dir}")
 
     job = executor.submit(
         run_attack_val,
@@ -116,11 +112,21 @@ def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_di
     return job
 
 
+def format_value(v):
+    if isinstance(v, float):
+        fraction = Fraction(v).limit_denominator(1000)
+        if fraction.denominator <= 255:
+            return f"{fraction.numerator}/{fraction.denominator}"
+        else:
+            return f"{v:.2f}"  # Limit to 2 decimal places
+    return str(v)
+
+
 checkpoint_files = []
 config_files = []
 
 for subdir in Path(MODEL_DIR).iterdir():
-    if subdir.is_dir():  # Ensure it's a directory
+    if subdir.is_dir():
         checkpoint_file = find_latest_epoch_file(subdir)
         config_file = find_python_files(subdir)
 
@@ -136,12 +142,12 @@ logger.info("Setup submitit executor")
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
     slurm_partition="gpu_4",
-    slurm_gres="gpu:1",
+    slurm_gres="gpu:4",
     slurm_time="01:00:00",
-    nodes=1,
-    cpus_per_task=4,
-    tasks_per_node=1,
-    slurm_mem="10G",
+    nodes=4,
+    cpus_per_task=1,
+    tasks_per_node=40,
+    slurm_mem="300G",
     slurm_mail_type="NONE",
 )
 # submitit.helpers.CommandFunction(["module", "load", "devel/cuda/11.8"])
@@ -150,70 +156,39 @@ jobs = []
 
 logger.info(f"found {len(config_files)} config and checkpoint files")
 
+try:
+    for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+        for attack_name, attack in ATTACKS.items():
+            steps = STEPS_ATTACK[attack_name]
+            epsilons = EPSILONS[attack_name]
+            alphas = ALPHAS[attack_name]
+            norms = NORMS[attack_name]
 
-for config_file, checkpoint_file in zip(config_files, checkpoint_files):
-    for attack_name, attack in ATTACKS.items():
-        steps = STEPS_ATTACK[attack_name]
-        epsilons = EPSILONS[attack_name]
-        alphas = ALPHAS[attack_name]
-
-        for epsilon in epsilons:
-            for alpha in alphas:
-                if attack == pgd_attack:
-                    attack_kwargs = {
-                        "epsilon": epsilon,
-                        "alpha": alpha,
-                        "targeted": TARGETED,
-                        "steps": steps,
-                        "random_start": RANDOM_START,
-                    }
-
-                    result_dir = os.path.join(
-                        RESULT_DIR,
-                        f"{attack_name}_eps{epsilon}_alpha{alpha}_steps{steps}_random{RANDOM_START}",
-                    )
-
-                    job = submit_attack(
-                        config_file, checkpoint_file, attack, attack_kwargs, result_dir
-                    )
-                    if job:
-                        jobs.append(job)
-
-                elif attack == fgsm_attack:
-                    for norm in ["inf", "two"]:
+            for epsilon in epsilons:
+                for alpha in alphas:
+                    for norm in norms:
                         attack_kwargs = {
                             "epsilon": epsilon,
                             "alpha": alpha,
                             "targeted": TARGETED,
-                            "norm": norm,
-                        }
-                        result_dir = os.path.join(
-                            RESULT_DIR,
-                            f"{attack_name}_eps{epsilon}_alpha{alpha}_norm{norm}",
-                        )
-                        job = submit_attack(
-                            config_file,
-                            checkpoint_file,
-                            attack,
-                            attack_kwargs,
-                            result_dir,
-                        )
-                        if jobs:
-                            jobs.append(job)
-
-                elif attack == bim_attack:
-                    for norm in ["inf", "two"]:
-                        attack_kwargs = {
-                            "epsilon": epsilon,
-                            "alpha": alpha,
-                            "targeted": TARGETED,
-                            "norm": norm,
                             "steps": steps,
+                            "random_start": RANDOM_START,
+                            "norm": norm,
                         }
 
+                        if attack == fgsm_attack:
+                            del attack_kwargs["steps"]
+                            del attack_kwargs["random_start"]
+                        elif attack == pgd_attack:
+                            del attack_kwargs["norm"]
+                        elif attack == bim_attack:
+                            del attack_kwargs["random_start"]
+
                         result_dir = os.path.join(
-                            RESULT_DIR,
-                            f"{attack_name}_eps{epsilon}_alpha{alpha}_norm{norm}_steps{steps}",
+                            f"{RESULT_DIR}_"
+                            + "_".join(
+                                [k + format_value(v) for k, v in attack_kwargs.items()]
+                            )
                         )
 
                         job = submit_attack(
@@ -223,21 +198,22 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                             attack_kwargs,
                             result_dir,
                         )
-
                         if job:
                             jobs.append(job)
 
+except FailedJobError:
+    logger.exception("Failed to submit job")
+finally:
+    # wait until all jobs are completed:
+    outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
 
-# wait until all jobs are completed:
-outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
+    # change notification and no need for a gpu
+    executor.update_parameters(
+        slurm_partition="single",
+        slurm_time="01:00:00",
+        slurm_gres="",
+        slurm_mail_type="END, FAIL",
+        slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
+    )
 
-# change notification and no need for a gpu
-executor.update_parameters(
-    slurm_partition="single",
-    slurm_time="01:00:00",
-    slurm_gres="",
-    slurm_mail_type="END, FAIL",
-    slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
-)
-
-executor.submit(collect_results, RESULT_DIR)
+    executor.submit(collect_results, RESULT_DIR)
