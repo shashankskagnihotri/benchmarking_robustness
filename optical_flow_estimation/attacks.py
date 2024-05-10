@@ -639,6 +639,8 @@ def attack_one_dataloader(
 
             inputs = io_adapter.unscale(inputs, image_only=True)
             preds = io_adapter.unscale(preds)
+            if attack_args["attack"] != "none":
+                perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
 
             if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
                 if args.seq_val_mode == "first":
@@ -798,8 +800,6 @@ def _write_to_npy_file(
                 if k == "images":
                     out_dir_imgs = out_dir / k / extra_dirs
                     out_dir_imgs.mkdir(parents=True, exist_ok=True)
-                    if v.max() <= 1:
-                        v = v * 255
                     np.savez_compressed(str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8))
 
 
