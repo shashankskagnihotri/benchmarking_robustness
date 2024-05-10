@@ -9,6 +9,7 @@ from rich.logging import RichHandler
 import os
 from submitit.core.utils import FailedJobError
 from fractions import Fraction
+import itertools
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -32,7 +33,7 @@ ATTACKS = {
 }
 STEPS_ATTACK = {
     "PGD": [5, 10, 20],
-    "FGSM": None,
+    "FGSM": [None],
     "BIM": [5, 10, 20],
 }
 EPSILONS = {
@@ -95,10 +96,10 @@ def find_python_files(directory):
 
 def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_dir):
     if os.path.exists(result_dir):
-        logger.info(f"Skipping {result_dir} as it already exists")
+        logger.info(f"skipping {result_dir} as it already exists")
         return None
     else:
-        logger.info(f"Running attack {attack.__name__} with {attack_kwargs}")
+        logger.info(f"running attack {attack.__name__} with {attack_kwargs}")
         logger.info(f"saving results to {result_dir}")
 
     job = executor.submit(
@@ -131,78 +132,84 @@ for subdir in Path(MODEL_DIR).iterdir():
         config_file = find_python_files(subdir)
 
         if checkpoint_file and config_file:
-            logger.info(f"Checkpoint file: {checkpoint_file}")
-            logger.info(f"Config file: {config_file}")
+            logger.info(f"checkpoint file: {checkpoint_file}")
+            logger.info(f"config file: {config_file}")
             checkpoint_files.append(checkpoint_file)
             config_files.append(config_file)
         else:
             logger.warning(f"No checkpoint or config file found in {subdir}")
 
-logger.info("Setup submitit executor")
+logger.info("setup submitit executor")
+logger.info(f"found {len(config_files)} config and checkpoint files")
+num_tasks = min(40, len(config_files))
+slurm_mem = min(360, 10 * num_tasks)
+logger.info(f"submitting {num_tasks} tasks")
+logger.info(f"slurm_mem: {slurm_mem}")
+
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
     slurm_partition="gpu_4",
-    slurm_gres="gpu:4",
-    slurm_time="01:00:00",
-    nodes=4,
+    slurm_gres="gpu:2",
+    slurm_time="10:00:00",
+    nodes=1,
     cpus_per_task=1,
-    tasks_per_node=40,
-    slurm_mem="300G",
+    tasks_per_node=num_tasks,
+    slurm_mem=slurm_mem,
     slurm_mail_type="NONE",
 )
+jobs = []
 # submitit.helpers.CommandFunction(["module", "load", "devel/cuda/11.8"])
 
-jobs = []
-
-logger.info(f"found {len(config_files)} config and checkpoint files")
-
 try:
-    for config_file, checkpoint_file in zip(config_files, checkpoint_files):
-        for attack_name, attack in ATTACKS.items():
-            steps = STEPS_ATTACK[attack_name]
-            epsilons = EPSILONS[attack_name]
-            alphas = ALPHAS[attack_name]
-            norms = NORMS[attack_name]
+    for attack_name, attack in ATTACKS.items():
+        num_steps = STEPS_ATTACK[attack_name]
+        epsilons = EPSILONS[attack_name]
+        alphas = ALPHAS[attack_name]
+        norms = NORMS[attack_name]
 
-            for epsilon in epsilons:
-                for alpha in alphas:
-                    for norm in norms:
-                        attack_kwargs = {
-                            "epsilon": epsilon,
-                            "alpha": alpha,
-                            "targeted": TARGETED,
-                            "steps": steps,
-                            "random_start": RANDOM_START,
-                            "norm": norm,
-                        }
+        for steps, epsilon, alpha, norm in itertools.product(
+            num_steps, epsilons, alphas, norms
+        ):
+            slurm_time = f"{steps}:00:00"
+            executor.update_parameters(slurm_time=slurm_time)
 
-                        if attack == fgsm_attack:
-                            del attack_kwargs["steps"]
-                            del attack_kwargs["random_start"]
-                        elif attack == pgd_attack:
-                            del attack_kwargs["norm"]
-                        elif attack == bim_attack:
-                            del attack_kwargs["random_start"]
+            with executor.batch():
+                for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+                    attack_kwargs = {
+                        "epsilon": epsilon,
+                        "alpha": alpha,
+                        "targeted": TARGETED,
+                        "steps": steps,
+                        "random_start": RANDOM_START,
+                        "norm": norm,
+                    }
 
-                        result_dir = os.path.join(
-                            f"{RESULT_DIR}_"
-                            + "_".join(
-                                [k + format_value(v) for k, v in attack_kwargs.items()]
-                            )
+                    if attack == fgsm_attack:
+                        del attack_kwargs["steps"]
+                        del attack_kwargs["random_start"]
+                    elif attack == pgd_attack:
+                        del attack_kwargs["norm"]
+                    elif attack == bim_attack:
+                        del attack_kwargs["random_start"]
+
+                    result_dir = os.path.join(
+                        f"{RESULT_DIR}_"
+                        + "_".join(
+                            [k + format_value(v) for k, v in attack_kwargs.items()]
                         )
+                    )
 
-                        job = submit_attack(
-                            config_file,
-                            checkpoint_file,
-                            attack,
-                            attack_kwargs,
-                            result_dir,
-                        )
-                        if job:
-                            jobs.append(job)
-
+                    job = submit_attack(
+                        config_file,
+                        checkpoint_file,
+                        attack,
+                        attack_kwargs,
+                        result_dir,
+                    )
+                    if job:
+                        jobs.append(job)
 except FailedJobError:
-    logger.exception("Failed to submit job")
+    logger.exception("failed to submit job")
 finally:
     # wait until all jobs are completed:
     outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
