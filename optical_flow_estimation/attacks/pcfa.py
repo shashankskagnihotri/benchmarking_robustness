@@ -39,11 +39,16 @@ def pcfa(
     for param in model.parameters():
         param.requires_grad = False
 
-    preds, l2_delta1, l2_delta2, l2_delta12 = pcfa_attack(
+    preds, delta1, delta2 = pcfa_attack(
         model, targeted_inputs, eps_box, device, optim_mu, attack_args
     )
+    pdb.set_trace()
+    image1, image2 = get_image_tensors(targeted_inputs)
+    perturbed_image1 = image1 + delta1
+    perturbed_image2 = image2 + delta2
+    perturbed_inputs = replace_images_dic(targeted_inputs, perturbed_image1, perturbed_image2, clone=True)
 
-    return preds #, l2_delta1, l2_delta2, l2_delta12
+    return preds, perturbed_inputs 
 
 
 def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
@@ -241,11 +246,11 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
         flow_pred = preds["flows"].squeeze(0)
         flow_pred = flow_pred.to(device)
 
-        l2_delta1 = torchfloat_to_float64(losses.two_norm_avg(delta1))
-        l2_delta2 = torchfloat_to_float64(losses.two_norm_avg(delta2))
-        l2_delta12 = torchfloat_to_float64(losses.two_norm_avg_delta(delta1, delta2))
+        # l2_delta1 = torchfloat_to_float64(losses.two_norm_avg(delta1))
+        # l2_delta2 = torchfloat_to_float64(losses.two_norm_avg(delta2))
+        # l2_delta12 = torchfloat_to_float64(losses.two_norm_avg_delta(delta1, delta2))
 
-    return preds, l2_delta1, l2_delta2, l2_delta12
+    return preds, delta1, delta2
 
 
 # For PCFA

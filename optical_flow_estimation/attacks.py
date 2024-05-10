@@ -617,7 +617,6 @@ def attack_one_dataloader(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pcfa":
-                    # TODO: return perturbed inputs
                     preds, perturbed_inputs = pcfa(
                         attack_args, model, targeted_inputs
                     )
