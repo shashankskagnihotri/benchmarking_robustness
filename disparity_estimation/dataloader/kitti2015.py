@@ -79,7 +79,7 @@ class KITTIBaseDataset(data.Dataset):
                 self.disp_data = self.disp_data[int(len(self.disp_data) * train_val_frac):]
 
     def _augmentation(self):
-        if self.architecture_name == 'sttr':
+        if self.architecture_name == 'sttr' or self.architecture_name == 'sttr-light':
             if self.split == 'train':
                 self.transformation = Compose([
                     RGBShiftStereo(always_apply=True, p_asym=0.5),
@@ -116,6 +116,9 @@ class KITTIBaseDataset(data.Dataset):
         
         
         if self.architecture_name == 'sttr':
+            return self.get_item_STTR(img_left, img_right, disp_left)
+        
+        elif self.architecture_name == 'sttr-light': 
             return self.get_item_STTR(img_left, img_right, disp_left)
         
         elif self.architecture_name == 'gwcnet-g' or self.architecture_name == 'gwcnet-gc':
@@ -183,6 +186,36 @@ class KITTIBaseDataset(data.Dataset):
         # right_fname = self.right_data[idx]
         # right = np.array(Image.open(right_fname)).astype(np.uint8)
         # input_data['right'] = right
+        input_data['right'] = np.array(img_right).astype(np.uint8)
+
+        # disp
+        if not self.split == 'test':  # no disp for test files
+            # disp_fname = self.disp_data[idx]
+
+            # disp = np.array(Image.open(disp_fname)).astype(float) / 256.
+            input_data['disp'] = np.array(disp_left).astype(float) / 256.
+            input_data['occ_mask'] = np.zeros_like(disp_left).astype(bool)
+
+            if self.split == 'train':
+                input_data = random_crop(200, 640, input_data, self.split)
+
+            input_data = sttr.preprocess.augment(input_data, self.transformation)
+        else:
+            input_data = sttr.preprocess.normalization(**input_data)
+
+        return input_data
+    
+    def get_item_sttr_light(self, img_left:Image, img_right:Image, disp_left:np.ndarray) -> dict:
+        input_data = {}
+
+        # left
+        # left_fname = self.left_data[idx]
+        # left = np.array(Image.open(left_fname)).astype(np.uint8)
+        input_data['left'] = np.array(img_left).astype(np.uint8)
+
+        # right
+        # right_fname = self.right_data[idx]
+        # right = np.array(Image.open(right_fname)).astype(np.uint8)
         input_data['right'] = np.array(img_right).astype(np.uint8)
 
         # disp
