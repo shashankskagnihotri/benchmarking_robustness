@@ -228,7 +228,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_alpha",
         type=float,
         default=alpha,
-        help="Set epsilon to use for adversarial attack.",
+        help="Set alpha to use for adversarial attack.",
     )
     parser.add_argument(
         "--attack_targeted",
@@ -691,19 +691,19 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack"] is not "none":
+            if attack_args["attack"] != "none":
                 generate_outputs(
                     args,
-                    inputs,
                     preds,
                     dataloader_name,
                     i,
                     inputs.get("meta"),
                     perturbed_inputs,
+                    attack_args,
                 )
             else:
                 generate_outputs(
-                    args, inputs, preds, dataloader_name, i, inputs.get("meta")
+                    args, preds, dataloader_name, i, inputs.get("meta")
                 )
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
@@ -728,6 +728,7 @@ def generate_outputs(
     batch_idx: int,
     metadata: Optional[Dict[str, Any]] = None,
     perturbed_inputs: Optional[Dict[str, torch.Tensor]] = None,
+    attack_args: Optional[Dict[str, List[object]]] = None,
 ) -> None:
     """Display on screen and/or save outputs to disk, if required.
 
@@ -746,22 +747,61 @@ def generate_outputs(
     metadata : Dict[str, Any], optional
         Metadata about this input, if available.
     """
-    # pdb.set_trace()
-    # inputs = tensor_dict_to_numpy(inputs)
-    # inputs["flows_viz"] = flow_utils.flow_to_rgb(inputs["flows"])[:, :, ::-1]
-    # if inputs.get("flows_b") is not None:
-    #     inputs["flows_b_viz"] = flow_utils.flow_to_rgb(inputs["flows_b"])[:, :, ::-1]
+
     preds = tensor_dict_to_numpy(preds)
     preds["flows_viz"] = flow_utils.flow_to_rgb(preds["flows"])[:, :, ::-1]
     if preds.get("flows_b") is not None:
         preds["flows_b_viz"] = flow_utils.flow_to_rgb(preds["flows_b"])[:, :, ::-1]
 
     if args.write_outputs:
-        _write_to_file(args, preds, dataloader_name, batch_idx, metadata)
         if perturbed_inputs is not None:
             perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
-            # TODO: save perturbed images
-            pass
+            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata, perturbed_inputs, attack_args)
+        else:
+            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
+
+
+def _write_to_npy_file(
+    args: Namespace,
+    preds: Dict[str, torch.Tensor],
+    dataloader_name: str,
+    batch_idx: int,
+    metadata: Optional[Dict[str, Any]] = None,
+    perturbed_inputs: Dict[str, torch.Tensor] = None,
+    attack_args: Optional[Dict[str, List[object]]] = None,
+) -> None:
+    out_root_dir = Path(args.output_path) / dataloader_name
+    extra_dirs = ""
+    if metadata is not None:
+        img_path = Path(metadata["image_paths"][0][0])
+        image_name = img_path.stem
+        if "sintel" in dataloader_name:
+            seq_name = img_path.parts[-2]
+            extra_dirs = seq_name
+    else:
+        image_name = f"{batch_idx:08d}"
+
+    for k, v in preds.items():
+        if isinstance(v, np.ndarray):
+            out_dir = out_root_dir
+            if perturbed_inputs is not None:
+                for arg, val in attack_args.items():
+                    out_dir = out_dir / f"{arg}={val}"
+
+            if k == "flows":
+                out_dir_flows = out_dir / k / extra_dirs
+                out_dir_flows.mkdir(parents=True, exist_ok=True)
+                np.savez_compressed(str(out_dir_flows / f"{image_name}"), v.astype(np.uint8))
+
+    if perturbed_inputs is not None:
+        for k, v in perturbed_inputs.items():
+            if isinstance(v, np.ndarray):
+                if k == "images":
+                    out_dir_imgs = out_dir / k / extra_dirs
+                    out_dir_imgs.mkdir(parents=True, exist_ok=True)
+                    if v.max() <= 1:
+                        v = v * 255
+                    np.savez_compressed(str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8))
 
 
 def _write_to_file(

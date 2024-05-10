@@ -177,3 +177,4 @@ dataset/
 .flo
 .fio
 *.png
+*.npz
