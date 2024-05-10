@@ -67,7 +67,8 @@ do
                                                 --attack_alpha $alpha \
                                                 --attack_epsilon $epsilon \
                                                 --attack_targeted $targeted \
-                                                --attack_target $target                                       
+                                                --attack_target $target \
+                                                --write_outputs                                       
                                             #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                                         fi
                                         jobnum=$((jobnum + 1))
