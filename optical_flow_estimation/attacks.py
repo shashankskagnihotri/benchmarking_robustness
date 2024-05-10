@@ -52,6 +52,7 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
+from attacks.tdcc import get_dataset_3DCC
 from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
@@ -62,8 +63,11 @@ from ptlflow_attacked.validate import (
     _get_model_names,
 )
 
+# Import cosPGD functions
+import torch.nn as nn
 from torch.nn.functional import cosine_similarity
 from attacks.attack_utils.utils import get_flow_tensors
+
 
 # Default Attack parameters
 epsilon = 8 / 255
@@ -102,6 +106,7 @@ def _init_parser() -> ArgumentParser:
             "apgd",
             "fab",
             "pcfa",
+            "3dcc",
             "common_corruptions",
             "none",
         ],
@@ -136,7 +141,7 @@ def _init_parser() -> ArgumentParser:
         type=int,
         default=1,
         nargs="*",
-        choices=[1,2,3,4,5],
+        choices=[1, 2, 3, 4, 5],
         help="Severity of the common corruption to use on the input images.",
     )
     parser.add_argument(
@@ -251,6 +256,31 @@ def _init_parser() -> ArgumentParser:
         default=loss_function,
         nargs="*",
         help="Set the name of the used loss function (mse, epe)",
+    )
+    parser.add_argument(
+        "--3dcc_intensity",
+        type=int,
+        choices=[1, 2, 3, 4, 5],
+        default=3,
+        nargs="*",
+        help="Set the the intensity of the 3DCC corruption, int between 1 and 5",
+    )
+    parser.add_argument(
+        "--3dcc_corruption",
+        type=str,
+        default="far_focus",
+        nargs="*",
+        choices=[
+            "far_focus",
+            "near_focus",
+            "fog_3d",
+            "color_quant",
+            "iso_noise",
+            "low_light",
+            "xy_motion_blur",
+            "z_motion_blur",
+        ],
+        help="Set the type of 3DCC",
     )
     parser.add_argument(
         "--selection",
@@ -384,7 +414,6 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
         model = model.cuda()
         if args.fp16:
             model = model.half()
-
     dataloaders = model.val_dataloader()
     dataloaders = {
         model.val_dataloader_names[i]: dataloaders[i] for i in range(len(dataloaders))
@@ -392,9 +421,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     overwrite_flag = args.overwrite_output
     output_data = []
     start_time = datetime.now()
-    output_data.append(
-        ("start_time", start_time.strftime('%Y-%m-%d %H:%M:%S'))
-    )
+    output_data.append(("start_time", start_time.strftime("%Y-%m-%d %H:%M:%S")))
     output_data.append(("model", args.model))
     output_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
@@ -412,9 +439,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             )
 
             end_time = datetime.now()
-            output_data.append(
-                ("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S"))
-            )
+            output_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
             time_difference = end_time - start_time
             hours = time_difference.seconds // 3600
             minutes = (time_difference.seconds % 3600) // 60
@@ -425,7 +450,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             output_data.append(("dataset", dataset_name))
             for k in metrics_mean.keys():
                 output_data.append((k, metrics_mean[k]))
-            
+
             args.output_path.mkdir(parents=True, exist_ok=True)
             # metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
             # if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
@@ -449,14 +474,14 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             output_filename = args.output_path / f"metrics_{args.val_dataset}.json"
 
             if os.path.exists(output_filename) and not overwrite_flag:
-                with open(output_filename, 'r') as json_file:
+                with open(output_filename, "r") as json_file:
                     metrics = json.load(json_file)
             else:
                 metrics = {"experiments": []}
 
             metrics["experiments"].append(output_dict)
 
-            with open(output_filename, 'w') as json_file:
+            with open(output_filename, "w") as json_file:
                 json.dump(metrics, json_file, indent=4)
     # return metrics_df
 
@@ -546,7 +571,13 @@ def attack_one_dataloader(
     """
 
     metrics_sum = {}
-
+    if attack_args["attack"] == "3dcc":
+        dataloader = get_dataset_3DCC(
+            model,
+            dataloader_name,
+            attack_args["3dcc_corruption"],
+            attack_args["3dcc_intensity"],
+        )
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -663,15 +694,29 @@ def attack_one_dataloader(
                 metrics = model.val_metrics(preds, targeted_inputs)
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
-                metrics["val/cosim_target"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(targeted_inputs)))
-                metrics["val/cosim_orig_preds"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(orig_preds)))
+                metrics["val/cosim_target"] = torch.mean(
+                    cosine_similarity(
+                        get_flow_tensors(preds), get_flow_tensors(targeted_inputs)
+                    )
+                )
+                metrics["val/cosim_orig_preds"] = torch.mean(
+                    cosine_similarity(
+                        get_flow_tensors(preds), get_flow_tensors(orig_preds)
+                    )
+                )
                 if has_ground_truth:
                     metrics_ground_truth = model.val_metrics(preds, inputs)
                     metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
-                    metrics["val/cosim_ground_truth"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs)))
+                    metrics["val/cosim_ground_truth"] = torch.mean(
+                        cosine_similarity(
+                            get_flow_tensors(preds), get_flow_tensors(inputs)
+                        )
+                    )
             else:
                 metrics = model.val_metrics(preds, inputs)
-                metrics["val/cosim"] = torch.mean(cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs)))
+                metrics["val/cosim"] = torch.mean(
+                    cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs))
+                )
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:

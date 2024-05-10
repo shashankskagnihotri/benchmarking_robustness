@@ -1,0 +1,17 @@
+XY-Motion Blur, Z-Motion Blur
+Done! Everything saved at: /pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/datasets_corrupted/kitti2012/training/colored_0
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n482
+Job ID: 23544051
+Cluster: uc2
+User/Group: ma_jcaspary/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 02:27:29
+CPU Efficiency: 14.17% of 17:20:48 core-walltime
+Job Wall-clock time: 01:05:03
+Memory Utilized: 7.24 GB
+Memory Efficiency: 7.24% of 100.00 GB

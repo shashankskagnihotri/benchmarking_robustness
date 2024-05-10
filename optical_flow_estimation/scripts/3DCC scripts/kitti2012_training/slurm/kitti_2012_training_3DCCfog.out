@@ -1,0 +1,17 @@
+Fog 3D
+Done! Everything saved at: /pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/datasets_corrupted/kitti2012/training/colored_0
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n483
+Job ID: 23544052
+Cluster: uc2
+User/Group: ma_jcaspary/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 00:03:22
+CPU Efficiency: 4.02% of 01:23:44 core-walltime
+Job Wall-clock time: 00:05:14
+Memory Utilized: 3.61 GB
+Memory Efficiency: 3.61% of 100.00 GB

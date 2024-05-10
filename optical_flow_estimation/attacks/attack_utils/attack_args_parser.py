@@ -42,6 +42,12 @@ pcfa_arguments = [
     "attack_iterations",
     "pcfa_boxconstraint",
 ]
+tdcc_arguments = [
+    "attack",
+    "3dcc_corruption",
+    "3dcc_intensity",
+    "attack_targeted",
+]
 cc_arguments = [
     "attack",
     "attack_targeted",
@@ -63,6 +69,7 @@ class AttackArgumentParser:
                 arg.startswith("attack")
                 or arg.startswith("pcfa")
                 or arg.startswith("apgd")
+                or arg.startswith("3dcc")
                 or arg.startswith("cc")
             ):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
@@ -149,6 +156,12 @@ class AttackArgumentParser:
                     for arg_name in entry.keys():
                         if arg_name not in pcfa_arguments:
                             del to_remove[arg_name]
+                case "3dcc":
+                    for arg_name in entry.keys():
+                        if arg_name not in tdcc_arguments:
+                            del to_remove[arg_name]
+                        elif arg_name == "attack_targeted":
+                            to_remove["attack_targeted"] = False
                 case "common_corruptions":
                     for arg_name in entry.keys():
                         if arg_name not in cc_arguments:
@@ -177,6 +190,7 @@ class AttackArgumentParser:
                 new_argument_list.append(self.argument_lists[i])
         self.argument_lists = new_argument_list
         self.filter_pcfa_untargeted()
+        self.tdcc_to_the_end()
 
     def filter_pcfa_untargeted(self):
         pcfa_targeted_flag = False
@@ -196,6 +210,21 @@ class AttackArgumentParser:
             for i in range(0, len(self.argument_lists)):
                 if i not in pcfa_untargeted_indices:
                     new_argument_list.append(self.argument_lists[i])
+            self.argument_lists = new_argument_list
+
+    def tdcc_to_the_end(self):
+        tdcc_indeces = []
+        tdcc_entries = []
+        new_argument_list = []
+        for i in range(0, len(self.argument_lists)):
+            if self.argument_lists[i]["attack"] == "3dcc":
+                tdcc_indeces.append(i)
+                tdcc_entries.append(self.argument_lists[i])
+        if len(tdcc_indeces) > 0:
+            for i in range(0, len(self.argument_lists)):
+                if i not in tdcc_indeces:
+                    new_argument_list.append(self.argument_lists[i])
+            new_argument_list.extend(tdcc_entries)
             self.argument_lists = new_argument_list
 
 
