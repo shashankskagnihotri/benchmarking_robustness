@@ -35,7 +35,7 @@ class KITTIBaseDataset(data.Dataset):
 
         self.datadir = datadir
         self.split = split
-        self.architecture_name = architecture_name
+        self.architecture_name = architecture_name.lower()
 
         if split == 'train' or split == 'validation' or split == 'validation_all':
             self.sub_folder = 'training/'
@@ -79,7 +79,7 @@ class KITTIBaseDataset(data.Dataset):
                 self.disp_data = self.disp_data[int(len(self.disp_data) * train_val_frac):]
 
     def _augmentation(self):
-        if self.architecture_name == 'STTR':
+        if self.architecture_name == 'sttr':
             if self.split == 'train':
                 self.transformation = Compose([
                     RGBShiftStereo(always_apply=True, p_asym=0.5),
@@ -115,19 +115,19 @@ class KITTIBaseDataset(data.Dataset):
         
         
         
-        if self.architecture_name == 'STTR':
+        if self.architecture_name == 'sttr':
             return self.get_item_STTR(img_left, img_right, disp_left)
         
         elif self.architecture_name == 'gwcnet-g' or self.architecture_name == 'gwcnet-gc':
             return self.get_item_GWCNET(img_left, img_right, disp_left)
 
-        elif self.architecture_name == 'CFNet':
+        elif self.architecture_name == 'cfnet':
             raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
 
-        elif self.architecture_name == 'HSMNet':
+        elif self.architecture_name == 'hsmnet':
             raise NotImplemented(f"No dataloder for {self.architecture_name} implemented") 
         
-        elif self.architecture_name == 'PSMNet':
+        elif self.architecture_name == 'psmnet':
             return self.get_item_PSMNet(img_left, img_right, disp_left)
         else:
             raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
