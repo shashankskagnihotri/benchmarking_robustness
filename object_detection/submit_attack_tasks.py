@@ -6,7 +6,7 @@ from tqdm import tqdm
 import re
 import logging
 from rich.logging import RichHandler
-
+import os
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -30,19 +30,19 @@ ATTACKS = {
     "BIM": bim_attack,
 }
 STEPS_ATTACK = {
-    "PGD": [1, 4],
+    "PGD": [2],
     "FGSM": [1],
-    "BIM": [1, 4],
+    "BIM": [2],
 }
 EPSILONS = {
-    "PGD": [16, 32],
-    "FGSM": [16, 32],
-    "BIM": [16, 32],
+    "PGD": [32],
+    "FGSM": [32],
+    "BIM": [32],
 }
 ALPHAS = {
-    "PGD": [2, 8],
-    "FGSM": [2, 8],
-    "BIM": [2, 8],
+    "PGD": [8],
+    "FGSM": [8],
+    "BIM": [8],
 }
 
 
@@ -55,6 +55,7 @@ logger.info(f"MODEL_DIR: {MODEL_DIR}")
 logger.info(f"ATTACKS: {ATTACKS}")
 logger.info(f"STEPS_ATTACK: {STEPS_ATTACK}")
 logger.info(f"EPSILONS: {EPSILONS}")
+logger.info(f"ALPHAS: {ALPHAS}")
 
 
 def find_latest_epoch_file(directory):
@@ -84,6 +85,35 @@ def find_python_files(directory):
         return python_files[0]
     else:
         return None
+
+
+def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_dir):
+    if os.path.exists(result_dir):
+        logger.info(f"Skipping {result_dir} as it already exists")
+        return None
+    else:
+        logger.info(
+            f"Running attack {attack_name} with epsilon {epsilon}, alpha {alpha}, steps {steps}, random start {RANDOM_START}"
+        )
+
+    job = executor.submit(
+        run_attack_val,
+        attack,
+        config_file,
+        checkpoint_file,
+        attack_kwargs,
+        result_dir,
+    )
+
+    job = executor.submit(
+        run_attack_val,
+        attack,
+        config_file,
+        checkpoint_file,
+        attack_kwargs,
+        result_dir,
+    )
+    return job
 
 
 checkpoint_files = []
@@ -138,15 +168,16 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                         "random_start": RANDOM_START,
                     }
 
-                    job = executor.submit(
-                        run_attack_val,
-                        attack,
-                        config_file,
-                        checkpoint_file,
-                        attack_kwargs,
+                    result_dir = os.path.join(
                         RESULT_DIR,
+                        f"{attack_name}_eps{epsilon}_alpha{alpha}_steps{steps}_random{RANDOM_START}",
                     )
-                    jobs.append(job)
+
+                    job = submit_attack(
+                        config_file, checkpoint_file, attack, attack_kwargs, result_dir
+                    )
+                    if job:
+                        jobs.append(job)
 
                 elif attack == fgsm_attack:
                     for norm in ["inf", "two"]:
@@ -156,16 +187,19 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                             "targeted": TARGETED,
                             "norm": norm,
                         }
-
-                        job = executor.submit(
-                            run_attack_val,
-                            attack,
+                        result_dir = os.path.join(
+                            RESULT_DIR,
+                            f"{attack_name}_eps{epsilon}_alpha{alpha}_norm{norm}",
+                        )
+                        job = submit_attack(
                             config_file,
                             checkpoint_file,
+                            attack,
                             attack_kwargs,
-                            RESULT_DIR,
+                            result_dir,
                         )
-                        jobs.append(job)
+                        if jobs:
+                            jobs.append(job)
 
                 elif attack == bim_attack:
                     for norm in ["inf", "two"]:
@@ -177,15 +211,21 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                             "steps": steps,
                         }
 
-                        job = executor.submit(
-                            run_attack_val,
-                            attack,
+                        result_dir = os.path.join(
+                            RESULT_DIR,
+                            f"{attack_name}_eps{epsilon}_alpha{alpha}_norm{norm}_steps{steps}",
+                        )
+
+                        job = submit_attack(
                             config_file,
                             checkpoint_file,
+                            attack,
                             attack_kwargs,
-                            RESULT_DIR,
+                            result_dir,
                         )
-                        jobs.append(job)
+
+                        if job:
+                            jobs.append(job)
 
 
 # wait until all jobs are completed:
