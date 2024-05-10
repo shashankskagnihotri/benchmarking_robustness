@@ -20,7 +20,6 @@ def fgsm(
 ):
     # TODO: ADD NORMALIZATION + EPSILON SCALING!
     criterion = LossCriterion(attack_args["attack_loss"])
-    attack_args["attack_alpha"] = attack_args["attack_epsilon"]
 
     orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
     orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
@@ -61,7 +60,7 @@ def fgsm_attack(
     if attack_args["attack_targeted"]:
         sign_data_grad *= -1
     perturbed_image = (
-        perturbed_image.detach() + attack_args["attack_alpha"] * sign_data_grad
+        perturbed_image.detach() + attack_args["attack_epsilon"] * sign_data_grad
     )
     # Adding clipping to maintain [0,1] range
     if attack_args["attack_norm"] == "inf":
