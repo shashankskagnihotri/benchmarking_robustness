@@ -5,7 +5,6 @@ fgsm_arguments = [
     "attack",
     "attack_norm",
     "attack_epsilon",
-    "attack_alpha",
     "attack_targeted",
     "attack_target",
     "attack_loss",

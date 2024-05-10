@@ -60,4 +60,4 @@ def common_corrupt(
     # Make prediction
     preds = model(perturbed_inputs)
 
-    return preds
+    return preds, perturbed_inputs
