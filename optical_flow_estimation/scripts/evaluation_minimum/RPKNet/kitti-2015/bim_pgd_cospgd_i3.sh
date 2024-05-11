@@ -7,14 +7,15 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-90%4
-#SBATCH --output=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i3_i10.out
-#SBATCH --error=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i3_i10.out
+#SBATCH --job-name=rpknet_kitti-2015_bim_pgd_cospgd_i3
+#SBATCH --output=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i3.out
+#SBATCH --error=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i3.out
 
-models="rpknet"
-datasets="kitti-2015"
+model="rpknet"
+dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"
-targets="zero negative"
+targets="negative zero"
 norms="inf two"
 attacks="bim pgd cospgd"
 iterations="3"
@@ -23,82 +24,71 @@ jobnum=0
 
 cd ../../../../
 
-for model in $models
+for norm in $norms
 do
-    for dataset in $datasets
+    if [[ $norm = "inf" ]]
+    then
+        epsilons="1 2 4 8"
+        alphas="0.01"          
+    else
+        epsilons="0.0005 0.005 0.001 0.05 0.01"
+        alphas="0.0000001"
+    fi
+    for epsilon in $epsilons
     do
-        for norm in $norms
+        if [[ $norm = "inf" ]]
+        then
+            epsilon=$(echo "scale=10; $epsilon/255" | bc)
+        fi
+        for alpha in $alphas
         do
-            if [[ $norm = "inf" ]]
-            then
-                epsilons="1 2 4 8"
-                alphas="0.01"
-                for epsilon in $epsilons; do
-                    epsilon=$(echo "scale=10; $epsilon/255" | bc)
-                done
-            else
-                epsilons="0.0005 0.005 0.001 0.05 0.01""
-                alphas="0.0000001"
-            fi
             for attack in $attacks
             do
                 for iteration in $iterations
                 do
                     for targeted in $targeteds
                     do
-                        if [[ targeted = "True" ]]
+                        if [[ $targeted = "True" ]]
                         then
                             for target in $targets
-                            do
-                                for alpha in $alphas
-                                do
-                                    for epsilon in $epsilons
-                                    do                        
-                                        if [[ $SLURM_ARRAY_TASK_ID -eq $jobnum ]]
-                                        then
-                                            echo "Running job $model $checkpoint $dataset $attack $iteration $norm $alpha $epsilon $targeted $target $jobnum"
-                                            python attacks.py \
-                                                $model \
-                                                --pretrained_ckpt $checkpoint \
-                                                --val_dataset $dataset \
-                                                --attack $attack \
-                                                --attack_iterations $iteration \
-                                                --attack_norm $norm \
-                                                --attack_alpha $alpha \
-                                                --attack_epsilon $epsilon \
-                                                --attack_targeted $targeted \
-                                                --attack_target $target \
-                                                --write_outputs                                       
-                                            #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
-                                        fi
-                                        jobnum=$((jobnum + 1))
-                                    done
-                                done
+                            do      
+                                if [[ $SLURM_ARRAY_TASK_ID -eq $jobnum ]]
+                                then
+                                    echo "Running job $model $checkpoint $dataset $attack $iteration $norm $alpha $epsilon $targeted $target $jobnum"
+                                    python attacks.py \
+                                        $model \
+                                        --pretrained_ckpt $checkpoint \
+                                        --val_dataset $dataset \
+                                        --attack $attack \
+                                        --attack_iterations $iteration \
+                                        --attack_norm $norm \
+                                        --attack_alpha $alpha \
+                                        --attack_epsilon $epsilon \
+                                        --attack_targeted $targeted \
+                                        --attack_target $target \
+                                        --write_outputs                                       
+                                    #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
+                                fi
+                                jobnum=$((jobnum + 1))
                             done
-                        else
-                            for alpha in $alphas
-                            do
-                                for epsilon in $epsilons
-                                do                        
-                                    if [[ $SLURM_ARRAY_TASK_ID -eq $jobnum ]]
-                                    then
-                                        echo "Running job $model $checkpoint $dataset $attack $iteration $norm $alpha $epsilon $targeted $target $jobnum"
-                                        python attacks.py \
-                                           $model \
-                                           --pretrained_ckpt $checkpoint \
-                                           --val_dataset $dataset \
-                                           --attack $attack \
-                                           --attack_iterations $iteration \
-                                           --attack_norm $norm \
-                                           --attack_alpha $alpha \
-                                           --attack_epsilon $epsilon \
-                                            --attack_targeted $targeted \
-                                           --attack_target "zero"
-                                        #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
-                                    fi
-                                    jobnum=$((jobnum + 1))
-                                done
-                            done
+                        else                           
+                            if [[ $SLURM_ARRAY_TASK_ID -eq $jobnum ]]
+                            then
+                                echo "Running job $model $checkpoint $dataset $attack $iteration $norm $alpha $epsilon $targeted $target $jobnum"
+                                python attacks.py \
+                                    $model \
+                                    --pretrained_ckpt $checkpoint \
+                                    --val_dataset $dataset \
+                                    --attack $attack \
+                                    --attack_iterations $iteration \
+                                    --attack_norm $norm \
+                                    --attack_alpha $alpha \
+                                    --attack_epsilon $epsilon \
+                                    --attack_targeted $targeted \
+                                    --attack_target "zero"
+                                #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
+                            fi
+                            jobnum=$((jobnum + 1))
                         fi
                     done
                 done
