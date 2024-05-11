@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --array=0-90%4
+#SBATCH --array=0-44%4
 #SBATCH --job-name=rpknet_kitti-2015_bim_pgd_cospgd_i3
 #SBATCH --output=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i3.out
 #SBATCH --error=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i3.out
@@ -31,7 +31,7 @@ do
         epsilons="1 2 4 8"
         alphas="0.01"          
     else
-        epsilons="0.0005 0.005 0.001 0.05 0.01"
+        epsilons="0.005"
         alphas="0.0000001"
     fi
     for epsilon in $epsilons
