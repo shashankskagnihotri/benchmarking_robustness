@@ -14,12 +14,12 @@ models="raft"
 datasets="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"
-targets="negative zero negative"
+targets="negative zero"
 norms="inf two"
 attacks="bim pgd cospgd"
 iterations="3 10"
 jobnum=0
-#SLURM_ARRAY_TASK_ID=0
+# SLURM_ARRAY_TASK_ID=0
 
 cd ../../../../
 
@@ -69,7 +69,7 @@ do
                                                 --attack_targeted $targeted \
                                                 --attack_target $target \
                                                 --write_outputs                                       
-                                            #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
+                                            SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                                         fi
                                         jobnum=$((jobnum + 1))
                                     done
@@ -94,7 +94,7 @@ do
                                            --attack_epsilon $epsilon \
                                             --attack_targeted $targeted \
                                            --attack_target "zero"
-                                        #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
+                                        SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                                     fi
                                     jobnum=$((jobnum + 1))
                                 done
