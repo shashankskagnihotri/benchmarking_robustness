@@ -21,7 +21,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
         self.datadir = datadir
         self.model_name = model_name.lower()
-
+        
         self.split_folder = 'TRAIN' if train else 'TEST'
         self.training = train
 
@@ -77,12 +77,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         occ_right = self.load_occ(self.occ_right_filenames[index])
         
         if self.model_name == 'cfnet':
-            a = self.get_item_cfnet(img_left, img_right, disp_left)
-            print(a["left"].shape, a["right"].shape, a["disparity"].shape)
-            return a
+            return self.get_item_cfnet(img_left, img_right, disp_left)
         elif self.model_name == 'psmnet':
             return self.get_item_psmnet(img_left, img_right, disp_left)
-        elif self.model_name == 'gwcnet':
+        elif self.model_name in ['gwcnet', 'gwcnet-g', 'gwcnet-gc']:
             return self.get_item_gwcnet(img_left, img_right, disp_left)
         elif self.model_name == 'sttr':
             return self.get_item_sttr(img_left, img_right, disp_left, disp_right, occ_left, occ_right)
@@ -135,25 +133,25 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         if self.training:
             # horizontal flip
             result['left'], result['right'], result['occ_mask'], result['occ_mask_right'], disp, disp_right \
-                = horizontal_flip(result['left'], result['right'], left_occ, right_occ, left_disp, disp_right,
+                = sttr.stereo_albumentation.horizontal_flip(result['left'], result['right'], left_occ, right_occ, left_disp, disp_right,
                                   self.split_folder)
             result['disp'] = np.nan_to_num(disp, nan=0.0)
             result['disp_right'] = np.nan_to_num(disp_right, nan=0.0)
 
             # random crop        
-            result = random_crop(360, 640, result, self.split_folder)
+            result = sttr.stereo_albumentation.random_crop(360, 640, result, self.split_folder)
         else:
             result['occ_mask'] = left_occ
             result['occ_mask_right'] = right_occ
             result['disp'] = left_disp
             result['disp_right'] = right_disp
 
-        result = augment(result, Compose([
-                RandomShiftRotate(always_apply=True),
-                RGBShiftStereo(always_apply=True, p_asym=0.3),
+        result = sttr.preprocess.augment(result, Compose([
+                sttr.stereo_albumentation.RandomShiftRotate(always_apply=True),
+                sttr.stereo_albumentation.RGBShiftStereo(always_apply=True, p_asym=0.3),
                 OneOf([
-                    GaussNoiseStereo(always_apply=True, p_asym=1.0),
-                    RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
+                    sttr.stereo_albumentation.GaussNoiseStereo(always_apply=True, p_asym=1.0, p=False),
+                    sttr.stereo_albumentation.RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
                 ], p=1.0)
             ]))
 

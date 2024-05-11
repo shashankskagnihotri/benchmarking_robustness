@@ -73,7 +73,7 @@ def inception_color_preproccess(input_size, normalize=__imagenet_stats):
     ])
 
 
-def get_transform_psmnet(name='imagenet', input_size=None,
+def get_transform(name='imagenet', input_size=None,
                   scale_size=None, normalize=None, augment=True):
     normalize = __imagenet_stats
     input_size = 256

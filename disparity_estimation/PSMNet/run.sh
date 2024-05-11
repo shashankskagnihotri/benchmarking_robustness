@@ -5,17 +5,19 @@ DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/
 python main.py --maxdisp 192 \
                --model stackhourglass \
                --datapath $DATAPATH \
-               --epochs 0 \
-               --loadmodel ./pretrained_weights/pretrained_sceneflow_new.tar \
-               --savemodel ./trained/
+               --epochs 1 \
+               --loadmodel /pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/psmnet/pretrained_sceneflow_new.tar \
+               --savemodel ./trained/ \
+               --dataset sceneflow
 
 
 
-python finetune.py --maxdisp 192 \
-                   --model stackhourglass \
-                   --datatype 2015 \
-                   --datapath dataset/data_scene_flow_2015/training/ \
-                   --epochs 300 \
-                   --loadmodel ./trained/checkpoint_10.tar \
-                   --savemodel ./trained/
+# python finetune.py --maxdisp 192 \
+#                    --model stackhourglass \
+#                    --datatype 2015 \
+#                    --datapath $DATAPATH \
+#                    --epochs 300 \
+#                    --loadmodel /pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/psmnet/pretrained_sceneflow_new.tar \
+#                    --savemodel ./trained/\
+#                    --dataset sceneflow
 
