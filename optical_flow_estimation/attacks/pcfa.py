@@ -23,9 +23,11 @@ def pcfa(
     Performs an PCFA attack on a given model and for all images of a specified dataset.
     """
 
-    optim_mu = 2500.0 / attack_args["pcfa_delta_bound"]
+    optim_mu = 2500.0 / attack_args["attack_epsilon"]
+    if attack_args["attack_target"] not in ["zero"]:
+            optim_mu = 1.5*optim_mu
 
-    eps_box = 1e-7
+    eps_box = attack_args["attack_alpha"]
 
     # Define what device we are using
     if not torch.cuda.is_available():
@@ -41,7 +43,7 @@ def pcfa(
         model, targeted_inputs, eps_box, device, optim_mu, attack_args
     )
 
-    return preds, l2_delta1, l2_delta2, l2_delta12
+    return preds #, l2_delta1, l2_delta2, l2_delta12
 
 
 def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
@@ -104,6 +106,8 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
     """
     torch.autograd.set_detect_anomaly(True)
 
+    model = InputModel(model, eps_box, variable_change=attack_args["pcfa_boxconstraint"] in ["change_of_variables"])
+
     image1, image2 = get_image_tensors(targeted_inputs)
     image1, image2 = image1.to(device), image2.to(device)
     # pdb.set_trace()
@@ -145,36 +149,8 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
 
     optimizer = optim.LBFGS([nw_input1, nw_input2], max_iter=10)
 
-    def box(nw_input1, nw_input2, eps_box, attack_args):
-        # Perform the Carlini&Wagner Change of Variables
-        # If variable_change=True was specified for the ScaledInputModel, images1 and 2 are assumed to be not the image information,
-        # but the w-variable from the Carlini&Wagner model. Hence they are transformed into their image representations, before being fed to to the model.
-        if attack_args["pcfa_boxconstraint"] == "change_of_variables":
-            nw_input1 = (
-                (1.0 / 2.0)
-                * 1.0
-                / (1.0 - eps_box)
-                * (torch.tanh(nw_input1) + (1 - eps_box))
-            )
-            nw_input2 = (
-                (1.0 / 2.0)
-                * 1.0
-                / (1.0 - eps_box)
-                * (torch.tanh(nw_input2) + (1 - eps_box))
-            )
-        # Clipping case, which will only clip something if change of variables was not defined. otherwise, the change of variables has already brought the iamges into the range [0,1]
-        else:
-            nw_input1 = torch.clamp(nw_input1, 0.0, 1.0)
-            nw_input2 = torch.clamp(nw_input2, 0.0, 1.0)
-
-        return nw_input1, nw_input2
-
     # Predict the flow
-    boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
-    perturbed_inputs = replace_images_dic(
-        targeted_inputs, boxed_input1, boxed_input2, clone=True
-    )
-    preds = model(perturbed_inputs)
+    preds = model(nw_input1, nw_input2)
     flow_pred = preds["flows"].squeeze(0)
     flow_pred = flow_pred.to(device)
 
@@ -193,7 +169,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
 
     l2_delta1, l2_delta2, l2_delta12 = 0, 0, 0
 
-    for steps in range(attack_args["pcfa_steps"]):
+    for steps in range(attack_args["attack_iterations"]):
         # Calculate the deltas from the quantities that go into the network
         delta1, delta2 = extract_deltas(
             nw_input1,
@@ -210,7 +186,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
             delta1,
             delta2,
             device,
-            delta_bound=attack_args["pcfa_delta_bound"],
+            delta_bound=attack_args["attack_epsilon"],
             mu=optim_mu,
             f_type=attack_args["attack_loss"],
         )
@@ -221,12 +197,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
             optimizer.zero_grad()
 
             # Predict the flow
-            boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
-            perturbed_inputs = replace_images_dic(
-                targeted_inputs, boxed_input1, boxed_input2, clone=True
-            )
-
-            flow_closure = model(perturbed_inputs)["flows"].squeeze(0)
+            flow_closure = model(nw_input1, nw_input2)["flows"].squeeze(0)
             flow_closure = flow_closure.to(device)
 
             delta1_closure, delta2_closure = extract_deltas(
@@ -243,7 +214,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
                 delta1_closure,
                 delta2_closure,
                 device,
-                delta_bound=attack_args["pcfa_delta_bound"],
+                delta_bound=attack_args["attack_epsilon"],
                 mu=optim_mu,
                 f_type=attack_args["attack_loss"],
             )
@@ -254,7 +225,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
         # Update the optimization parameters
         optimizer.step(closure)
 
-        # calculate the magnitude of the updated distortion, and with it the new network inputs:
+        # calculate the magnitude of the updated distortion
         delta1, delta2 = extract_deltas(
             nw_input1,
             nw_input2,
@@ -266,11 +237,7 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
         # The nw_inputs remain unchanged in this case, and can be directly fed into the network again for further perturbation training
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
-        boxed_input1, boxed_input2 = box(nw_input1, nw_input2, eps_box, attack_args)
-        perturbed_inputs = replace_images_dic(
-            targeted_inputs, boxed_input1, boxed_input2, clone=True
-        )
-        preds = model(perturbed_inputs)
+        preds = model(nw_input1, nw_input2)
         flow_pred = preds["flows"].squeeze(0)
         flow_pred = flow_pred.to(device)
 
@@ -310,3 +277,61 @@ def torchfloat_to_float64(torch_float):
     """
     float_val = float(torch_float.detach().cpu().numpy())
     return float_val
+
+
+
+class InputModel(nn.Module):
+    def __init__(self, model, eps_box, variable_change=False,  **kwargs):
+        """
+        Initializes a Model with rescaled input requirements. It calls a pretrained model that takes inputs in [0,255], but the ScaledInputModel version of it can handle inputs in [0,1] and transforms them before passing them to the pretrained model.
+        This might be necessary for attacks that work on different paramter spaces, or with substitued variables
+        Args:
+            net: a string describing the network type
+            make_unit_input (bool): if True, the Model assumes that it receives inputs in [0,1], but that the pretrained model requires them in [0,255]
+            variable_change (bool): if True, the Model assumes that it will be given a variable as required for the change of variable proposed in the Carlini&Wagner attack.
+            **kwargs: Futher arguments for ownutilities.import_and_load()
+        """
+        super(InputModel, self).__init__()
+
+        self.var_change = variable_change
+
+        self.eps_box = eps_box
+
+        self.model_loaded = model
+
+
+    def forward(self, image1, image2):
+        """
+        Performs a forward pass of the pretrained model as specified in self.model_loaded.
+        Optionally, it transforms the input image1 and image2 previous to feeding them into the model.
+        When specifying delta1 or delta2, one or both of these tensors are added as perturbations to the input images.
+        If only "delta1" is specified, this tensor is added to both images and the result is cliped to the allowed image range [0,1].
+        If make_unit_input=True was specified for the ScaledInputModel, images1 and 2 are assumed to be in [0,1] when they enter forward, but will be rescaled to [0,255] before being passed to the pretrained model.
+        If variable_change=True was specified for the ScaledInputModel, images1 and 2 are assumed to be not the image information, but the w-variable from the Carlini&Wagner model. Hence they are transformed into their image representations, before being fed to to the model.
+
+        Args:
+            image1 (tensor): first input image for model in [0,1] with dimensions (b,3,H,W)
+            image2 (tensor): second input image for model in [0,1] with dimensions (b,3,H,W)
+            *args: additional arguments for model
+            delta1 (optional, tensor): optional distortion to be added to image1 in [0,1] with dimensions (b,3,H,W)
+            delta2 (optional, tensor): optional distortion to be added to image2 in [0,1] with dimensions (b,3,H,W)
+            **kwargs: additional kwargs for model
+
+        Returns:
+            tensor: returns the output of a forward pass of the pytorch.model on image1 and image2, after the specified transformations to images1 and 2.
+        """
+
+        # Perform the Carlini&Wagner Change of Variables, if the ScaledInputModel was configured to do so.
+        if self.var_change:
+            image1 = (1./2.) * 1. / (1. - self.eps_box) * (torch.tanh(image1) + (1 - self.eps_box) )
+            image2 = (1./2.) * 1. / (1. - self.eps_box) * (torch.tanh(image2) + (1 - self.eps_box) )
+
+
+        # Clipping case, which will only clip something if change of variables was not defined. otherwise, the change of variables has already brought the iamges into the range [0,1]
+        image1 = torch.clamp(image1, 0., 1.)
+        image2 = torch.clamp(image2, 0., 1.)
+
+        image_pair_tensor = torch.torch.cat((image1, image2)).unsqueeze(0)
+        dic = {"images": image_pair_tensor}
+
+        return self.model_loaded(dic)
