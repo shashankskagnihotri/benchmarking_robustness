@@ -513,9 +513,17 @@ def _init_parser() -> ArgumentParser:
         help="the number of flakes that is drawn per blurred flake. More samples are needed for faster objects or a larger motionblur_scale.",
     )
 
-    # GMA model iters
+    # GMA/Raft model iters
     parser.add_argument(
-        "--gma_iters",
+        "--model_iters",
+        default=32,
+        type=int,
+        help="the number of iters for gma/raft model, to override the ptlflow setting.",
+    )
+
+    # FlowFormer model decoder depth
+    parser.add_argument(
+        "--flowformer_decoder_depth",
         default=32,
         type=int,
         help="the number of iters for gma, to override the ptlflow setting.",
@@ -906,8 +914,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.model == "gma":
-        args.iters = args.gma_iters
+    if args.model in ("gma", "raft"):
+        args.iters = args.model_iters
+    if args.model == "flowformer":
+        args.decoder_depth = args.flowformer_decoder_depth
+        # args.encoder_depth = args.flowformer_decoder_depth
+        # args.cost_latent_input_dim = 16  # origin 64
+        # args.cost_latent_dim = 16  # origin 128
+        # args.encoder_latent_dim = 16  # origin 256
+        # args.query_latent_dim = 16  # origin 64
+        # args.patch_size = 4  # origin 8
+        # args.vert_c_dim = 16  # origin 64
 
     if args.model not in ["all", "select"]:
         model_id = args.model
