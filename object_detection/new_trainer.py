@@ -1,4 +1,5 @@
-# Copyright (c) OpenMMLab. All rights reserved.
+import argparse
+import os
 import os.path as osp
 
 from mmengine.config import Config, DictAction
@@ -8,15 +9,19 @@ from mmengine.runner import Runner
 from mmdet.utils import setup_cache_size_limit_of_dynamo
 
 
-def train(
+def trainer(
     config,
-    cfg_options=None,
     work_dir=None,
+    auto_scale_lr=False,
     amp=False,
-    auto_scale_lr=None,
-    resume="auto",  #! Originally NONE but we want it to resume training if not done -> "auto"
+    resume=None,
+    cfg_options=None,
     launcher="none",
+    local_rank=0,
 ):
+    import pudb
+
+    pudb.set_trace()
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
@@ -29,7 +34,7 @@ def train(
 
     # work_dir is determined in this priority: CLI > segment in file > filename
     if work_dir is not None:
-        # update configs according to CLI args if args.work_dir is not None
+        # update configs according to CLI args if work_dir is not None
         cfg.work_dir = work_dir
     elif cfg.get("work_dir", None) is None:
         # use config filename as default work_dir if cfg.work_dir is None
@@ -75,3 +80,16 @@ def train(
 
     # start training
     runner.train()
+
+
+if __name__ == "__main__":
+    trainer(
+        config="./configs_to_train/atss_convnext-b_coco.py",
+        work_dir=None,
+        auto_scale_lr=False,
+        amp=False,
+        resume=None,
+        cfg_options=None,
+        launcher="none",
+        local_rank=0,
+    )

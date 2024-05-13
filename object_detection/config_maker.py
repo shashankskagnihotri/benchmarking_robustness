@@ -573,21 +573,28 @@ for (neck, backbone, dataset), found in all_combis.items():
                 cfg.val_dataloader = voc0712_val_dataloader
                 cfg.test_dataloader = voc0712_val_dataloader
 
-                cfg.val_evaluator = dict(
-                    type="CocoMetric",
-                    metric="bbox",
-                    eval_mode="11points",
-                    # type="VOCMetric", metric="mAP", eval_mode="11points"
+                cfg.val_evaluator = (
+                    dict(
+                        ann_file="data/voc_coco_format/voc0712_val.json",
+                        backend_args=None,
+                        format_only=False,
+                        metric="bbox",
+                        type="CocoMetric",
+                    ),
                 )
                 cfg.test_evaluator = dict(
-                    type="CocoMetric", metric="bbox", eval_mode="11points"
+                    ann_file="data/voc_coco_format/voc07_test.json",
+                    backend_args=None,
+                    format_only=False,
+                    metric="bbox",
+                    type="CocoMetric",
                 )
 
-                # cfg.dataset_type = new_dataset_type[dataset]
-                # cfg.val_dataloader = new_val_dataloader[dataset]
-                # cfg.val_evaluator = new_val_evaluator[dataset]
-                # cfg.test_dataloader = new_val_dataloader[dataset]
-                # cfg.test_evaluator = new_val_evaluator[dataset]
+            cfg.auto_scale_lr.enable = True  #! test if works
+            cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
+            cfg.visualizer.vis_backends[0].init_kwargs = dict(
+                project=f"{neck}_{backbone}_{dataset}"
+            )
 
             destination_file = os.path.join(
                 "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
