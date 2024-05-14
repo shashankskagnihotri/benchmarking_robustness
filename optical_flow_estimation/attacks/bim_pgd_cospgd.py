@@ -145,4 +145,4 @@ def bim_pgd_cospgd(
         loss = criterion.loss(pred_flows.float(), labels.float())
 
     loss = loss.mean()
-    return preds, perturbed_images # labels, preds, loss.item()
+    return preds, perturbed_inputs # labels, preds, loss.item()
