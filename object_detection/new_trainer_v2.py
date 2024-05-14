@@ -13,7 +13,7 @@ from mmdet.utils import setup_cache_size_limit_of_dynamo
 
 def parse_args():
     parser = argparse.ArgumentParser(description="MMDet test (and eval) a model")
-    parser.add_argument("config", help="config file path")
+    parser.add_argument("config", help="test config file path")
     parser.add_argument("work_dirs", help="work_dirs path")
     args = parser.parse_args()
     return args
@@ -90,10 +90,10 @@ def trainer(
 
 
 if __name__ == "__main__":
-    args = parse_args()
     trainer(
-        config=args.config,  #! "configs_verified/dab_detr_r101_coco.py"
-        work_dir=args.work_dirs,  #! "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
+        config="configs_verified/dab_detr_r101_coco.py",
+        # work_dir="slurm/work_dir/0_verification_submitit_verifier_trainer_tester/configs_verified/trainer/dab_detr_r101_coco",
+        work_dir=None,
         auto_scale_lr=False,
         amp=False,
         resume=None,

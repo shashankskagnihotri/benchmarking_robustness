@@ -33,14 +33,11 @@ executor.update_parameters(
     slurm_time="00:10:00",
 )
 
-
-#! works with this setup
 # executor.submit(
 #     trainer,
 #     config_file,
 #     specific_slurm_work_dir,
 # )
-
 
 #! 23598515
 executor.submit(

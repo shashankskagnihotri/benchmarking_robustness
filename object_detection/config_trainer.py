@@ -103,7 +103,6 @@ def has_been_completed(config_file, slurm_log_folders):
 for config_file in folder_entry_list_configs_to_train:
     has_been_completed(config_file, slurm_log_folders)
 
-
 for config_file in folder_entry_list_configs_to_train:
     print(f"config_file : {config_file}")
     config_path = os.path.join(path_verified_configs, config_file)
