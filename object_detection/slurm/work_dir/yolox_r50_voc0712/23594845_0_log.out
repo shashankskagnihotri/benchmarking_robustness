@@ -1,0 +1,893 @@
+submitit INFO (2024-05-14 03:08:49,274) - Starting with JobEnvironment(job_id=23594845, hostname=uc2n513.localdomain, local_rank=0(1), node=0(1), global_rank=0(1))
+submitit INFO (2024-05-14 03:08:49,274) - Loading pickle: /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/work_dir/yolox_r50_voc0712/23594845_submitted.pkl
+05/14 03:08:58 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 494585330
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: /opt/bwhpc/common/devel/cuda/11.8
+    NVCC: Cuda compilation tools, release 11.8, V11.8.89
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-10)
+    PyTorch: 2.1.2
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201703
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v3.1.1 (Git Hash 64f6bcbcbab628e96f33a62c3e975f8535a7bde4)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX512
+  - CUDA Runtime 11.8
+  - NVCC architecture flags: -gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_90,code=sm_90;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.7
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.8, CUDNN_VERSION=8.7.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=old-style-cast -Wno-invalid-partial-specialization -Wno-unused-private-field -Wno-aligned-allocation-unavailable -Wno-missing-braces -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.1.2, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.16.2
+    OpenCV: 4.9.0
+    MMEngine: 0.10.3
+
+Runtime environment:
+    cudnn_benchmark: False
+    dist_cfg: {'backend': 'nccl'}
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    seed: 494585330
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+05/14 03:08:59 - mmengine - INFO - Config:
+auto_scale_lr = dict(base_batch_size=64, enable=False)
+backend_args = None
+base_lr = 0.01
+custom_hooks = [
+    dict(num_last_epochs=15, priority=48, type='YOLOXModeSwitchHook'),
+    dict(priority=48, type='SyncNormHook'),
+    dict(
+        ema_type='ExpMomentumEMA',
+        momentum=0.0001,
+        priority=49,
+        type='EMAHook',
+        update_buffers=True),
+]
+data_root = 'data/VOCdevkit/'
+dataset_type = 'VOCDataset'
+default_hooks = dict(
+    checkpoint=dict(interval=10, max_keep_ckpts=3, type='CheckpointHook'),
+    logger=dict(interval=50, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(type='DetVisualizationHook'))
+default_scope = 'mmdet'
+env_cfg = dict(
+    cudnn_benchmark=False,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_scale = (
+    640,
+    640,
+)
+img_scales = [
+    (
+        640,
+        640,
+    ),
+    (
+        320,
+        320,
+    ),
+    (
+        960,
+        960,
+    ),
+]
+interval = 10
+launcher = 'none'
+load_from = None
+log_level = 'INFO'
+log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
+max_epochs = 300
+model = dict(
+    backbone=dict(
+        depth=50,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet50', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=[
+            0,
+            1,
+            2,
+            3,
+        ],
+        style='pytorch',
+        type='ResNet'),
+    bbox_head=dict(
+        act_cfg=dict(type='Swish'),
+        feat_channels=320,
+        in_channels=320,
+        loss_bbox=dict(
+            eps=1e-16,
+            loss_weight=5.0,
+            mode='square',
+            reduction='sum',
+            type='IoULoss'),
+        loss_cls=dict(
+            loss_weight=1.0,
+            reduction='sum',
+            type='CrossEntropyLoss',
+            use_sigmoid=True),
+        loss_l1=dict(loss_weight=1.0, reduction='sum', type='L1Loss'),
+        loss_obj=dict(
+            loss_weight=1.0,
+            reduction='sum',
+            type='CrossEntropyLoss',
+            use_sigmoid=True),
+        norm_cfg=dict(eps=0.001, momentum=0.03, type='BN'),
+        num_classes=80,
+        stacked_convs=2,
+        strides=(
+            8,
+            16,
+            32,
+        ),
+        type='YOLOXHead',
+        use_depthwise=False),
+    data_preprocessor=dict(
+        batch_augments=[
+            dict(
+                interval=10,
+                random_size_range=(
+                    480,
+                    800,
+                ),
+                size_divisor=32,
+                type='BatchSyncRandomResize'),
+        ],
+        pad_size_divisor=32,
+        type='DetDataPreprocessor'),
+    neck=dict(
+        act_cfg=dict(type='Swish'),
+        in_channels=[
+            256,
+            512,
+            1024,
+            2048,
+        ],
+        norm_cfg=dict(eps=0.001, momentum=0.03, type='BN'),
+        num_csp_blocks=4,
+        out_channels=320,
+        type='YOLOXPAFPN',
+        upsample_cfg=dict(mode='nearest', scale_factor=2),
+        use_depthwise=False),
+    test_cfg=dict(nms=dict(iou_threshold=0.65, type='nms'), score_thr=0.01),
+    train_cfg=dict(assigner=dict(center_radius=2.5, type='SimOTAAssigner')),
+    type='YOLOX')
+num_last_epochs = 15
+optim_wrapper = dict(
+    optimizer=dict(
+        lr=0.01, momentum=0.9, nesterov=True, type='SGD', weight_decay=0.0005),
+    paramwise_cfg=dict(bias_decay_mult=0.0, norm_decay_mult=0.0),
+    type='OptimWrapper')
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=True,
+        convert_to_iter_based=True,
+        end=5,
+        type='mmdet.QuadraticWarmupLR'),
+    dict(
+        T_max=285,
+        begin=5,
+        by_epoch=True,
+        convert_to_iter_based=True,
+        end=285,
+        eta_min=0.0005,
+        type='CosineAnnealingLR'),
+    dict(begin=285, by_epoch=True, end=300, factor=1, type='ConstantLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='VOC2007/ImageSets/Main/test.txt',
+        backend_args=None,
+        data_prefix=dict(sub_data_root='VOC2007/'),
+        data_root='data/VOCdevkit/',
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                1000,
+                600,
+            ), type='Resize'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'scale_factor',
+                ),
+                type='PackDetInputs'),
+        ],
+        test_mode=True,
+        type='VOCDataset'),
+    drop_last=False,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+test_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        1000,
+        600,
+    ), type='Resize'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        meta_keys=(
+            'img_id',
+            'img_path',
+            'ori_shape',
+            'img_shape',
+            'scale_factor',
+        ),
+        type='PackDetInputs'),
+]
+train_cfg = dict(max_epochs=300, type='EpochBasedTrainLoop', val_interval=10)
+train_dataloader = dict(
+    batch_sampler=dict(type='AspectRatioBatchSampler'),
+    batch_size=2,
+    dataset=dict(
+        dataset=dict(
+            datasets=[
+                dict(
+                    ann_file='VOC2007/ImageSets/Main/trainval.txt',
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root='VOC2007/'),
+                    data_root='data/VOCdevkit/',
+                    filter_cfg=dict(
+                        bbox_min_size=32, filter_empty_gt=True, min_size=32),
+                    pipeline=[
+                        dict(backend_args=None, type='LoadImageFromFile'),
+                        dict(type='LoadAnnotations', with_bbox=True),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type='Resize'),
+                        dict(prob=0.5, type='RandomFlip'),
+                        dict(type='PackDetInputs'),
+                    ],
+                    type='VOCDataset'),
+                dict(
+                    ann_file='VOC2012/ImageSets/Main/trainval.txt',
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root='VOC2012/'),
+                    data_root='data/VOCdevkit/',
+                    filter_cfg=dict(
+                        bbox_min_size=32, filter_empty_gt=True, min_size=32),
+                    pipeline=[
+                        dict(backend_args=None, type='LoadImageFromFile'),
+                        dict(type='LoadAnnotations', with_bbox=True),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type='Resize'),
+                        dict(prob=0.5, type='RandomFlip'),
+                        dict(type='PackDetInputs'),
+                    ],
+                    type='VOCDataset'),
+            ],
+            ignore_keys=[
+                'dataset_type',
+            ],
+            type='ConcatDataset'),
+        times=3,
+        type='RepeatDataset'),
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='DefaultSampler'))
+train_dataset = dict(
+    dataset=dict(
+        ann_file='annotations/instances_train2017.json',
+        backend_args=None,
+        data_prefix=dict(img='train2017/'),
+        data_root='data/coco/',
+        filter_cfg=dict(filter_empty_gt=False, min_size=32),
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+        ],
+        type='CocoDataset'),
+    pipeline=[
+        dict(img_scale=(
+            640,
+            640,
+        ), pad_val=114.0, type='Mosaic'),
+        dict(
+            border=(
+                -320,
+                -320,
+            ),
+            scaling_ratio_range=(
+                0.1,
+                2,
+            ),
+            type='RandomAffine'),
+        dict(
+            img_scale=(
+                640,
+                640,
+            ),
+            pad_val=114.0,
+            ratio_range=(
+                0.8,
+                1.6,
+            ),
+            type='MixUp'),
+        dict(type='YOLOXHSVRandomAug'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(keep_ratio=True, scale=(
+            640,
+            640,
+        ), type='Resize'),
+        dict(
+            pad_to_square=True,
+            pad_val=dict(img=(
+                114.0,
+                114.0,
+                114.0,
+            )),
+            type='Pad'),
+        dict(
+            keep_empty=False,
+            min_gt_bbox_wh=(
+                1,
+                1,
+            ),
+            type='FilterAnnotations'),
+        dict(type='PackDetInputs'),
+    ],
+    type='MultiImageMixDataset')
+train_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(keep_ratio=True, scale=(
+        1000,
+        600,
+    ), type='Resize'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PackDetInputs'),
+]
+tta_model = dict(
+    tta_cfg=dict(max_per_img=100, nms=dict(iou_threshold=0.65, type='nms')),
+    type='DetTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale=(
+                    640,
+                    640,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
+                    320,
+                    320,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
+                    960,
+                    960,
+                ), type='Resize'),
+            ],
+            [
+                dict(prob=1.0, type='RandomFlip'),
+                dict(prob=0.0, type='RandomFlip'),
+            ],
+            [
+                dict(
+                    pad_to_square=True,
+                    pad_val=dict(img=(
+                        114.0,
+                        114.0,
+                        114.0,
+                    )),
+                    type='Pad'),
+            ],
+            [
+                dict(type='LoadAnnotations', with_bbox=True),
+            ],
+            [
+                dict(
+                    meta_keys=(
+                        'img_id',
+                        'img_path',
+                        'ori_shape',
+                        'img_shape',
+                        'scale_factor',
+                        'flip',
+                        'flip_direction',
+                    ),
+                    type='PackDetInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='VOC2007/ImageSets/Main/test.txt',
+        backend_args=None,
+        data_prefix=dict(sub_data_root='VOC2007/'),
+        data_root='data/VOCdevkit/',
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                1000,
+                600,
+            ), type='Resize'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'scale_factor',
+                ),
+                type='PackDetInputs'),
+        ],
+        test_mode=True,
+        type='VOCDataset'),
+    drop_last=False,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    type='DetLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = 'slurm/results/yolox_r50_voc0712'
+
+05/14 03:09:02 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+05/14 03:09:02 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(49          ) EMAHook                            
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_load_checkpoint:
+(49          ) EMAHook                            
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(49          ) EMAHook                            
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(48          ) YOLOXModeSwitchHook                
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(49          ) EMAHook                            
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(48          ) SyncNormHook                       
+(49          ) EMAHook                            
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(49          ) EMAHook                            
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_save_checkpoint:
+(49          ) EMAHook                            
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(49          ) EMAHook                            
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(49          ) EMAHook                            
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.downsample.1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.0.downsample.1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.1.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.1.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.1.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.1.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.1.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.1.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.2.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.2.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.2.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.2.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.2.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.2.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.3.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.3.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.3.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.3.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.3.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer2.3.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.downsample.1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.0.downsample.1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.1.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.1.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.1.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.1.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.1.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.1.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.2.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.2.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.2.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.2.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.2.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.2.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.3.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.3.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.3.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.3.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.3.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.3.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.4.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.4.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.4.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.4.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.4.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.4.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.5.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.5.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.5.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.5.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.5.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer3.5.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.downsample.1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.0.downsample.1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.1.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.1.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.1.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.1.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.1.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.1.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.2.bn1.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.2.bn1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.2.bn2.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.2.bn2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.2.bn3.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- backbone.layer4.2.bn3.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.reduce_layers.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.reduce_layers.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.reduce_layers.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.reduce_layers.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.reduce_layers.2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.reduce_layers.2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.main_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.main_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.short_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.short_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.final_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.final_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.0.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.0.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.0.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.0.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.1.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.1.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.1.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.1.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.2.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.2.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.2.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.2.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.3.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.3.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.3.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.0.blocks.3.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.main_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.main_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.short_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.short_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.final_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.final_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.0.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.0.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.0.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.0.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.1.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.1.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.1.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.1.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.2.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.2.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.2.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.2.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.3.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.3.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.3.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.1.blocks.3.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.main_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.main_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.short_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.short_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.final_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.final_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.0.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.0.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.0.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.0.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.1.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.1.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.1.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.1.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.2.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.2.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.2.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.2.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.3.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.3.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.3.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.top_down_blocks.2.blocks.3.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.downsamples.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.downsamples.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.downsamples.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.downsamples.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.downsamples.2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.downsamples.2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.main_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.main_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.short_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.short_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.final_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.final_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.0.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.0.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.0.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.0.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.1.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.1.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.1.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.1.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.2.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.2.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.2.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.2.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.3.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.3.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.3.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.0.blocks.3.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.main_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.main_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.short_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.short_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.final_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.final_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.0.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.0.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.0.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.0.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.1.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.1.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.1.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.1.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.2.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.2.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.2.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.2.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.3.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.3.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.3.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.1.blocks.3.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.main_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.main_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.short_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.short_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.final_conv.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.final_conv.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.0.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.0.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.0.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.0.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.1.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.1.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.1.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.1.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.2.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.2.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.2.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.2.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.3.conv1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.3.conv1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.3.conv2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.bottom_up_blocks.2.blocks.3.conv2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.2.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.2.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.3.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- neck.out_convs.3.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.0.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.0.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.0.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.0.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.1.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.1.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.1.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.1.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.2.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.2.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.2.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_cls_convs.2.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.0.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.0.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.0.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.0.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.1.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.1.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.1.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.1.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.2.0.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.2.0.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.2.1.bn.weight:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_reg_convs.2.1.bn.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_cls.0.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_cls.1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_cls.2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_reg.0.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_reg.1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_reg.2.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_obj.0.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_obj.1.bias:weight_decay=0.0
+05/14 03:09:16 - mmengine - INFO - paramwise_options -- bbox_head.multi_level_conv_obj.2.bias:weight_decay=0.0
+05/14 03:09:21 - mmengine - INFO - load model from: torchvision://resnet50
+05/14 03:09:21 - mmengine - INFO - Loads checkpoint by torchvision backend from path: torchvision://resnet50
+05/14 03:09:23 - mmengine - WARNING - The model and loaded state dict do not match exactly
+
+unexpected key in source state_dict: fc.weight, fc.bias
+
+05/14 03:09:23 - mmengine - WARNING - "FileClient" will be deprecated in future. Please use io functions in https://mmengine.readthedocs.io/en/latest/api/fileio.html#file-io
+05/14 03:09:23 - mmengine - WARNING - "HardDiskBackend" is the alias of "LocalBackend" and the former will be deprecated in future.
+05/14 03:09:23 - mmengine - INFO - Checkpoints will be saved to /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/results/yolox_r50_voc0712.
+05/14 03:09:45 - mmengine - INFO - Epoch(train)   [1][   50/24827]  base_lr: 1.6224e-09 lr: 1.6224e-09  eta: 37 days, 21:04:26  time: 0.4394  data_time: 0.0134  memory: 15539  loss: 322.4828  loss_cls: 1.1855  loss_bbox: 4.9448  loss_obj: 316.3526
+05/14 03:10:04 - mmengine - INFO - Epoch(train)   [1][  100/24827]  base_lr: 6.4895e-09 lr: 6.4895e-09  eta: 35 days, 13:23:25  time: 0.3856  data_time: 0.0054  memory: 14256  loss: 321.7946  loss_cls: 1.0921  loss_bbox: 4.9670  loss_obj: 315.7355
+05/14 03:10:20 - mmengine - INFO - Epoch(train)   [1][  150/24827]  base_lr: 1.4601e-08 lr: 1.4601e-08  eta: 32 days, 16:33:00  time: 0.3127  data_time: 0.0054  memory: 11670  loss: 261.5295  loss_cls: 1.1856  loss_bbox: 4.9515  loss_obj: 255.3924
+05/14 03:10:40 - mmengine - INFO - Epoch(train)   [1][  200/24827]  base_lr: 2.5958e-08 lr: 2.5958e-08  eta: 33 days, 3:08:38  time: 0.3997  data_time: 0.0054  memory: 15599  loss: 358.1215  loss_cls: 1.0616  loss_bbox: 4.9731  loss_obj: 352.0869
+05/14 03:10:58 - mmengine - INFO - Epoch(train)   [1][  250/24827]  base_lr: 4.0559e-08 lr: 4.0559e-08  eta: 32 days, 20:24:29  time: 0.3681  data_time: 0.0056  memory: 12480  loss: 335.4886  loss_cls: 1.0872  loss_bbox: 4.9592  loss_obj: 329.4422
+05/14 03:11:15 - mmengine - INFO - Epoch(train)   [1][  300/24827]  base_lr: 5.8406e-08 lr: 5.8406e-08  eta: 32 days, 1:24:42  time: 0.3260  data_time: 0.0057  memory: 12480  loss: 262.3535  loss_cls: 1.1566  loss_bbox: 4.9496  loss_obj: 256.2472
+05/14 03:11:35 - mmengine - INFO - Epoch(train)   [1][  350/24827]  base_lr: 7.9496e-08 lr: 7.9496e-08  eta: 32 days, 12:26:12  time: 0.4092  data_time: 0.0056  memory: 14257  loss: 300.1443  loss_cls: 1.0704  loss_bbox: 4.9688  loss_obj: 294.1051
+05/14 03:11:54 - mmengine - INFO - Epoch(train)   [1][  400/24827]  base_lr: 1.0383e-07 lr: 1.0383e-07  eta: 32 days, 12:45:57  time: 0.3785  data_time: 0.0055  memory: 14266  loss: 272.3620  loss_cls: 1.1141  loss_bbox: 4.9612  loss_obj: 266.2867
+05/14 03:12:12 - mmengine - INFO - Epoch(train)   [1][  450/24827]  base_lr: 1.3141e-07 lr: 1.3141e-07  eta: 32 days, 8:41:48  time: 0.3597  data_time: 0.0053  memory: 12480  loss: 227.2778  loss_cls: 1.1772  loss_bbox: 4.9497  loss_obj: 221.1508
+05/14 03:12:32 - mmengine - INFO - Epoch(train)   [1][  500/24827]  base_lr: 1.6224e-07 lr: 1.6224e-07  eta: 32 days, 15:24:07  time: 0.4079  data_time: 0.0053  memory: 17040  loss: 275.8102  loss_cls: 1.1716  loss_bbox: 4.9412  loss_obj: 269.6973
+05/14 03:12:54 - mmengine - INFO - Epoch(train)   [1][  550/24827]  base_lr: 1.9631e-07 lr: 1.9631e-07  eta: 33 days, 1:39:56  time: 0.4333  data_time: 0.0054  memory: 14052  loss: 271.3030  loss_cls: 1.0741  loss_bbox: 4.9733  loss_obj: 265.2556
+05/14 03:13:08 - mmengine - INFO - Epoch(train)   [1][  600/24827]  base_lr: 2.3362e-07 lr: 2.3362e-07  eta: 32 days, 6:08:57  time: 0.2705  data_time: 0.0054  memory: 10471  loss: 126.7998  loss_cls: 1.2472  loss_bbox: 4.9493  loss_obj: 120.6033
+05/14 03:13:26 - mmengine - INFO - Epoch(train)   [1][  650/24827]  base_lr: 2.7418e-07 lr: 2.7418e-07  eta: 32 days, 4:02:35  time: 0.3610  data_time: 0.0054  memory: 12214  loss: 166.5633  loss_cls: 1.1582  loss_bbox: 4.9708  loss_obj: 160.4342
+05/14 03:13:46 - mmengine - INFO - Epoch(train)   [1][  700/24827]  base_lr: 3.1799e-07 lr: 3.1799e-07  eta: 32 days, 7:53:02  time: 0.3992  data_time: 0.0053  memory: 15538  loss: 178.6583  loss_cls: 1.2197  loss_bbox: 4.9437  loss_obj: 172.4949
+05/14 03:14:00 - mmengine - INFO - Epoch(train)   [1][  750/24827]  base_lr: 3.6503e-07 lr: 3.6503e-07  eta: 31 days, 20:30:23  time: 0.2926  data_time: 0.0053  memory: 10575  loss: 102.4493  loss_cls: 1.1740  loss_bbox: 4.9563  loss_obj: 96.3190
+05/14 03:14:16 - mmengine - INFO - Epoch(train)   [1][  800/24827]  base_lr: 4.1533e-07 lr: 4.1533e-07  eta: 31 days, 13:25:04  time: 0.3148  data_time: 0.0053  memory: 11410  loss: 106.2316  loss_cls: 1.1338  loss_bbox: 4.9635  loss_obj: 100.1343
+05/14 03:14:34 - mmengine - INFO - Epoch(train)   [1][  850/24827]  base_lr: 4.6887e-07 lr: 4.6887e-07  eta: 31 days, 12:40:31  time: 0.3601  data_time: 0.0054  memory: 12500  loss: 109.9250  loss_cls: 1.1940  loss_bbox: 4.9579  loss_obj: 103.7730
+05/14 03:14:54 - mmengine - INFO - Epoch(train)   [1][  900/24827]  base_lr: 5.2565e-07 lr: 5.2565e-07  eta: 31 days, 15:34:46  time: 0.3911  data_time: 0.0053  memory: 15366  loss: 139.6430  loss_cls: 1.1824  loss_bbox: 4.8339  loss_obj: 133.6267
+05/14 03:15:14 - mmengine - INFO - Epoch(train)   [1][  950/24827]  base_lr: 5.8568e-07 lr: 5.8568e-07  eta: 31 days, 19:06:45  time: 0.3997  data_time: 0.0052  memory: 14261  loss: 110.4742  loss_cls: 1.1330  loss_bbox: 4.9540  loss_obj: 104.3872
+05/14 03:15:28 - mmengine - INFO - Exp name: yolox_r50_voc0712_20240514_030856
+05/14 03:15:28 - mmengine - INFO - Epoch(train)   [1][ 1000/24827]  base_lr: 6.4895e-07 lr: 6.4895e-07  eta: 31 days, 10:21:35  time: 0.2843  data_time: 0.0053  memory: 9873  loss: 66.1166  loss_cls: 1.2349  loss_bbox: 4.9306  loss_obj: 59.9511
+05/14 03:15:50 - mmengine - INFO - Epoch(train)   [1][ 1050/24827]  base_lr: 7.1547e-07 lr: 7.1547e-07  eta: 31 days, 18:43:38  time: 0.4497  data_time: 0.0052  memory: 15524  loss: 101.4396  loss_cls: 1.1692  loss_bbox: 4.9412  loss_obj: 95.3291
+05/14 03:16:08 - mmengine - INFO - Epoch(train)   [1][ 1100/24827]  base_lr: 7.8523e-07 lr: 7.8523e-07  eta: 31 days, 17:01:56  time: 0.3507  data_time: 0.0050  memory: 12214  loss: 67.5449  loss_cls: 1.2454  loss_bbox: 4.9168  loss_obj: 61.3826
+05/14 03:16:28 - mmengine - INFO - Epoch(train)   [1][ 1150/24827]  base_lr: 8.5824e-07 lr: 8.5824e-07  eta: 31 days, 20:51:15  time: 0.4104  data_time: 0.0051  memory: 15684  loss: 77.7949  loss_cls: 1.1838  loss_bbox: 4.9259  loss_obj: 71.6851
+submitit WARNING (2024-05-14 03:16:34,678) - Bypassing signal SIGCONT
+submitit ERROR (2024-05-14 03:16:34,726) - Submitted job triggered an exception
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n513
+Job ID: 23594845
+Cluster: uc2
+User/Group: ma_ruweber/ma_ma
+State: FAILED (exit code 1)
+Nodes: 1
+Cores per node: 10
+CPU Utilized: 00:07:51
+CPU Efficiency: 9.33% of 01:24:10 core-walltime
+Job Wall-clock time: 00:08:25
+Memory Utilized: 2.04 GB
+Memory Efficiency: 2.22% of 91.80 GB

@@ -1,0 +1,36 @@
+GpuFreq=control_disabled
+/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/task_modules/samplers/sampling_result.py:132: UserWarning: DeprecationWarning: pos_bboxes is deprecated, please use "pos_priors" instead
+  warnings.warn('DeprecationWarning: pos_bboxes is deprecated, '
+submitit WARNING (2024-05-14 04:07:04,323) - Bypassing signal SIGCONT
+[05/14 04:07:04] submitit WARNING: Bypassing signal SIGCONT
+submitit ERROR (2024-05-14 04:07:04,326) - Submitted job triggered an exception
+[05/14 04:07:04] submitit ERROR: Submitted job triggered an exception
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/_submit.py", line 11, in <module>
+    submitit_main()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 76, in submitit_main
+    process_job(args.folder)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 69, in process_job
+    raise error
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 55, in process_job
+    result = delayed.result()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/utils.py", line 133, in result
+    self._result = self.function(*self.args, **self.kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/new_trainer.py", line 88, in trainer
+    runner.train()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1777, in train
+    model = self.train_loop.run()  # type: ignore
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 96, in run
+    self.run_epoch()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 112, in run_epoch
+    self.run_iter(idx, data_batch)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 131, in run_iter
+    self.runner.call_hook(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1841, in call_hook
+    raise TypeError(f'{e} in {hook}') from None
+TypeError: can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime_info_hook.RuntimeInfoHook object at 0x149576c183d0>
+srun: error: uc2n512: task 0: Exited with exit code 1

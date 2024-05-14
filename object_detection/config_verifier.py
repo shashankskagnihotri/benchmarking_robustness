@@ -17,19 +17,13 @@ install(show_locals=False)
 
 
 slurm_log_folder_path = "slurm/work_dir"
-
-
 path_configs_to_train = "./configs_to_train"
 
 folder_entry_list_configs_to_train = os.listdir(path_configs_to_train)
 
-folder_entry_list_one_epoch_configs = os.listdir("./configs_to_verify_one_epoch")
-
-path_configs_to_verify_one_epoch = "./configs_to_verify_one_epoch"
-path_erroneous_configs = "./configs_erroneous"
+path_erroneous_configs = "./configs_erroneous/verification"
 path_verified_configs = "./configs_verified"
 
-weight_work_dirs_path = "./work_dirs"  #! will done models be instead sent to results or in the slurm workdir?
 slurm_results_path = "slurm/results"
 
 verify_subset = False
@@ -48,40 +42,6 @@ if verify_subset:
         folder_entry_list_configs_to_train[33],  # retinanet_convnext-b_voc0712.py
         folder_entry_list_configs_to_train[38],  # retinanet_convnext-b_coco.py
     ]
-
-
-# if one_epoch:
-
-# for config_file in folder_entry_list_configs_to_train:
-#     cfg = Config.fromfile(os.path.join(path_configs_to_train, config_file))
-
-#     if cfg.train_cfg.type == "IterBasedTrainLoop":
-#         cfg.train_cfg.max_iters = 1000
-#         print(f"IterBasedTrainLoop with {cfg.train_cfg.max_iters} iterations")
-#     elif cfg.train_cfg.type == "EpochBasedTrainLoop":
-#         print("EpochBasedTrainLoop")
-#         cfg.train_cfg.max_epochs = 1
-#         print(f"EpochBasedTrainLoop with {cfg.train_cfg.max_epochs} epochs")
-#     else:
-#         raise ValueError("Unknown Train Loop Type")
-
-#     cfg.dump(os.path.join(path_configs_to_verify_one_epoch, config_file))
-#     path_configs_to_verify_one_epoch = path_configs_to_train
-
-# else:
-#   path_configs_to_verify_one_epoch = path_configs_to_train
-
-
-#! 23562330 atss_convnext-b_coco.py -> submitit timeout
-
-# ? are run later remove one of those and replace by 23562330
-# ? 23562468
-# ? 23562467
-path_configs_to_verify_one_epoch = path_configs_to_train
-folder_entry_list_one_epoch_configs = folder_entry_list_configs_to_train
-
-print(path_configs_to_verify_one_epoch)
-print(folder_entry_list_one_epoch_configs)
 
 
 def highest_job_number(model_log_folder_path):
@@ -103,9 +63,9 @@ def has_been_started_before(config_file, slurm_log_folders):
     return False
 
 
-for config_file in folder_entry_list_one_epoch_configs:
+for config_file in folder_entry_list_configs_to_train:
     print(f"config_file : {config_file}")
-    config_path = os.path.join(path_configs_to_verify_one_epoch, config_file)
+    config_path = os.path.join(path_configs_to_train, config_file)
     print(f"config_path : {config_path}")
 
     slurm_log_folders = os.listdir(slurm_log_folder_path)
@@ -181,9 +141,3 @@ for config_file in folder_entry_list_one_epoch_configs:
             config_path,
             specific_slurm_result_dir,
         )
-
-
-# srun: error: CPU binding outside of job step allocation, allocated CPUs are: 0x00C0001C0000C0001C00.
-# srun: error: Task launch for StepId=23562467.0 failed on node uc2n520: Unable to satisfy cpu bind request
-# srun: error: Application launch failed: Unable to satisfy cpu bind request
-# srun: Job step aborted

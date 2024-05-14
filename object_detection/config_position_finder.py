@@ -1,6 +1,11 @@
 import os
 
 
+print(f"Number of configs to train: {len(os.listdir('./configs_to_train'))}")
+print(f"Number of verified, correct configs: {len(os.listdir('./configs_verified'))}")
+print(f"Number of erroneous configs: {len(os.listdir('./configs_erroneous'))}")
+
+
 original_config_files = os.listdir("./configs_to_train")
 original_config_files
 for i in range(len(original_config_files)):

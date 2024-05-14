@@ -33,14 +33,6 @@ def test_with_multiple_gpus(
             config_path=config_path,
             checkpoint=checkpoint,
             work_dir=work_dir,
-            out=out,
-            show=show,
-            show_dir=show_dir,
-            wait_time=wait_time,
-            cfg_options=cfg_options,
-            launcher=launcher,
-            tta=tta,
-            local_rank=local_rank,
         ),
     ]
     subprocess.run(command, check=True)

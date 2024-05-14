@@ -2,11 +2,20 @@ import argparse
 import os
 import os.path as osp
 
+import argparse
+
 from mmengine.config import Config, DictAction
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
 
 from mmdet.utils import setup_cache_size_limit_of_dynamo
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="MMDet test (and eval) a model")
+    parser.add_argument("config", help="test config file path")
+    args = parser.parse_args()
+    return args
 
 
 def trainer(
@@ -19,9 +28,6 @@ def trainer(
     launcher="none",
     local_rank=0,
 ):
-    import pudb
-
-    pudb.set_trace()
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
@@ -83,8 +89,9 @@ def trainer(
 
 
 if __name__ == "__main__":
+    args = parse_args()
     trainer(
-        config="./configs_to_train/atss_convnext-b_coco.py",
+        config=args.config,
         work_dir=None,
         auto_scale_lr=False,
         amp=False,

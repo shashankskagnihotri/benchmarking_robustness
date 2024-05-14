@@ -1,0 +1,783 @@
+submitit INFO (2024-05-14 04:29:51,343) - Starting with JobEnvironment(job_id=23594914, hostname=uc2n482.localdomain, local_rank=0(1), node=0(1), global_rank=0(1))
+submitit INFO (2024-05-14 04:29:51,343) - Loading pickle: /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/work_dir/DiffusionDet_swin-b_coco/23594914_submitted.pkl
+05/14 04:29:59 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 1965927624
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: /opt/bwhpc/common/devel/cuda/11.8
+    NVCC: Cuda compilation tools, release 11.8, V11.8.89
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-10)
+    PyTorch: 2.1.2
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201703
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v3.1.1 (Git Hash 64f6bcbcbab628e96f33a62c3e975f8535a7bde4)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX512
+  - CUDA Runtime 11.8
+  - NVCC architecture flags: -gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_90,code=sm_90;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.7
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.8, CUDNN_VERSION=8.7.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=old-style-cast -Wno-invalid-partial-specialization -Wno-unused-private-field -Wno-aligned-allocation-unavailable -Wno-missing-braces -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.1.2, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.16.2
+    OpenCV: 4.9.0
+    MMEngine: 0.10.3
+
+Runtime environment:
+    cudnn_benchmark: False
+    dist_cfg: {'backend': 'nccl'}
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    seed: 1965927624
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+05/14 04:30:00 - mmengine - INFO - Config:
+auto_scale_lr = dict(base_batch_size=16, enable=False)
+backend = 'pillow'
+backend_args = None
+custom_imports = dict(
+    allow_failed_imports=False,
+    imports=[
+        'projects.DiffusionDet.diffusiondet',
+    ])
+data_root = 'data/coco/'
+dataset_type = 'CocoDataset'
+default_hooks = dict(
+    checkpoint=dict(
+        _scope_='mmdet',
+        by_epoch=False,
+        interval=75000,
+        max_keep_ckpts=3,
+        type='CheckpointHook'),
+    logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
+    param_scheduler=dict(_scope_='mmdet', type='ParamSchedulerHook'),
+    sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
+    timer=dict(_scope_='mmdet', type='IterTimerHook'),
+    visualization=dict(_scope_='mmdet', type='DetVisualizationHook'))
+default_scope = 'mmdet'
+env_cfg = dict(
+    cudnn_benchmark=False,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+launcher = 'none'
+load_from = None
+log_level = 'INFO'
+log_processor = dict(
+    _scope_='mmdet', by_epoch=False, type='LogProcessor', window_size=50)
+model = dict(
+    backbone=dict(
+        attn_drop_rate=0.0,
+        convert_weights=True,
+        depths=[
+            2,
+            2,
+            18,
+            2,
+            1,
+        ],
+        drop_path_rate=0.3,
+        drop_rate=0.0,
+        embed_dims=128,
+        init_cfg=dict(
+            checkpoint=
+            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
+            type='Pretrained'),
+        mlp_ratio=4,
+        num_heads=[
+            4,
+            8,
+            16,
+            32,
+            64,
+        ],
+        out_indices=[
+            1,
+            2,
+            3,
+            4,
+        ],
+        patch_norm=True,
+        pretrain_img_size=384,
+        qk_scale=None,
+        qkv_bias=True,
+        strides=[
+            4,
+            2,
+            2,
+            2,
+            2,
+        ],
+        type='SwinTransformer',
+        window_size=12,
+        with_cp=True),
+    bbox_head=dict(
+        criterion=dict(
+            assigner=dict(
+                candidate_topk=5,
+                center_radius=2.5,
+                match_costs=[
+                    dict(
+                        alpha=0.25,
+                        eps=1e-08,
+                        gamma=2.0,
+                        type='FocalLossCost',
+                        weight=2.0),
+                    dict(box_format='xyxy', type='BBoxL1Cost', weight=5.0),
+                    dict(iou_mode='giou', type='IoUCost', weight=2.0),
+                ],
+                type='DiffusionDetMatcher'),
+            loss_bbox=dict(loss_weight=5.0, reduction='sum', type='L1Loss'),
+            loss_cls=dict(
+                alpha=0.25,
+                gamma=2.0,
+                loss_weight=2.0,
+                reduction='sum',
+                type='FocalLoss',
+                use_sigmoid=True),
+            loss_giou=dict(loss_weight=2.0, reduction='sum', type='GIoULoss'),
+            num_classes=80,
+            type='DiffusionDetCriterion'),
+        ddim_sampling_eta=1.0,
+        deep_supervision=True,
+        feat_channels=256,
+        num_classes=80,
+        num_heads=6,
+        num_proposals=500,
+        prior_prob=0.01,
+        roi_extractor=dict(
+            featmap_strides=[
+                4,
+                8,
+                16,
+                32,
+            ],
+            out_channels=256,
+            roi_layer=dict(output_size=7, sampling_ratio=2, type='RoIAlign'),
+            type='SingleRoIExtractor'),
+        sampling_timesteps=1,
+        single_head=dict(
+            act_cfg=dict(inplace=True, type='ReLU'),
+            dim_feedforward=2048,
+            dropout=0.0,
+            dynamic_conv=dict(dynamic_dim=64, dynamic_num=2),
+            num_cls_convs=1,
+            num_heads=8,
+            num_reg_convs=3,
+            type='SingleDiffusionDetHead'),
+        snr_scale=2.0,
+        type='DynamicDiffusionDetHead'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_size_divisor=32,
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='DetDataPreprocessor'),
+    neck=dict(
+        in_channels=[
+            256,
+            512,
+            1024,
+            2048,
+        ],
+        num_outs=4,
+        out_channels=256,
+        type='FPN'),
+    test_cfg=dict(
+        min_bbox_size=0,
+        nms=dict(iou_threshold=0.5, type='nms'),
+        score_thr=0.5,
+        use_nms=True),
+    type='DiffusionDet')
+optim_wrapper = dict(
+    _scope_='mmdet',
+    clip_grad=dict(max_norm=1.0, norm_type=2),
+    optimizer=dict(lr=2.5e-05, type='AdamW', weight_decay=0.0001),
+    type='OptimWrapper')
+param_scheduler = [
+    dict(
+        begin=0, by_epoch=False, end=1000, start_factor=0.01, type='LinearLR'),
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=450000,
+        gamma=0.1,
+        milestones=[
+            350000,
+            420000,
+        ],
+        type='MultiStepLR'),
+]
+resume = False
+test_cfg = dict(_scope_='mmdet', type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        _scope_='mmdet',
+        ann_file='annotations/instances_val2017.json',
+        backend_args=None,
+        data_prefix=dict(img='val2017/'),
+        data_root='data/coco/',
+        pipeline=[
+            dict(
+                backend_args=None,
+                imdecode_backend='pillow',
+                type='LoadImageFromFile'),
+            dict(
+                backend='pillow',
+                keep_ratio=True,
+                scale=(
+                    1333,
+                    800,
+                ),
+                type='Resize'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'scale_factor',
+                ),
+                type='PackDetInputs'),
+        ],
+        test_mode=True,
+        type='CocoDataset'),
+    drop_last=False,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(_scope_='mmdet', shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    _scope_='mmdet',
+    ann_file='data/coco/annotations/instances_val2017.json',
+    backend_args=None,
+    format_only=False,
+    metric='bbox',
+    type='CocoMetric')
+test_pipeline = [
+    dict(
+        backend_args=None, imdecode_backend='pillow',
+        type='LoadImageFromFile'),
+    dict(
+        backend='pillow', keep_ratio=True, scale=(
+            1333,
+            800,
+        ), type='Resize'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        meta_keys=(
+            'img_id',
+            'img_path',
+            'ori_shape',
+            'img_shape',
+            'scale_factor',
+        ),
+        type='PackDetInputs'),
+]
+train_cfg = dict(
+    max_iters=450000, type='IterBasedTrainLoop', val_interval=75000)
+train_dataloader = dict(
+    batch_sampler=dict(_scope_='mmdet', type='AspectRatioBatchSampler'),
+    batch_size=2,
+    dataset=dict(
+        _scope_='mmdet',
+        ann_file='annotations/instances_train2017.json',
+        backend_args=None,
+        data_prefix=dict(img='train2017/'),
+        data_root='data/coco/',
+        filter_cfg=dict(filter_empty_gt=False, min_size=1e-05),
+        pipeline=[
+            dict(
+                backend_args=None,
+                imdecode_backend='pillow',
+                type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(prob=0.5, type='RandomFlip'),
+            dict(
+                transforms=[
+                    [
+                        dict(
+                            backend='pillow',
+                            keep_ratio=True,
+                            scales=[
+                                (
+                                    480,
+                                    1333,
+                                ),
+                                (
+                                    512,
+                                    1333,
+                                ),
+                                (
+                                    544,
+                                    1333,
+                                ),
+                                (
+                                    576,
+                                    1333,
+                                ),
+                                (
+                                    608,
+                                    1333,
+                                ),
+                                (
+                                    640,
+                                    1333,
+                                ),
+                                (
+                                    672,
+                                    1333,
+                                ),
+                                (
+                                    704,
+                                    1333,
+                                ),
+                                (
+                                    736,
+                                    1333,
+                                ),
+                                (
+                                    768,
+                                    1333,
+                                ),
+                                (
+                                    800,
+                                    1333,
+                                ),
+                            ],
+                            type='RandomChoiceResize'),
+                    ],
+                    [
+                        dict(
+                            backend='pillow',
+                            keep_ratio=True,
+                            scales=[
+                                (
+                                    400,
+                                    1333,
+                                ),
+                                (
+                                    500,
+                                    1333,
+                                ),
+                                (
+                                    600,
+                                    1333,
+                                ),
+                            ],
+                            type='RandomChoiceResize'),
+                        dict(
+                            allow_negative_crop=True,
+                            crop_size=(
+                                384,
+                                600,
+                            ),
+                            crop_type='absolute_range',
+                            type='RandomCrop'),
+                        dict(
+                            backend='pillow',
+                            keep_ratio=True,
+                            scales=[
+                                (
+                                    480,
+                                    1333,
+                                ),
+                                (
+                                    512,
+                                    1333,
+                                ),
+                                (
+                                    544,
+                                    1333,
+                                ),
+                                (
+                                    576,
+                                    1333,
+                                ),
+                                (
+                                    608,
+                                    1333,
+                                ),
+                                (
+                                    640,
+                                    1333,
+                                ),
+                                (
+                                    672,
+                                    1333,
+                                ),
+                                (
+                                    704,
+                                    1333,
+                                ),
+                                (
+                                    736,
+                                    1333,
+                                ),
+                                (
+                                    768,
+                                    1333,
+                                ),
+                                (
+                                    800,
+                                    1333,
+                                ),
+                            ],
+                            type='RandomChoiceResize'),
+                    ],
+                ],
+                type='RandomChoice'),
+            dict(type='PackDetInputs'),
+        ],
+        type='CocoDataset'),
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(_scope_='mmdet', shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(
+        backend_args=None, imdecode_backend='pillow',
+        type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(
+        transforms=[
+            [
+                dict(
+                    backend='pillow',
+                    keep_ratio=True,
+                    scales=[
+                        (
+                            480,
+                            1333,
+                        ),
+                        (
+                            512,
+                            1333,
+                        ),
+                        (
+                            544,
+                            1333,
+                        ),
+                        (
+                            576,
+                            1333,
+                        ),
+                        (
+                            608,
+                            1333,
+                        ),
+                        (
+                            640,
+                            1333,
+                        ),
+                        (
+                            672,
+                            1333,
+                        ),
+                        (
+                            704,
+                            1333,
+                        ),
+                        (
+                            736,
+                            1333,
+                        ),
+                        (
+                            768,
+                            1333,
+                        ),
+                        (
+                            800,
+                            1333,
+                        ),
+                    ],
+                    type='RandomChoiceResize'),
+            ],
+            [
+                dict(
+                    backend='pillow',
+                    keep_ratio=True,
+                    scales=[
+                        (
+                            400,
+                            1333,
+                        ),
+                        (
+                            500,
+                            1333,
+                        ),
+                        (
+                            600,
+                            1333,
+                        ),
+                    ],
+                    type='RandomChoiceResize'),
+                dict(
+                    allow_negative_crop=True,
+                    crop_size=(
+                        384,
+                        600,
+                    ),
+                    crop_type='absolute_range',
+                    type='RandomCrop'),
+                dict(
+                    backend='pillow',
+                    keep_ratio=True,
+                    scales=[
+                        (
+                            480,
+                            1333,
+                        ),
+                        (
+                            512,
+                            1333,
+                        ),
+                        (
+                            544,
+                            1333,
+                        ),
+                        (
+                            576,
+                            1333,
+                        ),
+                        (
+                            608,
+                            1333,
+                        ),
+                        (
+                            640,
+                            1333,
+                        ),
+                        (
+                            672,
+                            1333,
+                        ),
+                        (
+                            704,
+                            1333,
+                        ),
+                        (
+                            736,
+                            1333,
+                        ),
+                        (
+                            768,
+                            1333,
+                        ),
+                        (
+                            800,
+                            1333,
+                        ),
+                    ],
+                    type='RandomChoiceResize'),
+            ],
+        ],
+        type='RandomChoice'),
+    dict(type='PackDetInputs'),
+]
+val_cfg = dict(_scope_='mmdet', type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        _scope_='mmdet',
+        ann_file='annotations/instances_val2017.json',
+        backend_args=None,
+        data_prefix=dict(img='val2017/'),
+        data_root='data/coco/',
+        pipeline=[
+            dict(
+                backend_args=None,
+                imdecode_backend='pillow',
+                type='LoadImageFromFile'),
+            dict(
+                backend='pillow',
+                keep_ratio=True,
+                scale=(
+                    1333,
+                    800,
+                ),
+                type='Resize'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'scale_factor',
+                ),
+                type='PackDetInputs'),
+        ],
+        test_mode=True,
+        type='CocoDataset'),
+    drop_last=False,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(_scope_='mmdet', shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    _scope_='mmdet',
+    ann_file='data/coco/annotations/instances_val2017.json',
+    backend_args=None,
+    format_only=False,
+    metric='bbox',
+    type='CocoMetric')
+vis_backends = [
+    dict(_scope_='mmdet', type='LocalVisBackend'),
+]
+visualizer = dict(
+    _scope_='mmdet',
+    name='visualizer',
+    type='DetLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = 'slurm/results/DiffusionDet_swin-b_coco'
+
+05/14 04:30:03 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+05/14 04:30:03 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+loading annotations into memory...
+Done (t=15.03s)
+creating index...
+index created!
+loading annotations into memory...
+Done (t=0.75s)
+creating index...
+index created!
+loading annotations into memory...
+Done (t=0.58s)
+creating index...
+index created!
+05/14 04:30:38 - mmengine - INFO - Loads checkpoint by http backend from path: https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth
+05/14 04:30:39 - mmengine - WARNING - "FileClient" will be deprecated in future. Please use io functions in https://mmengine.readthedocs.io/en/latest/api/fileio.html#file-io
+05/14 04:30:39 - mmengine - WARNING - "HardDiskBackend" is the alias of "LocalBackend" and the former will be deprecated in future.
+05/14 04:30:39 - mmengine - INFO - Checkpoints will be saved to /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/results/DiffusionDet_swin-b_coco.
+05/14 04:31:15 - mmengine - INFO - Iter(train) [    50/450000]  lr: 1.4640e-06  eta: 3 days, 18:57:46  time: 0.7278  data_time: 0.0061  memory: 5897  grad_norm: 99459.2694  loss: 53.4953  loss_cls: 2.4550  loss_bbox: 6.4259  loss_giou: 2.3946  s.0.loss_cls: 2.6345  s.0.loss_bbox: 2.1375  s.0.loss_giou: 1.5022  s.1.loss_cls: 2.6249  s.1.loss_bbox: 3.4442  s.1.loss_giou: 2.0594  s.2.loss_cls: 2.4178  s.2.loss_bbox: 3.9520  s.2.loss_giou: 1.9580  s.3.loss_cls: 2.4884  s.3.loss_bbox: 5.3872  s.3.loss_giou: 2.5821  s.4.loss_cls: 2.4998  s.4.loss_bbox: 3.9949  s.4.loss_giou: 2.5369
+05/14 04:31:51 - mmengine - INFO - Iter(train) [   100/450000]  lr: 2.7027e-06  eta: 3 days, 18:02:45  time: 0.7133  data_time: 0.0063  memory: 6136  grad_norm: 38400.8752  loss: 41.6242  loss_cls: 2.2808  loss_bbox: 2.7314  loss_giou: 2.1409  s.0.loss_cls: 2.4453  s.0.loss_bbox: 1.9473  s.0.loss_giou: 1.5354  s.1.loss_cls: 2.4565  s.1.loss_bbox: 2.5065  s.1.loss_giou: 1.9302  s.2.loss_cls: 2.3208  s.2.loss_bbox: 2.4181  s.2.loss_giou: 1.7922  s.3.loss_cls: 2.3210  s.3.loss_bbox: 2.9796  s.3.loss_giou: 2.3676  s.4.loss_cls: 2.2528  s.4.loss_bbox: 2.8546  s.4.loss_giou: 2.3433
+05/14 04:32:28 - mmengine - INFO - Iter(train) [   150/450000]  lr: 3.9414e-06  eta: 3 days, 18:52:59  time: 0.7409  data_time: 0.0076  memory: 5904  grad_norm: 28551.2810  loss: 34.0527  loss_cls: 2.2300  loss_bbox: 1.7216  loss_giou: 1.7286  s.0.loss_cls: 2.3659  s.0.loss_bbox: 1.5144  s.0.loss_giou: 1.3464  s.1.loss_cls: 2.4450  s.1.loss_bbox: 1.6764  s.1.loss_giou: 1.5474  s.2.loss_cls: 2.2612  s.2.loss_bbox: 1.5383  s.2.loss_giou: 1.5345  s.3.loss_cls: 2.2176  s.3.loss_bbox: 1.9974  s.3.loss_giou: 1.9098  s.4.loss_cls: 2.2122  s.4.loss_bbox: 1.9148  s.4.loss_giou: 1.8911
+05/14 04:33:04 - mmengine - INFO - Iter(train) [   200/450000]  lr: 5.1802e-06  eta: 3 days, 18:30:36  time: 0.7157  data_time: 0.0069  memory: 5842  grad_norm: 24434.3520  loss: 31.8173  loss_cls: 2.1478  loss_bbox: 1.8563  loss_giou: 1.4187  s.0.loss_cls: 2.3124  s.0.loss_bbox: 1.5285  s.0.loss_giou: 1.2650  s.1.loss_cls: 2.3196  s.1.loss_bbox: 1.5384  s.1.loss_giou: 1.2802  s.2.loss_cls: 2.1505  s.2.loss_bbox: 1.7787  s.2.loss_giou: 1.3750  s.3.loss_cls: 2.1521  s.3.loss_bbox: 1.8262  s.3.loss_giou: 1.4888  s.4.loss_cls: 2.1386  s.4.loss_bbox: 1.8812  s.4.loss_giou: 1.3593
+05/14 04:33:40 - mmengine - INFO - Iter(train) [   250/450000]  lr: 6.4189e-06  eta: 3 days, 18:24:51  time: 0.7210  data_time: 0.0062  memory: 6060  grad_norm: 9735.7086  loss: 31.3174  loss_cls: 2.0424  loss_bbox: 1.7241  loss_giou: 1.6470  s.0.loss_cls: 2.1841  s.0.loss_bbox: 1.5111  s.0.loss_giou: 1.3971  s.1.loss_cls: 2.1834  s.1.loss_bbox: 1.5262  s.1.loss_giou: 1.4053  s.2.loss_cls: 2.0972  s.2.loss_bbox: 1.4917  s.2.loss_giou: 1.4572  s.3.loss_cls: 2.1223  s.3.loss_bbox: 1.5333  s.3.loss_giou: 1.5304  s.4.loss_cls: 2.0702  s.4.loss_bbox: 1.8105  s.4.loss_giou: 1.5839
+05/14 04:34:16 - mmengine - INFO - Iter(train) [   300/450000]  lr: 7.6577e-06  eta: 3 days, 18:33:35  time: 0.7312  data_time: 0.0068  memory: 5862  grad_norm: 7894.7124  loss: 30.2854  loss_cls: 2.0408  loss_bbox: 1.4403  loss_giou: 1.6512  s.0.loss_cls: 2.0756  s.0.loss_bbox: 1.3059  s.0.loss_giou: 1.3808  s.1.loss_cls: 2.0871  s.1.loss_bbox: 1.4135  s.1.loss_giou: 1.4517  s.2.loss_cls: 2.1196  s.2.loss_bbox: 1.4331  s.2.loss_giou: 1.5242  s.3.loss_cls: 2.1060  s.3.loss_bbox: 1.4923  s.3.loss_giou: 1.5565  s.4.loss_cls: 2.0845  s.4.loss_bbox: 1.4794  s.4.loss_giou: 1.6429
+05/14 04:34:52 - mmengine - INFO - Iter(train) [   350/450000]  lr: 8.8964e-06  eta: 3 days, 18:25:51  time: 0.7183  data_time: 0.0074  memory: 5799  grad_norm: 3848.7142  loss: 31.1169  loss_cls: 1.9794  loss_bbox: 1.8785  loss_giou: 1.6966  s.0.loss_cls: 1.9967  s.0.loss_bbox: 1.4306  s.0.loss_giou: 1.4314  s.1.loss_cls: 1.9823  s.1.loss_bbox: 1.5026  s.1.loss_giou: 1.4717  s.2.loss_cls: 1.9713  s.2.loss_bbox: 1.5774  s.2.loss_giou: 1.5306  s.3.loss_cls: 1.9611  s.3.loss_bbox: 1.6577  s.3.loss_giou: 1.6369  s.4.loss_cls: 1.9535  s.4.loss_bbox: 1.7951  s.4.loss_giou: 1.6634
+05/14 04:35:28 - mmengine - INFO - Iter(train) [   400/450000]  lr: 1.0135e-05  eta: 3 days, 18:12:16  time: 0.7101  data_time: 0.0062  memory: 6070  grad_norm: 2544.0340  loss: 31.8276  loss_cls: 2.0547  loss_bbox: 1.9692  loss_giou: 1.8587  s.0.loss_cls: 2.0268  s.0.loss_bbox: 1.4842  s.0.loss_giou: 1.3633  s.1.loss_cls: 2.0718  s.1.loss_bbox: 1.4396  s.1.loss_giou: 1.3497  s.2.loss_cls: 2.0773  s.2.loss_bbox: 1.6776  s.2.loss_giou: 1.4980  s.3.loss_cls: 2.0882  s.3.loss_bbox: 1.7183  s.3.loss_giou: 1.5836  s.4.loss_cls: 2.1054  s.4.loss_bbox: 1.7818  s.4.loss_giou: 1.6795
+05/14 04:36:02 - mmengine - INFO - Iter(train) [   450/450000]  lr: 1.1374e-05  eta: 3 days, 17:47:15  time: 0.6930  data_time: 0.0065  memory: 5799  grad_norm: 1202.3223  loss: 31.7118  loss_cls: 1.9358  loss_bbox: 2.0776  loss_giou: 1.7289  s.0.loss_cls: 1.9693  s.0.loss_bbox: 1.4376  s.0.loss_giou: 1.3863  s.1.loss_cls: 1.9783  s.1.loss_bbox: 1.4853  s.1.loss_giou: 1.4382  s.2.loss_cls: 1.9790  s.2.loss_bbox: 1.7009  s.2.loss_giou: 1.5641  s.3.loss_cls: 1.9990  s.3.loss_bbox: 1.7394  s.3.loss_giou: 1.5961  s.4.loss_cls: 1.9970  s.4.loss_bbox: 2.0410  s.4.loss_giou: 1.6582
+05/14 04:36:37 - mmengine - INFO - Iter(train) [   500/450000]  lr: 1.2613e-05  eta: 3 days, 17:34:43  time: 0.7031  data_time: 0.0061  memory: 5877  grad_norm: 820.3610  loss: 31.7253  loss_cls: 2.0677  loss_bbox: 1.9945  loss_giou: 1.6462  s.0.loss_cls: 2.0539  s.0.loss_bbox: 1.5416  s.0.loss_giou: 1.3535  s.1.loss_cls: 2.0631  s.1.loss_bbox: 1.5688  s.1.loss_giou: 1.3998  s.2.loss_cls: 2.0894  s.2.loss_bbox: 1.6126  s.2.loss_giou: 1.4110  s.3.loss_cls: 2.0193  s.3.loss_bbox: 1.8236  s.3.loss_giou: 1.5713  s.4.loss_cls: 2.1235  s.4.loss_bbox: 1.7973  s.4.loss_giou: 1.5883
+05/14 04:37:13 - mmengine - INFO - Iter(train) [   550/450000]  lr: 1.3851e-05  eta: 3 days, 17:24:14  time: 0.7029  data_time: 0.0062  memory: 5866  grad_norm: 623.0576  loss: 31.4697  loss_cls: 2.0974  loss_bbox: 2.1642  loss_giou: 1.7029  s.0.loss_cls: 2.0431  s.0.loss_bbox: 1.4133  s.0.loss_giou: 1.2567  s.1.loss_cls: 2.0916  s.1.loss_bbox: 1.3609  s.1.loss_giou: 1.3100  s.2.loss_cls: 2.0603  s.2.loss_bbox: 1.6150  s.2.loss_giou: 1.4071  s.3.loss_cls: 2.0434  s.3.loss_bbox: 1.8115  s.3.loss_giou: 1.4258  s.4.loss_cls: 2.0829  s.4.loss_bbox: 1.9400  s.4.loss_giou: 1.6436
+submitit WARNING (2024-05-14 04:37:34,962) - Bypassing signal SIGCONT
+submitit ERROR (2024-05-14 04:37:34,966) - Submitted job triggered an exception
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n482
+Job ID: 23594914
+Cluster: uc2
+User/Group: ma_ruweber/ma_ma
+State: FAILED (exit code 1)
+Nodes: 1
+Cores per node: 10
+CPU Utilized: 00:08:18
+CPU Efficiency: 10.00% of 01:23:00 core-walltime
+Job Wall-clock time: 00:08:18
+Memory Utilized: 5.37 GB
+Memory Efficiency: 5.85% of 91.80 GB

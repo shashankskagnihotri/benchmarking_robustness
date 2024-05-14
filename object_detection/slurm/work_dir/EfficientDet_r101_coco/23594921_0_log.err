@@ -1,0 +1,62 @@
+GpuFreq=control_disabled
+submitit ERROR (2024-05-14 04:32:31,721) - Submitted job triggered an exception
+[05/14 04:32:31] submitit ERROR: Submitted job triggered an exception
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/_submit.py", line 11, in <module>
+    submitit_main()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 76, in submitit_main
+    process_job(args.folder)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 69, in process_job
+    raise error
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 55, in process_job
+    result = delayed.result()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/utils.py", line 133, in result
+    self._result = self.function(*self.args, **self.kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/new_trainer.py", line 88, in trainer
+    runner.train()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1777, in train
+    model = self.train_loop.run()  # type: ignore
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 96, in run
+    self.run_epoch()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 112, in run_epoch
+    self.run_iter(idx, data_batch)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 128, in run_iter
+    outputs = self.runner.model.train_step(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/model/base_model/base_model.py", line 114, in train_step
+    losses = self._run_forward(data, mode='loss')  # type: ignore
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/model/base_model/base_model.py", line 361, in _run_forward
+    results = self(**data, mode=mode)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/base.py", line 92, in forward
+    return self.loss(inputs, data_samples)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/single_stage.py", line 77, in loss
+    x = self.extract_feat(batch_inputs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/single_stage.py", line 148, in extract_feat
+    x = self.neck(x)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/projects/EfficientDet/efficientdet/bifpn.py", line 304, in forward
+    x = self.bifpn(x)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/container.py", line 215, in forward
+    input = module(input)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/projects/EfficientDet/efficientdet/bifpn.py", line 180, in forward
+    p3, p4, p5 = x
+ValueError: too many values to unpack (expected 3)
+srun: error: uc2n512: task 0: Exited with exit code 1

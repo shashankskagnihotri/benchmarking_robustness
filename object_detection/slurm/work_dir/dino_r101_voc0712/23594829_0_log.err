@@ -1,0 +1,74 @@
+GpuFreq=control_disabled
+/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /opt/conda/conda-bld/pytorch_1702400366987/work/aten/src/ATen/native/TensorShape.cpp:3526.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+submitit WARNING (2024-05-13 21:39:35,015) - Bypassing signal SIGCONT
+[05/13 21:39:35] submitit WARNING: Bypassing signal SIGCONT
+submitit ERROR (2024-05-13 21:39:35,135) - Submitted job triggered an exception
+[05/13 21:39:35] submitit ERROR: Submitted job triggered an exception
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/_submit.py", line 11, in <module>
+    submitit_main()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 76, in submitit_main
+    process_job(args.folder)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 69, in process_job
+    raise error
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 55, in process_job
+    result = delayed.result()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/utils.py", line 133, in result
+    self._result = self.function(*self.args, **self.kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/new_trainer.py", line 88, in trainer
+    runner.train()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1777, in train
+    model = self.train_loop.run()  # type: ignore
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 96, in run
+    self.run_epoch()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 112, in run_epoch
+    self.run_iter(idx, data_batch)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/loops.py", line 128, in run_iter
+    outputs = self.runner.model.train_step(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/model/base_model/base_model.py", line 114, in train_step
+    losses = self._run_forward(data, mode='loss')  # type: ignore
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/model/base_model/base_model.py", line 361, in _run_forward
+    results = self(**data, mode=mode)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/base.py", line 92, in forward
+    return self.loss(inputs, data_samples)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/base_detr.py", line 99, in loss
+    head_inputs_dict = self.forward_transformer(img_feats,
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/dino.py", line 116, in forward_transformer
+    encoder_outputs_dict = self.forward_encoder(**encoder_inputs_dict)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/detectors/deformable_detr.py", line 273, in forward_encoder
+    memory = self.encoder(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/layers/transformer/deformable_detr_layers.py", line 71, in forward
+    query = layer(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/models/layers/transformer/detr_layers.py", line 226, in forward
+    query = self.self_attn(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/utils/misc.py", line 395, in new_func
+    output = old_func(*args, **kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmcv/ops/multi_scale_deform_attn.py", line 335, in forward
+    assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/job_environment.py", line 200, in checkpoint_and_try_requeue
+    timed_out = self.has_timed_out()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/job_environment.py", line 181, in has_timed_out
+    guaranteed_walltime = min(max_walltime * 0.8, max_walltime - 10 * 60)
+TypeError: can't multiply sequence by non-int of type 'float'
+srun: error: uc2n512: task 0: Exited with exit code 1

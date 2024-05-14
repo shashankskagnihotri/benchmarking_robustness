@@ -1,0 +1,28 @@
+GpuFreq=control_disabled
+submitit ERROR (2024-05-14 01:32:36,508) - Submitted job triggered an exception
+[05/14 01:32:36] submitit ERROR: Submitted job triggered an exception
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/_submit.py", line 11, in <module>
+    submitit_main()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 76, in submitit_main
+    process_job(args.folder)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 69, in process_job
+    raise error
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/submission.py", line 55, in process_job
+    result = delayed.result()
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/submitit/core/utils.py", line 133, in result
+    self._result = self.function(*self.args, **self.kwargs)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/new_trainer.py", line 81, in trainer
+    runner = Runner.from_cfg(cfg)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 462, in from_cfg
+    runner = cls(
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 335, in __init__
+    self._check_scheduler_cfg(param_scheduler)
+  File "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/miniconda3/envs/benchmark/lib/python3.10/site-packages/mmengine/runner/runner.py", line 2338, in _check_scheduler_cfg
+    assert 'type' in _param_scheduler, (
+AssertionError: Each parameter scheduler should contain the key type, but got {'milestones': [30]}
+srun: error: uc2n486: task 0: Exited with exit code 1

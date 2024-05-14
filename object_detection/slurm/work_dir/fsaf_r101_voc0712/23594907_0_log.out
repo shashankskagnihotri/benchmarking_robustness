@@ -1,0 +1,559 @@
+submitit INFO (2024-05-14 04:23:43,620) - Starting with JobEnvironment(job_id=23594907, hostname=uc2n512.localdomain, local_rank=0(1), node=0(1), global_rank=0(1))
+submitit INFO (2024-05-14 04:23:43,620) - Loading pickle: /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/work_dir/fsaf_r101_voc0712/23594907_submitted.pkl
+05/14 04:23:47 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 1637916671
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: /opt/bwhpc/common/devel/cuda/11.8
+    NVCC: Cuda compilation tools, release 11.8, V11.8.89
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-10)
+    PyTorch: 2.1.2
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201703
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v3.1.1 (Git Hash 64f6bcbcbab628e96f33a62c3e975f8535a7bde4)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX512
+  - CUDA Runtime 11.8
+  - NVCC architecture flags: -gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_90,code=sm_90;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.7
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.8, CUDNN_VERSION=8.7.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=old-style-cast -Wno-invalid-partial-specialization -Wno-unused-private-field -Wno-aligned-allocation-unavailable -Wno-missing-braces -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.1.2, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.16.2
+    OpenCV: 4.9.0
+    MMEngine: 0.10.3
+
+Runtime environment:
+    cudnn_benchmark: False
+    dist_cfg: {'backend': 'nccl'}
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    seed: 1637916671
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+05/14 04:23:48 - mmengine - INFO - Config:
+auto_scale_lr = dict(base_batch_size=16, enable=False)
+backend_args = None
+data_root = 'data/VOCdevkit/'
+dataset_type = 'VOCDataset'
+default_hooks = dict(
+    checkpoint=dict(interval=1, type='CheckpointHook'),
+    logger=dict(interval=50, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(type='DetVisualizationHook'))
+default_scope = 'mmdet'
+env_cfg = dict(
+    cudnn_benchmark=False,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_scales = [
+    (
+        1333,
+        800,
+    ),
+    (
+        666,
+        400,
+    ),
+    (
+        2000,
+        1200,
+    ),
+]
+launcher = 'none'
+load_from = None
+log_level = 'INFO'
+log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
+model = dict(
+    backbone=dict(
+        depth=101,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet101', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=[
+            0,
+            1,
+            2,
+            3,
+        ],
+        style='pytorch',
+        type='ResNet'),
+    bbox_head=dict(
+        anchor_generator=dict(
+            octave_base_scale=1,
+            ratios=[
+                1.0,
+            ],
+            scales_per_octave=1,
+            strides=[
+                8,
+                16,
+                32,
+                64,
+                128,
+            ],
+            type='AnchorGenerator'),
+        bbox_coder=dict(normalizer=4.0, type='TBLRBBoxCoder'),
+        feat_channels=256,
+        in_channels=256,
+        loss_bbox=dict(
+            eps=1e-06, loss_weight=1.0, reduction='none', type='IoULoss'),
+        loss_cls=dict(
+            alpha=0.25,
+            gamma=2.0,
+            loss_weight=1.0,
+            reduction='none',
+            type='FocalLoss',
+            use_sigmoid=True),
+        num_classes=80,
+        reg_decoded_bbox=True,
+        stacked_convs=4,
+        type='FSAFHead'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_size_divisor=32,
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='DetDataPreprocessor'),
+    neck=dict(
+        add_extra_convs='on_input',
+        in_channels=[
+            256,
+            512,
+            1024,
+            2048,
+        ],
+        num_outs=5,
+        out_channels=256,
+        start_level=1,
+        type='FPN'),
+    test_cfg=dict(
+        max_per_img=100,
+        min_bbox_size=0,
+        nms=dict(iou_threshold=0.5, type='nms'),
+        nms_pre=1000,
+        score_thr=0.05),
+    train_cfg=dict(
+        allowed_border=-1,
+        assigner=dict(
+            min_pos_iof=0.01,
+            neg_scale=0.2,
+            pos_scale=0.2,
+            type='CenterRegionAssigner'),
+        debug=False,
+        pos_weight=-1,
+        sampler=dict(type='PseudoSampler')),
+    type='FSAF')
+optim_wrapper = dict(
+    clip_grad=dict(max_norm=10, norm_type=2),
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0001),
+    type='OptimWrapper')
+param_scheduler = [
+    dict(
+        begin=0, by_epoch=False, end=500, start_factor=0.001, type='LinearLR'),
+    dict(
+        begin=0,
+        by_epoch=True,
+        end=12,
+        gamma=0.1,
+        milestones=[
+            8,
+            11,
+        ],
+        type='MultiStepLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='VOC2007/ImageSets/Main/test.txt',
+        backend_args=None,
+        data_prefix=dict(sub_data_root='VOC2007/'),
+        data_root='data/VOCdevkit/',
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                1000,
+                600,
+            ), type='Resize'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'scale_factor',
+                ),
+                type='PackDetInputs'),
+        ],
+        test_mode=True,
+        type='VOCDataset'),
+    drop_last=False,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+test_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        1000,
+        600,
+    ), type='Resize'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        meta_keys=(
+            'img_id',
+            'img_path',
+            'ori_shape',
+            'img_shape',
+            'scale_factor',
+        ),
+        type='PackDetInputs'),
+]
+train_cfg = dict(max_epochs=12, type='EpochBasedTrainLoop', val_interval=1)
+train_dataloader = dict(
+    batch_sampler=dict(type='AspectRatioBatchSampler'),
+    batch_size=2,
+    dataset=dict(
+        dataset=dict(
+            datasets=[
+                dict(
+                    ann_file='VOC2007/ImageSets/Main/trainval.txt',
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root='VOC2007/'),
+                    data_root='data/VOCdevkit/',
+                    filter_cfg=dict(
+                        bbox_min_size=32, filter_empty_gt=True, min_size=32),
+                    pipeline=[
+                        dict(backend_args=None, type='LoadImageFromFile'),
+                        dict(type='LoadAnnotations', with_bbox=True),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type='Resize'),
+                        dict(prob=0.5, type='RandomFlip'),
+                        dict(type='PackDetInputs'),
+                    ],
+                    type='VOCDataset'),
+                dict(
+                    ann_file='VOC2012/ImageSets/Main/trainval.txt',
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root='VOC2012/'),
+                    data_root='data/VOCdevkit/',
+                    filter_cfg=dict(
+                        bbox_min_size=32, filter_empty_gt=True, min_size=32),
+                    pipeline=[
+                        dict(backend_args=None, type='LoadImageFromFile'),
+                        dict(type='LoadAnnotations', with_bbox=True),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type='Resize'),
+                        dict(prob=0.5, type='RandomFlip'),
+                        dict(type='PackDetInputs'),
+                    ],
+                    type='VOCDataset'),
+            ],
+            ignore_keys=[
+                'dataset_type',
+            ],
+            type='ConcatDataset'),
+        times=3,
+        type='RepeatDataset'),
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='DefaultSampler'))
+train_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(keep_ratio=True, scale=(
+        1000,
+        600,
+    ), type='Resize'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PackDetInputs'),
+]
+tta_model = dict(
+    tta_cfg=dict(max_per_img=100, nms=dict(iou_threshold=0.5, type='nms')),
+    type='DetTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale=(
+                    1333,
+                    800,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
+                    666,
+                    400,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
+                    2000,
+                    1200,
+                ), type='Resize'),
+            ],
+            [
+                dict(prob=1.0, type='RandomFlip'),
+                dict(prob=0.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations', with_bbox=True),
+            ],
+            [
+                dict(
+                    meta_keys=(
+                        'img_id',
+                        'img_path',
+                        'ori_shape',
+                        'img_shape',
+                        'scale_factor',
+                        'flip',
+                        'flip_direction',
+                    ),
+                    type='PackDetInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='VOC2007/ImageSets/Main/test.txt',
+        backend_args=None,
+        data_prefix=dict(sub_data_root='VOC2007/'),
+        data_root='data/VOCdevkit/',
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                1000,
+                600,
+            ), type='Resize'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'scale_factor',
+                ),
+                type='PackDetInputs'),
+        ],
+        test_mode=True,
+        type='VOCDataset'),
+    drop_last=False,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    type='DetLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = 'slurm/results/fsaf_r101_voc0712'
+
+05/14 04:23:49 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+05/14 04:23:49 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+05/14 04:23:56 - mmengine - INFO - load model from: torchvision://resnet101
+05/14 04:23:56 - mmengine - INFO - Loads checkpoint by torchvision backend from path: torchvision://resnet101
+05/14 04:23:57 - mmengine - WARNING - The model and loaded state dict do not match exactly
+
+unexpected key in source state_dict: fc.weight, fc.bias
+
+05/14 04:23:57 - mmengine - WARNING - "FileClient" will be deprecated in future. Please use io functions in https://mmengine.readthedocs.io/en/latest/api/fileio.html#file-io
+05/14 04:23:57 - mmengine - WARNING - "HardDiskBackend" is the alias of "LocalBackend" and the former will be deprecated in future.
+05/14 04:23:57 - mmengine - INFO - Checkpoints will be saved to /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/results/fsaf_r101_voc0712.
+05/14 04:24:06 - mmengine - INFO - Epoch(train)  [1][   50/24827]  lr: 9.9098e-04  eta: 15:32:44  time: 0.1879  data_time: 0.0083  memory: 2928  grad_norm: 3.4259  loss: 2.2445  loss_cls: 1.3076  loss_bbox: 0.9369  num_pos: 7.5000  pos_recall: 40.0000
+05/14 04:24:15 - mmengine - INFO - Epoch(train)  [1][  100/24827]  lr: 1.9920e-03  eta: 14:52:17  time: 0.1716  data_time: 0.0035  memory: 2929  grad_norm: 3.5163  loss: 1.8747  loss_cls: 1.2514  loss_bbox: 0.6234  num_pos: 16.0000  pos_recall: 21.8750
+05/14 04:24:23 - mmengine - INFO - Epoch(train)  [1][  150/24827]  lr: 2.9930e-03  eta: 14:36:56  time: 0.1706  data_time: 0.0035  memory: 2929  grad_norm: 10.1336  loss: 1.7481  loss_cls: 1.1132  loss_bbox: 0.6349  num_pos: 25.5000  pos_recall: 0.0000
+05/14 04:24:32 - mmengine - INFO - Epoch(train)  [1][  200/24827]  lr: 3.9940e-03  eta: 14:24:55  time: 0.1671  data_time: 0.0034  memory: 2929  grad_norm: 367.3440  loss: 3.9875  loss_cls: 3.3002  loss_bbox: 0.6873  num_pos: 7.5000  pos_recall: 0.0000
+05/14 04:24:40 - mmengine - INFO - Epoch(train)  [1][  250/24827]  lr: 4.9950e-03  eta: 14:20:32  time: 0.1700  data_time: 0.0033  memory: 2929  grad_norm: 54.3925  loss: 2.3057  loss_cls: 1.2181  loss_bbox: 1.0877  num_pos: 20.5000  pos_recall: 0.0000
+05/14 04:24:49 - mmengine - INFO - Epoch(train)  [1][  300/24827]  lr: 5.9960e-03  eta: 14:18:19  time: 0.1709  data_time: 0.0034  memory: 2929  grad_norm: 71.0342  loss: 2.2875  loss_cls: 1.6404  loss_bbox: 0.6471  num_pos: 15.5000  pos_recall: 0.0000
+05/14 04:24:57 - mmengine - INFO - Epoch(train)  [1][  350/24827]  lr: 6.9970e-03  eta: 14:15:58  time: 0.1699  data_time: 0.0033  memory: 2929  grad_norm: 11.4077  loss: 1.7380  loss_cls: 1.0711  loss_bbox: 0.6668  num_pos: 7.5000  pos_recall: 0.0000
+05/14 04:25:06 - mmengine - INFO - Epoch(train)  [1][  400/24827]  lr: 7.9980e-03  eta: 14:13:40  time: 0.1691  data_time: 0.0034  memory: 2929  grad_norm: 20.0606  loss: 1.7685  loss_cls: 1.0086  loss_bbox: 0.7600  num_pos: 7.5000  pos_recall: 0.0000
+05/14 04:25:14 - mmengine - INFO - Epoch(train)  [1][  450/24827]  lr: 8.9990e-03  eta: 14:12:31  time: 0.1703  data_time: 0.0034  memory: 2929  grad_norm: 8.5226  loss: 1.5936  loss_cls: 0.9431  loss_bbox: 0.6506  num_pos: 37.5000  pos_recall: 46.6667
+05/14 04:25:23 - mmengine - INFO - Epoch(train)  [1][  500/24827]  lr: 1.0000e-02  eta: 14:10:57  time: 0.1691  data_time: 0.0034  memory: 2929  grad_norm: 2.2382  loss: 1.5281  loss_cls: 0.9635  loss_bbox: 0.5646  num_pos: 85.0000  pos_recall: 65.2941
+05/14 04:25:31 - mmengine - INFO - Epoch(train)  [1][  550/24827]  lr: 1.0000e-02  eta: 14:09:37  time: 0.1690  data_time: 0.0034  memory: 2929  grad_norm: 2.1246  loss: 1.5320  loss_cls: 0.9386  loss_bbox: 0.5933  num_pos: 19.5000  pos_recall: 61.5385
+05/14 04:25:40 - mmengine - INFO - Epoch(train)  [1][  600/24827]  lr: 1.0000e-02  eta: 14:08:29  time: 0.1690  data_time: 0.0034  memory: 2929  grad_norm: 1.4959  loss: 1.5295  loss_cls: 0.9280  loss_bbox: 0.6015  num_pos: 19.5000  pos_recall: 0.0000
+05/14 04:25:48 - mmengine - INFO - Epoch(train)  [1][  650/24827]  lr: 1.0000e-02  eta: 14:07:22  time: 0.1687  data_time: 0.0034  memory: 2929  grad_norm: 1.3815  loss: 1.4848  loss_cls: 0.9099  loss_bbox: 0.5749  num_pos: 15.0000  pos_recall: 40.0000
+05/14 04:25:57 - mmengine - INFO - Epoch(train)  [1][  700/24827]  lr: 1.0000e-02  eta: 14:07:18  time: 0.1712  data_time: 0.0033  memory: 2929  grad_norm: 1.8608  loss: 1.4568  loss_cls: 0.8559  loss_bbox: 0.6009  num_pos: 56.0000  pos_recall: 85.7143
+05/14 04:26:05 - mmengine - INFO - Epoch(train)  [1][  750/24827]  lr: 1.0000e-02  eta: 14:07:11  time: 0.1711  data_time: 0.0034  memory: 2929  grad_norm: 3.0210  loss: 1.4264  loss_cls: 0.8576  loss_bbox: 0.5688  num_pos: 20.0000  pos_recall: 0.0000
+05/14 04:26:14 - mmengine - INFO - Epoch(train)  [1][  800/24827]  lr: 1.0000e-02  eta: 14:06:24  time: 0.1690  data_time: 0.0033  memory: 2929  grad_norm: 2.0337  loss: 1.4390  loss_cls: 0.8895  loss_bbox: 0.5495  num_pos: 13.5000  pos_recall: 77.7778
+05/14 04:26:22 - mmengine - INFO - Epoch(train)  [1][  850/24827]  lr: 1.0000e-02  eta: 14:06:21  time: 0.1712  data_time: 0.0034  memory: 2929  grad_norm: 1.5737  loss: 1.4415  loss_cls: 0.8964  loss_bbox: 0.5451  num_pos: 12.0000  pos_recall: 0.0000
+05/14 04:26:31 - mmengine - INFO - Epoch(train)  [1][  900/24827]  lr: 1.0000e-02  eta: 14:06:29  time: 0.1720  data_time: 0.0034  memory: 2929  grad_norm: 1.6451  loss: 1.4257  loss_cls: 0.8557  loss_bbox: 0.5700  num_pos: 5.0000  pos_recall: 0.0000
+05/14 04:26:39 - mmengine - INFO - Epoch(train)  [1][  950/24827]  lr: 1.0000e-02  eta: 14:06:25  time: 0.1713  data_time: 0.0034  memory: 2929  grad_norm: 1.4794  loss: 1.3999  loss_cls: 0.8336  loss_bbox: 0.5663  num_pos: 27.5000  pos_recall: 18.1818
+05/14 04:26:48 - mmengine - INFO - Exp name: fsaf_r101_voc0712_20240514_042346
+05/14 04:26:48 - mmengine - INFO - Epoch(train)  [1][ 1000/24827]  lr: 1.0000e-02  eta: 14:06:01  time: 0.1700  data_time: 0.0034  memory: 2929  grad_norm: 2.1768  loss: 1.4134  loss_cls: 0.8379  loss_bbox: 0.5755  num_pos: 83.0000  pos_recall: 91.5663
+05/14 04:26:56 - mmengine - INFO - Epoch(train)  [1][ 1050/24827]  lr: 1.0000e-02  eta: 14:05:46  time: 0.1705  data_time: 0.0033  memory: 2929  grad_norm: 1.6816  loss: 1.3874  loss_cls: 0.8357  loss_bbox: 0.5517  num_pos: 41.0000  pos_recall: 50.0000
+05/14 04:27:05 - mmengine - INFO - Epoch(train)  [1][ 1100/24827]  lr: 1.0000e-02  eta: 14:05:21  time: 0.1697  data_time: 0.0034  memory: 2756  grad_norm: 2.3875  loss: 1.3399  loss_cls: 0.7775  loss_bbox: 0.5625  num_pos: 22.0000  pos_recall: 13.6364
+05/14 04:27:13 - mmengine - INFO - Epoch(train)  [1][ 1150/24827]  lr: 1.0000e-02  eta: 14:05:12  time: 0.1708  data_time: 0.0034  memory: 2929  grad_norm: 1.9201  loss: 1.4392  loss_cls: 0.8635  loss_bbox: 0.5757  num_pos: 15.5000  pos_recall: 38.7097
+05/14 04:27:22 - mmengine - INFO - Epoch(train)  [1][ 1200/24827]  lr: 1.0000e-02  eta: 14:04:59  time: 0.1705  data_time: 0.0033  memory: 2929  grad_norm: 2.0487  loss: 1.3957  loss_cls: 0.8117  loss_bbox: 0.5840  num_pos: 14.5000  pos_recall: 0.0000
+05/14 04:27:30 - mmengine - INFO - Epoch(train)  [1][ 1250/24827]  lr: 1.0000e-02  eta: 14:04:28  time: 0.1689  data_time: 0.0034  memory: 2929  grad_norm: 2.1502  loss: 1.3891  loss_cls: 0.8044  loss_bbox: 0.5847  num_pos: 12.0000  pos_recall: 8.3333
+05/14 04:27:39 - mmengine - INFO - Epoch(train)  [1][ 1300/24827]  lr: 1.0000e-02  eta: 14:04:21  time: 0.1710  data_time: 0.0036  memory: 2929  grad_norm: 3.1240  loss: 1.3370  loss_cls: 0.7703  loss_bbox: 0.5667  num_pos: 8.0000  pos_recall: 100.0000
+05/14 04:27:48 - mmengine - INFO - Epoch(train)  [1][ 1350/24827]  lr: 1.0000e-02  eta: 14:04:48  time: 0.1740  data_time: 0.0037  memory: 2929  grad_norm: 4.8362  loss: 1.4200  loss_cls: 0.8497  loss_bbox: 0.5703  num_pos: 31.0000  pos_recall: 0.0000
+05/14 04:27:56 - mmengine - INFO - Epoch(train)  [1][ 1400/24827]  lr: 1.0000e-02  eta: 14:05:07  time: 0.1735  data_time: 0.0038  memory: 2929  grad_norm: 2.9544  loss: 1.4320  loss_cls: 0.8507  loss_bbox: 0.5814  num_pos: 19.0000  pos_recall: 44.7368
+05/14 04:28:05 - mmengine - INFO - Epoch(train)  [1][ 1450/24827]  lr: 1.0000e-02  eta: 14:05:31  time: 0.1742  data_time: 0.0037  memory: 2929  grad_norm: 1.7340  loss: 1.3596  loss_cls: 0.8355  loss_bbox: 0.5241  num_pos: 12.0000  pos_recall: 25.0000
+05/14 04:28:13 - mmengine - INFO - Epoch(train)  [1][ 1500/24827]  lr: 1.0000e-02  eta: 14:04:51  time: 0.1679  data_time: 0.0035  memory: 2929  grad_norm: 1.7195  loss: 1.3645  loss_cls: 0.8113  loss_bbox: 0.5532  num_pos: 7.0000  pos_recall: 100.0000
+05/14 04:28:22 - mmengine - INFO - Epoch(train)  [1][ 1550/24827]  lr: 1.0000e-02  eta: 14:04:45  time: 0.1714  data_time: 0.0034  memory: 2929  grad_norm: 1.6001  loss: 1.3986  loss_cls: 0.8095  loss_bbox: 0.5890  num_pos: 17.0000  pos_recall: 0.0000
+05/14 04:28:30 - mmengine - INFO - Epoch(train)  [1][ 1600/24827]  lr: 1.0000e-02  eta: 14:04:25  time: 0.1697  data_time: 0.0034  memory: 2929  grad_norm: 2.0332  loss: 1.3429  loss_cls: 0.7867  loss_bbox: 0.5561  num_pos: 17.5000  pos_recall: 0.0000
+05/14 04:28:39 - mmengine - INFO - Epoch(train)  [1][ 1650/24827]  lr: 1.0000e-02  eta: 14:03:57  time: 0.1689  data_time: 0.0039  memory: 2929  grad_norm: 2.3378  loss: 1.3851  loss_cls: 0.8120  loss_bbox: 0.5731  num_pos: 10.0000  pos_recall: 0.0000
+05/14 04:28:47 - mmengine - INFO - Epoch(train)  [1][ 1700/24827]  lr: 1.0000e-02  eta: 14:03:38  time: 0.1697  data_time: 0.0035  memory: 2929  grad_norm: 3.8974  loss: 1.4273  loss_cls: 0.7953  loss_bbox: 0.6320  num_pos: 14.0000  pos_recall: 0.0000
+05/14 04:28:56 - mmengine - INFO - Epoch(train)  [1][ 1750/24827]  lr: 1.0000e-02  eta: 14:03:01  time: 0.1675  data_time: 0.0033  memory: 2929  grad_norm: 1.9617  loss: 1.4137  loss_cls: 0.8090  loss_bbox: 0.6046  num_pos: 27.5000  pos_recall: 34.5455
+05/14 04:29:04 - mmengine - INFO - Epoch(train)  [1][ 1800/24827]  lr: 1.0000e-02  eta: 14:02:27  time: 0.1678  data_time: 0.0034  memory: 2929  grad_norm: 2.5446  loss: 1.4534  loss_cls: 0.8959  loss_bbox: 0.5575  num_pos: 18.0000  pos_recall: 80.5555
+05/14 04:29:13 - mmengine - INFO - Epoch(train)  [1][ 1850/24827]  lr: 1.0000e-02  eta: 14:02:18  time: 0.1706  data_time: 0.0034  memory: 2929  grad_norm: 1.9396  loss: 1.4216  loss_cls: 0.8249  loss_bbox: 0.5966  num_pos: 52.0000  pos_recall: 19.2308
+05/14 04:29:21 - mmengine - INFO - Epoch(train)  [1][ 1900/24827]  lr: 1.0000e-02  eta: 14:02:07  time: 0.1704  data_time: 0.0035  memory: 2929  grad_norm: 2.3965  loss: 1.3625  loss_cls: 0.7812  loss_bbox: 0.5813  num_pos: 25.5000  pos_recall: 0.0000
+05/14 04:29:30 - mmengine - INFO - Epoch(train)  [1][ 1950/24827]  lr: 1.0000e-02  eta: 14:02:18  time: 0.1733  data_time: 0.0038  memory: 2929  grad_norm: 2.1695  loss: 1.3341  loss_cls: 0.7654  loss_bbox: 0.5687  num_pos: 11.5000  pos_recall: 0.0000
+05/14 04:29:38 - mmengine - INFO - Exp name: fsaf_r101_voc0712_20240514_042346
+05/14 04:29:38 - mmengine - INFO - Epoch(train)  [1][ 2000/24827]  lr: 1.0000e-02  eta: 14:02:25  time: 0.1728  data_time: 0.0036  memory: 2929  grad_norm: 2.4424  loss: 1.3084  loss_cls: 0.7435  loss_bbox: 0.5649  num_pos: 10.5000  pos_recall: 0.0000
+05/14 04:29:47 - mmengine - INFO - Epoch(train)  [1][ 2050/24827]  lr: 1.0000e-02  eta: 14:02:27  time: 0.1723  data_time: 0.0034  memory: 2929  grad_norm: 2.4070  loss: 1.3673  loss_cls: 0.7659  loss_bbox: 0.6014  num_pos: 11.0000  pos_recall: 18.1818
+05/14 04:29:56 - mmengine - INFO - Epoch(train)  [1][ 2100/24827]  lr: 1.0000e-02  eta: 14:02:48  time: 0.1751  data_time: 0.0036  memory: 2929  grad_norm: 1.7703  loss: 1.2940  loss_cls: 0.7056  loss_bbox: 0.5885  num_pos: 17.5000  pos_recall: 0.0000
+05/14 04:30:04 - mmengine - INFO - Epoch(train)  [1][ 2150/24827]  lr: 1.0000e-02  eta: 14:02:55  time: 0.1731  data_time: 0.0035  memory: 2929  grad_norm: 1.9608  loss: 1.3102  loss_cls: 0.7156  loss_bbox: 0.5945  num_pos: 19.5000  pos_recall: 0.0000
+05/14 04:30:13 - mmengine - INFO - Epoch(train)  [1][ 2200/24827]  lr: 1.0000e-02  eta: 14:02:41  time: 0.1702  data_time: 0.0034  memory: 2929  grad_norm: 2.6112  loss: 1.3127  loss_cls: 0.7134  loss_bbox: 0.5994  num_pos: 6.5000  pos_recall: 0.0000
+05/14 04:30:22 - mmengine - INFO - Epoch(train)  [1][ 2250/24827]  lr: 1.0000e-02  eta: 14:02:39  time: 0.1721  data_time: 0.0032  memory: 2929  grad_norm: 2.3029  loss: 1.3109  loss_cls: 0.7141  loss_bbox: 0.5968  num_pos: 47.0000  pos_recall: 93.6170
+05/14 04:30:30 - mmengine - INFO - Epoch(train)  [1][ 2300/24827]  lr: 1.0000e-02  eta: 14:02:24  time: 0.1699  data_time: 0.0032  memory: 2929  grad_norm: 2.4474  loss: 1.3225  loss_cls: 0.7451  loss_bbox: 0.5774  num_pos: 16.5000  pos_recall: 42.4242
+05/14 04:30:39 - mmengine - INFO - Epoch(train)  [1][ 2350/24827]  lr: 1.0000e-02  eta: 14:02:07  time: 0.1697  data_time: 0.0032  memory: 2929  grad_norm: 2.3364  loss: 1.3183  loss_cls: 0.7147  loss_bbox: 0.6036  num_pos: 9.5000  pos_recall: 0.0000
+05/14 04:30:47 - mmengine - INFO - Epoch(train)  [1][ 2400/24827]  lr: 1.0000e-02  eta: 14:01:50  time: 0.1696  data_time: 0.0032  memory: 2929  grad_norm: 1.9038  loss: 1.2564  loss_cls: 0.6783  loss_bbox: 0.5781  num_pos: 0.0000  pos_recall: 0.0000
+05/14 04:30:55 - mmengine - INFO - Epoch(train)  [1][ 2450/24827]  lr: 1.0000e-02  eta: 14:01:28  time: 0.1687  data_time: 0.0032  memory: 2929  grad_norm: 2.2444  loss: 1.3296  loss_cls: 0.7226  loss_bbox: 0.6070  num_pos: 41.5000  pos_recall: 48.1928
+05/14 04:31:04 - mmengine - INFO - Epoch(train)  [1][ 2500/24827]  lr: 1.0000e-02  eta: 14:01:26  time: 0.1719  data_time: 0.0033  memory: 2929  grad_norm: 2.3003  loss: 1.3762  loss_cls: 0.6900  loss_bbox: 0.6862  num_pos: 37.0000  pos_recall: 71.6216
+05/14 04:31:12 - mmengine - INFO - Epoch(train)  [1][ 2550/24827]  lr: 1.0000e-02  eta: 14:00:59  time: 0.1677  data_time: 0.0032  memory: 2929  grad_norm: 3.9666  loss: 1.3618  loss_cls: 0.7354  loss_bbox: 0.6264  num_pos: 28.0000  pos_recall: 35.7143
+05/14 04:31:21 - mmengine - INFO - Epoch(train)  [1][ 2600/24827]  lr: 1.0000e-02  eta: 14:00:42  time: 0.1695  data_time: 0.0032  memory: 2929  grad_norm: 3.0188  loss: 1.3466  loss_cls: 0.7544  loss_bbox: 0.5922  num_pos: 15.5000  pos_recall: 38.7097
+05/14 04:31:30 - mmengine - INFO - Epoch(train)  [1][ 2650/24827]  lr: 1.0000e-02  eta: 14:00:46  time: 0.1730  data_time: 0.0034  memory: 2929  grad_norm: 2.0075  loss: 1.2847  loss_cls: 0.7304  loss_bbox: 0.5543  num_pos: 94.0000  pos_recall: 78.7234
+submitit WARNING (2024-05-14 04:31:34,870) - Bypassing signal SIGCONT
+submitit ERROR (2024-05-14 04:31:34,875) - Submitted job triggered an exception
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n512
+Job ID: 23594907
+Cluster: uc2
+User/Group: ma_ruweber/ma_ma
+State: FAILED (exit code 1)
+Nodes: 1
+Cores per node: 10
+CPU Utilized: 00:08:36
+CPU Efficiency: 10.30% of 01:23:30 core-walltime
+Job Wall-clock time: 00:08:21
+Memory Utilized: 1.70 GB
+Memory Efficiency: 1.85% of 91.80 GB
