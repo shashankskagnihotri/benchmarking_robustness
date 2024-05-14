@@ -7,7 +7,6 @@ from tqdm import tqdm
 from new_trainer import trainer
 from new_distributed_trainer import train_with_multiple_gpus
 
-
 GPU_NUM = 2
 # slurm_partition = "dev_gpu_4_a100" #! does not work?!?!?
 slurm_partition = "dev_gpu_4"
