@@ -1,6 +1,0 @@
-GpuFreq=control_disabled
-submitit WARNING (2024-05-13 15:42:23,255) - Bypassing signal SIGCONT
-slurmstepd: error: *** JOB 23562770 ON uc2n488 CANCELLED AT 2024-05-13T15:44:24 DUE TO TIME LIMIT ***
-slurmstepd: error: *** STEP 23562770.0 ON uc2n488 CANCELLED AT 2024-05-13T15:44:24 DUE TO TIME LIMIT ***
-submitit WARNING (2024-05-13 15:44:24,147) - Bypassing signal SIGTERM
-submitit WARNING (2024-05-13 15:44:24,238) - Bypassing signal SIGTERM
