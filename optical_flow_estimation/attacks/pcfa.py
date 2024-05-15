@@ -42,7 +42,6 @@ def pcfa(
     preds, delta1, delta2 = pcfa_attack(
         model, targeted_inputs, eps_box, device, optim_mu, attack_args
     )
-    pdb.set_trace()
     image1, image2 = get_image_tensors(targeted_inputs)
     perturbed_image1 = image1 + delta1
     perturbed_image2 = image2 + delta2
