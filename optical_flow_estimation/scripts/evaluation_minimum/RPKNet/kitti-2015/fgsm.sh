@@ -19,7 +19,7 @@ targets="negative zero"
 norms="inf two"
 attacks="fgsm"
 jobnum=0
-SLURM_ARRAY_TASK_ID=0
+#SLURM_ARRAY_TASK_ID=0
 
 cd ../../../../
 
