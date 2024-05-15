@@ -9,7 +9,7 @@
 #SBATCH --array=0-44%4
 #SBATCH --job-name=rpknet_kitti-2015_bim_pgd_cospgd_i10
 #SBATCH --output=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i10.out
-#SBATCH --error=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i10.out
+#SBATCH --error=slurm/rpknet_kitti-2015_bim_pgd_cospgd_i10_err.out
 
 model="rpknet"
 dataset="kitti-2015"
@@ -85,7 +85,8 @@ do
                                     --attack_alpha $alpha \
                                     --attack_epsilon $epsilon \
                                     --attack_targeted $targeted \
-                                    --attack_target "zero"
+                                    --attack_target "zero" \
+                                    --write_outputs 
                                 #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                             fi
                             jobnum=$((jobnum + 1))
