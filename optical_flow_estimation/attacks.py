@@ -430,7 +430,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             if "_" in key:
                 key = key.split("_")[1]
             if isinstance(value, float):
-                value = round(value, 2)
+                value = round(value, 4)
             output_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
