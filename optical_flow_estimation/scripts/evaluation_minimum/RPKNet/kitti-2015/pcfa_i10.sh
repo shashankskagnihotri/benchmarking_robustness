@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --array=0-1%4
+#SBATCH --array=0-1%2
 #SBATCH --job-name=rpknet_kitti-2015_pcfa_i10
 #SBATCH --output=slurm/rpknet_kitti-2015_pcfa_i10.out
 #SBATCH --error=slurm/rpknet_kitti-2015_pcfa_i10_err.out
