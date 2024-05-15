@@ -94,7 +94,11 @@ for config_file in folder_entry_list_configs_to_train:
                                 os.path.join(model_log_folder_path, model_logfile), "r"
                             ) as file:
                                 logfile_content = file.read()
-                                if "DUE TO TIME LIMIT" in logfile_content:
+                                if (
+                                    "DUE TO TIME LIMIT" in logfile_content
+                                    or "min(max_walltime * 0.8, max_walltime - 10 * 60"
+                                    in logfile_content
+                                ):
                                     print(
                                         f"moving {config_file} to {path_verified_configs} folder"
                                     )
@@ -107,7 +111,10 @@ for config_file in folder_entry_list_configs_to_train:
                                                 config_file,
                                             ),
                                         )
-                                elif "Error" in logfile_content:
+                                else:
+                                    # elif (
+                                    #     "Error" in logfile_content
+                                    # ):  #! or "AssertionError" in logfile_content maybe just use else
                                     print(
                                         f"moving {config_file} to {path_erroneous_configs} folder"
                                     )

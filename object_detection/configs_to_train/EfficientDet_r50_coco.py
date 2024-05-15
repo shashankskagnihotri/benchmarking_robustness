@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=128, enable=False)
+auto_scale_lr = dict(base_batch_size=128, enable=True)
 backend_args = None
 batch_augments = [
     dict(size=(

@@ -7,7 +7,8 @@ from tqdm import tqdm
 from new_trainer import trainer
 from new_distributed_trainer import train_with_multiple_gpus
 
-GPU_NUM = 2
+# GPU_NUM = 2
+GPU_NUM = 1
 # slurm_partition = "dev_gpu_4_a100" #! does not work?!?!?
 slurm_partition = "dev_gpu_4"
 
@@ -32,16 +33,17 @@ executor.update_parameters(
     slurm_time="00:10:00",
 )
 
-# executor.submit(
-#     trainer,
-#     config_file,
-#     specific_slurm_work_dir,
-# )
-
-#! 23598515
+#! WORKS WITH WALLTIME ERROR
 executor.submit(
-    train_with_multiple_gpus,
+    trainer,
     config_file,
     specific_slurm_work_dir,
-    GPU_NUM,
 )
+
+#! WORKS WITH WALLTIME ERROR
+# executor.submit(
+#     train_with_multiple_gpus,
+#     config_file,
+#     specific_slurm_work_dir,
+#     GPU_NUM,
+# )

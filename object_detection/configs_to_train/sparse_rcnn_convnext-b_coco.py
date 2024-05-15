@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=16, enable=False)
+auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'

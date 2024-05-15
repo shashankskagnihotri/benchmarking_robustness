@@ -13,6 +13,8 @@ from mmdet.evaluation import DumpDetResults
 from mmdet.registry import RUNNERS
 from mmdet.utils import setup_cache_size_limit_of_dynamo
 
+import wandb
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="MMDet test (and eval) a model")

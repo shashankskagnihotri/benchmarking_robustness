@@ -25,17 +25,18 @@ path_erroneous_configs = (
 )
 
 
-path_verified_configs = "./configs_verified"
-
-folder_entry_list_configs_to_train = os.listdir(path_verified_configs)
+path_verified_configs = "./configs_verified"  # ? change to eval for evaluation
+folder_entry_list_configs_to_train = os.listdir(
+    path_verified_configs
+)  # ? change to eval for evaluation
 
 path_configs_to_test = "./configs_to_test"
 
 
 verify_subset = True  #! for checking functionality
-GPU_NUM = 2
+GPU_NUM = 1
 TIME = "00:10:00"
-SLURM_PARTITION = "gpu_4"
+SLURM_PARTITION = "dev_gpu_4"
 
 
 submitit.helpers.CommandFunction(["module", "load", "devel/cuda/11.8"])
@@ -49,6 +50,10 @@ if verify_subset:
         folder_entry_list_configs_to_train[1],
     ]
     path_configs_to_test = "./configs_to_test_subset"
+
+
+print(f"folder_entry_list_configs_to_train : {folder_entry_list_configs_to_train}")
+print(f"path_configs_to_test : {path_configs_to_test}")
 
 
 def highest_job_number(model_log_folder_path):
@@ -70,15 +75,20 @@ def has_been_started_before(config_file, slurm_log_folders):
     return False
 
 
+#! atss_swin-b_coco -> changed to success
 def has_been_completed(config_file, slurm_log_folders):
     if has_been_started_before(config_file, slurm_log_folders):
         for model_log_folder_name in slurm_log_folders:
             if config_file.split(".")[0] in model_log_folder_name:
+                model_log_folder_path = os.path.join(
+                    slurm_log_folder_path, model_log_folder_name
+                )
+                model_logfiles = os.listdir(model_log_folder_path)
                 highest_job_number_for_model = highest_job_number(model_log_folder_path)
                 for model_logfile in model_logfiles:
                     if highest_job_number_for_model in model_logfile:
                         model_logfile_ending = model_logfile.split(".")[1]
-                        if "out" in model_logfile_ending:
+                        if "err" in model_logfile_ending:
                             with open(
                                 os.path.join(model_log_folder_path, model_logfile), "r"
                             ) as file:
@@ -87,6 +97,10 @@ def has_been_completed(config_file, slurm_log_folders):
                                     print(
                                         f"moving {config_file} to {path_configs_to_test} folder"
                                     )
+                                    config_path = os.path.join(
+                                        path_verified_configs, config_file
+                                    )
+
                                     if os.path.exists(config_path):
                                         shutil.move(
                                             config_path,
@@ -132,11 +146,11 @@ for config_file in folder_entry_list_configs_to_train:
                                 os.path.join(model_log_folder_path, model_logfile), "r"
                             ) as file:
                                 logfile_content = file.read()
-                                if "DUE TO TIME LIMIT" in logfile_content:
-                                    print(
-                                        f"moving {config_file} to {path_verified_configs} folder"
-                                    )
-
+                                if (
+                                    "DUE TO TIME LIMIT" in logfile_content
+                                    or "min(max_walltime * 0.8, max_walltime - 10 * 60"
+                                    in logfile_content
+                                ):
                                     print(f"training {config_file} from {config_path}")
                                     specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
                                     specific_slurm_result_dir = f"{slurm_results_path}/{os.path.splitext(config_file)[0]}"
@@ -155,8 +169,10 @@ for config_file in folder_entry_list_configs_to_train:
                                         train_with_multiple_gpus,
                                         config_path,
                                         specific_slurm_result_dir,
+                                        GPU_NUM,
                                     )
-                                elif "Error" in logfile_content:
+                                else:
+                                    # elif "Error" in logfile_content:
                                     print(
                                         f"moving {config_file} to {path_erroneous_configs} folder"
                                     )
@@ -189,4 +205,5 @@ for config_file in folder_entry_list_configs_to_train:
             train_with_multiple_gpus,
             config_path,
             specific_slurm_result_dir,
+            GPU_NUM,
         )

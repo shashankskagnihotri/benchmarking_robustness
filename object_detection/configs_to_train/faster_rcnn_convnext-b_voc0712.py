@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=16, enable=False)
+auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 data_root = 'data/VOCdevkit/'
 dataset_type = 'VOCDataset'
@@ -231,7 +231,11 @@ test_dataloader = dict(
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
-test_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+test_evaluator = dict(
+    ann_file='data/coco/annotations/instances_val2017.json',
+    backend_args=None,
+    metric='bbox',
+    type='CocoMetric')
 test_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
     dict(keep_ratio=True, scale=(
@@ -349,7 +353,11 @@ val_dataloader = dict(
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
-val_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+val_evaluator = dict(
+    ann_file='data/coco/annotations/instances_val2017.json',
+    backend_args=None,
+    metric='bbox',
+    type='CocoMetric')
 vis_backends = [
     dict(type='LocalVisBackend'),
 ]

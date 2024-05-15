@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=64, enable=False)
+auto_scale_lr = dict(base_batch_size=64, enable=True)
 backend_args = None
 base_lr = 0.01
 custom_hooks = [

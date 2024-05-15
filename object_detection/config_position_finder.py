@@ -7,6 +7,9 @@ print(
     f"Number of erroneous configs: {len(os.listdir('./configs_erroneous/verification'))}"
 )
 
+files = os.listdir("./configs_erroneous/verification")
+files.sort()
+print(files)
 
 original_config_files = os.listdir("./configs_to_train")
 original_config_files

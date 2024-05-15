@@ -562,7 +562,6 @@ for (neck, backbone, dataset), found in all_combis.items():
             # val_dataloader as voc0712_val_dataloader
 
             if dataset != dataset_ref:
-                #! traindataloader
                 cfg.data_root = voc0712_data_root
                 cfg.dataset_type = voc0712_dataset_type
 
@@ -573,28 +572,30 @@ for (neck, backbone, dataset), found in all_combis.items():
                 cfg.val_dataloader = voc0712_val_dataloader
                 cfg.test_dataloader = voc0712_val_dataloader
 
-                cfg.val_evaluator = (
-                    dict(
-                        ann_file="data/voc_coco_format/voc0712_val.json",
-                        backend_args=None,
-                        format_only=False,
-                        metric="bbox",
-                        type="CocoMetric",
-                    ),
-                )
-                cfg.test_evaluator = dict(
-                    ann_file="data/voc_coco_format/voc07_test.json",
-                    backend_args=None,
-                    format_only=False,
-                    metric="bbox",
-                    type="CocoMetric",
-                )
+                #! when try to update the metric
+                # cfg.val_evaluator = (
+                #     dict(
+                #         ann_file="data/voc_coco_format/voc0712_val.json",
+                #         backend_args=None,
+                #         format_only=False,
+                #         metric="bbox",
+                #         type="CocoMetric",
+                #     ),
+                # )
+                # cfg.test_evaluator = dict(
+                #     ann_file="data/voc_coco_format/voc07_test.json",
+                #     backend_args=None,
+                #     format_only=False,
+                #     metric="bbox",
+                #     type="CocoMetric",
+                # )
 
             cfg.auto_scale_lr.enable = True  #! test if works
-            cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-            cfg.visualizer.vis_backends[0].init_kwargs = dict(
-                project=f"{neck}_{backbone}_{dataset}"
-            )
+            #! put in for real training
+            # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
+            # cfg.visualizer.vis_backends[0].init_kwargs = dict(
+            #     project=f"{neck}_{backbone}_{dataset}"
+            # )
 
             destination_file = os.path.join(
                 "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"

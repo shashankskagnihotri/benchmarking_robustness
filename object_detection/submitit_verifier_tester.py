@@ -9,7 +9,7 @@ from new_distributed_tester import test_with_multiple_gpus
 
 
 GPU_NUM = 2
-
+# GPU_NUM = 1
 
 # slurm_partition = "dev_gpu_4_a100" #! does not work?!?!?
 slurm_partition = "dev_gpu_4"
@@ -22,7 +22,7 @@ check_config_file = "slurm/work_dir/0_verification_submitit_verifier_trainer_tes
 slurm_log_folder_path = (
     "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/tester"
 )
-specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[3]}"
+specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
 
 
 executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
@@ -46,7 +46,7 @@ executor.update_parameters(
 #     specific_slurm_work_dir,
 # )
 
-#!
+#! doesn´t run through nor create log files
 executor.submit(
     test_with_multiple_gpus,
     config_file,

@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=64)
+auto_scale_lr = dict(base_batch_size=64, enable=True)
 backend = 'pillow'
 backend_args = None
 batch_augments = [
