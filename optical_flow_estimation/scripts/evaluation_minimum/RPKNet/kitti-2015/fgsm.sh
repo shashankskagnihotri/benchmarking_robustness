@@ -8,8 +8,13 @@
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-14%4
 #SBATCH --job-name=rpknet_kitti-2015_fgsm
-#SBATCH --output=slurm/rpknet_kitti-2015_fgsm.out
-#SBATCH --error=slurm/rpknet_kitti-2015_fgsm_err.out
+#SBATCH --output=slurm/rpknet_kitti-2015_fgsm_%A_%a.out
+#SBATCH --error=slurm/rpknet_kitti-2015_fgsm_err_%A_%a.out
+
+# Manually set the PATH to include the Conda binary directory
+export PATH="/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/miniconda3/bin:$PATH"
+# Activate Conda environment
+source activate benchmark
 
 model="rpknet"
 dataset="kitti-2015"

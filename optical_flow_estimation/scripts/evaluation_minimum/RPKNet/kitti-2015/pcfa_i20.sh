@@ -9,7 +9,12 @@
 #SBATCH --array=0-1%2
 #SBATCH --job-name=rpknet_kitti-2015_pcfa_i20
 #SBATCH --output=slurm/rpknet_kitti-2015_pcfa_i20.out
-#SBATCH --error=slurm/rpknet_kitti-2015_pcfa_i20_err.out
+#SBATCH --error=slurm/rpknet_kitti-2015_pcfa_i20_err_%A_%a.out
+
+# Manually set the PATH to include the Conda binary directory
+export PATH="/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/miniconda3/bin:$PATH"
+# Activate Conda environment
+source activate benchmark
 
 model="rpknet"
 dataset="kitti-2015"
