@@ -2,23 +2,23 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=00:29:59
+#SBATCH --time=02:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-44%4
-#SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i3
-#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i3_%A_%a.out
-#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i3_err_%A_%a.out
+#SBATCH --job-name=raft_sintel-clean_bim_pgd_cospgd_i10
+#SBATCH --output=slurm/raft_sintel-clean_bim_pgd_cospgd_i10_%A_%a.out
+#SBATCH --error=slurm/raft_sintel-clean_bim_pgd_cospgd_i10_err_%A_%a.out
 
 model="raft"
-dataset="kitti-2015"
+dataset="sintel-clean"
 checkpoint="kitti"
 targeteds="True False"
 targets="negative zero"
 norms="inf two"
 attacks="bim pgd cospgd"
-iterations="3"
+iterations="10"
 jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 
