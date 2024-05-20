@@ -17,14 +17,13 @@ from models import *
 
 parser = argparse.ArgumentParser(description='PSMNet')
 parser.add_argument('--dataset', required=True, 
-                    help='dataset name')
+                    help='dataset name')train
 parser.add_argument('--maxdisp', type=int ,default=192,
                     help='maxium disparity')
 parser.add_argument('--model', default='stackhourglass',
                     help='select model')
 parser.add_argument('--datapath', required=True,
                     help='datapath')
-parser.add_argument('--dataset', required=True, help='dataset name')
 parser.add_argument('--epochs', type=int, default=10,
                     help='number of epochs to train')
 parser.add_argument('--loadmodel', default=None,

@@ -16,14 +16,22 @@ from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
 
 # SceneFlow dataloader from CFNet
 class SceneFlowFlyingThings3DDataset(Dataset):
-    def __init__(self, datadir:str, model_name:str, train:bool=True):
+    def __init__(self, datadir, architecture_name, split='train'['train', 'test', 'corrupted']):
         super().__init__()
 
         self.datadir = datadir
-        self.model_name = model_name.lower()
+        self.model_name = architecture_name.lower()
         
-        self.split_folder = 'TRAIN' if train else 'TEST'
-        self.training = train
+        if split.upper() == 'TRAIN':
+            self.split_folder = 'TRAIN'
+        elif split.upper() == 'TEST':
+            self.split_folder = 'TEST'
+        elif split.upper() == 'CORRUPTED':
+            self.split_folder = 'CORRUPTED'
+        else:
+            raise ValueError(f"Invalid split value: {split}")
+
+        self.training = True if split.lower() in "train" else False
 
         self._read_data()
 
