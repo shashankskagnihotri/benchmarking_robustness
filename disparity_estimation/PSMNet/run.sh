@@ -7,7 +7,9 @@ python main.py --maxdisp 192 \
                --datapath $DATAPATH \
                --epochs 0 \
                --loadmodel ./pretrained_weights/pretrained_sceneflow_new.tar \
-               --savemodel ./trained/
+               --savemodel ./trained/ \
+               --dataset sceneflow
+
 
 
 

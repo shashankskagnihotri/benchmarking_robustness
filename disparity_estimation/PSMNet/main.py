@@ -11,7 +11,7 @@ import numpy as np
 import time
 import math
 # from dataloader import listflowfile as lt
-from dataloader import SceneFlowFlyingThings3DDataset
+from dataloader import  get_dataset
 from torch.utils.data import DataLoader
 from models import *
 
@@ -22,6 +22,7 @@ parser.add_argument('--model', default='stackhourglass',
                     help='select model')
 parser.add_argument('--datapath', required=True,
                     help='datapath')
+parser.add_argument('--dataset', required=True, help='dataset name')
 parser.add_argument('--epochs', type=int, default=10,
                     help='number of epochs to train')
 parser.add_argument('--loadmodel', default=None,
@@ -49,8 +50,8 @@ if args.cuda:
 #          SceneFlowFlyingThings3DDataset(test_left_img,test_right_img,test_left_disp, False), 
 #          batch_size= 8, shuffle= False, num_workers= 4, drop_last=False)
 
-train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="PSMNet", train=True)
-test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="PSMNet", train=False)
+train_dataset =  get_dataset(args.dataset, args.datapath, split="train", architeture_name="PSMNet")
+test_dataset  =  get_dataset(args.dataset, args.datapath, split="test",  architeture_name="PSMNet")
 
 TrainImgLoader = DataLoader(train_dataset, batch_size=12, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, batch_size=8, shuffle=False, num_workers=4, drop_last=False)
