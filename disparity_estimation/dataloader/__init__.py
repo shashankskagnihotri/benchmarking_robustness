@@ -20,7 +20,7 @@ def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
         isTrain = True if split == 'train' else False
         return ETH3DDataset(datadir, architeture_name, isTrain)
     elif dataset_name == 'mpisintel':
-        from .mpisintel import MPISintelDataloader
-        return MPISintelDataloader(datadir, split)
+        from .mpisintel import MPISintelDataset
+        return MPISintelDataset(datadir, architeture_name, split)
     else:
         raise NotImplementedError(f'Dataset {dataset_name} not implemented')
