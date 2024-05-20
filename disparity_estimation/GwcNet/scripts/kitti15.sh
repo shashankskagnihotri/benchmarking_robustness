@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-set -x
+# set -x
 
 # Change directory to the directory containing main.py
-cd /pfs/work7/workspace/scratch/ma_adackerm-team_project_fss2024/benchmarking_robustness/disparity_estimation/GwcNet/
+#cd /pfs/work7/workspace/scratch/ma_adackerm-team_project_fss2024/benchmarking_robustness/disparity_estimation/GwcNet/
 
 DATAPATH="/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/KITTI_2015/"
 python -W ignore main.py --dataset kitti \
