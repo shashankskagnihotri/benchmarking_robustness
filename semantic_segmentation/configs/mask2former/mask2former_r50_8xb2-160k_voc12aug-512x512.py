@@ -136,20 +136,20 @@ model = dict(
     test_cfg=dict(mode='whole'))
 
 # dataset config
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations'),
-    dict(
-        type='RandomChoiceResize',
-        scales=[int(512 * x * 0.1) for x in range(5, 21)],
-        resize_type='ResizeShortestEdge',
-        max_size=2048),
-    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
-    dict(type='RandomFlip', prob=0.5),
-    dict(type='PhotoMetricDistortion'),
-    dict(type='PackSegInputs')
-]
-train_dataloader = dict(batch_size=2, dataset=dict(pipeline=train_pipeline))
+# train_pipeline = [
+#    dict(type='LoadImageFromFile'),
+#    dict(type='LoadAnnotations'),
+#    dict(
+#        type='RandomChoiceResize',
+#        scales=[int(512 * x * 0.1) for x in range(5, 21)],
+#        resize_type='ResizeShortestEdge',
+#        max_size=2048),
+#    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
+#    dict(type='RandomFlip', prob=0.5),
+#    dict(type='PhotoMetricDistortion'),
+#    dict(type='PackSegInputs')
+#]
+#train_dataloader = dict(batch_size=2, dataset=dict(pipeline=train_pipeline))
 
 # optimizer
 embed_multi = dict(lr_mult=1.0, decay_mult=0.0)
