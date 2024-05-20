@@ -17,14 +17,17 @@ import numpy as np
 import time
 import math
 import copy
-from dataloader import KITTIloader2015 as ls
-from dataloader import KITTILoader as DA
+from dataloader import get_dataset
+# from dataloader import KITTIloader2015 as ls
+# from dataloader import KITTILoader as DA
 
 from models import *
 
 parser = argparse.ArgumentParser(description='PSMNet')
 parser.add_argument('--maxdisp', type=int ,default=192,
                     help='maxium disparity')
+parser.add_argument('--dataset', required=True, 
+                    help='dataset name')
 parser.add_argument('--model', default='stackhourglass',
                     help='select model')
 parser.add_argument('--datatype', default='2015',
@@ -48,18 +51,22 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 if args.datatype == '2015':
-   from dataloader import KITTIloader2015 as ls
+#    from dataloader import KITTIloader2015 as ls
+    pass
 elif args.datatype == '2012':
-   from dataloader import KITTIloader2012 as ls
+    raise Exception("KITTI for 2012 is not supported yet.")
+    #    from dataloader import KITTIloader2012 as ls
 
-all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(args.datapath)
+# all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(args.datapath)
 
 TrainImgLoader = torch.utils.data.DataLoader(
-         DA.myImageFloder(all_left_img,all_right_img,all_left_disp, True), 
+        #  DA.myImageFloder(all_left_img,all_right_img,all_left_disp, True), 
+        get_dataset(args.dataset, args.datapath, architeture_name="PSMNet", split="Train"),
          batch_size= 12, shuffle= True, num_workers= 8, drop_last=False)
 
 TestImgLoader = torch.utils.data.DataLoader(
-         DA.myImageFloder(test_left_img,test_right_img,test_left_disp, False), 
+        #  DA.myImageFloder(test_left_img,test_right_img,test_left_disp, False), 
+        get_dataset(args.dataset, args.datapath, architeture_name="PSMNet", split="Test"),
          batch_size= 8, shuffle= False, num_workers= 4, drop_last=False)
 
 if args.model == 'stackhourglass':

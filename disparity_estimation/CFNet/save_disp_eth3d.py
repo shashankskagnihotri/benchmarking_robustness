@@ -13,13 +13,14 @@ import torch.nn.functional as F
 import numpy as np
 import time
 from tensorboardX import SummaryWriter
-from datasets import __datasets__
+# from datasets import __datasets__
+from dataloader import get_dataset
 from models import __models__
 from utils import *
 import PIL.Image
 from torch.utils.data import DataLoader
-from datasets import listfiles as ls
-from datasets import eth3dLoader as DA
+# from datasets import listfiles as ls
+# from datasets import eth3dLoader as DA
 import sys
 import gc
 import skimage
@@ -30,7 +31,7 @@ parser = argparse.ArgumentParser(description='Cascade and Fused Cost Volume for 
 parser.add_argument('--model', default='cfnet', help='select a model structure', choices=__models__.keys())
 parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity')
 
-parser.add_argument('--dataset', default='kitti', help='dataset name', choices=__datasets__.keys())
+parser.add_argument('--dataset',  required=True, help='dataset name')
 parser.add_argument('--datapath', required=True, help='data path')
 parser.add_argument('--testlist', required=True, help='testing list')
 parser.add_argument('--loadckpt', required=True, help='load the weights from a specific checkpoint')
@@ -43,9 +44,11 @@ args = parser.parse_args()
 # test_dataset = StereoDataset(args.datapath, args.testlist, False)
 # TestImgLoader = DataLoader(test_dataset, 1, shuffle=False, num_workers=4, drop_last=False)
 
-all_left_img, all_right_img, all_left_disp, _ = ls.dataloader('%s/eth3dtest/'%args.datapath)
-# all_left_img, all_right_img, all_left_disp, _ = ls.dataloader('%s/eth3d/'%args.datapath)
-test_dataset = DA.myImageFloder(all_left_img, all_right_img, None, False)
+# all_left_img, all_right_img, all_left_disp, _ = ls.dataloader('%s/eth3dtest/'%args.datapath)
+# # all_left_img, all_right_img, all_left_disp, _ = ls.dataloader('%s/eth3d/'%args.datapath)
+# test_dataset = DA.myImageFloder(all_left_img, all_right_img, None, False)
+
+test_dataset = get_dataset(args.dataset, args.datapath, 'test', args.model)
 TestImgLoader = DataLoader(test_dataset, 1, shuffle=False, num_workers=4, drop_last=False)
 # model, optimizer
 model = __models__[args.model](args.maxdisp)
@@ -99,7 +102,7 @@ def test():
             assert len(disp_est.shape) == 2
             disp_est = np.array(disp_est[top_pad:, :-right_pad], dtype=np.float32)
             #fn = os.path.join("predictions", fn.split('/')[-1])
-            fn = os.path.join("/home3/raozhibo/jack/shenzhelun/cfnet/pre_picture/", fn.split('/')[-2])
+            fn = os.path.join(args.datapath, "save_disp", "eth3d", fn.split('/')[-2])
             print("saving to", fn, disp_est.shape)
 
             # invalid = np.logical_or(disp_est == np.inf, disp_est != disp_est)
