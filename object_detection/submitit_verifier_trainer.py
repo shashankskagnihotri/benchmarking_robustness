@@ -19,7 +19,7 @@ slurm_partition = "dev_gpu_4"
 #! had can't multiply sequence by non-int of type 'float' error in RuntimeInfoHook -> atss_r101_voc0712 job 23610340 -> min(max_walltime * 0.8, max_walltime - 10 * 60) error
 # config_file = "configs_erroneous/verification/atss_r101_voc0712.py"
 
-#! had can't multiply sequence by non-int of type 'float' error in RuntimeInfoHook -> libra_rcnn_convnext-b_voc0712 job 23610354 ->
+#! had can't multiply sequence by non-int of type 'float' error in RuntimeInfoHook -> libra_rcnn_convnext-b_voc0712 job 23615948 ->
 config_file = "configs_erroneous/verification/libra_rcnn_convnext-b_voc0712.py"
 
 #! had cuda out of memory error ->  yolox_r101_coco -> same error
