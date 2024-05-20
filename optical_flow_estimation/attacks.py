@@ -59,6 +59,7 @@ from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
     attack_arg_string,
 )
+from attacks.attack_utils.loss_criterion import LossCriterion
 from ptlflow_attacked.validate import (
     _get_model_names,
 )
@@ -253,7 +254,7 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--attack_loss",
         type=str,
-        default=loss_function,
+        default="epe",
         nargs="*",
         help="Set the name of the used loss function (mse, epe)",
     )
@@ -691,9 +692,21 @@ def attack_one_dataloader(
                         inputs[key] = val[:, k : k + 1]
 
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+
                 metrics = model.val_metrics(preds, targeted_inputs)
+
+                criterion = LossCriterion("epe")
+                loss = criterion.loss(preds["flows"].squeeze(0).float(), targeted_inputs["flows"].squeeze(0).float())
+                loss = loss.mean()
+                metrics["val/own_epe"] = loss
+
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
+
+                loss = criterion.loss(preds["flows"].squeeze(0).float(), orig_preds["flows"].squeeze(0).float())
+                loss = loss.mean()
+                metrics["val/own_epe_orig_preds"] = loss               
+
                 metrics["val/cosim_target"] = torch.mean(
                     cosine_similarity(
                         get_flow_tensors(preds), get_flow_tensors(targeted_inputs)
@@ -707,6 +720,11 @@ def attack_one_dataloader(
                 if has_ground_truth:
                     metrics_ground_truth = model.val_metrics(preds, inputs)
                     metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
+
+                    loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                    loss = loss.mean()
+                    metrics["val/own_epe_ground_truth"] = loss
+                    
                     metrics["val/cosim_ground_truth"] = torch.mean(
                         cosine_similarity(
                             get_flow_tensors(preds), get_flow_tensors(inputs)
@@ -714,6 +732,12 @@ def attack_one_dataloader(
                     )
             else:
                 metrics = model.val_metrics(preds, inputs)
+
+                criterion = LossCriterion("epe")
+                loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                loss = loss.mean()
+                metrics["val/own_epe"] = loss
+
                 metrics["val/cosim"] = torch.mean(
                     cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs))
                 )
