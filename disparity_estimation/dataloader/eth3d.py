@@ -1,62 +1,84 @@
 import os, torch, torch.utils.data as data
 from PIL import Image
 import numpy as np
-from .. import flow_transforms
 import pdb
+import glob
 import torchvision
 import warnings
-from . import readpfm as rp
-from .gwcnet_data_io import get_transform, read_all_lines
-warnings.filterwarnings('ignore', '.*output shape of zoom.*')
 
-IMG_EXTENSIONS = [
- '.jpg', '.JPG', '.jpeg', '.JPEG',
- '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP']
+# Imports
+from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
 
-def is_image_file(filename):
-    return any((filename.endswith(extension) for extension in IMG_EXTENSIONS))
-
-
-def default_loader(path):
-    return Image.open(path).convert('RGB')
-
-
-def disparity_loader(path):
-    if '.png' in path:
-        data = Image.open(path)
-        data = np.ascontiguousarray(data,dtype=np.float32)/256
-        return data
-    else:
-        data = rp.readPFM(path)[0]
-        data = np.ascontiguousarray(data, dtype=np.float32)
-        return data
 
 # ETH3D dataloader from CFNET
 class ETH3DDataset(data.Dataset):
 
-    def __init__(self, model_name, left, right, left_disparity, training, right_disparity=None, loader=default_loader, dploader=disparity_loader):
+
+    def __init__(self, datadir:str, model_name:str, train:bool=True):
+        super().__init__()
+
+        self.datadir = datadir
+        self.model_name = model_name.lower()
+
+        self.split_folder = 'training' if train else 'test'
+        self.training = train
+
+        self._read_data()
         
-        self.model_name = model_name
-        self.left = left
-        self.right = right
-        self.disp_L = left_disparity
-        self.disp_R = right_disparity
-        self.training = training
-        self.loader = loader
-        self.dploader = dploader
+
+    def _read_data(self):
+        img_list = [i.split('/')[-1] for i in glob.glob(os.path.join(self.datadir, f"two_view_{self.split_folder}") + "/*") if os.path.isdir(i)]
+
+        self.img_left_filenames   = [os.path.join(self.datadir, f"two_view_{self.split_folder}", img, "im0.png")     for img in img_list]  
+        self.img_right_filenames  = [os.path.join(self.datadir, f"two_view_{self.split_folder}", img, "im1.png")     for img in img_list]
+        self.disp_left_filenames  = [os.path.join(self.datadir, f"two_view_{self.split_folder}", img, "disp0GT.pfm") for img in img_list]
+        # self.disp_right_filenames = [os.path.join(self.datadir, f"two_view_{self.split_folder}", img, "disp1GT.pfm") for img in img_list]
+
+    def load_image(self, filename) -> Image:
+        return Image.open(filename).convert('RGB')
+
+    def load_disp(self, path) -> np.ndarray[np.float32]:
+        if '.png' in path:
+            data = Image.open(path)
+            data = np.ascontiguousarray(data,dtype=np.float32)/256
+        else:
+            data = cfnet.readpfm.readPFM(path)[0]
+            data = np.ascontiguousarray(data, dtype=np.float32)
+        
+        data[data == np.inf] = 0
+        return data
+        
 
     def __getitem__(self, index):
+
+        img_left = self.load_image(self.img_left_filenames[index])
+        img_right = self.load_image(self.img_right_filenames[index])
         
-        left = self.left[index]
-        right = self.right[index]
-        left_img = self.loader(left)
-        right_img = self.loader(right)
-        if self.disp_L is not None:
-          disp_L = self.disp_L[index]
-          disparity = self.dploader(disp_L)
-          disparity[disparity == np.inf] = 0
+        # Disparity doen't exist for test set
+        disp_left = self.load_disp(self.disp_left_filenames[index]) if self.training else None
+        # disp_right = self.load_disp(self.disp_right_filenames[index])
+        # occ_left = self.load_occ(self.occ_left_filenames[index])
+        # occ_right = self.load_occ(self.occ_right_filenames[index])
+        
+        if self.model_name == 'cfnet':
+            return self.get_item_cfnet(img_left, img_right, disp_left, index)
+            
+        elif self.model_name == 'psmnet':
+           raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+        elif self.model_name == 'gwcnet':
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+        elif self.model_name == 'sttr':
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+        elif self.model_name == 'hsmnet':
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+        
         else:
-          disparity = None
+            raise NotImplemented(f"No dataloder for {self.model_name} implemented")
+
+        
+        
+
+    def get_item_cfnet(self, left_img, right_img, disparity, index:int):
 
         if self.training:
             th, tw = 256, 512
@@ -70,8 +92,8 @@ class ETH3DDataset(data.Dataset):
             right_img = torchvision.transforms.functional.adjust_brightness(right_img, random_brightness[1])
             right_img = torchvision.transforms.functional.adjust_gamma(right_img, random_gamma[1])
             right_img = torchvision.transforms.functional.adjust_contrast(right_img, random_contrast[1])
-            right_img = np.asarray(right_img)
-            left_img = np.asarray(left_img)
+            right_img = np.array(right_img)
+            left_img = np.array(left_img)
 
             # w, h  = left_img.size
             # th, tw = 256, 512
@@ -86,17 +108,17 @@ class ETH3DDataset(data.Dataset):
             # left_img = np.asarray(left_img)
 
             # geometric unsymmetric-augmentation
-            angle = 0;
+            angle = 0
             px = 0
             if np.random.binomial(1, 0.5):
                 # angle = 0.1;
                 # px = 2
                 angle = 0.05
                 px = 1
-            co_transform = flow_transforms.Compose([
+            co_transform = cfnet.flow_transforms.Compose([
                 # flow_transforms.RandomVdisp(angle, px),
                 # flow_transforms.Scale(np.random.uniform(self.rand_scale[0], self.rand_scale[1]), order=self.order),
-                flow_transforms.RandomCrop((th, tw)),
+                cfnet.flow_transforms.RandomCrop((th, tw)),
             ])
             augmented, disparity = co_transform([left_img, right_img], disparity)
             left_img = augmented[0]
@@ -112,7 +134,7 @@ class ETH3DDataset(data.Dataset):
 
             # to tensor, normalize
             disparity = np.ascontiguousarray(disparity, dtype=np.float32)
-            processed = get_transform()
+            processed = cfnet.data_io.get_transform()
             left_img = processed(left_img)
             right_img = processed(right_img)
 
@@ -123,7 +145,7 @@ class ETH3DDataset(data.Dataset):
             w, h = left_img.size
 
             # normalize
-            processed = get_transform()
+            processed = cfnet.data_io.get_transform()
             left_img = processed(left_img).numpy()
             right_img = processed(right_img).numpy()
 
@@ -147,6 +169,7 @@ class ETH3DDataset(data.Dataset):
                 assert len(disparity.shape) == 2
                 disparity = np.lib.pad(disparity, ((top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
 
+            print(f"top_pad: {top_pad}, right_pad: {right_pad}")
             if disparity is not None:
                 return {"left": left_img,
                         "right": right_img,
@@ -158,8 +181,8 @@ class ETH3DDataset(data.Dataset):
                         "right": right_img,
                         "top_pad": top_pad,
                         "right_pad": right_pad,
-                        "left_filename": self.left[index],
-                        "right_filename": self.right[index]}
+                        "left_filename": self.img_left_filenames[index],
+                        "right_filename": self.img_right_filenames[index]}
 
     def __len__(self):
-        return len(self.left)
+        return len(self.img_left_filenames)
