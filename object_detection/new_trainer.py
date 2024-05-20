@@ -94,7 +94,7 @@ def trainer(
 if __name__ == "__main__":
     args = parse_args()
     trainer(
-        config=args.config,  #! "configs_verified/dab_detr_r101_coco.py"
+        config=args.config,  #! "configs_verified/dab_detr_r101_coco.py" #! "configs_erroneous/verification/atss_r50_voc0712.py" has RuntimeInfoHook problem
         work_dir=args.work_dirs,  #! "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
         auto_scale_lr=False,
         amp=False,

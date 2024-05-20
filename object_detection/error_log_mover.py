@@ -15,7 +15,7 @@ for config_file in folder_erroneous_config_files:
     config_path = os.path.join(path_erroneous_config_files, config_file)
 
     for model_log_folder_name in folders_slurm_log_files:
-        if config_file.split(".")[0] in model_log_folder_name:
+        if config_file.split(".")[0] == model_log_folder_name:
             model_log_folder_path = os.path.join(
                 path_slurm_log_files_folder, model_log_folder_name
             )

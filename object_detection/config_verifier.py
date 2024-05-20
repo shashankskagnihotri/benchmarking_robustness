@@ -58,7 +58,7 @@ def highest_job_number(model_log_folder_path):
 
 def has_been_started_before(config_file, slurm_log_folders):
     for model_log_folder_name in slurm_log_folders:
-        if config_file.split(".")[0] in model_log_folder_name:
+        if config_file.split(".")[0] == model_log_folder_name:
             return True
     return False
 
@@ -72,7 +72,7 @@ for config_file in folder_entry_list_configs_to_train:
 
     if has_been_started_before(config_file, slurm_log_folders):
         for model_log_folder_name in slurm_log_folders:
-            if config_file.split(".")[0] in model_log_folder_name:
+            if config_file.split(".")[0] == model_log_folder_name:
                 model_log_folder_path = os.path.join(
                     slurm_log_folder_path, model_log_folder_name
                 )
@@ -99,6 +99,12 @@ for config_file in folder_entry_list_configs_to_train:
                                     or "min(max_walltime * 0.8, max_walltime - 10 * 60"
                                     in logfile_content
                                 ):
+                                    #! new error handling if permitted
+                                    # if (
+                                    #     "DUE TO TIME LIMIT" in logfile_content
+                                    #     or "min(max_walltime * 0.8, max_walltime - 10 * 60"
+                                    #     in logfile_content or "can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime" in logfile_content
+                                    # ):
                                     print(
                                         f"moving {config_file} to {path_verified_configs} folder"
                                     )

@@ -70,7 +70,7 @@ def highest_job_number(model_log_folder_path):
 
 def has_been_started_before(config_file, slurm_log_folders):
     for model_log_folder_name in slurm_log_folders:
-        if config_file.split(".")[0] in model_log_folder_name:
+        if config_file.split(".")[0] == model_log_folder_name:
             return True
     return False
 
@@ -79,7 +79,7 @@ def has_been_started_before(config_file, slurm_log_folders):
 def has_been_completed(config_file, slurm_log_folders):
     if has_been_started_before(config_file, slurm_log_folders):
         for model_log_folder_name in slurm_log_folders:
-            if config_file.split(".")[0] in model_log_folder_name:
+            if config_file.split(".")[0] == model_log_folder_name:
                 model_log_folder_path = os.path.join(
                     slurm_log_folder_path, model_log_folder_name
                 )
@@ -124,7 +124,7 @@ for config_file in folder_entry_list_configs_to_train:
 
     if has_been_started_before(config_file, slurm_log_folders):
         for model_log_folder_name in slurm_log_folders:
-            if config_file.split(".")[0] in model_log_folder_name:
+            if config_file.split(".")[0] == model_log_folder_name:
                 model_log_folder_path = os.path.join(
                     slurm_log_folder_path, model_log_folder_name
                 )

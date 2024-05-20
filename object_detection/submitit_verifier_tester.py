@@ -5,7 +5,9 @@ import submitit
 from tqdm import tqdm
 
 from new_tester import tester
-from new_distributed_tester import test_with_multiple_gpus
+
+# from new_distributed_tester import test_with_multiple_gpus
+from new_distributed_tester_v2_fix_dist_tester import test_with_multiple_gpus
 
 
 GPU_NUM = 2
@@ -14,7 +16,9 @@ GPU_NUM = 2
 # slurm_partition = "dev_gpu_4_a100" #! does not work?!?!?
 slurm_partition = "dev_gpu_4"
 
-#! 23597964
+#! updated the tester (non fix file)
+#! Job 23609927 mit distributed_tester
+#! Job 23610004 mit distributed_tester_v2
 config_file = "mmdetection/configs/atss/atss_r50_fpn_1x_coco.py"
 check_config_file = "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/tester/atss_r50_fpn_1x_coco_20200209-985f7bd0.pth"
 
@@ -46,7 +50,7 @@ executor.update_parameters(
 #     specific_slurm_work_dir,
 # )
 
-#! doesn´t run through nor create log files
+
 executor.submit(
     test_with_multiple_gpus,
     config_file,
