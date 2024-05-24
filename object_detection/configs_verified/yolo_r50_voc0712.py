@@ -15,8 +15,8 @@ data_preprocessor = dict(
     ],
     type="DetDataPreprocessor",
 )
-data_root = "data/coco/"
-dataset_type = "CocoDataset"
+data_root = "data/VOCdevkit/"
+dataset_type = "VOCDataset"
 default_hooks = dict(
     checkpoint=dict(interval=7, type="CheckpointHook"),
     logger=dict(interval=50, type="LoggerHook"),
@@ -199,17 +199,17 @@ test_cfg = dict(type="TestLoop")
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        ann_file="annotations/instances_val2017.json",
+        ann_file="VOC2007/ImageSets/Main/test.txt",
         backend_args=None,
-        data_prefix=dict(img="val2017/"),
-        data_root="data/coco/",
+        data_prefix=dict(sub_data_root="VOC2007/"),
+        data_root="data/VOCdevkit/",
         pipeline=[
             dict(backend_args=None, type="LoadImageFromFile"),
             dict(
                 keep_ratio=True,
                 scale=(
-                    608,
-                    608,
+                    1000,
+                    600,
                 ),
                 type="Resize",
             ),
@@ -226,7 +226,7 @@ test_dataloader = dict(
             ),
         ],
         test_mode=True,
-        type="CocoDataset",
+        type="VOCDataset",
     ),
     drop_last=False,
     num_workers=2,
@@ -244,8 +244,8 @@ test_pipeline = [
     dict(
         keep_ratio=True,
         scale=(
-            608,
-            608,
+            1000,
+            600,
         ),
         type="Resize",
     ),
@@ -264,62 +264,68 @@ test_pipeline = [
 train_cfg = dict(max_epochs=273, type="EpochBasedTrainLoop", val_interval=7)
 train_dataloader = dict(
     batch_sampler=dict(type="AspectRatioBatchSampler"),
-    batch_size=8,
+    batch_size=2,
     dataset=dict(
-        ann_file="annotations/instances_train2017.json",
-        backend_args=None,
-        data_prefix=dict(img="train2017/"),
-        data_root="data/coco/",
-        filter_cfg=dict(filter_empty_gt=True, min_size=32),
-        pipeline=[
-            dict(backend_args=None, type="LoadImageFromFile"),
-            dict(type="LoadAnnotations", with_bbox=True),
-            dict(
-                mean=[
-                    0,
-                    0,
-                    0,
-                ],
-                ratio_range=(
-                    1,
-                    2,
-                ),
-                to_rgb=True,
-                type="Expand",
-            ),
-            dict(
-                min_crop_size=0.3,
-                min_ious=(
-                    0.4,
-                    0.5,
-                    0.6,
-                    0.7,
-                    0.8,
-                    0.9,
-                ),
-                type="MinIoURandomCrop",
-            ),
-            dict(
-                keep_ratio=True,
-                scale=[
-                    (
-                        320,
-                        320,
+        dataset=dict(
+            datasets=[
+                dict(
+                    ann_file="VOC2007/ImageSets/Main/trainval.txt",
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root="VOC2007/"),
+                    data_root="data/VOCdevkit/",
+                    filter_cfg=dict(
+                        bbox_min_size=32, filter_empty_gt=True, min_size=32
                     ),
-                    (
-                        608,
-                        608,
+                    pipeline=[
+                        dict(backend_args=None, type="LoadImageFromFile"),
+                        dict(type="LoadAnnotations", with_bbox=True),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type="Resize",
+                        ),
+                        dict(prob=0.5, type="RandomFlip"),
+                        dict(type="PackDetInputs"),
+                    ],
+                    type="VOCDataset",
+                ),
+                dict(
+                    ann_file="VOC2012/ImageSets/Main/trainval.txt",
+                    backend_args=None,
+                    data_prefix=dict(sub_data_root="VOC2012/"),
+                    data_root="data/VOCdevkit/",
+                    filter_cfg=dict(
+                        bbox_min_size=32, filter_empty_gt=True, min_size=32
                     ),
-                ],
-                type="RandomResize",
-            ),
-            dict(prob=0.5, type="RandomFlip"),
-            dict(type="PhotoMetricDistortion"),
-            dict(type="PackDetInputs"),
-        ],
-        type="CocoDataset",
+                    pipeline=[
+                        dict(backend_args=None, type="LoadImageFromFile"),
+                        dict(type="LoadAnnotations", with_bbox=True),
+                        dict(
+                            keep_ratio=True,
+                            scale=(
+                                1000,
+                                600,
+                            ),
+                            type="Resize",
+                        ),
+                        dict(prob=0.5, type="RandomFlip"),
+                        dict(type="PackDetInputs"),
+                    ],
+                    type="VOCDataset",
+                ),
+            ],
+            ignore_keys=[
+                "dataset_type",
+            ],
+            type="ConcatDataset",
+        ),
+        times=3,
+        type="RepeatDataset",
     ),
-    num_workers=4,
+    num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=True, type="DefaultSampler"),
 )
@@ -327,63 +333,31 @@ train_pipeline = [
     dict(backend_args=None, type="LoadImageFromFile"),
     dict(type="LoadAnnotations", with_bbox=True),
     dict(
-        mean=[
-            0,
-            0,
-            0,
-        ],
-        ratio_range=(
-            1,
-            2,
-        ),
-        to_rgb=True,
-        type="Expand",
-    ),
-    dict(
-        min_crop_size=0.3,
-        min_ious=(
-            0.4,
-            0.5,
-            0.6,
-            0.7,
-            0.8,
-            0.9,
-        ),
-        type="MinIoURandomCrop",
-    ),
-    dict(
         keep_ratio=True,
-        scale=[
-            (
-                320,
-                320,
-            ),
-            (
-                608,
-                608,
-            ),
-        ],
-        type="RandomResize",
+        scale=(
+            1000,
+            600,
+        ),
+        type="Resize",
     ),
     dict(prob=0.5, type="RandomFlip"),
-    dict(type="PhotoMetricDistortion"),
     dict(type="PackDetInputs"),
 ]
 val_cfg = dict(type="ValLoop")
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        ann_file="annotations/instances_val2017.json",
+        ann_file="VOC2007/ImageSets/Main/test.txt",
         backend_args=None,
-        data_prefix=dict(img="val2017/"),
-        data_root="data/coco/",
+        data_prefix=dict(sub_data_root="VOC2007/"),
+        data_root="data/VOCdevkit/",
         pipeline=[
             dict(backend_args=None, type="LoadImageFromFile"),
             dict(
                 keep_ratio=True,
                 scale=(
-                    608,
-                    608,
+                    1000,
+                    600,
                 ),
                 type="Resize",
             ),
@@ -400,7 +374,7 @@ val_dataloader = dict(
             ),
         ],
         test_mode=True,
-        type="CocoDataset",
+        type="VOCDataset",
     ),
     drop_last=False,
     num_workers=2,

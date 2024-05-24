@@ -36,9 +36,9 @@ log_level = "INFO"
 log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
 model = dict(
     backbone=dict(
-        depth=50,
+        depth=101,
         frozen_stages=1,
-        init_cfg=dict(checkpoint="torchvision://resnet50", type="Pretrained"),
+        init_cfg=dict(checkpoint="torchvision://resnet101", type="Pretrained"),
         norm_cfg=dict(requires_grad=True, type="BN"),
         norm_eval=True,
         num_stages=4,
