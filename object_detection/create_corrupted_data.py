@@ -110,7 +110,7 @@ if __name__ == "__main__":
     dataset_type = "voc"
     input_dir = "data/VOCdevkit/VOC2012/"
     output_dir = "data/VOCdevkit/VOC2012/cc/"
-    job_name = "cc_voc2012_processing"
+    job_name = "voc2012_cc_processing"
     executor.update_parameters(name=job_name)
     job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
     jobs.append(job)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     dataset_type = "voc"
     input_dir = "data/VOCdevkit/VOC2007/"
     output_dir = "data/VOCdevkit/VOC2007/cc/"
-    job_name = "cc_voc2017_processing"
+    job_name = "voc2017_cc_processing"
     executor.update_parameters(name=job_name)
     job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
     jobs.append(job)
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     dataset_type = "coco"
     input_dir = "data/coco/"
     output_dir = "data/coco/cc/"
-    job_name = "cc_coco_processing"
+    job_name = "coco_cc_processing"
     executor.update_parameters(name=job_name)
     job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
     jobs.append(job)
