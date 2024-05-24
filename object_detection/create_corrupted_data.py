@@ -100,7 +100,7 @@ if __name__ == "__main__":
         cpus_per_task=4,
         nodes=1,
         tasks_per_node=1,
-        slurm_mem=30,
+        slurm_mem="16GB",
         slurm_time="10:00:00",
         slurm_mail_type="END,FAIL",
         slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
@@ -117,8 +117,8 @@ if __name__ == "__main__":
     logger.info(f"Submitted job with ID: {job.job_id} and name: {job_name}")
 
     dataset_type = "voc"
-    input_dir = "data/VOCdevkit/VOC2017/"
-    output_dir = "data/VOCdevkit/VOC2017/cc/"
+    input_dir = "data/VOCdevkit/VOC2007/"
+    output_dir = "data/VOCdevkit/VOC2007/cc/"
     job_name = "cc_voc2017_processing"
     executor.update_parameters(name=job_name)
     job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
