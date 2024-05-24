@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --partition=gpu_4
 #SBATCH --gres=gpu:1
-#SBATCH --time=10:00:00
+#SBATCH --time=30:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --ntasks=1
-#SBATCH --mem=10G
+#SBATCH --mem=10GB
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=jonas.jakubassa@students.uni-mannheim.de
 #SBATCH -o ./logs/%j.out # STDOUT
@@ -27,6 +27,7 @@ fi
 
 # Move back to the original directory
 cd ../..
+
 create_depth_info() {
     local PATH_RGB=$1
     local PATH_DEPTH=$2
@@ -48,9 +49,9 @@ create_depth_info() {
 }
 
 create_3d_corruptions() {
-    local PATH_RGB="../.."$1
-    local PATH_DEPTH="../.."$2
-    local PATH_TARGET="../.."$3
+    local PATH_RGB="../../"$1
+    local PATH_DEPTH="../../"$2
+    local PATH_TARGET="../../"$3
 
     echo "Starting 3D corruption creation..."
     cd 3DCommonCorruptions/create_3dcc 
@@ -70,7 +71,7 @@ echo "Processing COCO dataset..."
 create_3d_corruptions $PATH_RGB $PATH_DEPTH $PATH_TARGET
 echo "COCO dataset processing completed."
 
-# PASCAL VOC 2007
+# # PASCAL VOC 2007
 PATH_DEPTH="data/VOCdevkit/VOC2007/depth"
 PATH_RGB="data/VOCdevkit/VOC2007/JPEGImages"
 PATH_TARGET="data/VOCdevkit/VOC2007/3dcc"

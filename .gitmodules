@@ -7,3 +7,9 @@
 [submodule "semantic_segmentation/mmsegmentation"]
 	path = semantic_segmentation/mmsegmentation
 	url = git@github.com:open-mmlab/mmsegmentation.git
+[submodule "object_detection/DPT"]
+	path = object_detection/DPT
+	url = https://github.com/isl-org/DPT.git
+[submodule "object_detection/3DCommonCorruptions"]
+	path = object_detection/3DCommonCorruptions
+	url = https://github.com/EPFL-VILAB/3DCommonCorruptions.git

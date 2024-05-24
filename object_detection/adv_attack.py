@@ -290,10 +290,6 @@ def run_attack_val(
             )
 
     cfg = Config.fromfile(config_file)
-    slurm_job_id = os.getenv("SLURM_JOB_ID")
-    if slurm_job_id:
-        log_dir = os.path.join(log_dir, slurm_job_id)
-
     cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
     cfg.checkpoint_config = dict(interval=0)
