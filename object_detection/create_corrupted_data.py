@@ -3,6 +3,20 @@ from tqdm import tqdm
 from pycocotools.coco import COCO
 from imagecorruptions import get_corruption_names, corrupt
 import mmcv
+import logging
+from rich.logging import RichHandler
+import submitit
+
+# Set up the logging configuration to use RichHandler
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(message)s",
+    datefmt="[%X]",  # Custom date format
+    handlers=[RichHandler(rich_tracebacks=True)],
+)
+
+# Create a logger
+logger = logging.getLogger("rich")
 
 
 def common_corruptions(dataset_type, input_dir, output_dir):
@@ -13,6 +27,10 @@ def common_corruptions(dataset_type, input_dir, output_dir):
     :param input_dir: Path to the input dataset directory.
     :param output_dir: Path to the output directory to save corrupted images.
     """
+    logger.info(f"Applying common corruptions to {dataset_type} dataset.")
+    logger.info(f"Input directory: {input_dir}")
+    logger.info(f"Output directory: {output_dir}")
+
     if dataset_type == "coco":
         # Load the COCO annotations
         ann_file = os.path.join(input_dir, "annotations", "instances_val2017.json")
@@ -35,6 +53,8 @@ def common_corruptions(dataset_type, input_dir, output_dir):
     severities = [1, 2, 3, 4, 5]
     for corruption in corruptions:
         for severity in severities:
+            logger.info(f"Applying corruption '{corruption}' with severity {severity}.")
+
             # Create folders for each corruption and severity
             output_folder = os.path.join(
                 output_dir, "cc", corruption, f"severity_{severity}"
@@ -69,20 +89,51 @@ def common_corruptions(dataset_type, input_dir, output_dir):
                     )
                     mmcv.imwrite(corrupted_image, output_path)
                     pbar.update(1)
+    logger.info("Common corruptions applied successfully.")
 
 
 if __name__ == "__main__":
+    executor = submitit.AutoExecutor(folder="slurm/logs/cc/%j")
+    executor.update_parameters(
+        slurm_partition="gpu_4",
+        slurm_gres="gpu:1",
+        cpus_per_task=4,
+        nodes=1,
+        tasks_per_node=1,
+        slurm_mem=30,
+        slurm_time="10:00:00",
+        slurm_mail_type="END,FAIL",
+        slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
+    )
+    jobs = []
+
     dataset_type = "voc"
     input_dir = "data/VOCdevkit/VOC2012/"
     output_dir = "data/VOCdevkit/VOC2012/cc/"
-    common_corruptions(dataset_type, input_dir, output_dir)
+    job_name = "cc_voc2012_processing"
+    executor.update_parameters(name=job_name)
+    job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
+    jobs.append(job)
+    logger.info(f"Submitted job with ID: {job.job_id} and name: {job_name}")
 
     dataset_type = "voc"
     input_dir = "data/VOCdevkit/VOC2017/"
     output_dir = "data/VOCdevkit/VOC2017/cc/"
-    common_corruptions(dataset_type, input_dir, output_dir)
+    job_name = "cc_voc2017_processing"
+    executor.update_parameters(name=job_name)
+    job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
+    jobs.append(job)
+    logger.info(f"Submitted job with ID: {job.job_id} and name: {job_name}")
 
     dataset_type = "coco"
     input_dir = "data/coco/"
     output_dir = "data/coco/cc/"
-    common_corruptions(dataset_type, input_dir, output_dir)
+    job_name = "cc_coco_processing"
+    executor.update_parameters(name=job_name)
+    job = executor.submit(common_corruptions, dataset_type, input_dir, output_dir)
+    jobs.append(job)
+    logger.info(f"Submitted job with ID: {job.job_id} and name: {job_name}")
+
+    outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
+    logger.info("All jobs completed successfully.")
+    logger.info(outputs)
