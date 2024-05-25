@@ -43,10 +43,13 @@ def weather(
     torch.cuda.empty_cache()
     print("Print all keys", attack_args)
 
+<<<<<<< HEAD
     # substitude model specific args
     if attack_args["model"] in ("gma", "raft", "flowformer"):
         model.args.iters = attack_args["weather_model_iters"]
 
+=======
+>>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
     # Define what device we are using
     if not torch.cuda.is_available():
         device = torch.device("cpu")
@@ -245,10 +248,16 @@ def attack_image(
     # rendered_image1, rendered_image2 = render(image1, image2, scene_data, weather, args=attack_args)
 
     # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
+<<<<<<< HEAD
     with torch.no_grad():
         preds = model(
             image1, image2, weather=weather, scene_data=scene_data, args_=attack_args
         )
+=======
+    preds = model(
+        image1, image2, weather=weather, scene_data=scene_data, args_=attack_args
+    )
+>>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
     torch.cuda.empty_cache()
     flow_weather_pred = preds["flows"].squeeze(0)
     flow_weather_pred = flow_weather_pred.to(device)
@@ -257,8 +266,12 @@ def attack_image(
     flow_weather_pred_init = flow_weather_pred.detach().clone()
     flow_weather_pred_init.requires_grad = False
 
+<<<<<<< HEAD
     with torch.no_grad():
         preds_init = model(image1, image2, weather=None, scene_data=None, args_=attack_args)
+=======
+    preds_init = model(image1, image2, weather=None, scene_data=None, args_=attack_args)
+>>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
     flow_init = preds_init["flows"].squeeze(0)
     flow_init = flow_init.to(device).detach()
 
@@ -395,7 +408,11 @@ def attack_image(
         flow_init,
         batch_index,
         flow_folder,
+<<<<<<< HEAD
         flow_name=f"ORIGIN_[im_{image_index}]_[w_step_{attack_args['weather_steps']}]_[w_m_samples_{attack_args['weather_motionblur_samples']}]",
+=======
+        flow_name=f"ORIGIN_[image_index_{image_index}]_[weather_step_{attack_args['weather_steps']}]_[weather_motionblur_samples_{attack_args['weather_motionblur_samples']}]",
+>>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
     )
 
     # ======== Save Predicted Flow for Attacked Image =======
@@ -405,7 +422,11 @@ def attack_image(
         flow_weather_pred,
         batch_index,
         flow_folder,
+<<<<<<< HEAD
         flow_name=f"ATTACKED_[im_{image_index}]_[w_step_{attack_args['weather_steps']}]_[w_m_samples_{attack_args['weather_motionblur_samples']}]",
+=======
+        flow_name=f"ATTACKED_[image_index_{image_index}]_[weather_step_{attack_args['weather_steps']}]_[weather_motionblur_samples_{attack_args['weather_motionblur_samples']}]",
+>>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
     )
 
     return preds

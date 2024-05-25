@@ -68,6 +68,7 @@ weather_arguments = [
     "weather_do_motionblur",
     "weather_motionblur_scale",
     "weather_motionblur_samples",
+<<<<<<< HEAD
     "weather_model_iters",
     "weather_flakesize_max",
     "weather_depth_decay",
@@ -81,6 +82,8 @@ weather_arguments = [
     "weather_motion_random_angle",
     "weather_flake_random_h",
     "weather_flake_random_l",
+=======
+>>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
 ]
 tdcc_arguments = [
     "attack",
