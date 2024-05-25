@@ -512,21 +512,13 @@ def _init_parser() -> ArgumentParser:
         type=int,
         help="the number of flakes that is drawn per blurred flake. More samples are needed for faster objects or a larger motionblur_scale.",
     )
-<<<<<<< HEAD
     # GMA/Raft model iters
     parser.add_argument(
         "--weather_model_iters",
-=======
-
-    # GMA/Raft model iters
-    parser.add_argument(
-        "--model_iters",
->>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
         default=32,
         type=int,
         help="the number of iters for gma/raft model, to override the ptlflow setting.",
     )
-<<<<<<< HEAD
     parser.add_argument('--weather_flakesize_max', default=71, type=int,
                 help="the maximal size for particles in pixels.")
     parser.add_argument('--weather_depth_decay', default=10, type=float,
@@ -552,16 +544,6 @@ def _init_parser() -> ArgumentParser:
                 help="the upper bound for HSL color Hue (H) randomization. Hue runs from 0° to 360°, hence values >= 180 will give fully randomized hues.")
     parser.add_argument('--weather_flake_random_l', default=0, type=float,
                 help="the upper bound for HSL color Lightness (L) randomization. Lightness runs from 0 (black) over 0.5 (color) to 1 (white).")
-=======
-
-    # FlowFormer model decoder depth
-    parser.add_argument(
-        "--flowformer_decoder_depth",
-        default=32,
-        type=int,
-        help="the number of iters for gma, to override the ptlflow setting.",
-    )
->>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
 
     return parser
 
@@ -757,11 +739,8 @@ def attack_one_dataloader(
     #         attack_args["3dcc_corruption"],
     #         attack_args["3dcc_intensity"],
     #     )
-<<<<<<< HEAD
     if attack_args["attack"] == "weather":
         attack_args["model"] = args.model
-=======
->>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -953,18 +932,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.model in ("gma", "raft"):
-        args.iters = args.model_iters
-    if args.model == "flowformer":
-        args.decoder_depth = args.flowformer_decoder_depth
-        # args.encoder_depth = args.flowformer_decoder_depth
-        # args.cost_latent_input_dim = 16  # origin 64
-        # args.cost_latent_dim = 16  # origin 128
-        # args.encoder_latent_dim = 16  # origin 256
-        # args.query_latent_dim = 16  # origin 64
-        # args.patch_size = 4  # origin 8
-        # args.vert_c_dim = 16  # origin 64
-
     if args.model not in ["all", "select"]:
         model_id = args.model
         if args.pretrained_ckpt is not None:
@@ -980,3 +947,4 @@ if __name__ == "__main__":
         attack(args, model)
     else:
         attack_list_of_models(args)
+

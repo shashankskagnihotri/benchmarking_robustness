@@ -47,11 +47,7 @@ def pcfa(
     perturbed_image2 = image2 + delta2
     perturbed_inputs = replace_images_dic(targeted_inputs, perturbed_image1, perturbed_image2, clone=True)
 
-<<<<<<< HEAD
     return preds, perturbed_inputs 
-=======
-    return preds #, l2_delta1, l2_delta2, l2_delta12
->>>>>>> efe14941a9de72e4f082658e192a400dfffd335a
 
 
 def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
