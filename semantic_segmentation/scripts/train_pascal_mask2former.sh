@@ -21,7 +21,7 @@ cd mmsegmentation
 if [[ $SLURM_ARRAY_TASK_ID -eq 1 ]]
 then
     python tools/train.py ../configs/mask2former/mask2former_swin-t_8xb2-160k_voc12aug-512x512.py --work-dir ../work_dirs/mask2former_swin-t_8xb2-160k_voc12aug-512x512
-elif [[ $SLURM_ARRAY_TASK_ID -eq 2]]
+elif [[ $SLURM_ARRAY_TASK_ID -eq 2 ]]
 then
     python tools/train.py ../configs/mask2former/mask2former_swin-s_8xb2-160k_voc12aug-512x512.py --work-dir ../work_dirs/mask2former_swin-s_8xb2-160k_voc12aug-512x512
 elif [[ $SLURM_ARRAY_TASK_ID -eq 3 ]]
@@ -31,8 +31,7 @@ else
     echo "All submitted"
 fi
 
-
-end=$('date +%s')
+end=$(date +%s)
 runtime=$((end-start))
 
 echo Runtime: $runtime
