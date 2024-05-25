@@ -15,9 +15,16 @@ class LossCriterion:
         else:
             return self.nn_criterion(flow_1, flow_2)
 
+
 def epe(flow1, flow2):
     epe = torch.norm(flow1 - flow2, p=2, dim=1)
     return epe
+
+
+def avg_epe(flow1, flow2):
+    epe = torch.norm(flow1 - flow2, p=2, dim=1)
+    return torch.mean(epe)
+
 
 # From FlowUnderAttack
 # def epe(flow1, flow2):
@@ -55,54 +62,54 @@ def epe(flow1, flow2):
 #     return epe
 
 
-def avg_epe(flow1, flow2):
-    """ "
-    Compute the average endpoint errors (AEE) between two flow fields.
-    The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
-    (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
+# def avg_epe(flow1, flow2):
+#     """ "
+#     Compute the average endpoint errors (AEE) between two flow fields.
+#     The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
+#     (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
 
-    Args:
-        flow1 (tensor):
-            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
-        flow2 (tensor):
-            represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+#     Args:
+#         flow1 (tensor):
+#             represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+#         flow2 (tensor):
+#             represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
 
-    Raises:
-        ValueError: dimensons not valid
+#     Raises:
+#         ValueError: dimensons not valid
 
-    Returns:
-        float: scalar average endpoint error
-    """
-    diff_squared = (flow1 - flow2) ** 2
-    if len(diff_squared.size()) == 3:
-        # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-        epe = torch.mean(torch.sum(diff_squared, dim=0).sqrt())
-    elif len(diff_squared.size()) == 4:
-        # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-        epe = torch.mean(torch.sum(diff_squared, dim=1).sqrt())
-    else:
-        raise ValueError(
-            "The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: "
-            + str(flow1.size())
-            + " and "
-            + str(flow1.size())
-        )
-    return epe
+#     Returns:
+#         float: scalar average endpoint error
+#     """
+#     diff_squared = (flow1 - flow2) ** 2
+#     if len(diff_squared.size()) == 3:
+#         # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
+#         epe = torch.mean(torch.sum(diff_squared, dim=0).sqrt())
+#     elif len(diff_squared.size()) == 4:
+#         # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
+#         epe = torch.mean(torch.sum(diff_squared, dim=1).sqrt())
+#     else:
+#         raise ValueError(
+#             "The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: "
+#             + str(flow1.size())
+#             + " and "
+#             + str(flow1.size())
+#         )
+#     return epe
 
 
-def avg_mse(flow1, flow2):
-    """Computes mean squared error between two flow fields.
+# def avg_mse(flow1, flow2):
+#     """Computes mean squared error between two flow fields.
 
-    Args:
-        flow1 (tensor):
-            flow field, which must have the same dimension as flow2
-        flow2 (tensor):
-            flow field, which must have the same dimension as flow1
+#     Args:
+#         flow1 (tensor):
+#             flow field, which must have the same dimension as flow2
+#         flow2 (tensor):
+#             flow field, which must have the same dimension as flow1
 
-    Returns:
-        float: scalar average squared end-point-error
-    """
-    return torch.mean((flow1 - flow2) ** 2)
+#     Returns:
+#         float: scalar average squared end-point-error
+#     """
+#     return torch.mean((flow1 - flow2) ** 2)
 
 
 def f_epe(pred, target):
