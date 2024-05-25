@@ -97,19 +97,19 @@ def avg_epe(flow1, flow2):
 #     return epe
 
 
-# def avg_mse(flow1, flow2):
-#     """Computes mean squared error between two flow fields.
+def avg_mse(flow1, flow2):
+    """Computes mean squared error between two flow fields.
 
-#     Args:
-#         flow1 (tensor):
-#             flow field, which must have the same dimension as flow2
-#         flow2 (tensor):
-#             flow field, which must have the same dimension as flow1
+    Args:
+        flow1 (tensor):
+            flow field, which must have the same dimension as flow2
+        flow2 (tensor):
+            flow field, which must have the same dimension as flow1
 
-#     Returns:
-#         float: scalar average squared end-point-error
-#     """
-#     return torch.mean((flow1 - flow2) ** 2)
+    Returns:
+        float: scalar average squared end-point-error
+    """
+    return torch.mean((flow1 - flow2) ** 2)
 
 
 def f_epe(pred, target):
