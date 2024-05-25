@@ -5,6 +5,7 @@ fgsm_arguments = [
     "attack",
     "attack_norm",
     "attack_epsilon",
+    "attack_alpha",
     "attack_targeted",
     "attack_target",
     "attack_loss",
@@ -42,6 +43,45 @@ pcfa_arguments = [
     "attack_iterations",
     "pcfa_boxconstraint",
 ]
+weather_arguments = [
+    "attack",
+    "attack_targeted",
+    "attack_target",
+    "attack_loss",
+    "weather_optimizer",
+    "weather_steps",
+    "weather_learn_offset",
+    "weather_learn_motionoffset",
+    "weather_learn_color",
+    "weather_learn_transparency",
+    "weather_alph_motion",
+    "weather_alph_motionoffset",
+    "weather_data",
+    "weather_dataset",
+    "weather_dataset_stage",
+    "weather_rendering_method",
+    "weather_transparency_scale",
+    "weather_depth_check",
+    "weather_depth_check_differentiable",
+    "weather_scene_scale",
+    "weather_recolor",
+    "weather_do_motionblur",
+    "weather_motionblur_scale",
+    "weather_motionblur_samples",
+    "weather_model_iters",
+    "weather_flakesize_max",
+    "weather_depth_decay",
+    "weather_constant_transparency",
+    "weather_motion_y",
+    "weather_do_motionblur",
+    "weather_flake_r",
+    "weather_flake_g",
+    "weather_flake_b",
+    "weather_motion_random_scale",
+    "weather_motion_random_angle",
+    "weather_flake_random_h",
+    "weather_flake_random_l",
+]
 tdcc_arguments = [
     "attack",
     "3dcc_corruption",
@@ -69,6 +109,7 @@ class AttackArgumentParser:
                 arg.startswith("attack")
                 or arg.startswith("pcfa")
                 or arg.startswith("apgd")
+                or arg.startswith("weather")
                 or arg.startswith("3dcc")
                 or arg.startswith("cc")
             ):
@@ -155,6 +196,10 @@ class AttackArgumentParser:
                 case "pcfa":
                     for arg_name in entry.keys():
                         if arg_name not in pcfa_arguments:
+                            del to_remove[arg_name]
+                case "weather":
+                    for arg_name in entry.keys():
+                        if arg_name not in weather_arguments:
                             del to_remove[arg_name]
                 case "3dcc":
                     for arg_name in entry.keys():
