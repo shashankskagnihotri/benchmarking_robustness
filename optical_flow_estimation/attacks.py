@@ -17,7 +17,7 @@
 # =============================================================================
 
 import pdb
-
+import ast
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
@@ -28,8 +28,6 @@ import json
 
 import os
 
-import cv2 as cv
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -52,7 +50,9 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
-from attacks.tdcc import get_dataset_3DCC
+from attacks.weather import weather
+
+# from attacks.tdcc import get_dataset_3DCC
 from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
@@ -60,6 +60,8 @@ from attacks.attack_utils.attack_args_parser import (
     attack_arg_string,
 )
 from ptlflow_attacked.validate import (
+    validate_one_dataloader,
+    generate_outputs,
     _get_model_names,
 )
 
@@ -106,6 +108,7 @@ def _init_parser() -> ArgumentParser:
             "apgd",
             "fab",
             "pcfa",
+            "weather",
             "3dcc",
             "common_corruptions",
             "none",
@@ -233,7 +236,7 @@ def _init_parser() -> ArgumentParser:
         "--attack_alpha",
         type=float,
         default=alpha,
-        help="Set alpha to use for adversarial attack.",
+        help="Set epsilon to use for adversarial attack.",
     )
     parser.add_argument(
         "--attack_targeted",
@@ -387,6 +390,161 @@ def _init_parser() -> ArgumentParser:
         help="If set, save a table of metrics for every image.",
     )
     parser.add_argument("--overwrite_output", type=bool, default=False)
+
+    # ======== Weather Attack Related Args ========
+    parser.add_argument(
+        "--weather_optimizer",
+        default="Adam",
+        help="the optimizer used for the perturbations.",
+    )
+    parser.add_argument(
+        "--weather_steps",
+        type=int,
+        default=750,
+        nargs="*",
+        help="the number of optimization steps per image.",
+    )
+    parser.add_argument(
+        "--weather_learn_offset",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, initial position of the particles will be optimized.",
+    )
+    parser.add_argument(
+        "--weather_learn_motionoffset",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the endpoint of the particle motion will be optimized (along with the starting point).",
+    )
+    parser.add_argument(
+        "--weather_learn_color",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the color of the particle will be optimized.",
+    )
+    parser.add_argument(
+        "--weather_learn_transparency",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the transparency of the particles will be optimized.",
+    )
+    parser.add_argument(
+        "--weather_alph_motion",
+        default=1000.0,
+        type=float,
+        help="weighting for the motion loss.",
+    )
+    parser.add_argument(
+        "--weather_alph_motionoffset",
+        default=1000.0,
+        type=float,
+        help="weighting for the motion offset loss.",
+    )
+    parser.add_argument(
+        "--weather_data",
+        default="/path/to/generated_weather_npz_data",
+        help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.",
+    )
+    parser.add_argument(
+        "--weather_dataset",
+        default="Sintel",
+        nargs="*",
+        help="specify the dataset which should be used for evaluation",
+    )
+    parser.add_argument(
+        "--weather_dataset_stage",
+        default="training",
+        choices=["training", "evaluation"],
+        help="specify the dataset stage ('training' or 'evaluation') that should be used.",
+    )
+    parser.add_argument(
+        "--weather_rendering_method",
+        default="additive",
+        choices=["meshkin", "additive"],
+        help="choose a method rendering the particle color. 'meshkin' use alpha-blending with order-independent transparency calculation, while 'additive' adds the color value to the image. Default: 'meshkin', choices: [meshkin, additive].",
+    )
+    parser.add_argument(
+        "--weather_transparency_scale",
+        default=1.0,
+        type=float,
+        help="a scaling factor, by which the tansparency for every particle is multiplied.",
+    )
+    parser.add_argument(
+        "--weather_depth_check",
+        default=False,
+        type=ast.literal_eval,
+        help="if specified, particles will not be rendered if behind an object.",
+    )
+    parser.add_argument(
+        "--weather_depth_check_differentiable",
+        type=ast.literal_eval,
+        default=False,
+        nargs="*",
+        help="if specified, the rendering check for particle occlusion by objects is included into the compute graph.",
+    )
+    parser.add_argument(
+        "--weather_scene_scale",
+        default=1.0,
+        type=float,
+        help="A global scaling to the scene depth. If the value is > 1, all scenes will appear bigger and more particles will show up in the foreground.",
+    )
+    parser.add_argument(
+        "--weather_recolor",
+        default=False,
+        type=ast.literal_eval,
+        help="If specified, all weather is recolored with the given r,g,b value (no variations).",
+    )
+    parser.add_argument(
+        "--weather_do_motionblur",
+        default=True,
+        type=ast.literal_eval,
+        help="control if particles are rendered with motion blur (default=True).",
+    )
+    parser.add_argument(
+        "--weather_motionblur_scale",
+        default=0.025,
+        type=float,
+        help="a scaling factor in [0,1], by which the motion blur is shortened. No motion blur appears for 0, while the full blur vector is used with 1. A full motion blur might need a higher number of motionblur_samples.",
+    )
+    parser.add_argument(
+        "--weather_motionblur_samples",
+        default=10,
+        type=int,
+        help="the number of flakes that is drawn per blurred flake. More samples are needed for faster objects or a larger motionblur_scale.",
+    )
+    # GMA/Raft model iters
+    parser.add_argument(
+        "--weather_model_iters",
+        default=32,
+        type=int,
+        help="the number of iters for gma/raft model, to override the ptlflow setting.",
+    )
+    parser.add_argument('--weather_flakesize_max', default=71, type=int,
+                help="the maximal size for particles in pixels.")
+    parser.add_argument('--weather_depth_decay', default=10, type=float,
+                help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.")
+    parser.add_argument('--weather_constant_transparency', default=0, type=float,
+                help="if set to a value != 0, this is the default transparency for all initialized particles. Otherwise, the transparency is a hat-function that reaches its peak at a depth of 2.")
+    parser.add_argument('--weather_motion_y', default=0., type=float,
+                help="the motion in y-direction for all particles between frames.")
+    parser.add_argument('--weather_motion_random_scale', default=0.0, type=float,
+                help="randomizes the magnitude of the particle motion relative to the motion vector length. By setting to 0.5, the motion vector can be longer or smaller up to half its length. (default=0.0)")
+    parser.add_argument('--weather_motion_random_angle', default=0.0, type=float,
+                help="maximal random offset angle for the particle motion in degree. (default=0.0, max=180)")
+
+    # parser.add_argument('--weather_do_motionblur', default=True, type=ast.literal_eval,
+    #         help="control if particles are rendered with motion blur (default=True).")
+    parser.add_argument('--weather_flake_r', default=255, type=int,
+            help="the R value for the particle RGB")
+    parser.add_argument('--weather_flake_g', default=255, type=int,
+            help="the G value for the particle RGB")
+    parser.add_argument('--weather_flake_b', default=255, type=int,
+            help="the B value for the particle RGB")
+    parser.add_argument('--weather_flake_random_h', default=0, type=float,
+                help="the upper bound for HSL color Hue (H) randomization. Hue runs from 0° to 360°, hence values >= 180 will give fully randomized hues.")
+    parser.add_argument('--weather_flake_random_l', default=0, type=float,
+                help="the upper bound for HSL color Lightness (L) randomization. Lightness runs from 0 (black) over 0.5 (color) to 1 (white).")
+
     return parser
 
 
@@ -430,13 +588,16 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             if "_" in key:
                 key = key.split("_")[1]
             if isinstance(value, float):
-                value = round(value, 4)
+                value = round(value, 2)
             output_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
-            metrics_mean = attack_one_dataloader(
-                args, attack_args, model, dl, dataset_name
-            )
+            if args.attack == "none":
+                metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
+            else:
+                metrics_mean = attack_one_dataloader(
+                    args, attack_args, model, dl, dataset_name
+                )
 
             end_time = datetime.now()
             output_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
@@ -571,17 +732,20 @@ def attack_one_dataloader(
     """
 
     metrics_sum = {}
-    if attack_args["attack"] == "3dcc":
-        dataloader = get_dataset_3DCC(
-            model,
-            dataloader_name,
-            attack_args["3dcc_corruption"],
-            attack_args["3dcc_intensity"],
-        )
+    # if attack_args["attack"] == "3dcc":
+    #     dataloader = get_dataset_3DCC(
+    #         model,
+    #         dataloader_name,
+    #         attack_args["3dcc_corruption"],
+    #         attack_args["3dcc_intensity"],
+    #     )
+    if attack_args["attack"] == "weather":
+        attack_args["model"] = args.model
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
 
+    losses = torch.zeros(len(dataloader))
     with tqdm(dataloader) as tdl:
         prev_preds = None
         for i, inputs in enumerate(tdl):
@@ -624,36 +788,26 @@ def attack_one_dataloader(
 
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    preds, perturbed_inputs = fgsm(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    preds = fgsm(attack_args, inputs, model, targeted_inputs)
                 case "pgd":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    preds = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
                 case "cospgd":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    preds = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
                 case "bim":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    preds = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
                 case "apgd":
-                    preds, perturbed_inputs = apgd(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    preds = apgd(attack_args, inputs, model, targeted_inputs)
                 case "fab":
-                    preds, perturbed_inputs = fab(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    preds = fab(attack_args, inputs, model, targeted_inputs)
                 case "pcfa":
-                    preds, perturbed_inputs = pcfa(
-                        attack_args, model, targeted_inputs
+                    preds = pcfa(attack_args, model, targeted_inputs)
+                case "weather":
+                    preds = weather(
+                        attack_args, model, targeted_inputs, i, args.output_path
                     )
                 case "common_corruptions":
-                    preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
-                case "none":
+                    preds = common_corrupt(attack_args, inputs, model)
+                case "3dcc" | "none":
                     preds = model(inputs)
 
             if args.warm_start:
@@ -670,8 +824,6 @@ def attack_one_dataloader(
 
             inputs = io_adapter.unscale(inputs, image_only=True)
             preds = io_adapter.unscale(preds)
-            if attack_args["attack"] != "none":
-                perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
 
             if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
                 if args.seq_val_mode == "first":
@@ -737,19 +889,18 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack"] != "none":
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                 generate_outputs(
                     args,
+                    targeted_inputs,
                     preds,
                     dataloader_name,
                     i,
-                    inputs.get("meta"),
-                    perturbed_inputs,
-                    attack_args,
+                    targeted_inputs.get("meta"),
                 )
             else:
                 generate_outputs(
-                    args, preds, dataloader_name, i, inputs.get("meta")
+                    args, inputs, preds, dataloader_name, i, inputs.get("meta")
                 )
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
@@ -765,130 +916,6 @@ def attack_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
     return metrics_mean
-
-
-def generate_outputs(
-    args: Namespace,
-    preds: Dict[str, torch.Tensor],
-    dataloader_name: str,
-    batch_idx: int,
-    metadata: Optional[Dict[str, Any]] = None,
-    perturbed_inputs: Optional[Dict[str, torch.Tensor]] = None,
-    attack_args: Optional[Dict[str, List[object]]] = None,
-) -> None:
-    """Display on screen and/or save outputs to disk, if required.
-
-    Parameters
-    ----------
-    args : Namespace
-        The arguments with the required values to manage the outputs.
-    inputs : Dict[str, torch.Tensor]
-        The inputs loaded from the dataset (images, groundtruth).
-    preds : Dict[str, torch.Tensor]
-        The model predictions (optical flow and others).
-    dataloader_name : str
-        A string to identify from which dataloader these inputs came from.
-    batch_idx : int
-        Indicates in which position of the loader this input is.
-    metadata : Dict[str, Any], optional
-        Metadata about this input, if available.
-    """
-
-    preds = tensor_dict_to_numpy(preds)
-    preds["flows_viz"] = flow_utils.flow_to_rgb(preds["flows"])[:, :, ::-1]
-    if preds.get("flows_b") is not None:
-        preds["flows_b_viz"] = flow_utils.flow_to_rgb(preds["flows_b"])[:, :, ::-1]
-
-    if args.write_outputs:
-        if perturbed_inputs is not None:
-            perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
-            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata, perturbed_inputs, attack_args)
-        else:
-            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
-
-
-def _write_to_npy_file(
-    args: Namespace,
-    preds: Dict[str, torch.Tensor],
-    dataloader_name: str,
-    batch_idx: int,
-    metadata: Optional[Dict[str, Any]] = None,
-    perturbed_inputs: Dict[str, torch.Tensor] = None,
-    attack_args: Optional[Dict[str, List[object]]] = None,
-) -> None:
-    out_root_dir = Path(args.output_path) / dataloader_name
-    extra_dirs = ""
-    if metadata is not None:
-        img_path = Path(metadata["image_paths"][0][0])
-        image_name = img_path.stem
-        if "sintel" in dataloader_name:
-            seq_name = img_path.parts[-2]
-            extra_dirs = seq_name
-    else:
-        image_name = f"{batch_idx:08d}"
-
-    for k, v in preds.items():
-        if isinstance(v, np.ndarray):
-            out_dir = out_root_dir
-            if perturbed_inputs is not None:
-                for arg, val in attack_args.items():
-                    out_dir = out_dir / f"{arg}={val}"
-
-            if k == "flows":
-                out_dir_flows = out_dir / k / extra_dirs
-                out_dir_flows.mkdir(parents=True, exist_ok=True)
-                np.savez_compressed(str(out_dir_flows / f"{image_name}"), v.astype(np.uint8))
-
-    if perturbed_inputs is not None:
-        for k, v in perturbed_inputs.items():
-            if isinstance(v, np.ndarray):
-                if k == "images":
-                    out_dir_imgs = out_dir / k / extra_dirs
-                    out_dir_imgs.mkdir(parents=True, exist_ok=True)
-                    np.savez_compressed(str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8))
-
-
-def _write_to_file(
-    args: Namespace,
-    preds: Dict[str, torch.Tensor],
-    dataloader_name: str,
-    batch_idx: int,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> None:
-    out_root_dir = Path(args.output_path) / dataloader_name
-    # pdb.set_trace()
-    extra_dirs = ""
-    if metadata is not None:
-        img_path = Path(metadata["image_paths"][0][0])
-        image_name = img_path.stem
-        if "sintel" in dataloader_name:
-            seq_name = img_path.parts[-2]
-            extra_dirs = seq_name
-    else:
-        image_name = f"{batch_idx:08d}"
-
-    if args.flow_format != "original":
-        flow_ext = args.flow_format
-    else:
-        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
-            flow_ext = "png"
-        else:
-            flow_ext = "flo"
-
-    for k, v in preds.items():
-        if isinstance(v, np.ndarray):
-            out_dir = out_root_dir / k / extra_dirs
-            out_dir.mkdir(parents=True, exist_ok=True)
-            if k == "flows" or k == "flows_b":
-                flow_utils.flow_write(out_dir / f"{image_name}.{flow_ext}", v)
-            elif len(v.shape) == 2 or (
-                len(v.shape) == 3 and (v.shape[2] == 1 or v.shape[2] == 3)
-            ):
-                if v.max() <= 1:
-                    v = v * 255
-                pdb.set_trace()
-                cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
-
 
 
 if __name__ == "__main__":
