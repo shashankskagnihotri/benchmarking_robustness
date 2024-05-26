@@ -774,7 +774,7 @@ def attack_one_dataloader(
             targeted_inputs = None
             with torch.no_grad():
                 orig_preds = model(inputs)
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather":
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
                 else:
