@@ -15,6 +15,9 @@ from typing import Callable
 import shutil
 import os
 import collect_attack_results
+import wandb
+from mmengine.registry import HOOKS
+from mmengine.hooks import Hook
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
 
@@ -53,25 +56,18 @@ def pgd_attack(
         losses = runner.model(**data_batch_prepro, mode="loss")
         cost, _ = runner.model.parse_losses(losses)
 
-        grad = torch.autograd.grad(
-            cost, adv_images, retain_graph=False, create_graph=False
-        )
-        grad = torch.cat(grad, dim=0)
+        runner.model.zero_grad()
+        cost.backward(retain_graph=True)
+        grad = adv_images.grad
+        assert grad is not None
 
         adv_images = adv_images.detach() + alpha * grad.sign()
-        # assert torch.allclose(ALPHA * grad.sign(), torch.zeros_like(grad.sign()))
         delta = torch.clamp(adv_images - images, min=-epsilon, max=epsilon)
-        # assert torch.allclose(delta, torch.zeros_like(delta))
         adv_images = torch.clamp(images + delta, min=0, max=255).detach()
 
     adv_images.requires_grad = False
     transforms.Normalize(mean, std, inplace=True)(adv_images)
     data_batch_prepro["inputs"][0] = adv_images
-
-    if alpha == 0 or epsilon == 0 or steps == 0:  # for debug
-        assert torch.allclose(images_clone, adv_images)
-    else:
-        assert not torch.allclose(images_clone, adv_images)
 
     return data_batch_prepro
 
@@ -96,8 +92,10 @@ def fgsm_attack(
     data_batch_prepro["inputs"][0] = adv_images
     losses = runner.model(**data_batch_prepro, mode="loss")
     cost, _ = runner.model.parse_losses(losses)
-    grad = torch.autograd.grad(cost, adv_images, retain_graph=False, create_graph=False)
-    grad = torch.cat(grad, dim=0)
+    runner.model.zero_grad()
+    cost.backward(retain_graph=True)
+    grad = adv_images.grad
+    assert grad is not None
 
     # Collect the element-wise sign of the data gradient
     sign_data_grad = grad.sign()
@@ -155,10 +153,10 @@ def bim_attack(
         data_batch_prepro["inputs"][0] = adv_images
         losses = runner.model(**data_batch_prepro, mode="loss")
         cost, _ = runner.model.parse_losses(losses)
-        grad = torch.autograd.grad(
-            cost, adv_images, retain_graph=False, create_graph=False
-        )
-        grad = torch.cat(grad, dim=0)
+        runner.model.zero_grad()
+        cost.backward(retain_graph=True)
+        grad = adv_images.grad
+        assert grad is not None
 
         # Collect the element-wise sign of the data gradient
         sign_data_grad = grad.sign()
@@ -293,29 +291,30 @@ def run_attack_val(
     cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
     cfg.checkpoint_config = dict(interval=0)
-    cfg.default_hooks.logger.interval = 100
+    cfg.log_config = dict(
+        interval=50,
+        hooks=[
+            dict(type="TextLoggerHook"),
+            dict(
+                type="WandbLoggerHook",
+                init_kwargs=dict(
+                    project="attacks",
+                    config={
+                        "attack": attack.__name__,
+                        "attack_kwargs": attack_kwargs,
+                        "config_file": config_file,
+                        "checkpoint_file": checkpoint_file,
+                        "job_id": os.environ.get("SLURM_JOB_ID"),
+                    },
+                    group=config_file.split("/")[-1].split(".")[0],  # model name
+                ),
+                interval=10,
+            ),
+        ],
+    )
 
     runner = Runner.from_cfg(cfg)
     runner.val()
-
-    # save cfg as json
-    destination_file = os.path.join(runner.work_dir, "cfg.json")
-    cfg.dump(destination_file)
-
-    # copy metrics json into right folder
-    source_file = os.path.join(runner.work_dir, "vis_data", "scalars.json")
-    destination_folder = runner.work_dir
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
-    destination_file = os.path.join(destination_folder, "metrics.json")
-    shutil.copy(source_file, destination_file)
-
-    # save kwargs as json
-    destination_file = os.path.join(runner.work_dir, "args.json")
-    attack_kwargs["attack"] = attack.__name__
-    print("\nattack_kwargs: ", attack_kwargs)
-    with open(destination_file, "w") as json_file:
-        json.dump(attack_kwargs, json_file)
 
 
 if __name__ == "__main__":

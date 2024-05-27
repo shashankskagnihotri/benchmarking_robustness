@@ -37,9 +37,9 @@ STEPS_ATTACK = {
     "BIM": [5, 10, 20],
 }
 EPSILONS = {
-    "PGD": [1 / 255, 2 / 255, 4 / 255, 8 / 255],
-    "FGSM": [1 / 255, 2 / 255, 4 / 255, 8 / 255],
-    "BIM": [1 / 255, 2 / 255, 4 / 255, 8 / 255],
+    "PGD": [1, 2, 4, 8],
+    "FGSM": [1, 2, 4, 8],
+    "BIM": [1, 2, 4, 8],
 }
 ALPHAS = {
     "PGD": [0.01],
@@ -53,16 +53,16 @@ NORMS = {
 }
 
 
-logger.info("Starting attack tasks")
-logger.info(f"WORK_DIR: {WORK_DIR}")
-logger.info(f"RESULT_DIR: {RESULT_DIR}")
-logger.info(f"TARGETED: {TARGETED}")
-logger.info(f"RANDOM_START: {RANDOM_START}")
-logger.info(f"MODEL_DIR: {MODEL_DIR}")
-logger.info(f"ATTACKS: {ATTACKS}")
-logger.info(f"STEPS_ATTACK: {STEPS_ATTACK}")
-logger.info(f"EPSILONS: {EPSILONS}")
-logger.info(f"ALPHAS: {ALPHAS}")
+logger.debug("Starting attack tasks")
+logger.debug(f"WORK_DIR: {WORK_DIR}")
+logger.debug(f"RESULT_DIR: {RESULT_DIR}")
+logger.debug(f"TARGETED: {TARGETED}")
+logger.debug(f"RANDOM_START: {RANDOM_START}")
+logger.debug(f"MODEL_DIR: {MODEL_DIR}")
+logger.debug(f"ATTACKS: {ATTACKS}")
+logger.debug(f"STEPS_ATTACK: {STEPS_ATTACK}")
+logger.debug(f"EPSILONS: {EPSILONS}")
+logger.debug(f"ALPHAS: {ALPHAS}")
 
 
 def find_latest_epoch_file(directory):
@@ -80,7 +80,6 @@ def find_latest_epoch_file(directory):
             if current_num > max_num:
                 max_num = current_num
                 latest_file = file
-
     return latest_file
 
 
@@ -95,13 +94,6 @@ def find_python_files(directory):
 
 
 def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_dir):
-    if os.path.exists(result_dir):
-        logger.info(f"skipping {result_dir} as it already exists")
-        return None
-    else:
-        logger.info(f"running attack {attack.__name__} with {attack_kwargs}")
-        logger.info(f"saving results to {result_dir}")
-
     job = executor.submit(
         run_attack_val,
         attack,
@@ -131,7 +123,7 @@ for subdir in Path(MODEL_DIR).iterdir():
         checkpoint_file = str(find_latest_epoch_file(subdir))
         config_file = str(find_python_files(subdir))
 
-        if checkpoint_file and config_file:
+        if checkpoint_file != "None" and config_file != "None":
             logger.info(f"checkpoint file: {checkpoint_file}")
             logger.info(f"config file: {config_file}")
             checkpoint_files.append(checkpoint_file)
@@ -139,12 +131,13 @@ for subdir in Path(MODEL_DIR).iterdir():
         else:
             logger.warning(f"No checkpoint or config file found in {subdir}")
 
-logger.info("setup submitit executor")
+logger.debug("setup submitit executor")
 logger.info(f"found {len(config_files)} config and checkpoint files")
-num_tasks = min(40, len(config_files))
-slurm_mem = min(360 * 100, 10 * num_tasks * 100)  # 10GB per task
-logger.info(f"submitting {num_tasks} tasks")
-logger.info(f"slurm_mem: {slurm_mem}")
+# num_tasks = min(40, len(config_files))
+num_tasks = 1
+slurm_mem = 10_000  # 10GB per task
+# logger.debug(f"submitting {len(config_files)} tasks")
+logger.debug(f"slurm_mem: {slurm_mem}")
 
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
@@ -167,8 +160,7 @@ for attack_name, attack in ATTACKS.items():
     for steps, epsilon, alpha, norm in itertools.product(
         num_steps, epsilons, alphas, norms
     ):
-        # slurm_time = f"{1 if steps is None else steps}:00:00"
-        slurm_time = "10:00"
+        slurm_time = f"{1 if steps is None else steps}:00:00"
         executor.update_parameters(slurm_time=slurm_time)
 
         with executor.batch():
@@ -190,7 +182,8 @@ for attack_name, attack in ATTACKS.items():
                 elif attack == bim_attack:
                     del attack_kwargs["random_start"]
 
-                logger.info(str(config_file))
+                logger.debug(str(config_file))
+                logger.debug(str(checkpoint_file))
                 model_name = str(config_file).split("/")[-1][0:-3]
                 result_dir = os.path.join(
                     f"{RESULT_DIR}/"
@@ -199,15 +192,23 @@ for attack_name, attack in ATTACKS.items():
                     + "_".join([k + format_value(v) for k, v in attack_kwargs.items()])
                 )
 
-                job = submit_attack(
-                    config_file,
-                    checkpoint_file,
-                    attack,
-                    attack_kwargs,
-                    result_dir,
-                )
-                if job:
+                if os.path.exists(result_dir):
+                    logger.info(f"skipping {result_dir} as it already exists")
+                else:
+                    logger.info(
+                        f"running attack {attack.__name__} with {attack_kwargs}"
+                    )
+                    logger.info(f"saving results to {result_dir}")
+                    job = submit_attack(
+                        config_file,
+                        checkpoint_file,
+                        attack,
+                        attack_kwargs,
+                        result_dir,
+                    )
                     jobs.append(job)
+        break  # only run one attack per model for now
+    break
 
 # wait until all jobs are completed:
 outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
