@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=90:00:00
+#SBATCH --time=49:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
@@ -15,7 +15,7 @@
 
 model="raft"
 dataset="sintel-clean"
-checkpoint="kitti"
+checkpoint="sintel"
 targeteds="True"
 targets="negative zero"
 norms="two"

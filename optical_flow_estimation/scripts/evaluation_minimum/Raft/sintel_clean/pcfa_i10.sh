@@ -15,7 +15,7 @@
 
 model="raft"
 dataset="sintel-clean"
-checkpoint="kitti"
+checkpoint="sintel"
 targeteds="True"
 targets="negative zero"
 norms="two"

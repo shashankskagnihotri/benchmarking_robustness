@@ -13,7 +13,7 @@
 
 model="raft"
 dataset="sintel-clean"
-checkpoint="kitti"
+checkpoint="sintel"
 targeteds="True False"
 targets="negative zero"
 norms="inf two"
