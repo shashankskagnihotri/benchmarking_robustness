@@ -94,8 +94,8 @@ def trainer(
 if __name__ == "__main__":
     args = parse_args()
     trainer(
-        config=args.config,  #! "configs_verified/dab_detr_r101_coco.py" #! "configs_erroneous/verification/EfficientDet_swin-b_coco.py" #! "configs_erroneous/verification/yolo_r50_voc0712.py"
-        work_dir=args.work_dirs,  #! "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
+        config=args.config,  #! configs_verified/EfficientDet_swin-b_voc0712.py
+        work_dir=args.work_dirs,  #! slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
         auto_scale_lr=False,
         amp=False,
         resume=None,
@@ -103,3 +103,20 @@ if __name__ == "__main__":
         launcher="none",
         local_rank=0,
     )
+
+#! python -m pudb new_trainer.py configs_verified/EfficientDet_swin-b_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+
+# ? ./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py"
+
+
+# python -m pudb new_trainer.py ./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+
+# ? configs_verified/EfficientDet_convnext-b_coco.py
+
+# python -m pudb new_trainer.py configs_erroneous/verification/EfficientDet_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+
+# python -m pudb new_trainer.py configs_verified/codino_convnext-b_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+
+# python -m pudb new_trainer.py configs_erroneous/verification/codino_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+
+#

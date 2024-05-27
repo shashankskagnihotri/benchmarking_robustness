@@ -517,8 +517,8 @@ reference_configs = {
     "guided_anchoring": "./mmdetection/configs/guided_anchoring/ga-faster-rcnn_x101-64x4d_fpn_1x_coco.py",
     # "centripetalnet": "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py", #! has none neck
     "yolox": "./mmdetection/configs/yolox/yolox_x_8xb8-300e_coco.py",
-    "rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
-    # "./mmdetection/configs/rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
+    "rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
+    # "./mmdetection/configs/rtmdet": "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
     "glip": "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
     "EfficientDet": "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
     # "ViTDet": "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
