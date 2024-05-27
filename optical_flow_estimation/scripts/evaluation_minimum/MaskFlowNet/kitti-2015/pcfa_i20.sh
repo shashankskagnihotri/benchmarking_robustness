@@ -2,23 +2,23 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=15:00:00
+#SBATCH --time=30:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=gma_kitti-2015_pcfa_i10
-#SBATCH --output=slurm/gma_kitti-2015_pcfa_i10_%A_%a.out
-#SBATCH --error=slurm/gma_kitti-2015_pcfa_i10_err_%A_%a.out
+#SBATCH --job-name=maskflownet_kitti-2015_pcfa_i20
+#SBATCH --output=slurm/maskflownet_kitti-2015_pcfa_i20.out
+#SBATCH --error=slurm/maskflownet_kitti-2015_pcfa_i20_err_%A_%a.out
 
-model="gma"
+model="maskflownet"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True"
 targets="negative zero"
 norms="two"
 attacks="pcfa"
-iterations="10"
+iterations="20"
 jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 

@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-74%4
-#SBATCH --job-name=gma_kitti-2015_cc
-#SBATCH --output=slurm/gma_kitti-2015_cc_%A_%a.out
-#SBATCH --error=slurm/gma_kitti-2015_cc_err_%A_%a.out
+#SBATCH --job-name=flowformer_kitti-2015_cc
+#SBATCH --output=slurm/flowformer_kitti-2015_cc_%A_%a.out
+#SBATCH --error=slurm/flowformer_kitti-2015_cc_err_%A_%a.out
 
-model="gma"
+model="flowformer"
 dataset="kitti-2015"
 checkpoint="kitti"
 attack="common_corruptions"

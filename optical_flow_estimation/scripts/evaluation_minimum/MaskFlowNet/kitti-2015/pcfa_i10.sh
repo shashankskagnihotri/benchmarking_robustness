@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=gma_kitti-2015_pcfa_i10
-#SBATCH --output=slurm/gma_kitti-2015_pcfa_i10_%A_%a.out
-#SBATCH --error=slurm/gma_kitti-2015_pcfa_i10_err_%A_%a.out
+#SBATCH --job-name=maskflownet_kitti-2015_pcfa_i10
+#SBATCH --output=slurm/maskflownet_kitti-2015_pcfa_i10_%A_%a.out
+#SBATCH --error=slurm/maskflownet_kitti-2015_pcfa_i10_err_%A_%a.out
 
-model="gma"
+model="maskflownet"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True"

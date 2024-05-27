@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-14%4
-#SBATCH --job-name=rpknet_kitti-2015_fgsm
-#SBATCH --output=slurm/rpknet_kitti-2015_fgsm_%A_%a.out
-#SBATCH --error=slurm/rpknet_kitti-2015_fgsm_err_%A_%a.out
+#SBATCH --job-name=flowformer_kitti-2015_fgsm
+#SBATCH --output=slurm/flowformer_kitti-2015_fgsm_%A_%a.out
+#SBATCH --error=slurm/flowformer_kitti-2015_fgsm_err_%A_%a.out
 
-model="rpknet"
+model="flowformer"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"

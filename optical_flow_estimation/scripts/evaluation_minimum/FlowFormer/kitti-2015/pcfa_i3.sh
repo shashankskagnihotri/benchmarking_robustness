@@ -2,23 +2,23 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=15:00:00
+#SBATCH --time=04:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=gma_kitti-2015_pcfa_i10
-#SBATCH --output=slurm/gma_kitti-2015_pcfa_i10_%A_%a.out
-#SBATCH --error=slurm/gma_kitti-2015_pcfa_i10_err_%A_%a.out
+#SBATCH --job-name=flowformer_kitti-2015_pcfa_i3
+#SBATCH --output=slurm/flowformer_kitti-2015_pcfa_i3_%A_%a.out
+#SBATCH --error=slurm/flowformer_kitti-2015_pcfa_i3_err_%A_%a.out
 
-model="gma"
+model="flowformer"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True"
 targets="negative zero"
 norms="two"
 attacks="pcfa"
-iterations="10"
+iterations="3"
 jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 
