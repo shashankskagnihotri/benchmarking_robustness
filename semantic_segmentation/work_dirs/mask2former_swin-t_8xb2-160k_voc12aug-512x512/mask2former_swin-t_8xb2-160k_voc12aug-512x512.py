@@ -488,7 +488,7 @@ test_pipeline = [
 train_cfg = dict(
     max_iters=160000, type='IterBasedTrainLoop', val_interval=5000)
 train_dataloader = dict(
-    batch_size=2,
+    batch_size=4,
     dataset=dict(
         datasets=[
             dict(
@@ -563,40 +563,6 @@ train_dataloader = dict(
                 ],
                 type='PascalVOCDataset'),
         ],
-        pipeline=[
-            dict(type='LoadImageFromFile'),
-            dict(type='LoadAnnotations'),
-            dict(
-                max_size=2048,
-                resize_type='ResizeShortestEdge',
-                scales=[
-                    256,
-                    307,
-                    358,
-                    409,
-                    460,
-                    512,
-                    563,
-                    614,
-                    665,
-                    716,
-                    768,
-                    819,
-                    870,
-                    921,
-                    972,
-                    1024,
-                ],
-                type='RandomChoiceResize'),
-            dict(
-                cat_max_ratio=0.75, crop_size=(
-                    512,
-                    512,
-                ), type='RandomCrop'),
-            dict(prob=0.5, type='RandomFlip'),
-            dict(type='PhotoMetricDistortion'),
-            dict(type='PackSegInputs'),
-        ],
         type='ConcatDataset'),
     num_workers=4,
     persistent_workers=True,
@@ -605,33 +571,26 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
     dict(
-        max_size=2048,
-        resize_type='ResizeShortestEdge',
-        scales=[
-            256,
-            307,
-            358,
-            409,
-            460,
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
             512,
-            563,
-            614,
-            665,
-            716,
-            768,
-            819,
-            870,
-            921,
-            972,
-            1024,
-        ],
-        type='RandomChoiceResize'),
+        ),
+        type='RandomResize'),
     dict(cat_max_ratio=0.75, crop_size=(
         512,
         512,
     ), type='RandomCrop'),
     dict(prob=0.5, type='RandomFlip'),
     dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
     dict(type='PackSegInputs'),
 ]
 tta_model = dict(type='SegTTAModel')
