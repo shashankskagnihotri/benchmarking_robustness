@@ -25,3 +25,15 @@ def train_with_multiple_gpus(
         "pytorch",
     ]
     subprocess.run(command, check=True)
+
+
+if __name__ == "__main__":
+    train_with_multiple_gpus(
+        config="configs_erroneous/verification/yolox_r101_coco.py",
+        work_dir="slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer",
+        gpus=2,
+    )
+
+# yolox_r101_coco.py
+
+# python -m pudb new_distributed_trainer.py

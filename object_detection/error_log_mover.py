@@ -9,7 +9,7 @@ folders_slurm_log_files = os.listdir(path_slurm_log_files_folder)
 
 path_erroneous_config_files = "./configs_erroneous/verification"
 folder_erroneous_config_files = os.listdir(path_erroneous_config_files)
-log_error_path = "slurm/work_dir/log_error"
+log_error_path = "slurm/log_errors"
 
 for config_file in folder_erroneous_config_files:
     config_path = os.path.join(path_erroneous_config_files, config_file)

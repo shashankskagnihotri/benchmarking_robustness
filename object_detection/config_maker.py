@@ -60,7 +60,7 @@ old_dataset_names = [old_coco_dataset, old_lvis_dataset]
 # for testing just those that only have one implementation
 
 #! add more files
-files_to_use_to_change = [
+files_which_we_have = [
     "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
     # DO NOT USE "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py",
     "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
@@ -409,7 +409,7 @@ def which(path):
     return which_backbone(path), which_neck(path), which_dataset(path)
 
 
-for file in files_to_use_to_change:
+for file in files_which_we_have:
     backbone, neck, dataset = which(file)
 
     if backbone and neck and dataset:
@@ -444,7 +444,7 @@ for n in necks_we_want:
 
 # print(all_combis)
 
-for file in files_to_use_to_change:
+for file in files_which_we_have:
     backbone, neck, dataset = which(file)
     if backbone and neck and dataset:
         all_combis[(neck, backbone, dataset)] = True

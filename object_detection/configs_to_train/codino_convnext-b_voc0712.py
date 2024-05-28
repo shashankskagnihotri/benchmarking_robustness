@@ -170,14 +170,14 @@ model = dict(
     ],
     data_preprocessor=dict(
         batch_augments=[
-            dict(
-                pad_mask=True,
-                size=(
-                    1024,
-                    1024,
-                ),
-                type="BatchFixedSizePad",
-            ),
+            # dict(
+            #     pad_mask=True,
+            #     size=(
+            #         1024,
+            #         1024,
+            #     ),
+            #     type="BatchFixedSizePad",
+            # ),
         ],
         bgr_to_rgb=True,
         mean=[
