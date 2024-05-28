@@ -164,9 +164,6 @@ for attack_name, attack in ATTACKS.items():
 
         with executor.batch():
             for config_file, checkpoint_file in zip(config_files, checkpoint_files):
-                if "atss_convnext-b_voc0712" not in str(config_file):  # for debugging
-                    continue
-
                 attack_kwargs = {
                     "epsilon": epsilon,
                     "alpha": alpha,
