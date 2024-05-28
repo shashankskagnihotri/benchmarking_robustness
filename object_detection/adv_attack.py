@@ -261,6 +261,7 @@ def run_attack_val(
                 self.run_iter(idx, data_batch)
 
             metrics = self.evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
+            wandb.log(metrics)
             self.runner.call_hook("after_val_epoch", metrics=metrics)
             self.runner.call_hook("after_val")
             return metrics
@@ -291,28 +292,27 @@ def run_attack_val(
     cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
     cfg.checkpoint_config = dict(interval=0)
+
+    wandb.init(
+        project="attacks",
+        config={
+            "attack": attack.__name__,
+            "attack_kwargs": attack_kwargs,
+            "config_file": config_file,
+            "checkpoint_file": checkpoint_file,
+        },
+        name=config_file.split("/")[-1].split(".")[0],
+    )
+
     cfg.log_config = dict(
-        interval=50,
+        interval=100,
         hooks=[
             dict(type="TextLoggerHook"),
             dict(
                 type="WandbLoggerHook",
-                init_kwargs=dict(
-                    project="attacks",
-                    config={
-                        "attack": attack.__name__,
-                        "attack_kwargs": attack_kwargs,
-                        "config_file": config_file,
-                        "checkpoint_file": checkpoint_file,
-                        "job_id": os.environ.get("SLURM_JOB_ID"),
-                    },
-                    group=config_file.split("/")[-1].split(".")[0],  # model name
-                ),
-                interval=10,
             ),
         ],
     )
-
     runner = Runner.from_cfg(cfg)
     runner.val()
 

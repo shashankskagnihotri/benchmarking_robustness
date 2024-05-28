@@ -70,25 +70,20 @@ def common_corruptions(dataset_type, input_dir, output_dir):
                 continue
 
             # Apply corruption and save corrupted images
-            with tqdm(
-                total=len(img_ids),
-                desc=f"Corruption: {corruption}, Severity: {severity}",
-            ) as pbar:
-                for img_id in img_ids:
-                    if dataset_type == "coco":
-                        img_info = coco.loadImgs(img_id)[0]
-                        img_path = os.path.join(img_dir, img_info["file_name"])
-                        output_path = os.path.join(output_folder, img_info["file_name"])
-                    else:  # 'voc'
-                        img_path = os.path.join(img_dir, f"{img_id}.jpg")
-                        output_path = os.path.join(output_folder, f"{img_id}.jpg")
+            for img_id in img_ids:
+                if dataset_type == "coco":
+                    img_info = coco.loadImgs(img_id)[0]
+                    img_path = os.path.join(img_dir, img_info["file_name"])
+                    output_path = os.path.join(output_folder, img_info["file_name"])
+                else:  # 'voc'
+                    img_path = os.path.join(img_dir, f"{img_id}.jpg")
+                    output_path = os.path.join(output_folder, f"{img_id}.jpg")
 
-                    image = mmcv.imread(img_path)
-                    corrupted_image = corrupt(
-                        image, corruption_name=corruption, severity=severity
-                    )
-                    mmcv.imwrite(corrupted_image, output_path)
-                    pbar.update(1)
+                image = mmcv.imread(img_path)
+                corrupted_image = corrupt(
+                    image, corruption_name=corruption, severity=severity
+                )
+                mmcv.imwrite(corrupted_image, output_path)
     logger.info("Common corruptions applied successfully.")
 
 
@@ -100,7 +95,7 @@ if __name__ == "__main__":
         cpus_per_task=4,
         nodes=1,
         tasks_per_node=1,
-        slurm_mem="16GB",
+        slurm_mem="4GB",
         slurm_time="10:00:00",
         slurm_mail_type="END,FAIL",
         slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",

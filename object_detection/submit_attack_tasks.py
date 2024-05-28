@@ -32,14 +32,14 @@ ATTACKS = {
     "BIM": bim_attack,
 }
 STEPS_ATTACK = {
-    "PGD": [5, 10, 20],
+    "PGD": [1, 20],  # [1, 5, 10, 20]
     "FGSM": [None],
-    "BIM": [5, 10, 20],
+    "BIM": [1, 20],
 }
 EPSILONS = {
-    "PGD": [1, 2, 4, 8],
-    "FGSM": [1, 2, 4, 8],
-    "BIM": [1, 2, 4, 8],
+    "PGD": [8],  # [1, 2, 4, 8]
+    "FGSM": [8],
+    "BIM": [8],
 }
 ALPHAS = {
     "PGD": [0.01],
@@ -51,7 +51,6 @@ NORMS = {
     "FGSM": ["inf"],
     "BIM": ["inf"],
 }
-
 
 logger.debug("Starting attack tasks")
 logger.debug(f"WORK_DIR: {WORK_DIR}")
@@ -160,11 +159,14 @@ for attack_name, attack in ATTACKS.items():
     for steps, epsilon, alpha, norm in itertools.product(
         num_steps, epsilons, alphas, norms
     ):
-        slurm_time = f"{1 if steps is None else steps}:00:00"
+        slurm_time = f"{70 if steps is None else 70*steps}:00"
         executor.update_parameters(slurm_time=slurm_time)
 
         with executor.batch():
             for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+                if "atss_convnext-b_voc0712" not in str(config_file):  # for debugging
+                    continue
+
                 attack_kwargs = {
                     "epsilon": epsilon,
                     "alpha": alpha,
@@ -207,8 +209,6 @@ for attack_name, attack in ATTACKS.items():
                         result_dir,
                     )
                     jobs.append(job)
-        break  # only run one attack per model for now
-    break
 
 # wait until all jobs are completed:
 outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
