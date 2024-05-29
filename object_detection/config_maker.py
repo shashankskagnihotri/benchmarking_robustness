@@ -1,6 +1,12 @@
 import os
 from mmengine.config import Config
-from mmdetection.configs.pascal_voc.faster_rcnn_r50_fpn_1x_voc0712_cocofmt import (
+# from mmdetection.configs._base_.datasets.voc0712 import (
+#     backend_args as backend_args,
+# )
+
+
+from voc0712_cocofmt_reference import (
+    METAINFO as voc0712_METAINFO,
     data_root as voc0712_data_root,
     dataset_type as voc0712_dataset_type,
     train_pipeline as voc0712_train_pipeline,
@@ -9,6 +15,7 @@ from mmdetection.configs.pascal_voc.faster_rcnn_r50_fpn_1x_voc0712_cocofmt impor
     val_dataloader as voc0712_val_dataloader,
 )
 
+#! how to import num classes for each voc model in the right way !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 from rich.traceback import install
 
@@ -457,6 +464,25 @@ if None in all_combis.values():
     print(f"In values {True}")
 
 
+# def num_classes_changer(d, prefix=""):
+#     for key in d:
+#         full_key = f"{prefix}.{key}" if prefix else key
+#         if "num_classes" in full_key:
+#             print(f"Found key: {full_key}")
+#             cfg._cfg_dict[full_key] = 20
+#         if isinstance(d[key], dict):
+#             num_classes_changer(d[key], full_key)
+def num_classes_changer(d, prefix=""):
+    # Use list(d.keys()) to avoid modifying the dictionary during iteration
+    for key in list(d.keys()):
+        full_key = f"{prefix}.{key}" if prefix else key
+        if "num_classes" in full_key:
+            print(f"Found key: {full_key}")
+        # If the value is a dictionary, apply the function recursively
+        if isinstance(d[key], dict):
+            num_classes_changer(d[key], full_key)
+
+
 #! Take in more files
 reference_configs = {
     "double_heads": "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
@@ -530,85 +556,92 @@ reference_configs = {
 missing_refrences = set()
 
 for (neck, backbone, dataset), found in all_combis.items():
-    if not found:
-        if neck in reference_configs.keys():
-            # if reference_configs[neck] == "configs":
-            #     neck = "EfficientDet"
+    if found:
+        continue
 
-            reference_file = reference_configs[neck]
-            backbone_ref, neck_ref, dataset_ref = which(reference_file)
-            cfg = Config.fromfile(reference_file)
+    if neck in reference_configs.keys():
+        # if reference_configs[neck] == "configs":
+        #     neck = "EfficientDet"
 
-            assert (
-                neck == neck_ref
-            ), f"Neck mismatch: {neck} != {neck_ref}, make neck in refercence list"
+        reference_file = reference_configs[neck]
+        backbone_ref, neck_ref, dataset_ref = which(reference_file)
+        cfg = Config.fromfile(reference_file)
 
-            if backbone != backbone_ref:
-                cfg.model.backbone = new_backbone_configs[backbone]
-                # print(f"{neck, backbone, dataset}")
-                if neck == "libra_rcnn":
-                    cfg.model.neck[0].in_channels = new_neck_configs[backbone][
-                        "in_channels"
-                    ]
-                else:
-                    cfg.model.neck.in_channels = new_neck_configs[backbone][
-                        "in_channels"
-                    ]
+        assert (
+            neck == neck_ref
+        ), f"Neck mismatch: {neck} != {neck_ref}, make neck in refercence list"
 
-            # data_root as voc0712_data_root,
-            # dataset_type as voc0712_dataset_type,
-            # train_pipeline as voc0712_train_pipeline,
-            # test_pipeline as voc0712_test_pipeline,
-            # train_dataloader as voc0712_train_dataloader,
-            # val_dataloader as voc0712_val_dataloader
+        if backbone != backbone_ref:
+            cfg.model.backbone = new_backbone_configs[backbone]
+            # print(f"{neck, backbone, dataset}")
+            if neck == "libra_rcnn":
+                cfg.model.neck[0].in_channels = new_neck_configs[backbone][
+                    "in_channels"
+                ]
+            else:
+                cfg.model.neck.in_channels = new_neck_configs[backbone]["in_channels"]
 
-            if dataset != dataset_ref:
-                cfg.data_root = voc0712_data_root
-                cfg.dataset_type = voc0712_dataset_type
+        # data_root as voc0712_data_root,
+        # dataset_type as voc0712_dataset_type,
+        # train_pipeline as voc0712_train_pipeline,
+        # test_pipeline as voc0712_test_pipeline,
+        # train_dataloader as voc0712_train_dataloader,
+        # val_dataloader as voc0712_val_dataloader
 
-                cfg.train_pipeline = voc0712_train_pipeline
-                cfg.test_pipeline = voc0712_test_pipeline
+        if dataset != dataset_ref:
+            cfg.data_root = voc0712_data_root
+            cfg.dataset_type = voc0712_dataset_type
 
-                cfg.train_dataloader = voc0712_train_dataloader
-                cfg.val_dataloader = voc0712_val_dataloader
-                cfg.test_dataloader = voc0712_val_dataloader
+            cfg.METAINFO = voc0712_METAINFO
 
-                #! when try to update the metric
-                # cfg.val_evaluator = (
-                #     dict(
-                #         ann_file="data/voc_coco_format/voc0712_val.json",
-                #         backend_args=None,
-                #         format_only=False,
-                #         metric="bbox",
-                #         type="CocoMetric",
-                #     ),
-                # )
-                # cfg.test_evaluator = dict(
-                #     ann_file="data/voc_coco_format/voc07_test.json",
-                #     backend_args=None,
-                #     format_only=False,
-                #     metric="bbox",
-                #     type="CocoMetric",
-                # )
+            cfg.train_pipeline = voc0712_train_pipeline
+            cfg.test_pipeline = voc0712_test_pipeline
 
-            cfg.auto_scale_lr.enable = True  #! test if works
-            #! put in for real training
-            # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-            # cfg.visualizer.vis_backends[0].init_kwargs = dict(
-            #     project=f"{neck}_{backbone}_{dataset}"
+            cfg.train_dataloader = voc0712_train_dataloader
+            cfg.val_dataloader = voc0712_val_dataloader
+            cfg.test_dataloader = voc0712_val_dataloader
+
+            if cfg.train_cfg.type == "EpochBasedTrainLoop":
+                cfg.train_cfg.max_epochs = cfg.train_cfg.max_epochs // 3
+
+            num_classes_changer(cfg._cfg_dict)
+
+            #! when try to update the metric
+            # cfg.val_evaluator = (
+            #     dict(
+            #         ann_file="data/voc_coco_format/voc0712_val.json",
+            #         backend_args=None,
+            #         format_only=False,
+            #         metric="bbox",
+            #         type="CocoMetric",
+            #     ),
+            # )
+            # cfg.test_evaluator = dict(
+            #     ann_file="data/voc_coco_format/voc07_test.json",
+            #     backend_args=None,
+            #     format_only=False,
+            #     metric="bbox",
+            #     type="CocoMetric",
             # )
 
-            destination_file = os.path.join(
-                "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
-            )
-            # destination_file = os.path.join(
-            #     "./configs_to_train", f"{neck}_{cfg.model.backbone.type}_{dataset}.py"
-            # )
-            cfg.dump(destination_file)
-            all_combis[(neck, backbone, dataset)] = True
-        else:
-            # print(f"Missing reference for {neck}")
-            missing_refrences.add(neck)
+        cfg.auto_scale_lr.enable = True  #! test if works
+        #! put in for real training
+        # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
+        # cfg.visualizer.vis_backends[0].init_kwargs = dict(
+        #     project=f"{neck}_{backbone}_{dataset}"
+        # )
+
+        destination_file = os.path.join(
+            "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
+        )
+        # destination_file = os.path.join(
+        #     "./configs_to_train", f"{neck}_{cfg.model.backbone.type}_{dataset}.py"
+        # )
+        cfg.dump(destination_file)
+        all_combis[(neck, backbone, dataset)] = True
+    else:
+        # print(f"Missing reference for {neck}")
+        missing_refrences.add(neck)
 
 
 # print(all_combis)
