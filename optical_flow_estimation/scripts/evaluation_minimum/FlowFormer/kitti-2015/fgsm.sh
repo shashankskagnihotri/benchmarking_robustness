@@ -5,7 +5,7 @@
 #SBATCH --time=00:29:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4
+#SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-14%4
 #SBATCH --job-name=flowformer_kitti-2015_fgsm
 #SBATCH --output=slurm/flowformer_kitti-2015_fgsm_%A_%a.out
