@@ -1,52 +1,7 @@
-submitit INFO (2024-05-14 04:07:35,115) - Starting with JobEnvironment(job_id=23594889, hostname=uc2n482.localdomain, local_rank=0(1), node=0(1), global_rank=0(1))
-submitit INFO (2024-05-14 04:07:35,115) - Loading pickle: /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm/work_dir/rtmdet_swin-b_voc0712/23594889_submitted.pkl
-05/14 04:07:40 - mmengine - INFO - 
-------------------------------------------------------------
-System environment:
-    sys.platform: linux
-    Python: 3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
-    CUDA available: True
-    MUSA available: False
-    numpy_random_seed: 1636228093
-    GPU 0: Tesla V100-SXM2-32GB
-    CUDA_HOME: /opt/bwhpc/common/devel/cuda/11.8
-    NVCC: Cuda compilation tools, release 11.8, V11.8.89
-    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-10)
-    PyTorch: 2.1.2
-    PyTorch compiling details: PyTorch built with:
-  - GCC 9.3
-  - C++ Version: 201703
-  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
-  - Intel(R) MKL-DNN v3.1.1 (Git Hash 64f6bcbcbab628e96f33a62c3e975f8535a7bde4)
-  - OpenMP 201511 (a.k.a. OpenMP 4.5)
-  - LAPACK is enabled (usually provided by MKL)
-  - NNPACK is enabled
-  - CPU capability usage: AVX512
-  - CUDA Runtime 11.8
-  - NVCC architecture flags: -gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_90,code=sm_90;-gencode;arch=compute_37,code=compute_37
-  - CuDNN 8.7
-  - Magma 2.6.1
-  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.8, CUDNN_VERSION=8.7.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=old-style-cast -Wno-invalid-partial-specialization -Wno-unused-private-field -Wno-aligned-allocation-unavailable -Wno-missing-braces -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.1.2, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
-
-    TorchVision: 0.16.2
-    OpenCV: 4.9.0
-    MMEngine: 0.10.3
-
-Runtime environment:
-    cudnn_benchmark: False
-    dist_cfg: {'backend': 'nccl'}
-    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
-    seed: 1636228093
-    Distributed launcher: none
-    Distributed training: False
-    GPU number: 1
-------------------------------------------------------------
-
-05/14 04:07:40 - mmengine - INFO - Config:
-auto_scale_lr = dict(base_batch_size=16, enable=False)
+auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 base_lr = 0.001
-checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth'
+checkpoint = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth'
 custom_hooks = [
     dict(
         ema_type='ExpMomentumEMA',
@@ -66,13 +21,13 @@ custom_hooks = [
                     2.0,
                 ),
                 scale=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='RandomResize'),
             dict(crop_size=(
-                640,
-                640,
+                1280,
+                1280,
             ), type='RandomCrop'),
             dict(type='YOLOXHSVRandomAug'),
             dict(prob=0.5, type='RandomFlip'),
@@ -83,18 +38,14 @@ custom_hooks = [
                     114,
                 )),
                 size=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='Pad'),
             dict(type='PackDetInputs'),
         ],
         type='PipelineSwitchHook'),
 ]
-custom_imports = dict(
-    allow_failed_imports=False, imports=[
-        'mmpretrain.models',
-    ])
 data_root = 'data/VOCdevkit/'
 dataset_type = 'VOCDataset'
 default_hooks = dict(
@@ -111,70 +62,39 @@ env_cfg = dict(
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
 img_scales = [
     (
+        1280,
+        1280,
+    ),
+    (
         640,
         640,
     ),
     (
-        320,
-        320,
-    ),
-    (
-        960,
-        960,
+        1920,
+        1920,
     ),
 ]
 interval = 10
-launcher = 'none'
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 max_epochs = 100
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-            1,
-        ],
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
-        init_cfg=dict(
-            checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
-            type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
+        depth=50,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet50', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
         out_indices=[
+            0,
             1,
             2,
             3,
-            4,
         ],
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        strides=[
-            4,
-            2,
-            2,
-            2,
-            2,
-        ],
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        style='pytorch',
+        type='ResNet'),
     bbox_head=dict(
         act_cfg=dict(inplace=True, type='SiLU'),
         anchor_generator=dict(
@@ -182,6 +102,7 @@ model = dict(
                 8,
                 16,
                 32,
+                64,
             ], type='MlvlPointGenerator'),
         bbox_coder=dict(type='DistancePointBBoxCoder'),
         exp_on_reg=True,
@@ -241,15 +162,9 @@ model = dict(
     type='RTMDet')
 norm_cfg = dict(num_groups=32, type='GN')
 optim_wrapper = dict(
-    constructor='LearningRateDecayOptimizerConstructor',
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
-        bias_decay_mult=0,
-        bypass_duplicate=True,
-        decay_rate=0.8,
-        decay_type='layer_wise',
-        norm_decay_mult=0,
-        num_layers=12),
+        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
     type='OptimWrapper')
 param_scheduler = [
     dict(
@@ -297,7 +212,17 @@ test_dataloader = dict(
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
-test_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+test_evaluator = dict(
+    ann_file='data/coco/annotations/instances_val2017.json',
+    backend_args=None,
+    format_only=False,
+    metric='bbox',
+    proposal_nums=(
+        100,
+        1,
+        10,
+    ),
+    type='CocoMetric')
 test_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
     dict(keep_ratio=True, scale=(
@@ -403,13 +328,13 @@ train_pipeline_stage2 = [
             2.0,
         ),
         scale=(
-            640,
-            640,
+            1280,
+            1280,
         ),
         type='RandomResize'),
     dict(crop_size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='RandomCrop'),
     dict(type='YOLOXHSVRandomAug'),
     dict(prob=0.5, type='RandomFlip'),
@@ -418,8 +343,8 @@ train_pipeline_stage2 = [
         114,
         114,
     )), size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='Pad'),
     dict(type='PackDetInputs'),
 ]
@@ -432,16 +357,16 @@ tta_pipeline = [
         transforms=[
             [
                 dict(keep_ratio=True, scale=(
+                    1280,
+                    1280,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
                     640,
                     640,
                 ), type='Resize'),
                 dict(keep_ratio=True, scale=(
-                    320,
-                    320,
-                ), type='Resize'),
-                dict(keep_ratio=True, scale=(
-                    960,
-                    960,
+                    1920,
+                    1920,
                 ), type='Resize'),
             ],
             [
@@ -456,8 +381,8 @@ tta_pipeline = [
                         114,
                     )),
                     size=(
-                        960,
-                        960,
+                        1920,
+                        1920,
                     ),
                     type='Pad'),
             ],
@@ -511,7 +436,17 @@ val_dataloader = dict(
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
-val_evaluator = dict(eval_mode='11points', metric='mAP', type='VOCMetric')
+val_evaluator = dict(
+    ann_file='data/coco/annotations/instances_val2017.json',
+    backend_args=None,
+    format_only=False,
+    metric='bbox',
+    proposal_nums=(
+        100,
+        1,
+        10,
+    ),
+    type='CocoMetric')
 vis_backends = [
     dict(type='LocalVisBackend'),
 ]
@@ -521,122 +456,3 @@ visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
     ])
-work_dir = 'slurm/results/rtmdet_swin-b_voc0712'
-
-05/14 04:07:43 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
-05/14 04:07:43 - mmengine - INFO - Hooks will be executed in the following order:
-before_run:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(49          ) EMAHook                            
-(BELOW_NORMAL) LoggerHook                         
- -------------------- 
-after_load_checkpoint:
-(49          ) EMAHook                            
- -------------------- 
-before_train:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(49          ) EMAHook                            
-(NORMAL      ) IterTimerHook                      
-(VERY_LOW    ) CheckpointHook                     
- -------------------- 
-before_train_epoch:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(NORMAL      ) IterTimerHook                      
-(NORMAL      ) DistSamplerSeedHook                
-(NORMAL      ) PipelineSwitchHook                 
- -------------------- 
-before_train_iter:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(NORMAL      ) IterTimerHook                      
- -------------------- 
-after_train_iter:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(49          ) EMAHook                            
-(NORMAL      ) IterTimerHook                      
-(BELOW_NORMAL) LoggerHook                         
-(LOW         ) ParamSchedulerHook                 
-(VERY_LOW    ) CheckpointHook                     
- -------------------- 
-after_train_epoch:
-(NORMAL      ) IterTimerHook                      
-(LOW         ) ParamSchedulerHook                 
-(VERY_LOW    ) CheckpointHook                     
- -------------------- 
-before_val:
-(VERY_HIGH   ) RuntimeInfoHook                    
- -------------------- 
-before_val_epoch:
-(49          ) EMAHook                            
-(NORMAL      ) IterTimerHook                      
- -------------------- 
-before_val_iter:
-(NORMAL      ) IterTimerHook                      
- -------------------- 
-after_val_iter:
-(NORMAL      ) IterTimerHook                      
-(NORMAL      ) DetVisualizationHook               
-(BELOW_NORMAL) LoggerHook                         
- -------------------- 
-after_val_epoch:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(49          ) EMAHook                            
-(NORMAL      ) IterTimerHook                      
-(BELOW_NORMAL) LoggerHook                         
-(LOW         ) ParamSchedulerHook                 
-(VERY_LOW    ) CheckpointHook                     
- -------------------- 
-after_val:
-(VERY_HIGH   ) RuntimeInfoHook                    
- -------------------- 
-before_save_checkpoint:
-(49          ) EMAHook                            
- -------------------- 
-after_train:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(VERY_LOW    ) CheckpointHook                     
- -------------------- 
-before_test:
-(VERY_HIGH   ) RuntimeInfoHook                    
- -------------------- 
-before_test_epoch:
-(49          ) EMAHook                            
-(NORMAL      ) IterTimerHook                      
- -------------------- 
-before_test_iter:
-(NORMAL      ) IterTimerHook                      
- -------------------- 
-after_test_iter:
-(NORMAL      ) IterTimerHook                      
-(NORMAL      ) DetVisualizationHook               
-(BELOW_NORMAL) LoggerHook                         
- -------------------- 
-after_test_epoch:
-(VERY_HIGH   ) RuntimeInfoHook                    
-(49          ) EMAHook                            
-(NORMAL      ) IterTimerHook                      
-(BELOW_NORMAL) LoggerHook                         
- -------------------- 
-after_test:
-(VERY_HIGH   ) RuntimeInfoHook                    
- -------------------- 
-after_run:
-(BELOW_NORMAL) LoggerHook                         
- -------------------- 
-05/14 04:07:49 - mmengine - INFO - self.paramwise_cfg is {'bias_decay_mult': 0, 'bypass_duplicate': True, 'decay_rate': 0.8, 'decay_type': 'layer_wise', 'norm_decay_mult': 0, 'num_layers': 12}
-05/14 04:07:49 - mmengine - INFO - Build LearningRateDecayOptimizerConstructor  layer_wise 0.8 - 14
-submitit ERROR (2024-05-14 04:07:49,712) - Submitted job triggered an exception
-
-============================= JOB FEEDBACK =============================
-
-NodeName=uc2n482
-Job ID: 23594889
-Cluster: uc2
-User/Group: ma_ruweber/ma_ma
-State: FAILED (exit code 1)
-Nodes: 1
-Cores per node: 10
-CPU Utilized: 00:00:14
-CPU Efficiency: 2.92% of 00:08:00 core-walltime
-Job Wall-clock time: 00:00:48
-Memory Utilized: 818.16 MB
-Memory Efficiency: 0.87% of 91.80 GB
