@@ -1,14 +1,14 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 batch_augments = [
-    # dict(
-    #     pad_mask=True,
-    #     size=(
-    #         1024,
-    #         1024,
-    #     ),
-    #     type="BatchFixedSizePad",
-    # ),
+    dict(
+        pad_mask=True,
+        size=(
+            1024,
+            1024,
+        ),
+        type="BatchFixedSizePad",
+    ),
 ]
 custom_imports = dict(
     allow_failed_imports=False,
@@ -168,14 +168,14 @@ model = dict(
     ],
     data_preprocessor=dict(
         batch_augments=[
-            dict(
-                pad_mask=True,
-                size=(
-                    1024,
-                    1024,
-                ),
-                type="BatchFixedSizePad",
-            ),
+            # dict(
+            #     pad_mask=True,
+            #     size=(
+            #         1024,
+            #         1024,
+            #     ),
+            #     type="BatchFixedSizePad",
+            # ),
         ],
         bgr_to_rgb=True,
         mean=[
