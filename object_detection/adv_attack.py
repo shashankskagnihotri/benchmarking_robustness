@@ -209,84 +209,87 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
 
 
 def run_attack_val(
-    attack: Callable,
+    attack: Callable | None,
     config_file: str,
     checkpoint_file: str,
     attack_kwargs: dict,
     log_dir: str,
 ):
-    LOOPS.module_dict.pop("ValLoop")
+    if attack is not None:
+        LOOPS.module_dict.pop("ValLoop")
 
-    @LOOPS.register_module()
-    class ValLoop(BaseLoop):
-        def __init__(
-            self,
-            runner,
-            dataloader: Union[DataLoader, Dict],
-            evaluator: Union[Evaluator, Dict, List],
-            fp16: bool = False,
-        ) -> None:
-            super().__init__(runner, dataloader)
+        @LOOPS.register_module()
+        class ValLoop(BaseLoop):
+            def __init__(
+                self,
+                runner,
+                dataloader: Union[DataLoader, Dict],
+                evaluator: Union[Evaluator, Dict, List],
+                fp16: bool = False,
+            ) -> None:
+                super().__init__(runner, dataloader)
 
-            if isinstance(evaluator, (dict, list)):
-                self.evaluator = runner.build_evaluator(evaluator)
-            else:
-                assert isinstance(evaluator, Evaluator), (
-                    "evaluator must be one of dict, list or Evaluator instance, "
-                    f"but got {type(evaluator)}."
+                if isinstance(evaluator, (dict, list)):
+                    self.evaluator = runner.build_evaluator(evaluator)
+                else:
+                    assert isinstance(evaluator, Evaluator), (
+                        "evaluator must be one of dict, list or Evaluator instance, "
+                        f"but got {type(evaluator)}."
+                    )
+                    self.evaluator = evaluator
+                if hasattr(self.dataloader.dataset, "metainfo"):
+                    self.evaluator.dataset_meta = getattr(
+                        self.dataloader.dataset, "metainfo"
+                    )
+                    self.runner.visualizer.dataset_meta = getattr(
+                        self.dataloader.dataset, "metainfo"
+                    )
+                else:
+                    print_log(
+                        f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
+                        "metainfo. ``dataset_meta`` in evaluator, metric and "
+                        "visualizer will be None.",
+                        logger="current",
+                        level=logging.WARNING,
+                    )
+                self.fp16 = fp16
+
+            def run(self) -> dict:
+                self.runner.call_hook("before_val")
+                self.runner.call_hook("before_val_epoch")
+                self.runner.model.eval()
+                for idx, data_batch in enumerate(self.dataloader):
+                    self.run_iter(idx, data_batch)
+
+                metrics = self.evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
+                wandb.log(metrics)
+                self.runner.call_hook("after_val_epoch", metrics=metrics)
+                self.runner.call_hook("after_val")
+                return metrics
+
+            def run_iter(
+                self,
+                idx,
+                data_batch: Sequence[dict],
+            ):
+                self.runner.call_hook(
+                    "before_val_iter", batch_idx=idx, data_batch=data_batch
                 )
-                self.evaluator = evaluator
-            if hasattr(self.dataloader.dataset, "metainfo"):
-                self.evaluator.dataset_meta = getattr(
-                    self.dataloader.dataset, "metainfo"
+
+                data_batch_prepro = attack(data_batch, self.runner, **attack_kwargs)
+
+                with torch.no_grad():
+                    outputs = self.runner.model(**data_batch_prepro, mode="predict")
+
+                self.evaluator.process(
+                    data_samples=outputs, data_batch=data_batch_prepro
                 )
-                self.runner.visualizer.dataset_meta = getattr(
-                    self.dataloader.dataset, "metainfo"
+                self.runner.call_hook(
+                    "after_val_iter",
+                    batch_idx=idx,
+                    data_batch=data_batch_prepro,
+                    outputs=outputs,
                 )
-            else:
-                print_log(
-                    f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
-                    "metainfo. ``dataset_meta`` in evaluator, metric and "
-                    "visualizer will be None.",
-                    logger="current",
-                    level=logging.WARNING,
-                )
-            self.fp16 = fp16
-
-        def run(self) -> dict:
-            self.runner.call_hook("before_val")
-            self.runner.call_hook("before_val_epoch")
-            self.runner.model.eval()
-            for idx, data_batch in enumerate(self.dataloader):
-                self.run_iter(idx, data_batch)
-
-            metrics = self.evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
-            wandb.log(metrics)
-            self.runner.call_hook("after_val_epoch", metrics=metrics)
-            self.runner.call_hook("after_val")
-            return metrics
-
-        def run_iter(
-            self,
-            idx,
-            data_batch: Sequence[dict],
-        ):
-            self.runner.call_hook(
-                "before_val_iter", batch_idx=idx, data_batch=data_batch
-            )
-
-            data_batch_prepro = attack(data_batch, self.runner, **attack_kwargs)
-
-            with torch.no_grad():
-                outputs = self.runner.model(**data_batch_prepro, mode="predict")
-
-            self.evaluator.process(data_samples=outputs, data_batch=data_batch_prepro)
-            self.runner.call_hook(
-                "after_val_iter",
-                batch_idx=idx,
-                data_batch=data_batch_prepro,
-                outputs=outputs,
-            )
 
     cfg = Config.fromfile(config_file)
     cfg.work_dir = log_dir
@@ -415,6 +418,9 @@ if __name__ == "__main__":
             "norm": norm,
             "steps": steps,
         }
+    elif attack == "none":
+        attack = None
+        attack_kwargs = {}
     else:
         raise ValueError
 

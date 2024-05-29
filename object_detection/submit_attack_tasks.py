@@ -26,30 +26,30 @@ TARGETED = False
 RANDOM_START = False
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models"
-ATTACKS = {
-    "PGD": pgd_attack,
-    "FGSM": fgsm_attack,
-    "BIM": bim_attack,
-}
+ATTACKS = {"PGD": pgd_attack, "FGSM": fgsm_attack, "BIM": bim_attack, "none": "none"}
 STEPS_ATTACK = {
     "PGD": [1, 20],  # [1, 5, 10, 20]
     "FGSM": [None],
     "BIM": [1, 20],
+    "none": [1],
 }
 EPSILONS = {
     "PGD": [8],  # [1, 2, 4, 8]
     "FGSM": [8],
     "BIM": [8],
+    "none": [1],
 }
 ALPHAS = {
     "PGD": [0.01],
     "FGSM": [0.01],
     "BIM": [0.01],
+    "none": [1],
 }
 NORMS = {
     "PGD": [None],
     "FGSM": ["inf"],
     "BIM": ["inf"],
+    "none": [1],
 }
 
 logger.debug("Starting attack tasks")
@@ -180,6 +180,8 @@ for attack_name, attack in ATTACKS.items():
                     del attack_kwargs["norm"]
                 elif attack == bim_attack:
                     del attack_kwargs["random_start"]
+                elif attack == "none":
+                    attack_kwargs = {}
 
                 logger.debug(str(config_file))
                 logger.debug(str(checkpoint_file))
@@ -187,7 +189,7 @@ for attack_name, attack in ATTACKS.items():
                 result_dir = os.path.join(
                     f"{RESULT_DIR}/"
                     + f"{model_name}/"
-                    + f"{attack.__name__}_"
+                    + f"{attack.__name__ if attack != 'none' else 'none'}_"
                     + "_".join([k + format_value(v) for k, v in attack_kwargs.items()])
                 )
 
@@ -195,7 +197,7 @@ for attack_name, attack in ATTACKS.items():
                     logger.info(f"skipping {result_dir} as it already exists")
                 else:
                     logger.info(
-                        f"running attack {attack.__name__} with {attack_kwargs}"
+                        f"running attack {attack.__name__ if attack != 'none' else 'none'} with {attack_kwargs}"
                     )
                     logger.info(f"saving results to {result_dir}")
                     job = submit_attack(
