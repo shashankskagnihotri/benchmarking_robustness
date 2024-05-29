@@ -1,7 +1,7 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 base_lr = 0.001
-checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth'
+checkpoint = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth'
 custom_hooks = [
     dict(
         ema_type='ExpMomentumEMA',
@@ -21,13 +21,13 @@ custom_hooks = [
                     2.0,
                 ),
                 scale=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='RandomResize'),
             dict(crop_size=(
-                640,
-                640,
+                1280,
+                1280,
             ), type='RandomCrop'),
             dict(type='YOLOXHSVRandomAug'),
             dict(prob=0.5, type='RandomFlip'),
@@ -38,18 +38,14 @@ custom_hooks = [
                     114,
                 )),
                 size=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='Pad'),
             dict(type='PackDetInputs'),
         ],
         type='PipelineSwitchHook'),
 ]
-custom_imports = dict(
-    allow_failed_imports=False, imports=[
-        'mmpretrain.models',
-    ])
 data_root = 'data/VOCdevkit/'
 dataset_type = 'VOCDataset'
 default_hooks = dict(
@@ -66,16 +62,16 @@ env_cfg = dict(
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
 img_scales = [
     (
+        1280,
+        1280,
+    ),
+    (
         640,
         640,
     ),
     (
-        320,
-        320,
-    ),
-    (
-        960,
-        960,
+        1920,
+        1920,
     ),
 ]
 interval = 10
@@ -108,6 +104,7 @@ model = dict(
                 8,
                 16,
                 32,
+                64,
             ], type='MlvlPointGenerator'),
         bbox_coder=dict(type='DistancePointBBoxCoder'),
         exp_on_reg=True,
@@ -166,15 +163,9 @@ model = dict(
     type='RTMDet')
 norm_cfg = dict(num_groups=32, type='GN')
 optim_wrapper = dict(
-    constructor='LearningRateDecayOptimizerConstructor',
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
-        bias_decay_mult=0,
-        bypass_duplicate=True,
-        decay_rate=0.8,
-        decay_type='layer_wise',
-        norm_decay_mult=0,
-        num_layers=12),
+        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
     type='OptimWrapper')
 param_scheduler = [
     dict(
@@ -338,13 +329,13 @@ train_pipeline_stage2 = [
             2.0,
         ),
         scale=(
-            640,
-            640,
+            1280,
+            1280,
         ),
         type='RandomResize'),
     dict(crop_size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='RandomCrop'),
     dict(type='YOLOXHSVRandomAug'),
     dict(prob=0.5, type='RandomFlip'),
@@ -353,8 +344,8 @@ train_pipeline_stage2 = [
         114,
         114,
     )), size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='Pad'),
     dict(type='PackDetInputs'),
 ]
@@ -367,16 +358,16 @@ tta_pipeline = [
         transforms=[
             [
                 dict(keep_ratio=True, scale=(
+                    1280,
+                    1280,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
                     640,
                     640,
                 ), type='Resize'),
                 dict(keep_ratio=True, scale=(
-                    320,
-                    320,
-                ), type='Resize'),
-                dict(keep_ratio=True, scale=(
-                    960,
-                    960,
+                    1920,
+                    1920,
                 ), type='Resize'),
             ],
             [
@@ -391,8 +382,8 @@ tta_pipeline = [
                         114,
                     )),
                     size=(
-                        960,
-                        960,
+                        1920,
+                        1920,
                     ),
                     type='Pad'),
             ],

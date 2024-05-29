@@ -1,6 +1,6 @@
 import os
 from mmengine.config import Config
-from mmdetection.configs._base_.datasets.voc0712 import (
+from mmdetection.configs.pascal_voc.faster_rcnn_r50_fpn_1x_voc0712_cocofmt import (
     data_root as voc0712_data_root,
     dataset_type as voc0712_dataset_type,
     train_pipeline as voc0712_train_pipeline,
@@ -8,6 +8,7 @@ from mmdetection.configs._base_.datasets.voc0712 import (
     train_dataloader as voc0712_train_dataloader,
     val_dataloader as voc0712_val_dataloader,
 )
+
 
 from rich.traceback import install
 

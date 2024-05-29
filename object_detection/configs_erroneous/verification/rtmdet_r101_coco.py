@@ -1,7 +1,7 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 base_lr = 0.001
-checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth'
+checkpoint = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth'
 custom_hooks = [
     dict(
         ema_type='ExpMomentumEMA',
@@ -21,13 +21,13 @@ custom_hooks = [
                     2.0,
                 ),
                 scale=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='RandomResize'),
             dict(crop_size=(
-                640,
-                640,
+                1280,
+                1280,
             ), type='RandomCrop'),
             dict(type='YOLOXHSVRandomAug'),
             dict(prob=0.5, type='RandomFlip'),
@@ -38,18 +38,14 @@ custom_hooks = [
                     114,
                 )),
                 size=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='Pad'),
             dict(type='PackDetInputs'),
         ],
         type='PipelineSwitchHook'),
 ]
-custom_imports = dict(
-    allow_failed_imports=False, imports=[
-        'mmpretrain.models',
-    ])
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'
 default_hooks = dict(
@@ -66,16 +62,16 @@ env_cfg = dict(
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
 img_scales = [
     (
+        1280,
+        1280,
+    ),
+    (
         640,
         640,
     ),
     (
-        320,
-        320,
-    ),
-    (
-        960,
-        960,
+        1920,
+        1920,
     ),
 ]
 interval = 10
@@ -106,6 +102,7 @@ model = dict(
                 8,
                 16,
                 32,
+                64,
             ], type='MlvlPointGenerator'),
         bbox_coder=dict(type='DistancePointBBoxCoder'),
         exp_on_reg=True,
@@ -165,15 +162,9 @@ model = dict(
     type='RTMDet')
 norm_cfg = dict(num_groups=32, type='GN')
 optim_wrapper = dict(
-    constructor='LearningRateDecayOptimizerConstructor',
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
-        bias_decay_mult=0,
-        bypass_duplicate=True,
-        decay_rate=0.8,
-        decay_type='layer_wise',
-        norm_decay_mult=0,
-        num_layers=12),
+        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
     type='OptimWrapper')
 param_scheduler = [
     dict(
@@ -201,8 +192,8 @@ test_dataloader = dict(
         pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
-                640,
-                640,
+                1280,
+                1280,
             ), type='Resize'),
             dict(
                 pad_val=dict(img=(
@@ -211,8 +202,8 @@ test_dataloader = dict(
                     114,
                 )),
                 size=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='Pad'),
             dict(type='LoadAnnotations', with_bbox=True),
@@ -229,7 +220,7 @@ test_dataloader = dict(
         test_mode=True,
         type='CocoDataset'),
     drop_last=False,
-    num_workers=10,
+    num_workers=20,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = dict(
@@ -246,16 +237,16 @@ test_evaluator = dict(
 test_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
     dict(keep_ratio=True, scale=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='Resize'),
     dict(pad_val=dict(img=(
         114,
         114,
         114,
     )), size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='Pad'),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(
@@ -280,7 +271,7 @@ train_cfg = dict(
     val_interval=10)
 train_dataloader = dict(
     batch_sampler=None,
-    batch_size=32,
+    batch_size=16,
     dataset=dict(
         ann_file='annotations/instances_train2017.json',
         backend_args=None,
@@ -291,8 +282,8 @@ train_dataloader = dict(
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True),
             dict(img_scale=(
-                640,
-                640,
+                1280,
+                1280,
             ), pad_val=114.0, type='CachedMosaic'),
             dict(
                 keep_ratio=True,
@@ -301,13 +292,13 @@ train_dataloader = dict(
                     2.0,
                 ),
                 scale=(
-                    1280,
-                    1280,
+                    2560,
+                    2560,
                 ),
                 type='RandomResize'),
             dict(crop_size=(
-                640,
-                640,
+                1280,
+                1280,
             ), type='RandomCrop'),
             dict(type='YOLOXHSVRandomAug'),
             dict(prob=0.5, type='RandomFlip'),
@@ -318,14 +309,14 @@ train_dataloader = dict(
                     114,
                 )),
                 size=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='Pad'),
             dict(
                 img_scale=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 max_cached_images=20,
                 pad_val=(
@@ -341,7 +332,7 @@ train_dataloader = dict(
             dict(type='PackDetInputs'),
         ],
         type='CocoDataset'),
-    num_workers=10,
+    num_workers=20,
     persistent_workers=True,
     pin_memory=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))
@@ -349,8 +340,8 @@ train_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(img_scale=(
-        640,
-        640,
+        1280,
+        1280,
     ), pad_val=114.0, type='CachedMosaic'),
     dict(
         keep_ratio=True,
@@ -359,13 +350,13 @@ train_pipeline = [
             2.0,
         ),
         scale=(
-            1280,
-            1280,
+            2560,
+            2560,
         ),
         type='RandomResize'),
     dict(crop_size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='RandomCrop'),
     dict(type='YOLOXHSVRandomAug'),
     dict(prob=0.5, type='RandomFlip'),
@@ -374,13 +365,13 @@ train_pipeline = [
         114,
         114,
     )), size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='Pad'),
     dict(
         img_scale=(
-            640,
-            640,
+            1280,
+            1280,
         ),
         max_cached_images=20,
         pad_val=(
@@ -405,13 +396,13 @@ train_pipeline_stage2 = [
             2.0,
         ),
         scale=(
-            640,
-            640,
+            1280,
+            1280,
         ),
         type='RandomResize'),
     dict(crop_size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='RandomCrop'),
     dict(type='YOLOXHSVRandomAug'),
     dict(prob=0.5, type='RandomFlip'),
@@ -420,8 +411,8 @@ train_pipeline_stage2 = [
         114,
         114,
     )), size=(
-        640,
-        640,
+        1280,
+        1280,
     ), type='Pad'),
     dict(type='PackDetInputs'),
 ]
@@ -434,16 +425,16 @@ tta_pipeline = [
         transforms=[
             [
                 dict(keep_ratio=True, scale=(
+                    1280,
+                    1280,
+                ), type='Resize'),
+                dict(keep_ratio=True, scale=(
                     640,
                     640,
                 ), type='Resize'),
                 dict(keep_ratio=True, scale=(
-                    320,
-                    320,
-                ), type='Resize'),
-                dict(keep_ratio=True, scale=(
-                    960,
-                    960,
+                    1920,
+                    1920,
                 ), type='Resize'),
             ],
             [
@@ -458,8 +449,8 @@ tta_pipeline = [
                         114,
                     )),
                     size=(
-                        960,
-                        960,
+                        1920,
+                        1920,
                     ),
                     type='Pad'),
             ],
@@ -493,8 +484,8 @@ val_dataloader = dict(
         pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
-                640,
-                640,
+                1280,
+                1280,
             ), type='Resize'),
             dict(
                 pad_val=dict(img=(
@@ -503,8 +494,8 @@ val_dataloader = dict(
                     114,
                 )),
                 size=(
-                    640,
-                    640,
+                    1280,
+                    1280,
                 ),
                 type='Pad'),
             dict(type='LoadAnnotations', with_bbox=True),
@@ -521,7 +512,7 @@ val_dataloader = dict(
         test_mode=True,
         type='CocoDataset'),
     drop_last=False,
-    num_workers=10,
+    num_workers=20,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = dict(
