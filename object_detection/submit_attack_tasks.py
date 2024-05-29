@@ -10,6 +10,11 @@ import os
 from submitit.core.utils import FailedJobError
 from fractions import Fraction
 import itertools
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
+my_email = os.getenv("MY_EMAIL")
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -218,7 +223,7 @@ executor.update_parameters(
     slurm_time="01:00:00",
     slurm_gres="",
     slurm_mail_type="END, FAIL",
-    slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
+    slurm_mail_user=my_email,
 )
 
 executor.submit(collect_results, RESULT_DIR)
