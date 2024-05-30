@@ -1,128 +1,3 @@
-METAINFO = dict(
-    classes=(
-        'aeroplane',
-        'bicycle',
-        'bird',
-        'boat',
-        'bottle',
-        'bus',
-        'car',
-        'cat',
-        'chair',
-        'cow',
-        'diningtable',
-        'dog',
-        'horse',
-        'motorbike',
-        'person',
-        'pottedplant',
-        'sheep',
-        'sofa',
-        'train',
-        'tvmonitor',
-    ),
-    palette=[
-        (
-            106,
-            0,
-            228,
-        ),
-        (
-            119,
-            11,
-            32,
-        ),
-        (
-            165,
-            42,
-            42,
-        ),
-        (
-            0,
-            0,
-            192,
-        ),
-        (
-            197,
-            226,
-            255,
-        ),
-        (
-            0,
-            60,
-            100,
-        ),
-        (
-            0,
-            0,
-            142,
-        ),
-        (
-            255,
-            77,
-            255,
-        ),
-        (
-            153,
-            69,
-            1,
-        ),
-        (
-            120,
-            166,
-            157,
-        ),
-        (
-            0,
-            182,
-            199,
-        ),
-        (
-            0,
-            226,
-            252,
-        ),
-        (
-            182,
-            182,
-            255,
-        ),
-        (
-            0,
-            0,
-            230,
-        ),
-        (
-            220,
-            20,
-            60,
-        ),
-        (
-            163,
-            255,
-            0,
-        ),
-        (
-            0,
-            82,
-            0,
-        ),
-        (
-            3,
-            95,
-            161,
-        ),
-        (
-            0,
-            80,
-            100,
-        ),
-        (
-            183,
-            130,
-            88,
-        ),
-    ])
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 batch_augments = [
@@ -200,7 +75,7 @@ log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
 loss_lambda = 2.0
-max_epochs = 12
+max_epochs = 4
 max_iters = 270000
 model = dict(
     backbone=dict(
@@ -260,7 +135,7 @@ model = dict(
                 loss_weight=12.0,
                 type='FocalLoss',
                 use_sigmoid=True),
-            num_classes=80,
+            num_classes=20,
             stacked_convs=1,
             type='CoATSSHead'),
     ],
@@ -312,7 +187,7 @@ model = dict(
             type='QualityFocalLoss',
             use_sigmoid=True),
         loss_iou=dict(loss_weight=2.0, type='GIoULoss'),
-        num_classes=80,
+        num_classes=20,
         num_query=900,
         positional_encoding=dict(
             normalize=True,
@@ -396,7 +271,7 @@ model = dict(
                     loss_weight=12.0,
                     type='CrossEntropyLoss',
                     use_sigmoid=False),
-                num_classes=80,
+                num_classes=20,
                 reg_class_agnostic=False,
                 reg_decoded_bbox=True,
                 roi_feat_size=7,
@@ -529,7 +404,7 @@ model = dict(
     ],
     type='CoDETR',
     use_lsj=True)
-num_classes = 80
+num_classes = 20
 num_dec_layer = 6
 optim_wrapper = dict(
     clip_grad=dict(max_norm=0.1, norm_type=2),

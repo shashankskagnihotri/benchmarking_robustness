@@ -1,128 +1,3 @@
-METAINFO = dict(
-    classes=(
-        'aeroplane',
-        'bicycle',
-        'bird',
-        'boat',
-        'bottle',
-        'bus',
-        'car',
-        'cat',
-        'chair',
-        'cow',
-        'diningtable',
-        'dog',
-        'horse',
-        'motorbike',
-        'person',
-        'pottedplant',
-        'sheep',
-        'sofa',
-        'train',
-        'tvmonitor',
-    ),
-    palette=[
-        (
-            106,
-            0,
-            228,
-        ),
-        (
-            119,
-            11,
-            32,
-        ),
-        (
-            165,
-            42,
-            42,
-        ),
-        (
-            0,
-            0,
-            192,
-        ),
-        (
-            197,
-            226,
-            255,
-        ),
-        (
-            0,
-            60,
-            100,
-        ),
-        (
-            0,
-            0,
-            142,
-        ),
-        (
-            255,
-            77,
-            255,
-        ),
-        (
-            153,
-            69,
-            1,
-        ),
-        (
-            120,
-            166,
-            157,
-        ),
-        (
-            0,
-            182,
-            199,
-        ),
-        (
-            0,
-            226,
-            252,
-        ),
-        (
-            182,
-            182,
-            255,
-        ),
-        (
-            0,
-            0,
-            230,
-        ),
-        (
-            220,
-            20,
-            60,
-        ),
-        (
-            163,
-            255,
-            0,
-        ),
-        (
-            0,
-            82,
-            0,
-        ),
-        (
-            3,
-            95,
-            161,
-        ),
-        (
-            0,
-            80,
-            100,
-        ),
-        (
-            183,
-            130,
-            88,
-        ),
-    ])
 auto_scale_lr = dict(base_batch_size=64, enable=True)
 backend_args = None
 data_preprocessor = dict(
@@ -251,7 +126,7 @@ model = dict(
             reduction='sum',
             type='CrossEntropyLoss',
             use_sigmoid=True),
-        num_classes=80,
+        num_classes=20,
         out_channels=[
             1024,
             512,
@@ -305,12 +180,11 @@ optim_wrapper = dict(
     optimizer=dict(lr=0.001, momentum=0.9, type='SGD', weight_decay=0.0005),
     type='OptimWrapper')
 param_scheduler = [
-    dict(begin=0, by_epoch=False, end=2000, start_factor=0.1, type='LinearLR'),
-    dict(
-        by_epoch=True, gamma=0.1, milestones=[
-            218,
-            246,
-        ], type='MultiStepLR'),
+    dict(begin=0, by_epoch=False, end=666, start_factor=0.1, type='LinearLR'),
+    dict(by_epoch=True, gamma=0.1, milestones=[
+        72,
+        82,
+    ], type='MultiStepLR'),
 ]
 resume = False
 test_cfg = dict(type='TestLoop')

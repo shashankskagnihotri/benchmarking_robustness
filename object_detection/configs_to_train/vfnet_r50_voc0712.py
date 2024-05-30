@@ -1,128 +1,3 @@
-METAINFO = dict(
-    classes=(
-        'aeroplane',
-        'bicycle',
-        'bird',
-        'boat',
-        'bottle',
-        'bus',
-        'car',
-        'cat',
-        'chair',
-        'cow',
-        'diningtable',
-        'dog',
-        'horse',
-        'motorbike',
-        'person',
-        'pottedplant',
-        'sheep',
-        'sofa',
-        'train',
-        'tvmonitor',
-    ),
-    palette=[
-        (
-            106,
-            0,
-            228,
-        ),
-        (
-            119,
-            11,
-            32,
-        ),
-        (
-            165,
-            42,
-            42,
-        ),
-        (
-            0,
-            0,
-            192,
-        ),
-        (
-            197,
-            226,
-            255,
-        ),
-        (
-            0,
-            60,
-            100,
-        ),
-        (
-            0,
-            0,
-            142,
-        ),
-        (
-            255,
-            77,
-            255,
-        ),
-        (
-            153,
-            69,
-            1,
-        ),
-        (
-            120,
-            166,
-            157,
-        ),
-        (
-            0,
-            182,
-            199,
-        ),
-        (
-            0,
-            226,
-            252,
-        ),
-        (
-            182,
-            182,
-            255,
-        ),
-        (
-            0,
-            0,
-            230,
-        ),
-        (
-            220,
-            20,
-            60,
-        ),
-        (
-            163,
-            255,
-            0,
-        ),
-        (
-            0,
-            82,
-            0,
-        ),
-        (
-            3,
-            95,
-            161,
-        ),
-        (
-            0,
-            80,
-            100,
-        ),
-        (
-            183,
-            130,
-            88,
-        ),
-    ])
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 data_root = 'data/VOCdevkit/'
@@ -142,7 +17,7 @@ env_cfg = dict(
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 24
+max_epochs = 8
 model = dict(
     backbone=dict(
         dcn=dict(deform_groups=1, fallback_on_stride=False, type='DCNv2'),
@@ -180,7 +55,7 @@ model = dict(
             loss_weight=1.0,
             type='VarifocalLoss',
             use_sigmoid=True),
-        num_classes=80,
+        num_classes=20,
         stacked_convs=3,
         strides=[
             8,
@@ -237,15 +112,15 @@ optim_wrapper = dict(
     paramwise_cfg=dict(bias_decay_mult=0.0, bias_lr_mult=2.0),
     type='OptimWrapper')
 param_scheduler = [
-    dict(begin=0, by_epoch=False, end=500, start_factor=0.1, type='LinearLR'),
+    dict(begin=0, by_epoch=False, end=166, start_factor=0.1, type='LinearLR'),
     dict(
         begin=0,
         by_epoch=True,
-        end=24,
+        end=8,
         gamma=0.1,
         milestones=[
-            16,
-            22,
+            5,
+            7,
         ],
         type='MultiStepLR'),
 ]

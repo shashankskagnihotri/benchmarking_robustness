@@ -11,8 +11,8 @@ from voc0712_cocofmt_reference import (
     dataset_type as voc0712_dataset_type,
     train_pipeline as voc0712_train_pipeline,
     test_pipeline as voc0712_test_pipeline,
-    train_dataloader as voc0712_train_dataloader,
-    val_dataloader as voc0712_val_dataloader,
+    # train_dataloader as voc0712_train_dataloader,
+    # val_dataloader as voc0712_val_dataloader,
 )
 
 #! how to import num classes for each voc model in the right way !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -221,6 +221,32 @@ new_neck_configs = {
 }
 
 
+voc_train_dataloader = dict(
+    dataset=dict(
+        type="RepeatDataset",
+        times=3,
+        dataset=dict(
+            _delete_=True,
+            type=voc0712_dataset_type,
+            data_root=voc0712_data_root,
+            ann_file="annotations/voc0712_trainval.json",
+            data_prefix=dict(img=""),
+            metainfo=voc0712_METAINFO,
+            filter_cfg=dict(filter_empty_gt=True, min_size=32),
+            pipeline=voc0712_train_pipeline,
+            backend_args=None,
+        ),
+    )
+)
+voc_val_dataloader = dict(
+    dataset=dict(
+        type=voc0712_dataset_type,
+        ann_file="annotations/voc07_test.json",
+        data_prefix=dict(img=""),
+        metainfo=voc0712_METAINFO,
+        pipeline=voc0712_test_pipeline,
+    )
+)
 # new_dataset_type = {
 #     "coco": "CocoDataset",
 #     "voc0712": "VOCDataset",
@@ -464,23 +490,114 @@ if None in all_combis.values():
     print(f"In values {True}")
 
 
-# def num_classes_changer(d, prefix=""):
-#     for key in d:
-#         full_key = f"{prefix}.{key}" if prefix else key
-#         if "num_classes" in full_key:
-#             print(f"Found key: {full_key}")
-#             cfg._cfg_dict[full_key] = 20
-#         if isinstance(d[key], dict):
-#             num_classes_changer(d[key], full_key)
-def num_classes_changer(d, prefix=""):
-    # Use list(d.keys()) to avoid modifying the dictionary during iteration
-    for key in list(d.keys()):
-        full_key = f"{prefix}.{key}" if prefix else key
-        if "num_classes" in full_key:
-            print(f"Found key: {full_key}")
-        # If the value is a dictionary, apply the function recursively
-        if isinstance(d[key], dict):
-            num_classes_changer(d[key], full_key)
+def config_keybased_value_changer(
+    config_dictionary,
+    searched_key,
+    do_new,
+    new_absolute_value,
+    change_old_value_by,
+    prefix="",
+):
+    # If the input is a dictionary, iterate through its keys
+    if isinstance(config_dictionary, dict):
+        for key in list(config_dictionary.keys()):
+            full_key = f"{prefix}.{key}" if prefix else key
+            if key == searched_key:
+                print(f"Found key: {full_key}")
+                print(f"Old Value: {config_dictionary[key]}")
+                if do_new:
+                    config_dictionary[key] = (
+                        new_absolute_value  # Set the new value for the searched key
+                    )
+                else:
+                    config_dictionary[key] = (
+                        config_dictionary[key] // change_old_value_by
+                    )  # Change the old value
+                print(f"New Value: {config_dictionary[key]}")
+            # If the value is a dictionary, apply the function recursively
+            if isinstance(config_dictionary[key], dict):
+                config_keybased_value_changer(
+                    config_dictionary[key],
+                    searched_key,
+                    do_new,
+                    new_absolute_value,
+                    change_old_value_by,
+                    full_key,
+                )
+            # If the value is a list, apply the function to each element
+            elif isinstance(config_dictionary[key], list):
+                for i, item in enumerate(config_dictionary[key]):
+                    config_keybased_value_changer(
+                        item,
+                        searched_key,
+                        do_new,
+                        new_absolute_value,
+                        change_old_value_by,
+                        f"{full_key}[{i}]",
+                    )
+
+    # If the input is a list, iterate through its items
+    elif isinstance(config_dictionary, list):
+        for i, item in enumerate(config_dictionary):
+            config_keybased_value_changer(
+                item,
+                searched_key,
+                do_new,
+                new_absolute_value,
+                change_old_value_by,
+                f"{prefix}[{i}]",
+            )
+
+
+def adjust_param_scheduler(cfg, factor=3):
+    if (
+        hasattr(cfg, "model")
+        and hasattr(cfg.model, "optim_wrapper")
+        and hasattr(cfg.model.optim_wrapper, "param_scheduler")
+    ):
+        print("Found param_scheduler in configuration.")
+
+        for param_scheduler in cfg.model.optim_wrapper.param_scheduler:
+            if hasattr(param_scheduler, "by_epoch"):
+                if hasattr(param_scheduler, "begin"):
+                    print(f"Old begin: {param_scheduler.begin}")
+                    param_scheduler.begin = param_scheduler.begin // factor
+                    print(f"New begin: {param_scheduler.begin}")
+
+                if hasattr(param_scheduler, "end"):
+                    print(f"Old end: {param_scheduler.end}")
+                    param_scheduler.end = param_scheduler.end // factor
+                    print(f"New end: {param_scheduler.end}")
+
+                if hasattr(param_scheduler, "milestones"):
+                    print(f"Old milestones: {param_scheduler.milestones}")
+                    param_scheduler.milestones = [
+                        milestone // factor for milestone in param_scheduler.milestones
+                    ]
+                    print(f"New milestones: {param_scheduler.milestones}")
+    elif hasattr(cfg, "param_scheduler"):
+        print("Found param_scheduler in configuration.")
+
+        for param_scheduler in cfg.param_scheduler:
+            if hasattr(param_scheduler, "by_epoch"):
+                if hasattr(param_scheduler, "begin"):
+                    print(f"Old begin: {param_scheduler.begin}")
+                    param_scheduler.begin = param_scheduler.begin // factor
+                    print(f"New begin: {param_scheduler.begin}")
+
+                if hasattr(param_scheduler, "end"):
+                    print(f"Old end: {param_scheduler.end}")
+                    param_scheduler.end = param_scheduler.end // factor
+                    print(f"New end: {param_scheduler.end}")
+
+                if hasattr(param_scheduler, "milestones"):
+                    print(f"Old milestones: {param_scheduler.milestones}")
+                    param_scheduler.milestones = [
+                        milestone // factor for milestone in param_scheduler.milestones
+                    ]
+                    print(f"New milestones: {param_scheduler.milestones}")
+    else:
+        print("param_scheduler not found in configuration.")
 
 
 #! Take in more files
@@ -567,6 +684,16 @@ for (neck, backbone, dataset), found in all_combis.items():
         backbone_ref, neck_ref, dataset_ref = which(reference_file)
         cfg = Config.fromfile(reference_file)
 
+        if neck == "Detic" and dataset == dataset_ref:
+            config_keybased_value_changer(
+                config_dictionary=cfg._cfg_dict,
+                searched_key="num_classes",
+                do_new=True,
+                new_absolute_value=80,  #! check if worked
+                change_old_value_by=1,
+                prefix="",
+            )
+
         assert (
             neck == neck_ref
         ), f"Neck mismatch: {neck} != {neck_ref}, make neck in refercence list"
@@ -592,19 +719,62 @@ for (neck, backbone, dataset), found in all_combis.items():
             cfg.data_root = voc0712_data_root
             cfg.dataset_type = voc0712_dataset_type
 
-            cfg.METAINFO = voc0712_METAINFO
+            # cfg.METAINFO = voc0712_METAINFO
 
             cfg.train_pipeline = voc0712_train_pipeline
             cfg.test_pipeline = voc0712_test_pipeline
 
-            cfg.train_dataloader = voc0712_train_dataloader
-            cfg.val_dataloader = voc0712_val_dataloader
-            cfg.test_dataloader = voc0712_val_dataloader
+            cfg.train_dataloader = voc_train_dataloader
+            cfg.val_dataloader = voc_val_dataloader
+            cfg.test_dataloader = voc_val_dataloader
+
+            config_keybased_value_changer(
+                config_dictionary=cfg._cfg_dict,
+                searched_key="num_classes",
+                do_new=True,
+                new_absolute_value=20,
+                change_old_value_by=1,
+                prefix="",
+            )
 
             if cfg.train_cfg.type == "EpochBasedTrainLoop":
-                cfg.train_cfg.max_epochs = cfg.train_cfg.max_epochs // 3
+                config_keybased_value_changer(
+                    config_dictionary=cfg._cfg_dict,
+                    searched_key="max_epochs",
+                    do_new=False,
+                    new_absolute_value=0,
+                    change_old_value_by=3,
+                    prefix="",
+                )
+                adjust_param_scheduler(cfg, factor=3)
 
-            num_classes_changer(cfg._cfg_dict)
+            # if cfg.train_cfg.type == "EpochBasedTrainLoop":
+            #! max_epochs finder
+            #! cfg.max_epochs = cfg.max_epochs // 3
+            # for each param_scheduler.start //3
+            #! for each param_scheduler.end //3
+            #! for each milestone //3
+
+            # param_scheduler = [
+            # dict(
+            #     begin=0,
+            #     by_epoch=False,
+            #     end=4000,
+            #     start_factor=0.00025,
+            #     type='LinearLR'),
+            # dict(
+            #     begin=0,
+            #     by_epoch=True,
+            #     end=25,
+            #     gamma=0.1,
+            #     milestones=[
+            #         22,
+            #         24,
+            #     ],
+            #     type='MultiStepLR'),
+
+            # cfg.max_epochs = cfg.max_epochs // 3
+            # cfg.train_cfg.max_epochs = cfg.train_cfg.max_epochs // 3  #! sheduled??
 
             #! when try to update the metric
             # cfg.val_evaluator = (

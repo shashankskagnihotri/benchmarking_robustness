@@ -123,7 +123,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
-                num_classes=22047,
+                num_classes=80,
                 reg_class_agnostic=True,
                 reg_predictor_cfg=[
                     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -160,7 +160,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
-                num_classes=22047,
+                num_classes=80,
                 reg_class_agnostic=True,
                 reg_predictor_cfg=[
                     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -197,7 +197,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
-                num_classes=22047,
+                num_classes=80,
                 reg_class_agnostic=True,
                 reg_predictor_cfg=[
                     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -227,7 +227,7 @@ model = dict(
             in_channels=256,
             loss_mask=dict(
                 loss_weight=1.0, type='CrossEntropyLoss', use_mask=True),
-            num_classes=22047,
+            num_classes=80,
             num_convs=4,
             type='FCNMaskHead'),
         mask_roi_extractor=dict(
@@ -258,7 +258,7 @@ model = dict(
             pos_weight=0.25,
             type='GaussianFocalLoss'),
         norm_cfg=dict(num_groups=32, requires_grad=True, type='GN'),
-        num_classes=1,
+        num_classes=80,
         stacked_convs=4,
         strides=[
             8,
@@ -357,7 +357,7 @@ model = dict(
             nms=dict(iou_threshold=0.7, type='nms'),
             nms_pre=2000)),
     type='CascadeRCNN')
-num_classes = 22047
+num_classes = 80
 optim_wrapper = dict(
     _scope_='mmdet',
     optimizer=dict(lr=0.04, momentum=0.9, type='SGD', weight_decay=4e-05),

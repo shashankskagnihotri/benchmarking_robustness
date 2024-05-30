@@ -1,128 +1,3 @@
-METAINFO = dict(
-    classes=(
-        'aeroplane',
-        'bicycle',
-        'bird',
-        'boat',
-        'bottle',
-        'bus',
-        'car',
-        'cat',
-        'chair',
-        'cow',
-        'diningtable',
-        'dog',
-        'horse',
-        'motorbike',
-        'person',
-        'pottedplant',
-        'sheep',
-        'sofa',
-        'train',
-        'tvmonitor',
-    ),
-    palette=[
-        (
-            106,
-            0,
-            228,
-        ),
-        (
-            119,
-            11,
-            32,
-        ),
-        (
-            165,
-            42,
-            42,
-        ),
-        (
-            0,
-            0,
-            192,
-        ),
-        (
-            197,
-            226,
-            255,
-        ),
-        (
-            0,
-            60,
-            100,
-        ),
-        (
-            0,
-            0,
-            142,
-        ),
-        (
-            255,
-            77,
-            255,
-        ),
-        (
-            153,
-            69,
-            1,
-        ),
-        (
-            120,
-            166,
-            157,
-        ),
-        (
-            0,
-            182,
-            199,
-        ),
-        (
-            0,
-            226,
-            252,
-        ),
-        (
-            182,
-            182,
-            255,
-        ),
-        (
-            0,
-            0,
-            230,
-        ),
-        (
-            220,
-            20,
-            60,
-        ),
-        (
-            163,
-            255,
-            0,
-        ),
-        (
-            0,
-            82,
-            0,
-        ),
-        (
-            3,
-            95,
-            161,
-        ),
-        (
-            0,
-            80,
-            100,
-        ),
-        (
-            183,
-            130,
-            88,
-        ),
-    ])
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend = 'pillow'
 backend_args = None
@@ -197,12 +72,12 @@ model = dict(
                 type='FocalLoss',
                 use_sigmoid=True),
             loss_giou=dict(loss_weight=2.0, reduction='sum', type='GIoULoss'),
-            num_classes=80,
+            num_classes=20,
             type='DiffusionDetCriterion'),
         ddim_sampling_eta=1.0,
         deep_supervision=True,
         feat_channels=256,
-        num_classes=80,
+        num_classes=20,
         num_heads=6,
         num_proposals=500,
         prior_prob=0.01,

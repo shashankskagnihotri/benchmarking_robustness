@@ -1,128 +1,3 @@
-METAINFO = dict(
-    classes=(
-        'aeroplane',
-        'bicycle',
-        'bird',
-        'boat',
-        'bottle',
-        'bus',
-        'car',
-        'cat',
-        'chair',
-        'cow',
-        'diningtable',
-        'dog',
-        'horse',
-        'motorbike',
-        'person',
-        'pottedplant',
-        'sheep',
-        'sofa',
-        'train',
-        'tvmonitor',
-    ),
-    palette=[
-        (
-            106,
-            0,
-            228,
-        ),
-        (
-            119,
-            11,
-            32,
-        ),
-        (
-            165,
-            42,
-            42,
-        ),
-        (
-            0,
-            0,
-            192,
-        ),
-        (
-            197,
-            226,
-            255,
-        ),
-        (
-            0,
-            60,
-            100,
-        ),
-        (
-            0,
-            0,
-            142,
-        ),
-        (
-            255,
-            77,
-            255,
-        ),
-        (
-            153,
-            69,
-            1,
-        ),
-        (
-            120,
-            166,
-            157,
-        ),
-        (
-            0,
-            182,
-            199,
-        ),
-        (
-            0,
-            226,
-            252,
-        ),
-        (
-            182,
-            182,
-            255,
-        ),
-        (
-            0,
-            0,
-            230,
-        ),
-        (
-            220,
-            20,
-            60,
-        ),
-        (
-            163,
-            255,
-            0,
-        ),
-        (
-            0,
-            82,
-            0,
-        ),
-        (
-            3,
-            95,
-            161,
-        ),
-        (
-            0,
-            80,
-            100,
-        ),
-        (
-            183,
-            130,
-            88,
-        ),
-    ])
 auto_scale_lr = dict(base_batch_size=64, enable=True)
 backend = 'pillow'
 backend_args = None
@@ -166,7 +41,7 @@ load_from = None
 log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 25
+max_epochs = 8
 model = dict(
     backbone=dict(
         depth=50,
@@ -247,7 +122,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
-                num_classes=22047,
+                num_classes=20,
                 reg_class_agnostic=True,
                 reg_predictor_cfg=[
                     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -284,7 +159,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
-                num_classes=22047,
+                num_classes=20,
                 reg_class_agnostic=True,
                 reg_predictor_cfg=[
                     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -321,7 +196,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
-                num_classes=22047,
+                num_classes=20,
                 reg_class_agnostic=True,
                 reg_predictor_cfg=[
                     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -351,7 +226,7 @@ model = dict(
             in_channels=256,
             loss_mask=dict(
                 loss_weight=1.0, type='CrossEntropyLoss', use_mask=True),
-            num_classes=22047,
+            num_classes=20,
             num_convs=4,
             type='FCNMaskHead'),
         mask_roi_extractor=dict(
@@ -382,7 +257,7 @@ model = dict(
             pos_weight=0.25,
             type='GaussianFocalLoss'),
         norm_cfg=dict(num_groups=32, requires_grad=True, type='GN'),
-        num_classes=1,
+        num_classes=20,
         stacked_convs=4,
         strides=[
             8,
@@ -481,7 +356,7 @@ model = dict(
             nms=dict(iou_threshold=0.7, type='nms'),
             nms_pre=2000)),
     type='CascadeRCNN')
-num_classes = 22047
+num_classes = 20
 optim_wrapper = dict(
     _scope_='mmdet',
     optimizer=dict(lr=0.04, momentum=0.9, type='SGD', weight_decay=4e-05),
@@ -491,17 +366,17 @@ param_scheduler = [
     dict(
         begin=0,
         by_epoch=False,
-        end=4000,
+        end=1333,
         start_factor=0.00025,
         type='LinearLR'),
     dict(
         begin=0,
         by_epoch=True,
-        end=25,
+        end=8,
         gamma=0.1,
         milestones=[
-            22,
-            24,
+            7,
+            8,
         ],
         type='MultiStepLR'),
 ]
