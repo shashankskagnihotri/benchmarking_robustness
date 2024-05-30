@@ -4,6 +4,11 @@ import argparse
 import submitit
 import logging
 from rich.logging import RichHandler
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
+my_email = os.getenv("MY_EMAIL")
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -132,7 +137,7 @@ def main(args):
         slurm_mem=30,
         timeout_min=1800,  # 30 hours
         slurm_mail_type="END,FAIL",
-        slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
+        slurm_mail_user=my_email,
     )
 
     for dataset in selected_datasets:

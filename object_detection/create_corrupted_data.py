@@ -6,6 +6,11 @@ import mmcv
 import logging
 from rich.logging import RichHandler
 import submitit
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
+my_email = os.getenv("MY_EMAIL")
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -98,7 +103,7 @@ if __name__ == "__main__":
         slurm_mem="4GB",
         slurm_time="10:00:00",
         slurm_mail_type="END,FAIL",
-        slurm_mail_user="jonas.jakubassa@students.uni-mannheim.de",
+        slurm_mail_user=my_email,
     )
     jobs = []
 
