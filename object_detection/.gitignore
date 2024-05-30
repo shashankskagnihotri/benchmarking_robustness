@@ -3,3 +3,4 @@
 *.egg-info
 models
 slurm/results*
+slurm/work_dir_voc/
