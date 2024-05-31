@@ -1,7 +1,6 @@
 from pathlib import Path
 import submitit
 from adv_attack import run_attack_val, pgd_attack, fgsm_attack, bim_attack
-from collect_attack_results import collect_results
 from tqdm import tqdm
 import logging
 from rich.logging import RichHandler
@@ -67,6 +66,25 @@ logger.debug(f"EPSILONS: {EPSILONS}")
 logger.debug(f"ALPHAS: {ALPHAS}")
 
 
+def get_configs_and_checkpoints(model_dir):
+    checkpoint_files = []
+    config_files = []
+
+    for subdir in Path(MODEL_DIR).iterdir():
+        if subdir.is_dir():
+            checkpoint_file = str(find_latest_epoch_file(subdir))
+            config_file = str(find_python_files(subdir))
+
+            if checkpoint_file != "None" and config_file != "None":
+                logger.info(f"checkpoint file: {checkpoint_file}")
+                logger.info(f"config file: {config_file}")
+                checkpoint_files.append(checkpoint_file)
+                config_files.append(config_file)
+            else:
+                logger.warning(f"No checkpoint or config file found in {subdir}")
+    return config_files, checkpoint_files
+
+
 def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_dir):
     job = executor.submit(
         run_attack_val,
@@ -79,29 +97,9 @@ def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_di
     return job
 
 
-checkpoint_files = []
-config_files = []
+config_files, checkpoint_files = get_configs_and_checkpoints(MODEL_DIR)
 
-for subdir in Path(MODEL_DIR).iterdir():
-    if subdir.is_dir():
-        checkpoint_file = str(find_latest_epoch_file(subdir))
-        config_file = str(find_python_files(subdir))
-
-        if checkpoint_file != "None" and config_file != "None":
-            logger.info(f"checkpoint file: {checkpoint_file}")
-            logger.info(f"config file: {config_file}")
-            checkpoint_files.append(checkpoint_file)
-            config_files.append(config_file)
-        else:
-            logger.warning(f"No checkpoint or config file found in {subdir}")
-
-logger.debug("setup submitit executor")
 logger.info(f"found {len(config_files)} config and checkpoint files")
-# num_tasks = min(40, len(config_files))
-num_tasks = 1
-slurm_mem = 10_000  # 10GB per task
-# logger.debug(f"submitting {len(config_files)} tasks")
-logger.debug(f"slurm_mem: {slurm_mem}")
 
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
@@ -109,8 +107,8 @@ executor.update_parameters(
     slurm_gres="gpu:1",
     nodes=1,
     cpus_per_task=1,
-    tasks_per_node=num_tasks,
-    slurm_mem=slurm_mem,
+    tasks_per_node=1,
+    slurm_mem=10_000,  # 10GB per task
     slurm_mail_type="all",
 )
 jobs = []
@@ -150,20 +148,17 @@ for attack_name, attack in ATTACKS.items():
 
                 logger.debug(str(config_file))
                 logger.debug(str(checkpoint_file))
+
                 model_name = str(config_file).split("/")[-1][0:-3]
                 result_dir = os.path.join(
-                    f"{RESULT_DIR}/"
-                    + f"{model_name}/"
-                    + f"{attack.__name__ if attack != 'none' else 'none'}_"
+                    f"{RESULT_DIR}/{model_name}/{attack_name}_"
                     + "_".join([k + format_value(v) for k, v in attack_kwargs.items()])
                 )
 
                 if os.path.exists(result_dir):
                     logger.info(f"skipping {result_dir} as it already exists")
                 else:
-                    logger.info(
-                        f"running attack {attack.__name__ if attack != 'none' else 'none'} with {attack_kwargs}"
-                    )
+                    logger.info(f"running attack {attack_name} with {attack_kwargs}")
                     logger.info(f"saving results to {result_dir}")
                     job = submit_attack(
                         config_file,
@@ -174,16 +169,7 @@ for attack_name, attack in ATTACKS.items():
                     )
                     jobs.append(job)
 
-# wait until all jobs are completed:
-outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
-
-# change notification and no need for a gpu
-executor.update_parameters(
-    slurm_partition="single",
-    slurm_time="01:00:00",
-    slurm_gres="",
-    slurm_mail_type="END, FAIL",
-    slurm_mail_user=my_email,
+logger.info(
+    "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
 )
-
-executor.submit(collect_results, RESULT_DIR)
+outputs = [job.result() for job in tqdm(jobs, desc="Processing Jobs")]
