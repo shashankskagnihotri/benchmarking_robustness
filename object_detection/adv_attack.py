@@ -11,7 +11,6 @@ from torchvision import transforms
 from mmengine.evaluator import Evaluator
 import logging
 from typing import Callable
-import collect_attack_results
 import wandb
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
@@ -367,9 +366,6 @@ def parse_args():
         default="./work_dirs/",
         help="Directory path where result files are saved (default: ./slurm/logs)",
     )
-    parser.add_argument(
-        "--collect_results", action="store_true", help="Collect attack results"
-    )
 
     return parser.parse_args()
 
@@ -377,49 +373,37 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    targeted = args.targeted
-    random_start = args.random_start
-    steps = args.steps
-    alpha = args.alpha
-    epsilon = args.epsilon
-    attack = args.attack
-    checkpoint_file = args.checkpoint_file
-    config_file = args.config_file
-    norm = args.norm
-    output_dir = args.output_dir
-    collect_results = args.collect_results
-
     # Select right attack function
-    if attack == "pgd":
+    if args.attack == "pgd":
         attack = pgd_attack
         attack_kwargs = {
-            "steps": steps,
-            "epsilon": epsilon,
-            "alpha": alpha,
-            "targeted": targeted,
-            "random_start": random_start,
+            "steps": args.steps,
+            "epsilon": args.epsilon,
+            "alpha": args.alphaalpha,
+            "targeted": args.targeted,
+            "random_start": args.random_start,
         }
-    elif attack == "cospgd":
+    elif args.attack == "cospgd":
         attack_kwargs = {}
         raise NotImplementedError
-    elif attack == "fgsm":
+    elif args.attack == "fgsm":
         attack = fgsm_attack
         attack_kwargs = {
-            "epsilon": epsilon,
-            "alpha": alpha,
-            "targeted": targeted,
-            "norm": norm,
+            "epsilon": args.epsilon,
+            "alpha": args.alpha,
+            "targeted": args.targeted,
+            "norm": args.norm,
         }
-    elif attack == "bim":
+    elif args.attack == "bim":
         attack = bim_attack
         attack_kwargs = {
-            "epsilon": epsilon,
-            "alpha": alpha,
-            "targeted": targeted,
-            "norm": norm,
-            "steps": steps,
+            "epsilon": args.epsilon,
+            "alpha": args.alpha,
+            "targeted": args.targeted,
+            "norm": args.norm,
+            "steps": args.steps,
         }
-    elif attack == "none":
+    elif args.attack == "none":
         attack = None
         attack_kwargs = {}
     else:
@@ -428,10 +412,7 @@ if __name__ == "__main__":
     run_attack_val(
         attack=attack,
         attack_kwargs=attack_kwargs,
-        config_file=config_file,
-        checkpoint_file=checkpoint_file,
-        log_dir=output_dir,
+        config_file=args.config_file,
+        checkpoint_file=args.checkpoint_file,
+        log_dir=args.output_dir,
     )
-
-    if collect_results:
-        collect_attack_results.collect_results()
