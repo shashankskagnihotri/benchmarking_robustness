@@ -317,7 +317,7 @@ def run_attack_val(
     runner.val()
 
 
-if __name__ == "__main__":
+def parse_args():
     parser = argparse.ArgumentParser(description="Argument Parser for the variables")
     parser.add_argument(
         "--targeted", action="store_true", help="Enable targeted attack"
@@ -371,7 +371,11 @@ if __name__ == "__main__":
         "--collect_results", action="store_true", help="Collect attack results"
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
 
     targeted = args.targeted
     random_start = args.random_start
@@ -419,7 +423,7 @@ if __name__ == "__main__":
         attack = None
         attack_kwargs = {}
     else:
-        raise ValueError
+        raise NotImplementedError
 
     run_attack_val(
         attack=attack,
