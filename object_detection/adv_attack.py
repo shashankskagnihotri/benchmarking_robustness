@@ -1,5 +1,4 @@
 import argparse
-import json
 import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
@@ -12,12 +11,8 @@ from torchvision import transforms
 from mmengine.evaluator import Evaluator
 import logging
 from typing import Callable
-import shutil
-import os
 import collect_attack_results
 import wandb
-from mmengine.registry import HOOKS
-from mmengine.hooks import Hook
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
 
@@ -166,7 +161,7 @@ def bim_attack(
             sign_data_grad *= -1
         adv_images = adv_images.detach() + alpha * sign_data_grad
 
-        # Adding clipping to maintain [0,1] range
+        # Adding clipping to maintain [0,255] range
         if norm == "inf":
             delta = torch.clamp(adv_images - images, min=-1 * epsilon, max=epsilon)
         elif norm == "two":
@@ -296,15 +291,17 @@ def run_attack_val(
     cfg.load_from = checkpoint_file
     cfg.checkpoint_config = dict(interval=0)
 
+    model_name = config_file.split("/")[-1].split(".")[0]
     wandb.init(
         project="attacks",
         config={
-            "attack": attack.__name__,
+            "attack": attack.__name__ if attack is not None else "none",
             "attack_kwargs": attack_kwargs,
             "config_file": config_file,
             "checkpoint_file": checkpoint_file,
         },
-        name=config_file.split("/")[-1].split(".")[0],
+        name=model_name,
+        group=model_name,
     )
 
     cfg.log_config = dict(
