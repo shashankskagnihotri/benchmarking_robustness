@@ -7,11 +7,11 @@ from rich.logging import RichHandler
 import os
 import itertools
 from dotenv import load_dotenv
-
 from misc import find_latest_epoch_file, find_python_files, format_value
 
 load_dotenv()  # Load environment variables from .env file
 my_email = os.getenv("MY_EMAIL")
+assert my_email is not None, "Please set the MY_EMAIL environment variable"
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -39,12 +39,12 @@ EPSILONS = {
     "PGD": [8],  # [1, 2, 4, 8]
     "FGSM": [8],
     "BIM": [8],
-    "none": [1],
+    "none": [0],
 }
 ALPHAS = {
-    "PGD": [0.01],
-    "FGSM": [0.01],
-    "BIM": [0.01],
+    "PGD": [0.01 * 255],
+    "FGSM": [0.01 * 255],
+    "BIM": [0.01 * 255],
     "none": [1],
 }
 NORMS = {
@@ -144,7 +144,11 @@ for attack_name, attack in ATTACKS.items():
                 elif attack == bim_attack:
                     del attack_kwargs["random_start"]
                 elif attack == "none":
-                    attack_kwargs = {}
+                    attack_kwargs = {
+                        "epsilon": 0,
+                        "alpha": 0,
+                        "steps": 0,
+                    }
 
                 logger.debug(str(config_file))
                 logger.debug(str(checkpoint_file))
