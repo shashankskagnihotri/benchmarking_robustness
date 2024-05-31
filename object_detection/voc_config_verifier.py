@@ -64,7 +64,13 @@ def has_been_started_before(config_file, slurm_log_folders):
 
 
 for config_file in folder_entry_list_configs_to_train:
-    if "voc" in config_file or "Detic" in config_file:
+    if (
+        ("voc" in config_file and "atss" in config_file)
+        or ("voc" in config_file and "libra_rcnn" in config_file)
+        or ("voc" in config_file and "fsaf" in config_file)
+        or ("voc" in config_file and "free_anchor" in config_file)
+        or "Detic" in config_file
+    ):
         print(f"config_file : {config_file}")
         config_path = os.path.join(path_configs_to_train, config_file)
         print(f"config_path : {config_path}")
