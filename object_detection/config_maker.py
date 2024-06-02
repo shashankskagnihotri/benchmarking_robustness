@@ -173,7 +173,7 @@ new_backbone_configs = {
         ),
     },
     "convnext-b": {
-        # "_delete_": True, # gave errors when tried to train
+        # "_delete_": True,
         "type": "mmpretrain.ConvNeXt",
         "arch": "base",
         "out_indices": [1, 2, 3],
@@ -184,7 +184,7 @@ new_backbone_configs = {
         "init_cfg": dict(
             type="Pretrained",
             checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth",
-            prefix="backbone.",  # ? maybe get rid of prefix
+            prefix="backbone.",
         ),
     },
     "r101": {
