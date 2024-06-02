@@ -149,7 +149,7 @@ for config_file in folder_entry_list_configs_to_train:
                                 if (
                                     "DUE TO TIME LIMIT" in logfile_content
                                     or "min(max_walltime * 0.8, max_walltime - 10 * 60"
-                                    in logfile_content
+                                    in logfile_content or "TypeError: can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime_info_hook.RuntimeInfoHook" in logfile_content
                                 ):
                                     print(f"training {config_file} from {config_path}")
                                     specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"

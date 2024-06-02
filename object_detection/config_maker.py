@@ -11,6 +11,7 @@ from voc0712_cocofmt_reference import (
     dataset_type as voc0712_dataset_type,
     train_pipeline as voc0712_train_pipeline,
     test_pipeline as voc0712_test_pipeline,
+    val_evaluator as voc0712_val_evaluator,
     # train_dataloader as voc0712_train_dataloader,
     # val_dataloader as voc0712_val_dataloader,
 )
@@ -734,6 +735,10 @@ for (neck, backbone, dataset), found in all_combis.items():
             cfg.train_dataloader = voc_train_dataloader
             cfg.val_dataloader = voc_val_dataloader
             cfg.test_dataloader = voc_val_dataloader
+
+
+            cfg.val_evaluator = voc0712_val_evaluator
+            cfg.test_evaluator = voc0712_val_evaluator
 
             cfg.train_dataloader.batch_size = original_train_batch_size
             cfg.val_dataloader.batch_size = original_val_batch_size

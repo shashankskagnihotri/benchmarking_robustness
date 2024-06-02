@@ -16,26 +16,26 @@ install(show_locals=False)
 # TODO logging from Simon
 
 
-slurm_log_folder_path = "./slurm/train_work_dir"  # ? change to eval for evaluation
+slurm_log_folder_path = "./slurm/train_work_dir_voc"  # ? change to eval for evaluation
 slurm_log_folders = os.listdir(slurm_log_folder_path)
 
-slurm_results_path = "slurm/train_results"  # ? change to eval for evaluation
+slurm_results_path = "slurm/train_results_voc"  # ? change to eval for evaluation
 path_erroneous_configs = (
-    "./configs_erroneous_training"  # ? change to eval for evaluation
+    "./configs_erroneous_training_voc"  # ? change to eval for evaluation
 )
 
 
-path_verified_configs = "./configs_verified"  # ? change to eval for evaluation
+path_verified_configs = "./configs_verified_voc"  # ? change to eval for evaluation
 folder_entry_list_configs_to_train = os.listdir(
     path_verified_configs
 )  # ? change to eval for evaluation
 
-path_configs_to_test = "./configs_to_test"
+path_configs_to_test = "./configs_to_test_voc"
 
 
 verify_subset = True  #! for checking functionality
-GPU_NUM = 1 #! setting right settings for slurm
-TIME = "00:10:00"
+GPU_NUM = 4 #! setting right settings for slurm
+TIME = "20:00:00"
 SLURM_PARTITION = "dev_gpu_4"
 
 
@@ -156,7 +156,7 @@ for config_file in folder_entry_list_configs_to_train:
                                     if (
                                         "DUE TO TIME LIMIT" in logfile_content
                                         or "min(max_walltime * 0.8, max_walltime - 10 * 60"
-                                        in logfile_content
+                                        in logfile_content or "TypeError: can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime_info_hook.RuntimeInfoHook" in logfile_content
                                     ):
                                         print(f"training {config_file} from {config_path}")
                                         specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
