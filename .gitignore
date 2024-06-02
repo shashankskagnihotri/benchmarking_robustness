@@ -178,3 +178,4 @@ dataset/
 .fio
 
 *.pth
+semantic_segmentation/configs/onepeace/one-peace-vision.pkl
