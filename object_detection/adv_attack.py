@@ -21,7 +21,6 @@ def pgd_attack(
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
 
     images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    assert isinstance(images, torch.Tensor)
 
     # from retinanet_r50_fpn.py. TODO: read from runner.model
     mean = [123.675, 116.28, 103.53]
@@ -29,6 +28,7 @@ def pgd_attack(
 
     images = denorm(images, mean, std)
     adv_images = images.clone().float().detach().to("cuda")
+    adv_images.requires_grad = True
 
     if targeted:
         raise NotImplementedError
@@ -233,9 +233,9 @@ class AdversarialAttackHook(Hook):
         self.attack_kwargs = attack_kwargs
 
     def before_val_iter(self, runner, batch_idx: int, data_batch: Sequence[dict]):
-        data_batch_prepro = self.attack(data_batch, runner, **self.attack_kwargs)
-        runner.model.data_preprocessor(data_batch_prepro, training=False)
-        runner.data_batch = data_batch_prepro  # Update the data_batch for the iteration
+        with torch.enable_grad():
+            data_batch_prepro = self.attack(data_batch, runner, **self.attack_kwargs)
+        runner.data_batch = data_batch_prepro  # overwrite the data_batch
 
     def after_val_iter(
         self, runner, batch_idx: int, data_batch: Sequence[dict], outputs
@@ -250,11 +250,22 @@ def run_attack_val(
     attack_kwargs: dict,
     log_dir: str,
 ):
+    # Setup the configuration
     cfg = Config.fromfile(config_file)
     cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
     cfg.checkpoint_config = dict(interval=0)
+    cfg.log_config = dict(
+        interval=100,
+        hooks=[
+            dict(type="TextLoggerHook"),
+            dict(
+                type="WandbLoggerHook",
+            ),
+        ],
+    )
 
+    # Initialize wandb
     model_name = config_file.split("/")[-1].split(".")[0]
     wandb.init(
         project="attacks",
@@ -268,15 +279,7 @@ def run_attack_val(
         group=model_name,
     )
 
-    cfg.log_config = dict(
-        interval=100,
-        hooks=[
-            dict(type="TextLoggerHook"),
-            dict(
-                type="WandbLoggerHook",
-            ),
-        ],
-    )
+    # Initialize the runner
     runner = Runner.from_cfg(cfg)
 
     # Register the logging hooks
@@ -287,6 +290,7 @@ def run_attack_val(
     if attack is not None:
         runner.register_hook(AdversarialAttackHook(attack, attack_kwargs))
 
+    # Run the attack
     runner.val()
 
 
@@ -343,7 +347,7 @@ def parse_args():
 
     return parser.parse_args()
 
-``
+
 if __name__ == "__main__":
     args = parse_args()
 
