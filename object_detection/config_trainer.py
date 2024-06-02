@@ -34,7 +34,7 @@ path_configs_to_test = "./configs_to_test"
 
 
 verify_subset = True  #! for checking functionality
-GPU_NUM = 1
+GPU_NUM = 1 #! setting right settings for slurm
 TIME = "00:10:00"
 SLURM_PARTITION = "dev_gpu_4"
 

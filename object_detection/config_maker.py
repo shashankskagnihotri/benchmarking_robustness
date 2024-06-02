@@ -226,10 +226,10 @@ voc_train_dataloader = dict(
         type="RepeatDataset",
         times=3,
         dataset=dict(
-            _delete_=True,
+            #_delete_=True,
             type=voc0712_dataset_type,
             data_root=voc0712_data_root,
-            ann_file="annotations/voc0712_trainval.json",
+            ann_file="voc_coco_fmt_annotations/voc0712_trainval.json", # changed from annotations/....
             data_prefix=dict(img=""),
             metainfo=voc0712_METAINFO,
             filter_cfg=dict(filter_empty_gt=True, min_size=32),
@@ -241,7 +241,8 @@ voc_train_dataloader = dict(
 voc_val_dataloader = dict(
     dataset=dict(
         type=voc0712_dataset_type,
-        ann_file="annotations/voc07_test.json",
+        data_root=voc0712_data_root, #! was not originally  present
+        ann_file="voc_coco_fmt_annotations/voc07_test.json", # changed from annotations/....
         data_prefix=dict(img=""),
         metainfo=voc0712_METAINFO,
         pipeline=voc0712_test_pipeline,
@@ -716,6 +717,12 @@ for (neck, backbone, dataset), found in all_combis.items():
         # val_dataloader as voc0712_val_dataloader
 
         if dataset != dataset_ref:
+            #! the voc reference didn´t have a batchsize now we use the batchsize of the model reference
+            original_train_batch_size = cfg.train_dataloader.batch_size
+            original_val_batch_size = cfg.val_dataloader.batch_size
+            original_test_batch_size = cfg.test_dataloader.batch_size
+
+
             cfg.data_root = voc0712_data_root
             cfg.dataset_type = voc0712_dataset_type
 
@@ -727,6 +734,10 @@ for (neck, backbone, dataset), found in all_combis.items():
             cfg.train_dataloader = voc_train_dataloader
             cfg.val_dataloader = voc_val_dataloader
             cfg.test_dataloader = voc_val_dataloader
+
+            cfg.train_dataloader.batch_size = original_train_batch_size
+            cfg.val_dataloader.batch_size = original_val_batch_size
+            cfg.test_dataloader.batch_size = original_test_batch_size
 
             config_keybased_value_changer(
                 config_dictionary=cfg._cfg_dict,

@@ -181,9 +181,11 @@ param_scheduler = [
 resume = False
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
+    batch_size=8,
     dataset=dict(
-        ann_file='annotations/voc07_test.json',
+        ann_file='voc_coco_fmt_annotations/voc07_test.json',
         data_prefix=dict(img=''),
+        data_root='data/VOCdevkit/',
         metainfo=dict(
             classes=(
                 'aeroplane',
@@ -351,10 +353,10 @@ test_pipeline = [
 ]
 train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
 train_dataloader = dict(
+    batch_size=8,
     dataset=dict(
         dataset=dict(
-            _delete_=True,
-            ann_file='annotations/voc0712_trainval.json',
+            ann_file='voc_coco_fmt_annotations/voc0712_trainval.json',
             backend_args=None,
             data_prefix=dict(img=''),
             data_root='data/VOCdevkit/',
@@ -625,9 +627,11 @@ tta_pipeline = [
 ]
 val_cfg = dict(type='ValLoop')
 val_dataloader = dict(
+    batch_size=8,
     dataset=dict(
-        ann_file='annotations/voc07_test.json',
+        ann_file='voc_coco_fmt_annotations/voc07_test.json',
         data_prefix=dict(img=''),
+        data_root='data/VOCdevkit/',
         metainfo=dict(
             classes=(
                 'aeroplane',

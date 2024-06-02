@@ -54,6 +54,8 @@ METAINFO = {
 dataset_type = "CocoDataset"
 data_root = "data/VOCdevkit/"
 
+
+#! FileNotFoundError: [Errno 2] No such file or directory: voc_coco_fmt_annotations/voc07_test.json
 train_pipeline = [
     dict(type="LoadImageFromFile", backend_args=None),
     dict(type="LoadAnnotations", with_bbox=True),
@@ -79,7 +81,7 @@ train_dataloader = dict(
             # _delete_=True,
             type=dataset_type,
             data_root=data_root,
-            ann_file="annotations/voc0712_trainval.json",
+            ann_file="voc_coco_fmt_annotations/voc0712_trainval.json", # changed from annotations/....
             data_prefix=dict(img=""),
             metainfo=METAINFO,
             filter_cfg=dict(filter_empty_gt=True, min_size=32),
@@ -91,7 +93,8 @@ train_dataloader = dict(
 val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
-        ann_file="annotations/voc07_test.json",
+        data_root=data_root, #! didn´t find the config
+        ann_file="voc_coco_fmt_annotations/voc07_test.json", # changed from annotations/....
         data_prefix=dict(img=""),
         metainfo=METAINFO,
         pipeline=test_pipeline,
@@ -101,7 +104,7 @@ test_dataloader = val_dataloader
 
 val_evaluator = dict(
     type="CocoMetric",
-    ann_file=data_root + "annotations/voc07_test.json",
+    ann_file=data_root + "voc_coco_fmt_annotations/voc07_test.json", # changed from annotations/....
     metric="bbox",
     format_only=False,
     backend_args=None,
