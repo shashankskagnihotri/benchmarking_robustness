@@ -2,18 +2,11 @@ import argparse
 import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
-from typing import Dict, List, Optional, Sequence, Union
-from mmengine.logging import print_log
-from mmengine.registry import LOOPS
-from mmengine.runner.base_loop import BaseLoop
-from torch.utils.data import DataLoader
+from mmengine.runner.runner import Hook
 from torchvision import transforms
-from mmengine.evaluator import Evaluator
-import logging
 from typing import Callable
 import wandb
-
-DATA_BATCH = Optional[Union[dict, tuple, list]]
+from typing import Sequence
 
 
 def pgd_attack(
@@ -28,7 +21,6 @@ def pgd_attack(
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
 
     images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    images_clone = images.clone().float().detach()
     assert isinstance(images, torch.Tensor)
 
     # from retinanet_r50_fpn.py. TODO: read from runner.model
@@ -202,6 +194,55 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
     return batch * std.view(1, -1, 1, 1) + mean.view(1, -1, 1, 1)
 
 
+class ImageLoggerHook(Hook):
+    def __init__(self, max_images: int = 10):
+        self.max_images = max_images
+        self.logged_images = 0
+
+    def before_val_iter(self, runner, batch_idx: int, data_batch: Sequence[dict]):
+        if self.logged_images < self.max_images:
+            self.unaltered_images = data_batch["inputs"][0].clone().detach().cpu()
+
+    def after_val_iter(
+        self, runner, batch_idx: int, data_batch: Sequence[dict], outputs
+    ):
+        if self.logged_images < self.max_images:
+            adversarial_images = data_batch["inputs"][0].clone().detach().cpu()
+            wandb.log(
+                {
+                    "Unaltered Image with Ground Truth": wandb.Image(
+                        self.unaltered_images,
+                        caption="Unaltered Image with Ground Truth",
+                    ),
+                    "Adversarial Image with Prediction": wandb.Image(
+                        adversarial_images, caption="Adversarial Image with Prediction"
+                    ),
+                }
+            )
+            self.logged_images += 1
+
+
+class MetricsLoggerHook(Hook):
+    def after_val_epoch(self, runner, metrics):
+        wandb.log(metrics)
+
+
+class AdversarialAttackHook(Hook):
+    def __init__(self, attack: Callable, attack_kwargs: dict):
+        self.attack = attack
+        self.attack_kwargs = attack_kwargs
+
+    def before_val_iter(self, runner, batch_idx: int, data_batch: Sequence[dict]):
+        data_batch_prepro = self.attack(data_batch, runner, **self.attack_kwargs)
+        runner.model.data_preprocessor(data_batch_prepro, training=False)
+        runner.data_batch = data_batch_prepro  # Update the data_batch for the iteration
+
+    def after_val_iter(
+        self, runner, batch_idx: int, data_batch: Sequence[dict], outputs
+    ):
+        pass
+
+
 def run_attack_val(
     attack: Callable | None,
     config_file: str,
@@ -209,82 +250,6 @@ def run_attack_val(
     attack_kwargs: dict,
     log_dir: str,
 ):
-    if attack is not None:
-        LOOPS.module_dict.pop("ValLoop")
-
-        @LOOPS.register_module()
-        class ValLoop(BaseLoop):
-            def __init__(
-                self,
-                runner,
-                dataloader: Union[DataLoader, Dict],
-                evaluator: Union[Evaluator, Dict, List],
-                fp16: bool = False,
-            ) -> None:
-                super().__init__(runner, dataloader)
-
-                if isinstance(evaluator, (dict, list)):
-                    self.evaluator = runner.build_evaluator(evaluator)
-                else:
-                    assert isinstance(evaluator, Evaluator), (
-                        "evaluator must be one of dict, list or Evaluator instance, "
-                        f"but got {type(evaluator)}."
-                    )
-                    self.evaluator = evaluator
-                if hasattr(self.dataloader.dataset, "metainfo"):
-                    self.evaluator.dataset_meta = getattr(
-                        self.dataloader.dataset, "metainfo"
-                    )
-                    self.runner.visualizer.dataset_meta = getattr(
-                        self.dataloader.dataset, "metainfo"
-                    )
-                else:
-                    print_log(
-                        f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
-                        "metainfo. ``dataset_meta`` in evaluator, metric and "
-                        "visualizer will be None.",
-                        logger="current",
-                        level=logging.WARNING,
-                    )
-                self.fp16 = fp16
-
-            def run(self) -> dict:
-                self.runner.call_hook("before_val")
-                self.runner.call_hook("before_val_epoch")
-                self.runner.model.eval()
-                for idx, data_batch in enumerate(self.dataloader):
-                    self.run_iter(idx, data_batch)
-
-                metrics = self.evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
-                wandb.log(metrics)
-                self.runner.call_hook("after_val_epoch", metrics=metrics)
-                self.runner.call_hook("after_val")
-                return metrics
-
-            def run_iter(
-                self,
-                idx,
-                data_batch: Sequence[dict],
-            ):
-                self.runner.call_hook(
-                    "before_val_iter", batch_idx=idx, data_batch=data_batch
-                )
-
-                data_batch_prepro = attack(data_batch, self.runner, **attack_kwargs)
-
-                with torch.no_grad():
-                    outputs = self.runner.model(**data_batch_prepro, mode="predict")
-
-                self.evaluator.process(
-                    data_samples=outputs, data_batch=data_batch_prepro
-                )
-                self.runner.call_hook(
-                    "after_val_iter",
-                    batch_idx=idx,
-                    data_batch=data_batch_prepro,
-                    outputs=outputs,
-                )
-
     cfg = Config.fromfile(config_file)
     cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
@@ -313,6 +278,15 @@ def run_attack_val(
         ],
     )
     runner = Runner.from_cfg(cfg)
+
+    # Register the logging hooks
+    runner.register_hook(ImageLoggerHook())
+    runner.register_hook(MetricsLoggerHook())
+
+    # Register the attack hook if an attack is provided
+    if attack is not None:
+        runner.register_hook(AdversarialAttackHook(attack, attack_kwargs))
+
     runner.val()
 
 
@@ -325,7 +299,7 @@ def parse_args():
         "--random_start", action="store_true", help="Enable random start for attack"
     )
     parser.add_argument(
-        "--steps", type=int, default=5, help="Number of steps for the attack"
+        "--steps", type=int, default=1, help="Number of steps for the attack"
     )
     parser.add_argument(
         "--alpha", type=float, default=0.01 * 255, help="Alpha value for the attack"
@@ -369,7 +343,7 @@ def parse_args():
 
     return parser.parse_args()
 
-
+``
 if __name__ == "__main__":
     args = parse_args()
 
@@ -379,7 +353,7 @@ if __name__ == "__main__":
         attack_kwargs = {
             "steps": args.steps,
             "epsilon": args.epsilon,
-            "alpha": args.alphaalpha,
+            "alpha": args.alpha,
             "targeted": args.targeted,
             "random_start": args.random_start,
         }
