@@ -1,4 +1,4 @@
-_base_ = ['./segformer_mit-b0_8xb2-40k_voc12aug-512x512.py']
+_base_ = ['./segformer_mit-b0_8xb2-160k_voc12aug-512x512.py']
 
 checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b1_20220624-02e5a6a1.pth'  # noqa
 

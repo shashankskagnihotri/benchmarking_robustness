@@ -1,6 +1,6 @@
 _base_ = [
     '../../mmsegmentation/configs/_base_/models/segformer_mit-b0.py', '../../mmsegmentation/configs/_base_/datasets/pascal_voc12_aug.py',
-    '../../mmsegmentation/configs/_base_/default_runtime.py', '../../mmsegmentation/configs/_base_/schedules/schedule_40k.py'
+    '../../mmsegmentation/configs/_base_/default_runtime.py', '../../mmsegmentation/configs/_base_/schedules/schedule_160k.py'
 ]
 
 crop_size = (512, 512)
