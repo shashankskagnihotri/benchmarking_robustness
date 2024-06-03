@@ -1,6 +1,0 @@
-GpuFreq=control_disabled
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 23562759 ON uc2n485 CANCELLED AT 2024-05-13T15:33:21 DUE TO TIME LIMIT ***
-slurmstepd: error: *** STEP 23562759.0 ON uc2n485 CANCELLED AT 2024-05-13T15:33:21 DUE TO TIME LIMIT ***
-submitit WARNING (2024-05-13 15:33:21,508) - Bypassing signal SIGTERM
-submitit WARNING (2024-05-13 15:33:21,514) - Bypassing signal SIGTERM
