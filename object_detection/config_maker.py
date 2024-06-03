@@ -133,8 +133,7 @@ files_which_we_have = [
     #! add swin-b
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_4xb32-100e_coco.py",
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
-    #"./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py", #! was the old detic implementation, which had no loss implementation
-    "./mmdetection/projects/Detic_new/configs/detic_centernet2_swin-b_fpn_4x_lvis_in21k-lvis.py"
+    "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
     #! others
     "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",
     # "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py",
