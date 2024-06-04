@@ -3,18 +3,13 @@ import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
 from mmengine.runner.runner import Hook
-from mmdet.engine.hooks.visualization_hook import DetVisualizationHook
-from mmengine.visualization import Visualizer
-from mmengine.fileio import get
-from mmdet.structures import DetDataSample, TrackDataSample
-import mmcv
 from torchvision import transforms
 from typing import Callable
-import wandb
 from typing import Sequence
 from dotenv import load_dotenv
 import os
 
+# move this?
 load_dotenv()
 WAND_PROJECT = os.getenv("WANDB_PROJECT")
 WAND_ENTITY = os.getenv("WANDB_ENTITY")
@@ -315,7 +310,7 @@ def parse_args():
         "--output_dir",
         type=str,
         default="./work_dirs/",
-        help="Directory path where result files are saved (default: ./slurm/logs)",
+        help="Directory path where result files are saved (default: ./work_dirs/logs)",
     )
 
     return parser.parse_args()
