@@ -3,10 +3,23 @@ import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
 from mmengine.runner.runner import Hook
+from mmdet.engine.hooks.visualization_hook import DetVisualizationHook
+from mmengine.visualization import Visualizer
+from mmengine.fileio import get
+from mmdet.structures import DetDataSample, TrackDataSample
+import mmcv
 from torchvision import transforms
 from typing import Callable
 import wandb
 from typing import Sequence
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+WAND_PROJECT = os.getenv("WANDB_PROJECT")
+WAND_ENTITY = os.getenv("WANDB_ENTITY")
+assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
+assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
 
 def pgd_attack(
@@ -194,39 +207,6 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
     return batch * std.view(1, -1, 1, 1) + mean.view(1, -1, 1, 1)
 
 
-class ImageLoggerHook(Hook):
-    def __init__(self, max_images: int = 10):
-        self.max_images = max_images
-        self.logged_images = 0
-
-    def before_val_iter(self, runner, batch_idx: int, data_batch: Sequence[dict]):
-        if self.logged_images < self.max_images:
-            self.unaltered_images = data_batch["inputs"][0].clone().detach().cpu()
-
-    def after_val_iter(
-        self, runner, batch_idx: int, data_batch: Sequence[dict], outputs
-    ):
-        if self.logged_images < self.max_images:
-            adversarial_images = data_batch["inputs"][0].clone().detach().cpu()
-            wandb.log(
-                {
-                    "Unaltered Image with Ground Truth": wandb.Image(
-                        self.unaltered_images,
-                        caption="Unaltered Image with Ground Truth",
-                    ),
-                    "Adversarial Image with Prediction": wandb.Image(
-                        adversarial_images, caption="Adversarial Image with Prediction"
-                    ),
-                }
-            )
-            self.logged_images += 1
-
-
-class MetricsLoggerHook(Hook):
-    def after_val_epoch(self, runner, metrics):
-        wandb.log(metrics)
-
-
 class AdversarialAttackHook(Hook):
     def __init__(self, attack: Callable, attack_kwargs: dict):
         self.attack = attack
@@ -254,37 +234,30 @@ def run_attack_val(
     cfg = Config.fromfile(config_file)
     cfg.work_dir = log_dir
     cfg.load_from = checkpoint_file
-    cfg.checkpoint_config = dict(interval=0)
-    cfg.log_config = dict(
-        interval=100,
-        hooks=[
-            dict(type="TextLoggerHook"),
-            dict(
-                type="WandbLoggerHook",
-            ),
-        ],
-    )
-
-    # Initialize wandb
+    cfg.default_hooks.visualization.draw = True
+    cfg.default_hooks.visualization.interval = 1000
     model_name = config_file.split("/")[-1].split(".")[0]
-    wandb.init(
-        project="attacks",
-        config={
-            "attack": attack.__name__ if attack is not None else "none",
-            "attack_kwargs": attack_kwargs,
-            "config_file": config_file,
-            "checkpoint_file": checkpoint_file,
-        },
-        name=model_name,
-        group=model_name,
+    attack_name = attack.__name__ if attack is not None else "none"
+    cfg.visualizer.vis_backends = dict(
+        dict(
+            type="WandbVisBackend",
+            init_kwargs={
+                "project": WAND_PROJECT,
+                "entity": WAND_ENTITY,
+                "config": {
+                    "attack": attack_name,
+                    "attack_kwargs": attack_kwargs,
+                    "config_file": config_file,
+                    "checkpoint_file": checkpoint_file,
+                },
+                "name": model_name,
+                "group": model_name,
+            },
+        )
     )
 
     # Initialize the runner
     runner = Runner.from_cfg(cfg)
-
-    # Register the logging hooks
-    runner.register_hook(ImageLoggerHook())
-    runner.register_hook(MetricsLoggerHook())
 
     # Register the attack hook if an attack is provided
     if attack is not None:
