@@ -117,4 +117,4 @@ if __name__ == "__main__":
 
 # python -m pudb new_trainer.py configs_verified/codino_convnext-b_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
 
-# python -m pudb new_trainer.py configs_to_train/atss_convnext-b_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb new_trainer.py configs_to_train/centernet_swin-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer

@@ -1,25 +1,13 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
-backend = 'pillow'
 backend_args = None
-custom_imports = dict(
-    allow_failed_imports=False,
-    imports=[
-        'projects.DiffusionDet.diffusiondet',
-    ])
 data_root = 'data/VOCdevkit/'
 dataset_type = 'CocoDataset'
 default_hooks = dict(
-    checkpoint=dict(
-        _scope_='mmdet',
-        by_epoch=False,
-        interval=75000,
-        max_keep_ckpts=3,
-        type='CheckpointHook'),
-    logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
-    param_scheduler=dict(_scope_='mmdet', type='ParamSchedulerHook'),
-    sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
-    timer=dict(_scope_='mmdet', type='IterTimerHook'),
-    visualization=dict(_scope_='mmdet', type='DetVisualizationHook'))
+    checkpoint=dict(interval=1, type='CheckpointHook'),
+    logger=dict(interval=50, type='LoggerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(type='DetVisualizationHook'))
 default_scope = 'mmdet'
 env_cfg = dict(
     cudnn_benchmark=False,
@@ -27,110 +15,66 @@ env_cfg = dict(
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
 load_from = None
 log_level = 'INFO'
-log_processor = dict(
-    _scope_='mmdet', by_epoch=False, type='LogProcessor', window_size=50)
+log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-            1,
-        ],
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
-        init_cfg=dict(
-            checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
-            type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
-        out_indices=[
+        depth=50,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet50', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=(
+            0,
             1,
             2,
             3,
-            4,
-        ],
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        strides=[
-            4,
-            2,
-            2,
-            2,
-            2,
-        ],
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        ),
+        style='pytorch',
+        type='ResNet'),
     bbox_head=dict(
-        criterion=dict(
-            assigner=dict(
-                candidate_topk=5,
-                center_radius=2.5,
-                match_costs=[
-                    dict(
-                        alpha=0.25,
-                        eps=1e-08,
-                        gamma=2.0,
-                        type='FocalLossCost',
-                        weight=2.0),
-                    dict(box_format='xyxy', type='BBoxL1Cost', weight=5.0),
-                    dict(iou_mode='giou', type='IoUCost', weight=2.0),
-                ],
-                type='DiffusionDetMatcher'),
-            loss_bbox=dict(loss_weight=5.0, reduction='sum', type='L1Loss'),
-            loss_cls=dict(
-                alpha=0.25,
-                gamma=2.0,
-                loss_weight=2.0,
-                reduction='sum',
-                type='FocalLoss',
-                use_sigmoid=True),
-            loss_giou=dict(loss_weight=2.0, reduction='sum', type='GIoULoss'),
-            num_classes=20,
-            type='DiffusionDetCriterion'),
-        ddim_sampling_eta=1.0,
-        deep_supervision=True,
-        feat_channels=256,
-        num_classes=20,
-        num_heads=6,
-        num_proposals=500,
-        prior_prob=0.01,
-        roi_extractor=dict(
-            featmap_strides=[
-                4,
+        anchor_generator=dict(
+            octave_base_scale=8,
+            ratios=[
+                1.0,
+            ],
+            scales_per_octave=1,
+            strides=[
                 8,
                 16,
                 32,
+                64,
+                128,
             ],
-            out_channels=256,
-            roi_layer=dict(output_size=7, sampling_ratio=2, type='RoIAlign'),
-            type='SingleRoIExtractor'),
-        sampling_timesteps=1,
-        single_head=dict(
-            act_cfg=dict(inplace=True, type='ReLU'),
-            dim_feedforward=2048,
-            dropout=0.0,
-            dynamic_conv=dict(dynamic_dim=64, dynamic_num=2),
-            num_cls_convs=1,
-            num_heads=8,
-            num_reg_convs=3,
-            type='SingleDiffusionDetHead'),
-        snr_scale=2.0,
-        type='DynamicDiffusionDetHead'),
+            type='AnchorGenerator'),
+        bbox_coder=dict(
+            target_means=[
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+            ],
+            target_stds=[
+                0.1,
+                0.1,
+                0.2,
+                0.2,
+            ],
+            type='DeltaXYWHBBoxCoder'),
+        feat_channels=256,
+        in_channels=256,
+        loss_bbox=dict(loss_weight=2.0, type='GIoULoss'),
+        loss_centerness=dict(
+            loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=True),
+        loss_cls=dict(
+            alpha=0.25,
+            gamma=2.0,
+            loss_weight=1.0,
+            type='FocalLoss',
+            use_sigmoid=True),
+        num_classes=20,
+        stacked_convs=4,
+        type='ATSSHead'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -146,42 +90,35 @@ model = dict(
         ],
         type='DetDataPreprocessor'),
     neck=dict(
+        add_extra_convs='on_output',
         in_channels=[
             256,
             512,
             1024,
             2048,
         ],
-        num_outs=4,
+        num_outs=5,
         out_channels=256,
+        start_level=1,
         type='FPN'),
     test_cfg=dict(
+        max_per_img=100,
         min_bbox_size=0,
-        nms=dict(iou_threshold=0.5, type='nms'),
-        score_thr=0.5,
-        use_nms=True),
-    type='DiffusionDet')
+        nms=dict(iou_threshold=0.6, type='nms'),
+        nms_pre=1000,
+        score_thr=0.05),
+    train_cfg=dict(
+        allowed_border=-1,
+        assigner=dict(topk=9, type='ATSSAssigner'),
+        debug=False,
+        pos_weight=-1),
+    type='ATSS')
 optim_wrapper = dict(
-    _scope_='mmdet',
-    clip_grad=dict(max_norm=1.0, norm_type=2),
-    optimizer=dict(lr=2.5e-05, type='AdamW', weight_decay=0.0001),
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0001),
     type='OptimWrapper')
-param_scheduler = [
-    dict(
-        begin=0, by_epoch=False, end=1000, start_factor=0.01, type='LinearLR'),
-    dict(
-        begin=0,
-        by_epoch=False,
-        end=450000,
-        gamma=0.1,
-        milestones=[
-            350000,
-            420000,
-        ],
-        type='MultiStepLR'),
-]
+
 resume = False
-test_cfg = dict(_scope_='mmdet', type='TestLoop')
+test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
@@ -354,8 +291,7 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(
-    max_iters=450000, type='IterBasedTrainLoop', val_interval=75000)
+train_cfg = dict(max_epochs=1, type='EpochBasedTrainLoop', val_interval=1)
 train_dataloader = dict(
     batch_size=2,
     dataset=dict(
@@ -513,7 +449,7 @@ train_pipeline = [
     dict(prob=0.5, type='RandomFlip'),
     dict(type='PackDetInputs'),
 ]
-val_cfg = dict(_scope_='mmdet', type='ValLoop')
+val_cfg = dict(type='ValLoop')
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
@@ -670,12 +606,13 @@ val_evaluator = dict(
     metric='bbox',
     type='CocoMetric')
 vis_backends = [
-    dict(_scope_='mmdet', type='LocalVisBackend'),
+    dict(type='LocalVisBackend'),
 ]
 visualizer = dict(
-    _scope_='mmdet',
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
-        dict(type='LocalVisBackend'),
+        dict(
+            init_kwargs=dict(project='atss_r50_voc0712.py'),
+            type='WandbVisBackend'),
     ])

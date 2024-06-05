@@ -7,7 +7,7 @@ custom_imports = dict(
         'projects.DiffusionDet.diffusiondet',
     ])
 data_root = 'data/VOCdevkit/'
-dataset_type = 'VOCDataset'
+dataset_type = 'CocoDataset'
 default_hooks = dict(
     checkpoint=dict(
         _scope_='mmdet',
@@ -100,12 +100,12 @@ model = dict(
                 type='FocalLoss',
                 use_sigmoid=True),
             loss_giou=dict(loss_weight=2.0, reduction='sum', type='GIoULoss'),
-            num_classes=80,
+            num_classes=20,
             type='DiffusionDetCriterion'),
         ddim_sampling_eta=1.0,
         deep_supervision=True,
         feat_channels=256,
-        num_classes=80,
+        num_classes=20,
         num_heads=6,
         num_proposals=500,
         prior_prob=0.01,
@@ -185,10 +185,134 @@ test_cfg = dict(_scope_='mmdet', type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        ann_file='VOC2007/ImageSets/Main/test.txt',
-        backend_args=None,
-        data_prefix=dict(sub_data_root='VOC2007/'),
+        ann_file='voc_coco_fmt_annotations/voc07_test.json',
+        data_prefix=dict(img=''),
         data_root='data/VOCdevkit/',
+        metainfo=dict(
+            classes=(
+                'aeroplane',
+                'bicycle',
+                'bird',
+                'boat',
+                'bottle',
+                'bus',
+                'car',
+                'cat',
+                'chair',
+                'cow',
+                'diningtable',
+                'dog',
+                'horse',
+                'motorbike',
+                'person',
+                'pottedplant',
+                'sheep',
+                'sofa',
+                'train',
+                'tvmonitor',
+            ),
+            palette=[
+                (
+                    106,
+                    0,
+                    228,
+                ),
+                (
+                    119,
+                    11,
+                    32,
+                ),
+                (
+                    165,
+                    42,
+                    42,
+                ),
+                (
+                    0,
+                    0,
+                    192,
+                ),
+                (
+                    197,
+                    226,
+                    255,
+                ),
+                (
+                    0,
+                    60,
+                    100,
+                ),
+                (
+                    0,
+                    0,
+                    142,
+                ),
+                (
+                    255,
+                    77,
+                    255,
+                ),
+                (
+                    153,
+                    69,
+                    1,
+                ),
+                (
+                    120,
+                    166,
+                    157,
+                ),
+                (
+                    0,
+                    182,
+                    199,
+                ),
+                (
+                    0,
+                    226,
+                    252,
+                ),
+                (
+                    182,
+                    182,
+                    255,
+                ),
+                (
+                    0,
+                    0,
+                    230,
+                ),
+                (
+                    220,
+                    20,
+                    60,
+                ),
+                (
+                    163,
+                    255,
+                    0,
+                ),
+                (
+                    0,
+                    82,
+                    0,
+                ),
+                (
+                    3,
+                    95,
+                    161,
+                ),
+                (
+                    0,
+                    80,
+                    100,
+                ),
+                (
+                    183,
+                    130,
+                    88,
+                ),
+            ]),
         pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
@@ -206,15 +330,9 @@ test_dataloader = dict(
                 ),
                 type='PackDetInputs'),
         ],
-        test_mode=True,
-        type='VOCDataset'),
-    drop_last=False,
-    num_workers=2,
-    persistent_workers=True,
-    sampler=dict(shuffle=False, type='DefaultSampler'))
+        type='CocoDataset'))
 test_evaluator = dict(
-    _scope_='mmdet',
-    ann_file='data/coco/annotations/instances_val2017.json',
+    ann_file='data/VOCdevkit/voc_coco_fmt_annotations/voc07_test.json',
     backend_args=None,
     format_only=False,
     metric='bbox',
@@ -239,63 +357,152 @@ test_pipeline = [
 train_cfg = dict(
     max_iters=450000, type='IterBasedTrainLoop', val_interval=75000)
 train_dataloader = dict(
-    batch_sampler=dict(type='AspectRatioBatchSampler'),
     batch_size=2,
     dataset=dict(
         dataset=dict(
-            datasets=[
-                dict(
-                    ann_file='VOC2007/ImageSets/Main/trainval.txt',
-                    backend_args=None,
-                    data_prefix=dict(sub_data_root='VOC2007/'),
-                    data_root='data/VOCdevkit/',
-                    filter_cfg=dict(
-                        bbox_min_size=32, filter_empty_gt=True, min_size=32),
-                    pipeline=[
-                        dict(backend_args=None, type='LoadImageFromFile'),
-                        dict(type='LoadAnnotations', with_bbox=True),
-                        dict(
-                            keep_ratio=True,
-                            scale=(
-                                1000,
-                                600,
-                            ),
-                            type='Resize'),
-                        dict(prob=0.5, type='RandomFlip'),
-                        dict(type='PackDetInputs'),
-                    ],
-                    type='VOCDataset'),
-                dict(
-                    ann_file='VOC2012/ImageSets/Main/trainval.txt',
-                    backend_args=None,
-                    data_prefix=dict(sub_data_root='VOC2012/'),
-                    data_root='data/VOCdevkit/',
-                    filter_cfg=dict(
-                        bbox_min_size=32, filter_empty_gt=True, min_size=32),
-                    pipeline=[
-                        dict(backend_args=None, type='LoadImageFromFile'),
-                        dict(type='LoadAnnotations', with_bbox=True),
-                        dict(
-                            keep_ratio=True,
-                            scale=(
-                                1000,
-                                600,
-                            ),
-                            type='Resize'),
-                        dict(prob=0.5, type='RandomFlip'),
-                        dict(type='PackDetInputs'),
-                    ],
-                    type='VOCDataset'),
+            ann_file='voc_coco_fmt_annotations/voc0712_trainval.json',
+            backend_args=None,
+            data_prefix=dict(img=''),
+            data_root='data/VOCdevkit/',
+            filter_cfg=dict(filter_empty_gt=True, min_size=32),
+            metainfo=dict(
+                classes=(
+                    'aeroplane',
+                    'bicycle',
+                    'bird',
+                    'boat',
+                    'bottle',
+                    'bus',
+                    'car',
+                    'cat',
+                    'chair',
+                    'cow',
+                    'diningtable',
+                    'dog',
+                    'horse',
+                    'motorbike',
+                    'person',
+                    'pottedplant',
+                    'sheep',
+                    'sofa',
+                    'train',
+                    'tvmonitor',
+                ),
+                palette=[
+                    (
+                        106,
+                        0,
+                        228,
+                    ),
+                    (
+                        119,
+                        11,
+                        32,
+                    ),
+                    (
+                        165,
+                        42,
+                        42,
+                    ),
+                    (
+                        0,
+                        0,
+                        192,
+                    ),
+                    (
+                        197,
+                        226,
+                        255,
+                    ),
+                    (
+                        0,
+                        60,
+                        100,
+                    ),
+                    (
+                        0,
+                        0,
+                        142,
+                    ),
+                    (
+                        255,
+                        77,
+                        255,
+                    ),
+                    (
+                        153,
+                        69,
+                        1,
+                    ),
+                    (
+                        120,
+                        166,
+                        157,
+                    ),
+                    (
+                        0,
+                        182,
+                        199,
+                    ),
+                    (
+                        0,
+                        226,
+                        252,
+                    ),
+                    (
+                        182,
+                        182,
+                        255,
+                    ),
+                    (
+                        0,
+                        0,
+                        230,
+                    ),
+                    (
+                        220,
+                        20,
+                        60,
+                    ),
+                    (
+                        163,
+                        255,
+                        0,
+                    ),
+                    (
+                        0,
+                        82,
+                        0,
+                    ),
+                    (
+                        3,
+                        95,
+                        161,
+                    ),
+                    (
+                        0,
+                        80,
+                        100,
+                    ),
+                    (
+                        183,
+                        130,
+                        88,
+                    ),
+                ]),
+            pipeline=[
+                dict(backend_args=None, type='LoadImageFromFile'),
+                dict(type='LoadAnnotations', with_bbox=True),
+                dict(keep_ratio=True, scale=(
+                    1000,
+                    600,
+                ), type='Resize'),
+                dict(prob=0.5, type='RandomFlip'),
+                dict(type='PackDetInputs'),
             ],
-            ignore_keys=[
-                'dataset_type',
-            ],
-            type='ConcatDataset'),
+            type='CocoDataset'),
         times=3,
-        type='RepeatDataset'),
-    num_workers=2,
-    persistent_workers=True,
-    sampler=dict(shuffle=True, type='DefaultSampler'))
+        type='RepeatDataset'))
 train_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
@@ -310,10 +517,134 @@ val_cfg = dict(_scope_='mmdet', type='ValLoop')
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        ann_file='VOC2007/ImageSets/Main/test.txt',
-        backend_args=None,
-        data_prefix=dict(sub_data_root='VOC2007/'),
+        ann_file='voc_coco_fmt_annotations/voc07_test.json',
+        data_prefix=dict(img=''),
         data_root='data/VOCdevkit/',
+        metainfo=dict(
+            classes=(
+                'aeroplane',
+                'bicycle',
+                'bird',
+                'boat',
+                'bottle',
+                'bus',
+                'car',
+                'cat',
+                'chair',
+                'cow',
+                'diningtable',
+                'dog',
+                'horse',
+                'motorbike',
+                'person',
+                'pottedplant',
+                'sheep',
+                'sofa',
+                'train',
+                'tvmonitor',
+            ),
+            palette=[
+                (
+                    106,
+                    0,
+                    228,
+                ),
+                (
+                    119,
+                    11,
+                    32,
+                ),
+                (
+                    165,
+                    42,
+                    42,
+                ),
+                (
+                    0,
+                    0,
+                    192,
+                ),
+                (
+                    197,
+                    226,
+                    255,
+                ),
+                (
+                    0,
+                    60,
+                    100,
+                ),
+                (
+                    0,
+                    0,
+                    142,
+                ),
+                (
+                    255,
+                    77,
+                    255,
+                ),
+                (
+                    153,
+                    69,
+                    1,
+                ),
+                (
+                    120,
+                    166,
+                    157,
+                ),
+                (
+                    0,
+                    182,
+                    199,
+                ),
+                (
+                    0,
+                    226,
+                    252,
+                ),
+                (
+                    182,
+                    182,
+                    255,
+                ),
+                (
+                    0,
+                    0,
+                    230,
+                ),
+                (
+                    220,
+                    20,
+                    60,
+                ),
+                (
+                    163,
+                    255,
+                    0,
+                ),
+                (
+                    0,
+                    82,
+                    0,
+                ),
+                (
+                    3,
+                    95,
+                    161,
+                ),
+                (
+                    0,
+                    80,
+                    100,
+                ),
+                (
+                    183,
+                    130,
+                    88,
+                ),
+            ]),
         pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
@@ -331,15 +662,9 @@ val_dataloader = dict(
                 ),
                 type='PackDetInputs'),
         ],
-        test_mode=True,
-        type='VOCDataset'),
-    drop_last=False,
-    num_workers=2,
-    persistent_workers=True,
-    sampler=dict(shuffle=False, type='DefaultSampler'))
+        type='CocoDataset'))
 val_evaluator = dict(
-    _scope_='mmdet',
-    ann_file='data/coco/annotations/instances_val2017.json',
+    ann_file='data/VOCdevkit/voc_coco_fmt_annotations/voc07_test.json',
     backend_args=None,
     format_only=False,
     metric='bbox',
