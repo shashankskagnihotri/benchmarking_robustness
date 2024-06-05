@@ -98,6 +98,8 @@ for config_file in folder_entry_list_configs_to_train:
                                     "DUE TO TIME LIMIT" in logfile_content
                                     or "min(max_walltime * 0.8, max_walltime - 10 * 60"
                                     in logfile_content
+                                    or "can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime"
+                                    in logfile_content
                                 ):
                                     #! new error handling if permitted
                                     # if (
