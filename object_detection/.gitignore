@@ -4,3 +4,6 @@
 models
 slurm/results*
 slurm/work_dir_voc/
+slurm/train_work_dir_voc/*
+configs_to_test_voc/*
+slurm/train_results_voc/*
