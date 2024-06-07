@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=16, enable=True)
+auto_scale_lr = dict(base_batch_size=16)
 backend_args = None
 batch_augments = [
     dict(
@@ -10,6 +10,7 @@ batch_augments = [
         type="BatchFixedSizePad",
     ),
 ]
+checkpoint_config = dict(interval=0)
 custom_imports = dict(
     allow_failed_imports=False,
     imports=[
@@ -100,22 +101,20 @@ max_epochs = 36
 max_iters = 270000
 model = dict(
     backbone=dict(
-        arch="base",
-        drop_path_rate=0.7,
-        gap_before_final_norm=False,
-        init_cfg=dict(
-            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth",
-            prefix="backbone.",
-            type="Pretrained",
-        ),
-        layer_scale_init_value=1.0,
-        out_indices=[
+        depth=50,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint="torchvision://resnet50", type="Pretrained"),
+        norm_cfg=dict(requires_grad=False, type="BN"),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=(
+            0,
             1,
             2,
             3,
-        ],
-        type="mmpretrain.ConvNeXt",
-        with_cp=True,
+        ),
+        style="pytorch",
+        type="ResNet",
     ),
     bbox_head=[
         dict(
@@ -200,6 +199,7 @@ model = dict(
             256,
             512,
             1024,
+            2048,
         ],
         kernel_size=1,
         norm_cfg=dict(num_groups=32, type="GN"),
@@ -480,7 +480,6 @@ param_scheduler = [
         gamma=0.1,
     )
 ]
-
 resume = False
 test_cfg = dict(_scope_="mmdet", type="TestLoop")
 test_dataloader = dict(

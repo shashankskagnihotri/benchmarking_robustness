@@ -1,28 +1,98 @@
-auto_scale_lr = dict(base_batch_size=64, enable=True)
-backend = 'pillow'
+auto_scale_lr = dict(enable=True)
 backend_args = None
-batch_augments = [
-    dict(size=(
-        1024,
-        1024,
-    ), type='BatchFixedSizePad'),
-]
 cls_layer = dict(
     norm_temperature=50.0,
     norm_weight=True,
     type='ZeroShotClassifier',
     use_bias=0.0,
     zs_weight_dim=512,
-    zs_weight_path='rand')
+    zs_weight_path='data/metadata/lvis_v1_clip_a+cname.npy')
 custom_imports = dict(
     allow_failed_imports=False, imports=[
-        'projects.Detic.detic',
+        'projects.Detic_new.detic',
     ])
 data_root = 'data/VOCdevkit/'
+dataset_cls = dict(
+    ann_file='annotations/imagenet_lvis_image_info.json',
+    backend_args=None,
+    data_prefix=dict(img='ImageNet-LVIS/'),
+    data_root='data/imagenet',
+    pipeline=[
+        dict(backend_args=None, type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', with_bbox=False, with_label=True),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                1.5,
+            ),
+            scale=(
+                448,
+                448,
+            ),
+            type='RandomResize'),
+        dict(
+            allow_negative_crop=True,
+            bbox_clip_border=False,
+            crop_size=(
+                448,
+                448,
+            ),
+            crop_type='absolute_range',
+            recompute_bbox=False,
+            type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PackDetInputs'),
+    ],
+    type='ImageNetLVISV1Dataset')
+dataset_det = dict(
+    dataset=dict(
+        ann_file='annotations/lvis_v1_train.json',
+        backend_args=None,
+        data_prefix=dict(img=''),
+        data_root='data/lvis/',
+        filter_cfg=dict(filter_empty_gt=True, min_size=32),
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+            dict(
+                keep_ratio=True,
+                ratio_range=(
+                    0.1,
+                    2.0,
+                ),
+                scale=(
+                    896,
+                    896,
+                ),
+                type='RandomResize'),
+            dict(
+                allow_negative_crop=True,
+                crop_size=(
+                    896,
+                    896,
+                ),
+                crop_type='absolute_range',
+                recompute_bbox=True,
+                type='RandomCrop'),
+            dict(min_gt_bbox_wh=(
+                0.01,
+                0.01,
+            ), type='FilterAnnotations'),
+            dict(prob=0.5, type='RandomFlip'),
+            dict(type='PackDetInputs'),
+        ],
+        type='LVISV1Dataset'),
+    oversample_thr=0.001,
+    type='ClassBalancedDataset')
 dataset_type = 'CocoDataset'
 default_hooks = dict(
     checkpoint=dict(
-        _scope_='mmdet', interval=1, max_keep_ckpts=2, type='CheckpointHook'),
+        _scope_='mmdet',
+        by_epoch=False,
+        interval=30000,
+        max_keep_ckpts=5,
+        type='CheckpointHook'),
     logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
     param_scheduler=dict(_scope_='mmdet', type='ParamSchedulerHook'),
     sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
@@ -33,38 +103,52 @@ env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
-image_size = (
-    1024,
-    1024,
+find_unused_parameters = True
+image_size_cls = (
+    448,
+    448,
 )
-load_from = None
+image_size_det = (
+    896,
+    896,
+)
+load_from = './first_stage/detic_centernet2_swin-b_fpn_4x_lvis_boxsup.pth'
 log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 8
+lvis_cat_frequency_info = 'data/metadata/lvis_v1_train_cat_info.json'
+max_iter = 180000
 model = dict(
     backbone=dict(
-        depth=50,
-        frozen_stages=1,
-        init_cfg=dict(checkpoint='torchvision://resnet50', type='Pretrained'),
-        norm_cfg=dict(requires_grad=True, type='BN'),
-        norm_eval=True,
-        num_stages=4,
-        out_indices=[
-            0,
+        attn_drop_rate=0.0,
+        depths=[
+            2,
+            2,
+            18,
+            2,
+        ],
+        drop_path_rate=0.3,
+        drop_rate=0.0,
+        embed_dims=128,
+        mlp_ratio=4,
+        num_heads=[
+            4,
+            8,
+            16,
+            32,
+        ],
+        out_indices=(
             1,
             2,
             3,
-        ],
-        style='pytorch',
-        type='ResNet'),
+        ),
+        patch_norm=True,
+        qk_scale=None,
+        qkv_bias=True,
+        type='SwinTransformer',
+        window_size=7,
+        with_cp=False),
     data_preprocessor=dict(
-        batch_augments=[
-            dict(size=(
-                1024,
-                1024,
-            ), type='BatchFixedSizePad'),
-        ],
         bgr_to_rgb=True,
         mean=[
             123.675,
@@ -84,7 +168,6 @@ model = dict(
             256,
             512,
             1024,
-            2048,
         ],
         init_cfg=dict(layer='Conv2d', type='Caffe2Xavier'),
         num_outs=5,
@@ -109,16 +192,17 @@ model = dict(
                         0.2,
                     ],
                     type='DeltaXYWHBBoxCoder'),
+                cat_freq_path='data/metadata/lvis_v1_train_cat_info.json',
                 cls_predictor_cfg=dict(
                     norm_temperature=50.0,
                     norm_weight=True,
                     type='ZeroShotClassifier',
                     use_bias=0.0,
                     zs_weight_dim=512,
-                    zs_weight_path='rand'),
+                    zs_weight_path='data/metadata/lvis_v1_clip_a+cname.npy'),
                 fc_out_channels=1024,
                 in_channels=256,
-                loss_bbox=dict(beta=1.0, loss_weight=1.0, type='SmoothL1Loss'),
+                loss_bbox=dict(beta=0.1, loss_weight=1.0, type='SmoothL1Loss'),
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
@@ -130,7 +214,8 @@ model = dict(
                     dict(in_features=1024, out_features=4, type='Linear'),
                 ],
                 roi_feat_size=7,
-                type='DeticBBoxHead'),
+                type='DeticBBoxHead',
+                use_fed_loss=True),
             dict(
                 bbox_coder=dict(
                     target_means=[
@@ -146,16 +231,17 @@ model = dict(
                         0.1,
                     ],
                     type='DeltaXYWHBBoxCoder'),
+                cat_freq_path='data/metadata/lvis_v1_train_cat_info.json',
                 cls_predictor_cfg=dict(
                     norm_temperature=50.0,
                     norm_weight=True,
                     type='ZeroShotClassifier',
                     use_bias=0.0,
                     zs_weight_dim=512,
-                    zs_weight_path='rand'),
+                    zs_weight_path='data/metadata/lvis_v1_clip_a+cname.npy'),
                 fc_out_channels=1024,
                 in_channels=256,
-                loss_bbox=dict(beta=1.0, loss_weight=1.0, type='SmoothL1Loss'),
+                loss_bbox=dict(beta=0.1, loss_weight=1.0, type='SmoothL1Loss'),
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
@@ -167,7 +253,8 @@ model = dict(
                     dict(in_features=1024, out_features=4, type='Linear'),
                 ],
                 roi_feat_size=7,
-                type='DeticBBoxHead'),
+                type='DeticBBoxHead',
+                use_fed_loss=True),
             dict(
                 bbox_coder=dict(
                     target_means=[
@@ -183,16 +270,17 @@ model = dict(
                         0.067,
                     ],
                     type='DeltaXYWHBBoxCoder'),
+                cat_freq_path='data/metadata/lvis_v1_train_cat_info.json',
                 cls_predictor_cfg=dict(
                     norm_temperature=50.0,
                     norm_weight=True,
                     type='ZeroShotClassifier',
                     use_bias=0.0,
                     zs_weight_dim=512,
-                    zs_weight_path='rand'),
+                    zs_weight_path='data/metadata/lvis_v1_clip_a+cname.npy'),
                 fc_out_channels=1024,
                 in_channels=256,
-                loss_bbox=dict(beta=1.0, loss_weight=1.0, type='SmoothL1Loss'),
+                loss_bbox=dict(beta=0.1, loss_weight=1.0, type='SmoothL1Loss'),
                 loss_cls=dict(
                     loss_weight=1.0, type='CrossEntropyLoss',
                     use_sigmoid=True),
@@ -204,7 +292,8 @@ model = dict(
                     dict(in_features=1024, out_features=4, type='Linear'),
                 ],
                 roi_feat_size=7,
-                type='DeticBBoxHead'),
+                type='DeticBBoxHead',
+                use_fed_loss=True),
         ],
         bbox_roi_extractor=dict(
             featmap_strides=[
@@ -241,21 +330,25 @@ model = dict(
             type='SingleRoIExtractor'),
         num_stages=3,
         stage_loss_weights=[
-            1,
-            0.5,
-            0.25,
+            1.0,
+            1.0,
+            1.0,
         ],
         type='DeticRoIHead'),
     rpn_head=dict(
         conv_bias=True,
         feat_channels=256,
         in_channels=256,
-        loss_bbox=dict(loss_weight=2.0, type='GIoULoss'),
+        loss_bbox=dict(eps=1e-06, loss_weight=1.0, type='GIoULoss'),
         loss_cls=dict(
+            alpha=0.25,
+            beta=4.0,
+            gamma=2.0,
+            ignore_high_fp=0.85,
             loss_weight=1.0,
-            neg_weight=0.75,
-            pos_weight=0.25,
-            type='GaussianFocalLoss'),
+            neg_weight=0.5,
+            pos_weight=0.5,
+            type='HeatmapFocalLoss'),
         norm_cfg=dict(num_groups=32, requires_grad=True, type='GN'),
         num_classes=20,
         stacked_convs=4,
@@ -310,7 +403,7 @@ model = dict(
                 mask_size=28,
                 pos_weight=-1,
                 sampler=dict(
-                    add_gt_as_proposals=True,
+                    add_gt_as_proposals=False,
                     neg_pos_ub=-1,
                     num=512,
                     pos_fraction=0.25,
@@ -327,7 +420,7 @@ model = dict(
                 mask_size=28,
                 pos_weight=-1,
                 sampler=dict(
-                    add_gt_as_proposals=True,
+                    add_gt_as_proposals=False,
                     neg_pos_ub=-1,
                     num=512,
                     pos_fraction=0.25,
@@ -353,32 +446,21 @@ model = dict(
         rpn_proposal=dict(
             max_per_img=2000,
             min_bbox_size=0,
-            nms=dict(iou_threshold=0.7, type='nms'),
-            nms_pre=2000)),
-    type='CascadeRCNN')
+            nms=dict(iou_threshold=0.9, type='nms'),
+            nms_pre=4000,
+            score_thr=0.0001)),
+    type='Detic')
 num_classes = 20
 optim_wrapper = dict(
-    _scope_='mmdet',
-    optimizer=dict(lr=0.04, momentum=0.9, type='SGD', weight_decay=4e-05),
+    clip_grad=dict(max_norm=1.0, norm_type=2),
+    optimizer=dict(lr=0.0001, type='AdamW', weight_decay=0.0001),
     paramwise_cfg=dict(norm_decay_mult=0.0),
-    type='AmpOptimWrapper')
+    type='OptimWrapper')
 param_scheduler = [
     dict(
-        begin=0,
-        by_epoch=False,
-        end=1333,
-        start_factor=0.00025,
+        begin=0, by_epoch=False, end=1000, start_factor=0.001,
         type='LinearLR'),
-    dict(
-        begin=0,
-        by_epoch=True,
-        end=8,
-        gamma=0.1,
-        milestones=[
-            7,
-            8,
-        ],
-        type='MultiStepLR'),
+    dict(T_max=180000, begin=0, by_epoch=False, type='CosineAnnealingLR'),
 ]
 reg_layer = [
     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -386,9 +468,9 @@ reg_layer = [
     dict(in_features=1024, out_features=4, type='Linear'),
 ]
 resume = False
-test_cfg = dict(_scope_='mmdet', type='TestLoop')
+test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
-    batch_size=1,
+    batch_size=8,
     dataset=dict(
         ann_file='voc_coco_fmt_annotations/voc07_test.json',
         data_prefix=dict(img=''),
@@ -560,9 +642,12 @@ test_pipeline = [
         type='PackDetInputs'),
 ]
 train_cfg = dict(
-    _scope_='mmdet', max_epochs=8, type='EpochBasedTrainLoop', val_interval=5)
+    max_iters=180000, type='IterBasedTrainLoop', val_interval=180000)
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=[
+        4,
+        16,
+    ],
     dataset=dict(
         dataset=dict(
             ann_file='voc_coco_fmt_annotations/voc0712_trainval.json',
@@ -718,9 +803,66 @@ train_pipeline = [
     dict(prob=0.5, type='RandomFlip'),
     dict(type='PackDetInputs'),
 ]
-val_cfg = dict(_scope_='mmdet', type='ValLoop')
+train_pipeline_cls = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=False, with_label=True),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            1.5,
+        ),
+        scale=(
+            448,
+            448,
+        ),
+        type='RandomResize'),
+    dict(
+        allow_negative_crop=True,
+        bbox_clip_border=False,
+        crop_size=(
+            448,
+            448,
+        ),
+        crop_type='absolute_range',
+        recompute_bbox=False,
+        type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PackDetInputs'),
+]
+train_pipeline_det = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.1,
+            2.0,
+        ),
+        scale=(
+            896,
+            896,
+        ),
+        type='RandomResize'),
+    dict(
+        allow_negative_crop=True,
+        crop_size=(
+            896,
+            896,
+        ),
+        crop_type='absolute_range',
+        recompute_bbox=True,
+        type='RandomCrop'),
+    dict(min_gt_bbox_wh=(
+        0.01,
+        0.01,
+    ), type='FilterAnnotations'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PackDetInputs'),
+]
+val_cfg = dict(type='ValLoop')
 val_dataloader = dict(
-    batch_size=1,
+    batch_size=8,
     dataset=dict(
         ann_file='voc_coco_fmt_annotations/voc07_test.json',
         data_prefix=dict(img=''),
@@ -874,6 +1016,27 @@ val_evaluator = dict(
     format_only=False,
     metric='bbox',
     type='CocoMetric')
+val_pipeline = [
+    dict(backend_args=None, imdecode_backend=None, type='LoadImageFromFile'),
+    dict(backend=None, keep_ratio=True, scale=(
+        1333,
+        800,
+    ), type='Resize'),
+    dict(
+        poly2mask=False,
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=True),
+    dict(
+        meta_keys=(
+            'img_id',
+            'img_path',
+            'ori_shape',
+            'img_shape',
+            'scale_factor',
+        ),
+        type='PackDetInputs'),
+]
 vis_backends = [
     dict(_scope_='mmdet', type='LocalVisBackend'),
 ]

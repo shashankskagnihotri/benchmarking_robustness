@@ -16,7 +16,7 @@ custom_imports = dict(
         "projects.CO-DETR.codetr",
     ],
 )
-data_root = "data/coco/"
+data_root = "data/VOCdevkit/"
 dataset_type = "CocoDataset"
 default_hooks = dict(
     checkpoint=dict(
@@ -96,7 +96,7 @@ log_processor = dict(
     _scope_="mmdet", by_epoch=True, type="LogProcessor", window_size=50
 )
 loss_lambda = 2.0
-max_epochs = 36
+max_epochs = 12
 max_iters = 270000
 model = dict(
     backbone=dict(
@@ -163,21 +163,21 @@ model = dict(
                 type="FocalLoss",
                 use_sigmoid=True,
             ),
-            num_classes=80,
+            num_classes=20,
             stacked_convs=1,
             type="CoATSSHead",
         ),
     ],
     data_preprocessor=dict(
         batch_augments=[
-            dict(
-                pad_mask=True,
-                size=(
-                    1024,
-                    1024,
-                ),
-                type="BatchFixedSizePad",
-            ),
+            # dict(
+            #     pad_mask=True,
+            #     size=(
+            #         1024,
+            #         1024,
+            #     ),
+            #     type="BatchFixedSizePad",
+            # ),
         ],
         bgr_to_rgb=True,
         mean=[
@@ -220,7 +220,7 @@ model = dict(
             beta=2.0, loss_weight=1.0, type="QualityFocalLoss", use_sigmoid=True
         ),
         loss_iou=dict(loss_weight=2.0, type="GIoULoss"),
-        num_classes=80,
+        num_classes=20,
         num_query=900,
         positional_encoding=dict(
             normalize=True, num_feats=128, temperature=20, type="SinePositionalEncoding"
@@ -311,7 +311,7 @@ model = dict(
                 loss_cls=dict(
                     loss_weight=12.0, type="CrossEntropyLoss", use_sigmoid=False
                 ),
-                num_classes=80,
+                num_classes=20,
                 reg_class_agnostic=False,
                 reg_decoded_bbox=True,
                 roi_feat_size=7,
@@ -462,7 +462,7 @@ model = dict(
     type="CoDETR",
     use_lsj=True,
 )
-num_classes = 80
+num_classes = 20
 num_dec_layer = 6
 optim_wrapper = dict(
     clip_grad=dict(max_norm=0.1, norm_type=2),
@@ -476,46 +476,155 @@ param_scheduler = [
         begin=0,
         end=max_epochs,
         by_epoch=True,
-        milestones=[30],
+        milestones=[10],
         gamma=0.1,
     )
 ]
-
 resume = False
 test_cfg = dict(_scope_="mmdet", type="TestLoop")
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        _scope_="mmdet",
-        ann_file="annotations/instances_val2017.json",
-        backend_args=None,
-        data_prefix=dict(img="val2017/"),
-        data_root="data/coco/",
+        ann_file="voc_coco_fmt_annotations/voc07_test.json",
+        data_prefix=dict(img=""),
+        data_root="data/VOCdevkit/",
+        metainfo=dict(
+            classes=(
+                "aeroplane",
+                "bicycle",
+                "bird",
+                "boat",
+                "bottle",
+                "bus",
+                "car",
+                "cat",
+                "chair",
+                "cow",
+                "diningtable",
+                "dog",
+                "horse",
+                "motorbike",
+                "person",
+                "pottedplant",
+                "sheep",
+                "sofa",
+                "train",
+                "tvmonitor",
+            ),
+            palette=[
+                (
+                    106,
+                    0,
+                    228,
+                ),
+                (
+                    119,
+                    11,
+                    32,
+                ),
+                (
+                    165,
+                    42,
+                    42,
+                ),
+                (
+                    0,
+                    0,
+                    192,
+                ),
+                (
+                    197,
+                    226,
+                    255,
+                ),
+                (
+                    0,
+                    60,
+                    100,
+                ),
+                (
+                    0,
+                    0,
+                    142,
+                ),
+                (
+                    255,
+                    77,
+                    255,
+                ),
+                (
+                    153,
+                    69,
+                    1,
+                ),
+                (
+                    120,
+                    166,
+                    157,
+                ),
+                (
+                    0,
+                    182,
+                    199,
+                ),
+                (
+                    0,
+                    226,
+                    252,
+                ),
+                (
+                    182,
+                    182,
+                    255,
+                ),
+                (
+                    0,
+                    0,
+                    230,
+                ),
+                (
+                    220,
+                    20,
+                    60,
+                ),
+                (
+                    163,
+                    255,
+                    0,
+                ),
+                (
+                    0,
+                    82,
+                    0,
+                ),
+                (
+                    3,
+                    95,
+                    161,
+                ),
+                (
+                    0,
+                    80,
+                    100,
+                ),
+                (
+                    183,
+                    130,
+                    88,
+                ),
+            ],
+        ),
         pipeline=[
-            dict(type="LoadImageFromFile"),
+            dict(backend_args=None, type="LoadImageFromFile"),
             dict(
                 keep_ratio=True,
                 scale=(
-                    1024,
-                    1024,
+                    1000,
+                    600,
                 ),
                 type="Resize",
             ),
-            dict(
-                pad_val=dict(
-                    img=(
-                        114,
-                        114,
-                        114,
-                    )
-                ),
-                size=(
-                    1024,
-                    1024,
-                ),
-                type="Pad",
-            ),
-            dict(type="LoadAnnotations", with_bbox=True, with_mask=True),
+            dict(type="LoadAnnotations", with_bbox=True),
             dict(
                 meta_keys=(
                     "img_id",
@@ -527,47 +636,27 @@ test_dataloader = dict(
                 type="PackDetInputs",
             ),
         ],
-        test_mode=True,
         type="CocoDataset",
     ),
-    drop_last=False,
-    num_workers=2,
-    persistent_workers=True,
-    sampler=dict(_scope_="mmdet", shuffle=False, type="DefaultSampler"),
 )
 test_evaluator = dict(
-    _scope_="mmdet",
-    ann_file="data/coco/annotations/instances_val2017.json",
+    ann_file="data/VOCdevkit/voc_coco_fmt_annotations/voc07_test.json",
     backend_args=None,
     format_only=False,
     metric="bbox",
     type="CocoMetric",
 )
 test_pipeline = [
-    dict(type="LoadImageFromFile"),
+    dict(backend_args=None, type="LoadImageFromFile"),
     dict(
         keep_ratio=True,
         scale=(
-            1024,
-            1024,
+            1000,
+            600,
         ),
         type="Resize",
     ),
-    dict(
-        pad_val=dict(
-            img=(
-                114,
-                114,
-                114,
-            )
-        ),
-        size=(
-            1024,
-            1024,
-        ),
-        type="Pad",
-    ),
-    dict(type="LoadAnnotations", with_bbox=True, with_mask=True),
+    dict(type="LoadAnnotations", with_bbox=True),
     dict(
         meta_keys=(
             "img_id",
@@ -579,115 +668,320 @@ test_pipeline = [
         type="PackDetInputs",
     ),
 ]
-train_cfg = dict(max_epochs=36, type="EpochBasedTrainLoop", val_interval=1)
+train_cfg = dict(max_epochs=12, type="EpochBasedTrainLoop", val_interval=1)
 train_dataloader = dict(
     batch_size=2,
     dataset=dict(
-        _scope_="mmdet",
         dataset=dict(
-            ann_file="annotations/instances_train2017.json",
+            ann_file="voc_coco_fmt_annotations/voc0712_trainval.json",
             backend_args=None,
-            data_prefix=dict(img="train2017/"),
-            data_root="data/coco/",
-            filter_cfg=dict(filter_empty_gt=False, min_size=32),
+            data_prefix=dict(img=""),
+            data_root="data/VOCdevkit/",
+            filter_cfg=dict(filter_empty_gt=True, min_size=32),
+            metainfo=dict(
+                classes=(
+                    "aeroplane",
+                    "bicycle",
+                    "bird",
+                    "boat",
+                    "bottle",
+                    "bus",
+                    "car",
+                    "cat",
+                    "chair",
+                    "cow",
+                    "diningtable",
+                    "dog",
+                    "horse",
+                    "motorbike",
+                    "person",
+                    "pottedplant",
+                    "sheep",
+                    "sofa",
+                    "train",
+                    "tvmonitor",
+                ),
+                palette=[
+                    (
+                        106,
+                        0,
+                        228,
+                    ),
+                    (
+                        119,
+                        11,
+                        32,
+                    ),
+                    (
+                        165,
+                        42,
+                        42,
+                    ),
+                    (
+                        0,
+                        0,
+                        192,
+                    ),
+                    (
+                        197,
+                        226,
+                        255,
+                    ),
+                    (
+                        0,
+                        60,
+                        100,
+                    ),
+                    (
+                        0,
+                        0,
+                        142,
+                    ),
+                    (
+                        255,
+                        77,
+                        255,
+                    ),
+                    (
+                        153,
+                        69,
+                        1,
+                    ),
+                    (
+                        120,
+                        166,
+                        157,
+                    ),
+                    (
+                        0,
+                        182,
+                        199,
+                    ),
+                    (
+                        0,
+                        226,
+                        252,
+                    ),
+                    (
+                        182,
+                        182,
+                        255,
+                    ),
+                    (
+                        0,
+                        0,
+                        230,
+                    ),
+                    (
+                        220,
+                        20,
+                        60,
+                    ),
+                    (
+                        163,
+                        255,
+                        0,
+                    ),
+                    (
+                        0,
+                        82,
+                        0,
+                    ),
+                    (
+                        3,
+                        95,
+                        161,
+                    ),
+                    (
+                        0,
+                        80,
+                        100,
+                    ),
+                    (
+                        183,
+                        130,
+                        88,
+                    ),
+                ],
+            ),
             pipeline=[
-                dict(type="LoadImageFromFile"),
-                dict(type="LoadAnnotations", with_bbox=True, with_mask=True),
+                dict(backend_args=None, type="LoadImageFromFile"),
+                dict(type="LoadAnnotations", with_bbox=True),
                 dict(
                     keep_ratio=True,
-                    ratio_range=(
-                        0.1,
-                        2.0,
-                    ),
                     scale=(
-                        1024,
-                        1024,
+                        1000,
+                        600,
                     ),
-                    type="RandomResize",
-                ),
-                dict(
-                    allow_negative_crop=True,
-                    crop_size=(
-                        1024,
-                        1024,
-                    ),
-                    crop_type="absolute_range",
-                    recompute_bbox=True,
-                    type="RandomCrop",
-                ),
-                dict(
-                    min_gt_bbox_wh=(
-                        0.01,
-                        0.01,
-                    ),
-                    type="FilterAnnotations",
+                    type="Resize",
                 ),
                 dict(prob=0.5, type="RandomFlip"),
-                dict(
-                    pad_val=dict(
-                        img=(
-                            114,
-                            114,
-                            114,
-                        )
-                    ),
-                    size=(
-                        1024,
-                        1024,
-                    ),
-                    type="Pad",
-                ),
+                dict(type="PackDetInputs"),
             ],
             type="CocoDataset",
         ),
-        pipeline=[
-            dict(max_num_pasted=100, type="CopyPaste"),
-            dict(type="PackDetInputs"),
-        ],
-        type="MultiImageMixDataset",
+        times=3,
+        type="RepeatDataset",
     ),
-    num_workers=2,
-    persistent_workers=True,
-    sampler=dict(_scope_="mmdet", shuffle=True, type="DefaultSampler"),
 )
 train_pipeline = [
-    dict(max_num_pasted=100, type="CopyPaste"),
+    dict(backend_args=None, type="LoadImageFromFile"),
+    dict(type="LoadAnnotations", with_bbox=True),
+    dict(
+        keep_ratio=True,
+        scale=(
+            1000,
+            600,
+        ),
+        type="Resize",
+    ),
+    dict(prob=0.5, type="RandomFlip"),
     dict(type="PackDetInputs"),
 ]
 val_cfg = dict(_scope_="mmdet", type="ValLoop")
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        _scope_="mmdet",
-        ann_file="annotations/instances_val2017.json",
-        backend_args=None,
-        data_prefix=dict(img="val2017/"),
-        data_root="data/coco/",
+        ann_file="voc_coco_fmt_annotations/voc07_test.json",
+        data_prefix=dict(img=""),
+        data_root="data/VOCdevkit/",
+        metainfo=dict(
+            classes=(
+                "aeroplane",
+                "bicycle",
+                "bird",
+                "boat",
+                "bottle",
+                "bus",
+                "car",
+                "cat",
+                "chair",
+                "cow",
+                "diningtable",
+                "dog",
+                "horse",
+                "motorbike",
+                "person",
+                "pottedplant",
+                "sheep",
+                "sofa",
+                "train",
+                "tvmonitor",
+            ),
+            palette=[
+                (
+                    106,
+                    0,
+                    228,
+                ),
+                (
+                    119,
+                    11,
+                    32,
+                ),
+                (
+                    165,
+                    42,
+                    42,
+                ),
+                (
+                    0,
+                    0,
+                    192,
+                ),
+                (
+                    197,
+                    226,
+                    255,
+                ),
+                (
+                    0,
+                    60,
+                    100,
+                ),
+                (
+                    0,
+                    0,
+                    142,
+                ),
+                (
+                    255,
+                    77,
+                    255,
+                ),
+                (
+                    153,
+                    69,
+                    1,
+                ),
+                (
+                    120,
+                    166,
+                    157,
+                ),
+                (
+                    0,
+                    182,
+                    199,
+                ),
+                (
+                    0,
+                    226,
+                    252,
+                ),
+                (
+                    182,
+                    182,
+                    255,
+                ),
+                (
+                    0,
+                    0,
+                    230,
+                ),
+                (
+                    220,
+                    20,
+                    60,
+                ),
+                (
+                    163,
+                    255,
+                    0,
+                ),
+                (
+                    0,
+                    82,
+                    0,
+                ),
+                (
+                    3,
+                    95,
+                    161,
+                ),
+                (
+                    0,
+                    80,
+                    100,
+                ),
+                (
+                    183,
+                    130,
+                    88,
+                ),
+            ],
+        ),
         pipeline=[
-            dict(type="LoadImageFromFile"),
+            dict(backend_args=None, type="LoadImageFromFile"),
             dict(
                 keep_ratio=True,
                 scale=(
-                    1024,
-                    1024,
+                    1000,
+                    600,
                 ),
                 type="Resize",
             ),
-            dict(
-                pad_val=dict(
-                    img=(
-                        114,
-                        114,
-                        114,
-                    )
-                ),
-                size=(
-                    1024,
-                    1024,
-                ),
-                type="Pad",
-            ),
-            dict(type="LoadAnnotations", with_bbox=True, with_mask=True),
+            dict(type="LoadAnnotations", with_bbox=True),
             dict(
                 meta_keys=(
                     "img_id",
@@ -699,17 +993,11 @@ val_dataloader = dict(
                 type="PackDetInputs",
             ),
         ],
-        test_mode=True,
         type="CocoDataset",
     ),
-    drop_last=False,
-    num_workers=2,
-    persistent_workers=True,
-    sampler=dict(_scope_="mmdet", shuffle=False, type="DefaultSampler"),
 )
 val_evaluator = dict(
-    _scope_="mmdet",
-    ann_file="data/coco/annotations/instances_val2017.json",
+    ann_file="data/VOCdevkit/voc_coco_fmt_annotations/voc07_test.json",
     backend_args=None,
     format_only=False,
     metric="bbox",

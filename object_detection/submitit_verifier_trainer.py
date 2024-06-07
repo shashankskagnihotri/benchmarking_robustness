@@ -29,7 +29,8 @@ slurm_partition = "gpu_4"
 # config_file = "configs_verified/dab_detr_r101_voc0712.py"
 
 #! to check if repeate datasets actually repeats a epoch -> max_epochs set to 1 should run for 3 epochs
-#! might be under 23720087_submission
+#! might be under 23720087_submission -> unfortunaly cancled with scancel -u $USER
+#! new run to obtain weights 23737571
 config_file = "./to_check_if_epochs_repeated_atss_r50_voc0712.py"
 
 slurm_log_folder_path = (

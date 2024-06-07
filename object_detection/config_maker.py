@@ -133,7 +133,7 @@ files_which_we_have = [
     #! add swin-b
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_4xb32-100e_coco.py",
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
-    "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
+    "./mmdetection/projects/Detic_new/configs/detic_centernet2_swin-b_fpn_4x_lvis_in21k-lvis.py",
     #! others
     "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",
     # "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py",
@@ -227,10 +227,10 @@ voc_train_dataloader = dict(
         type="RepeatDataset",
         times=3,
         dataset=dict(
-            #_delete_=True,
+            # _delete_=True,
             type=voc0712_dataset_type,
             data_root=voc0712_data_root,
-            ann_file="voc_coco_fmt_annotations/voc0712_trainval.json", # changed from annotations/....
+            ann_file="voc_coco_fmt_annotations/voc0712_trainval.json",  # changed from annotations/....
             data_prefix=dict(img=""),
             metainfo=voc0712_METAINFO,
             filter_cfg=dict(filter_empty_gt=True, min_size=32),
@@ -242,8 +242,8 @@ voc_train_dataloader = dict(
 voc_val_dataloader = dict(
     dataset=dict(
         type=voc0712_dataset_type,
-        data_root=voc0712_data_root, #! was not originally  present
-        ann_file="voc_coco_fmt_annotations/voc07_test.json", # changed from annotations/....
+        data_root=voc0712_data_root,  #! was not originally  present
+        ann_file="voc_coco_fmt_annotations/voc07_test.json",  # changed from annotations/....
         data_prefix=dict(img=""),
         metainfo=voc0712_METAINFO,
         pipeline=voc0712_test_pipeline,
@@ -394,7 +394,7 @@ necks_we_want = [
     "dino",
     "glip",
     "ddq",
-    "Detic",
+    "Detic_new",
     "EfficientDet",
     "DiffusionDet",
     "codino",
@@ -437,8 +437,6 @@ def which(path):
     def which_dataset(path):
         if "coco" in path:
             return "coco"
-        elif "lvis" in path:
-            return "lvis"
         else:
             None
 
@@ -461,24 +459,12 @@ for file in files_which_we_have:
     cfg.dump(destination_file)
 
 
-# file = "./configs_to_test/ddod_r50_coco.py"
-# cfg = Config.fromfile(file)
-
-# backbone, neck, dataset = which(file)
-# cfg.model.backbone = new_backbone_configs["r101"]
-# cfg.model.neck.in_channels = new_neck_configs["r101"]["in_channels"]
-
-# cfg.dump("nice try.py")
-
-
 all_combis = {}
 for n in necks_we_want:
     for b in backbones_we_want:
         for d in datasets_we_want:
             all_combis[(n, b, d)] = False
 
-
-# print(all_combis)
 
 for file in files_which_we_have:
     backbone, neck, dataset = which(file)
@@ -668,7 +654,7 @@ reference_configs = {
     "glip": "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
     "EfficientDet": "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
     # "ViTDet": "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
-    "Detic": "./mmdetection/projects/Detic/configs/detic_centernet2_swin-b_fpn_4x_lvis-coco-in21k.py",
+    "Detic_new": "./mmdetection/projects/Detic_new/configs/detic_centernet2_swin-b_fpn_4x_lvis_in21k-lvis.py",
 }
 
 
@@ -686,7 +672,7 @@ for (neck, backbone, dataset), found in all_combis.items():
         backbone_ref, neck_ref, dataset_ref = which(reference_file)
         cfg = Config.fromfile(reference_file)
 
-        if neck == "Detic" and dataset == dataset_ref:
+        if neck == "Detic_new" and dataset == dataset_ref:
             config_keybased_value_changer(
                 config_dictionary=cfg._cfg_dict,
                 searched_key="num_classes",
@@ -710,19 +696,11 @@ for (neck, backbone, dataset), found in all_combis.items():
             else:
                 cfg.model.neck.in_channels = new_neck_configs[backbone]["in_channels"]
 
-        # data_root as voc0712_data_root,
-        # dataset_type as voc0712_dataset_type,
-        # train_pipeline as voc0712_train_pipeline,
-        # test_pipeline as voc0712_test_pipeline,
-        # train_dataloader as voc0712_train_dataloader,
-        # val_dataloader as voc0712_val_dataloader
-
         if dataset != dataset_ref:
             #! the voc reference didn´t have a batchsize now we use the batchsize of the model reference
             original_train_batch_size = cfg.train_dataloader.batch_size
             original_val_batch_size = cfg.val_dataloader.batch_size
             original_test_batch_size = cfg.test_dataloader.batch_size
-
 
             cfg.data_root = voc0712_data_root
             cfg.dataset_type = voc0712_dataset_type
@@ -735,7 +713,6 @@ for (neck, backbone, dataset), found in all_combis.items():
             cfg.train_dataloader = voc_train_dataloader
             cfg.val_dataloader = voc_val_dataloader
             cfg.test_dataloader = voc_val_dataloader
-
 
             cfg.val_evaluator = voc0712_val_evaluator
             cfg.test_evaluator = voc0712_val_evaluator
@@ -764,54 +741,12 @@ for (neck, backbone, dataset), found in all_combis.items():
                 )
                 adjust_param_scheduler(cfg, factor=3)
 
-            # if cfg.train_cfg.type == "EpochBasedTrainLoop":
-            #! max_epochs finder
-            #! cfg.max_epochs = cfg.max_epochs // 3
-            # for each param_scheduler.start //3
-            #! for each param_scheduler.end //3
-            #! for each milestone //3
+        if hasattr(cfg, "auto_scale_lr"):
+            cfg.auto_scale_lr.enable = True
+        else:
+            cfg.auto_scale_lr = dict(enable=True)
 
-            # param_scheduler = [
-            # dict(
-            #     begin=0,
-            #     by_epoch=False,
-            #     end=4000,
-            #     start_factor=0.00025,
-            #     type='LinearLR'),
-            # dict(
-            #     begin=0,
-            #     by_epoch=True,
-            #     end=25,
-            #     gamma=0.1,
-            #     milestones=[
-            #         22,
-            #         24,
-            #     ],
-            #     type='MultiStepLR'),
-
-            # cfg.max_epochs = cfg.max_epochs // 3
-            # cfg.train_cfg.max_epochs = cfg.train_cfg.max_epochs // 3  #! sheduled??
-
-            #! when try to update the metric
-            # cfg.val_evaluator = (
-            #     dict(
-            #         ann_file="data/voc_coco_format/voc0712_val.json",
-            #         backend_args=None,
-            #         format_only=False,
-            #         metric="bbox",
-            #         type="CocoMetric",
-            #     ),
-            # )
-            # cfg.test_evaluator = dict(
-            #     ann_file="data/voc_coco_format/voc07_test.json",
-            #     backend_args=None,
-            #     format_only=False,
-            #     metric="bbox",
-            #     type="CocoMetric",
-            # )
-
-        cfg.auto_scale_lr.enable = True  #! test if works
-        #! put in for real training
+        #! put in for real in training
         # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
         # cfg.visualizer.vis_backends[0].init_kwargs = dict(
         #     project=f"{neck}_{backbone}_{dataset}"
@@ -820,9 +755,7 @@ for (neck, backbone, dataset), found in all_combis.items():
         destination_file = os.path.join(
             "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
         )
-        # destination_file = os.path.join(
-        #     "./configs_to_train", f"{neck}_{cfg.model.backbone.type}_{dataset}.py"
-        # )
+
         cfg.dump(destination_file)
         all_combis[(neck, backbone, dataset)] = True
     else:
