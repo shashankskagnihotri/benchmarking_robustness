@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-74%4
-#SBATCH --job-name=liteflownet3_kitti-2015_cc
-#SBATCH --output=slurm/liteflownet3_kitti-2015_cc_%A_%a.out
-#SBATCH --error=slurm/liteflownet3_kitti-2015_cc_err_%A_%a.out
+#SBATCH --job-name=liteflownet3_pseudoreg_kitti-2015_cc
+#SBATCH --output=slurm/liteflownet3_pseudoreg_kitti-2015_cc_%A_%a.out
+#SBATCH --error=slurm/liteflownet3_pseudoreg_kitti-2015_cc_err_%A_%a.out
 
-model="liteflownet3"
+model="liteflownet3_pseudoreg"
 dataset="kitti-2015"
 checkpoint="kitti"
 attack="common_corruptions"
