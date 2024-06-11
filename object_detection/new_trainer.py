@@ -104,17 +104,4 @@ if __name__ == "__main__":
         local_rank=0,
     )
 
-#! python -m pudb new_trainer.py configs_verified/EfficientDet_swin-b_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
-
-# ? ./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py"
-
-
-# python -m pudb new_trainer.py ./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
-
-# ? configs_verified/EfficientDet_convnext-b_coco.py
-
-# python -m pudb new_trainer.py configs_erroneous/verification/EfficientDet_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
-
-# python -m pudb new_trainer.py configs_verified/codino_convnext-b_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
-
-# python -m pudb new_trainer.py configs_to_train/centernet_swin-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb new_trainer.py configs_erroneous/verification/yolo_swin-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer

@@ -1,10 +1,24 @@
-auto_scale_lr = dict(base_batch_size=16, enable=False)
+auto_scale_lr = dict(base_batch_size=64, enable=True)
 backend_args = None
-checkpoint_config = dict(interval=0)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    mean=[
+        0,
+        0,
+        0,
+    ],
+    pad_size_divisor=32,
+    std=[
+        255.0,
+        255.0,
+        255.0,
+    ],
+    type="DetDataPreprocessor",
+)
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
 default_hooks = dict(
-    checkpoint=dict(interval=1, type="CheckpointHook"),
+    checkpoint=dict(interval=7, type="CheckpointHook"),
     logger=dict(interval=50, type="LoggerHook"),
     param_scheduler=dict(type="ParamSchedulerHook"),
     sampler_seed=dict(type="DistSamplerSeedHook"),
@@ -20,122 +34,161 @@ env_cfg = dict(
 load_from = None
 log_level = "INFO"
 log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
-max_epochs = 24
 model = dict(
     backbone=dict(
-        depth=101,
+        depth=50,
         frozen_stages=1,
-        init_cfg=dict(checkpoint="torchvision://resnet101", type="Pretrained"),
+        init_cfg=dict(checkpoint="torchvision://resnet50", type="Pretrained"),
         norm_cfg=dict(requires_grad=True, type="BN"),
         norm_eval=True,
         num_stages=4,
-        out_indices=(
-            0,
-            1,
+        out_indices=[
             2,
-            3,
-        ),
+            1,
+            0,
+        ],
         style="pytorch",
         type="ResNet",
     ),
     bbox_head=dict(
-        feat_channels=256,
-        gradient_mul=0.1,
-        in_channels=256,
-        loss_bbox_init=dict(beta=0.11, loss_weight=0.5, type="SmoothL1Loss"),
-        loss_bbox_refine=dict(beta=0.11, loss_weight=1.0, type="SmoothL1Loss"),
-        loss_cls=dict(
-            alpha=0.25, gamma=2.0, loss_weight=1.0, type="FocalLoss", use_sigmoid=True
+        anchor_generator=dict(
+            base_sizes=[
+                [
+                    (
+                        116,
+                        90,
+                    ),
+                    (
+                        156,
+                        198,
+                    ),
+                    (
+                        373,
+                        326,
+                    ),
+                ],
+                [
+                    (
+                        30,
+                        61,
+                    ),
+                    (
+                        62,
+                        45,
+                    ),
+                    (
+                        59,
+                        119,
+                    ),
+                ],
+                [
+                    (
+                        10,
+                        13,
+                    ),
+                    (
+                        16,
+                        30,
+                    ),
+                    (
+                        33,
+                        23,
+                    ),
+                ],
+            ],
+            strides=[
+                32,
+                16,
+                8,
+            ],
+            type="YOLOAnchorGenerator",
         ),
-        norm_cfg=dict(num_groups=32, requires_grad=True, type="GN"),
-        num_classes=80,
-        num_points=9,
-        point_base_scale=4,
-        point_feat_channels=256,
-        point_strides=[
-            8,
-            16,
+        bbox_coder=dict(type="YOLOBBoxCoder"),
+        featmap_strides=[
             32,
-            64,
+            16,
+            8,
+        ],
+        in_channels=[
+            512,
+            256,
             128,
         ],
-        stacked_convs=3,
-        transform_method="moment",
-        type="RepPointsHead",
+        loss_cls=dict(
+            loss_weight=1.0, reduction="sum", type="CrossEntropyLoss", use_sigmoid=True
+        ),
+        loss_conf=dict(
+            loss_weight=1.0, reduction="sum", type="CrossEntropyLoss", use_sigmoid=True
+        ),
+        loss_wh=dict(loss_weight=2.0, reduction="sum", type="MSELoss"),
+        loss_xy=dict(
+            loss_weight=2.0, reduction="sum", type="CrossEntropyLoss", use_sigmoid=True
+        ),
+        num_classes=80,
+        out_channels=[
+            1024,
+            512,
+            256,
+        ],
+        type="YOLOV3Head",
     ),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
-            123.675,
-            116.28,
-            103.53,
+            0,
+            0,
+            0,
         ],
         pad_size_divisor=32,
         std=[
-            58.395,
-            57.12,
-            57.375,
+            255.0,
+            255.0,
+            255.0,
         ],
         type="DetDataPreprocessor",
     ),
     neck=dict(
-        add_extra_convs="on_input",
         in_channels=[
-            256,
-            512,
             1024,
-            2048,
+            512,
+            256,
         ],
-        norm_cfg=dict(num_groups=32, requires_grad=True, type="GN"),
-        num_outs=5,
-        out_channels=256,
-        start_level=1,
-        type="FPN",
+        num_scales=3,
+        out_channels=[
+            512,
+            256,
+            128,
+        ],
+        type="YOLOV3Neck",
     ),
     test_cfg=dict(
+        conf_thr=0.005,
         max_per_img=100,
         min_bbox_size=0,
-        nms=dict(iou_threshold=0.5, type="nms"),
+        nms=dict(iou_threshold=0.45, type="nms"),
         nms_pre=1000,
         score_thr=0.05,
     ),
     train_cfg=dict(
-        init=dict(
-            allowed_border=-1,
-            assigner=dict(pos_num=1, scale=4, type="PointAssigner"),
-            debug=False,
-            pos_weight=-1,
-        ),
-        refine=dict(
-            allowed_border=-1,
-            assigner=dict(
-                ignore_iof_thr=-1,
-                min_pos_iou=0,
-                neg_iou_thr=0.4,
-                pos_iou_thr=0.5,
-                type="MaxIoUAssigner",
-            ),
-            debug=False,
-            pos_weight=-1,
-        ),
+        assigner=dict(
+            min_pos_iou=0, neg_iou_thr=0.5, pos_iou_thr=0.5, type="GridAssigner"
+        )
     ),
-    type="RepPointsDetector",
+    type="YOLOV3",
 )
-norm_cfg = dict(num_groups=32, requires_grad=True, type="GN")
 optim_wrapper = dict(
-    optimizer=dict(lr=0.01, momentum=0.9, type="SGD", weight_decay=0.0001),
+    clip_grad=dict(max_norm=35, norm_type=2),
+    optimizer=dict(lr=0.001, momentum=0.9, type="SGD", weight_decay=0.0005),
     type="OptimWrapper",
 )
 param_scheduler = [
-    dict(begin=0, by_epoch=False, end=500, start_factor=0.001, type="LinearLR"),
+    dict(begin=0, by_epoch=False, end=2000, start_factor=0.1, type="LinearLR"),
     dict(
-        begin=0,
         by_epoch=True,
-        end=24,
         gamma=0.1,
         milestones=[
-            16,
-            22,
+            218,
+            246,
         ],
         type="MultiStepLR",
     ),
@@ -154,8 +207,8 @@ test_dataloader = dict(
             dict(
                 keep_ratio=True,
                 scale=(
-                    1333,
-                    800,
+                    608,
+                    608,
                 ),
                 type="Resize",
             ),
@@ -182,7 +235,6 @@ test_dataloader = dict(
 test_evaluator = dict(
     ann_file="data/coco/annotations/instances_val2017.json",
     backend_args=None,
-    format_only=False,
     metric="bbox",
     type="CocoMetric",
 )
@@ -191,8 +243,8 @@ test_pipeline = [
     dict(
         keep_ratio=True,
         scale=(
-            1333,
-            800,
+            608,
+            608,
         ),
         type="Resize",
     ),
@@ -208,10 +260,10 @@ test_pipeline = [
         type="PackDetInputs",
     ),
 ]
-train_cfg = dict(max_epochs=24, type="EpochBasedTrainLoop", val_interval=1)
+train_cfg = dict(max_epochs=273, type="EpochBasedTrainLoop", val_interval=7)
 train_dataloader = dict(
     batch_sampler=dict(type="AspectRatioBatchSampler"),
-    batch_size=2,
+    batch_size=8,
     dataset=dict(
         ann_file="annotations/instances_train2017.json",
         backend_args=None,
@@ -222,19 +274,51 @@ train_dataloader = dict(
             dict(backend_args=None, type="LoadImageFromFile"),
             dict(type="LoadAnnotations", with_bbox=True),
             dict(
-                keep_ratio=True,
-                scale=(
-                    1333,
-                    800,
+                mean=[
+                    0,
+                    0,
+                    0,
+                ],
+                ratio_range=(
+                    1,
+                    2,
                 ),
-                type="Resize",
+                to_rgb=True,
+                type="Expand",
+            ),
+            dict(
+                min_crop_size=0.3,
+                min_ious=(
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.7,
+                    0.8,
+                    0.9,
+                ),
+                type="MinIoURandomCrop",
+            ),
+            dict(
+                keep_ratio=True,
+                scale=[
+                    (
+                        320,
+                        320,
+                    ),
+                    (
+                        608,
+                        608,
+                    ),
+                ],
+                type="RandomResize",
             ),
             dict(prob=0.5, type="RandomFlip"),
+            dict(type="PhotoMetricDistortion"),
             dict(type="PackDetInputs"),
         ],
         type="CocoDataset",
     ),
-    num_workers=2,
+    num_workers=4,
     persistent_workers=True,
     sampler=dict(shuffle=True, type="DefaultSampler"),
 )
@@ -242,14 +326,46 @@ train_pipeline = [
     dict(backend_args=None, type="LoadImageFromFile"),
     dict(type="LoadAnnotations", with_bbox=True),
     dict(
-        keep_ratio=True,
-        scale=(
-            1333,
-            800,
+        mean=[
+            0,
+            0,
+            0,
+        ],
+        ratio_range=(
+            1,
+            2,
         ),
-        type="Resize",
+        to_rgb=True,
+        type="Expand",
+    ),
+    dict(
+        min_crop_size=0.3,
+        min_ious=(
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.9,
+        ),
+        type="MinIoURandomCrop",
+    ),
+    dict(
+        keep_ratio=True,
+        scale=[
+            (
+                320,
+                320,
+            ),
+            (
+                608,
+                608,
+            ),
+        ],
+        type="RandomResize",
     ),
     dict(prob=0.5, type="RandomFlip"),
+    dict(type="PhotoMetricDistortion"),
     dict(type="PackDetInputs"),
 ]
 val_cfg = dict(type="ValLoop")
@@ -265,8 +381,8 @@ val_dataloader = dict(
             dict(
                 keep_ratio=True,
                 scale=(
-                    1333,
-                    800,
+                    608,
+                    608,
                 ),
                 type="Resize",
             ),
@@ -293,7 +409,6 @@ val_dataloader = dict(
 val_evaluator = dict(
     ann_file="data/coco/annotations/instances_val2017.json",
     backend_args=None,
-    format_only=False,
     metric="bbox",
     type="CocoMetric",
 )

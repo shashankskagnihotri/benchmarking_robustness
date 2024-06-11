@@ -114,7 +114,7 @@ files_which_we_have = [
     "./mmdetection/configs/grid_rcnn/grid-rcnn_r101_fpn_gn-head_2x_coco.py",
     "./mmdetection/configs/fsaf/fsaf_r101_fpn_1x_coco.py",
     "./mmdetection/configs/libra_rcnn/libra-faster-rcnn_r101_fpn_1x_coco.py",
-    "./mmdetection/configs/reppoints/reppoints-moment_r101-dconv-c3-c5_fpn-gn_head-gn_2x_coco.py",
+    "./mmdetection/configs/reppoints/reppoints-moment_r101_fpn-gn_head-gn_2x_coco.py",
     "./mmdetection/configs/free_anchor/freeanchor_r101_fpn_1x_coco.py",
     "./mmdetection/configs/foveabox/fovea_r101_fpn_gn-head-align_ms-640-800-4xb4-2x_coco.py",
     "./mmdetection/configs/atss/atss_r101_fpn_1x_coco.py",
@@ -588,6 +588,23 @@ def adjust_param_scheduler(cfg, factor=3):
         print("param_scheduler not found in configuration.")
 
 
+def dataset_assigner(cfg, data_root, dataset_type, train_pipeline, test_pipeline, train_dataloader, val_dataloader, val_evaluator):
+    cfg.data_root = data_root
+    cfg.dataset_type = dataset_type
+
+    cfg.train_pipeline = train_pipeline
+    cfg.test_pipeline = test_pipeline
+
+    cfg.train_dataloader = train_dataloader
+    cfg.val_dataloader = val_dataloader
+    cfg.test_dataloader = val_dataloader
+
+    cfg.val_evaluator = val_evaluator
+    cfg.test_evaluator = val_evaluator
+
+
+
+
 #! Take in more files
 reference_configs = {
     "double_heads": "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
@@ -672,50 +689,37 @@ for (neck, backbone, dataset), found in all_combis.items():
         backbone_ref, neck_ref, dataset_ref = which(reference_file)
         cfg = Config.fromfile(reference_file)
 
-        if neck == "Detic_new" and dataset == dataset_ref:
-            config_keybased_value_changer(
-                config_dictionary=cfg._cfg_dict,
-                searched_key="num_classes",
-                do_new=True,
-                new_absolute_value=80,  #! check if worked
-                change_old_value_by=1,
-                prefix="",
-            )
-
         assert (
             neck == neck_ref
         ), f"Neck mismatch: {neck} != {neck_ref}, make neck in refercence list"
 
-        if backbone != backbone_ref:
-            cfg.model.backbone = new_backbone_configs[backbone]
-            # print(f"{neck, backbone, dataset}")
-            if neck == "libra_rcnn":
-                cfg.model.neck[0].in_channels = new_neck_configs[backbone][
-                    "in_channels"
-                ]
-            else:
-                cfg.model.neck.in_channels = new_neck_configs[backbone]["in_channels"]
+        if neck == "Detic_new" and dataset == "coco":
+            config_keybased_value_changer(
+                config_dictionary=cfg._cfg_dict,
+                searched_key="num_classes",
+                do_new=True,
+                new_absolute_value=80,
+                change_old_value_by=1,
+                prefix="",
+            )
+            #! put in a reference for the coco dataset
+            dataset_assigner(cfg, coco_data_root, coco_dataset_type, coco_train_pipeline, coco_test_pipeline, coco_train_dataloader, coco_val_dataloader, coco_val_evaluator)
 
-        if dataset != dataset_ref:
-            #! the voc reference didn´t have a batchsize now we use the batchsize of the model reference
+
+        elif neck == "Detic_new" and dataset == "voc0712":
+            config_keybased_value_changer(
+                config_dictionary=cfg._cfg_dict,
+                searched_key="num_classes",
+                do_new=True,
+                new_absolute_value=20,
+                change_old_value_by=1,
+                prefix="",
+            )
             original_train_batch_size = cfg.train_dataloader.batch_size
             original_val_batch_size = cfg.val_dataloader.batch_size
             original_test_batch_size = cfg.test_dataloader.batch_size
 
-            cfg.data_root = voc0712_data_root
-            cfg.dataset_type = voc0712_dataset_type
-
-            # cfg.METAINFO = voc0712_METAINFO
-
-            cfg.train_pipeline = voc0712_train_pipeline
-            cfg.test_pipeline = voc0712_test_pipeline
-
-            cfg.train_dataloader = voc_train_dataloader
-            cfg.val_dataloader = voc_val_dataloader
-            cfg.test_dataloader = voc_val_dataloader
-
-            cfg.val_evaluator = voc0712_val_evaluator
-            cfg.test_evaluator = voc0712_val_evaluator
+            dataset_assigner(cfg, voc0712_data_root, voc0712_dataset_type, voc0712_train_pipeline, voc0712_test_pipeline, voc_train_dataloader, voc_val_dataloader, voc0712_val_evaluator)
 
             cfg.train_dataloader.batch_size = original_train_batch_size
             cfg.val_dataloader.batch_size = original_val_batch_size
@@ -741,6 +745,51 @@ for (neck, backbone, dataset), found in all_combis.items():
                 )
                 adjust_param_scheduler(cfg, factor=3)
 
+        else:
+            if backbone != backbone_ref:
+                cfg.model.backbone = new_backbone_configs[backbone]
+                # print(f"{neck, backbone, dataset}")
+                if neck == "libra_rcnn":
+                    cfg.model.neck[0].in_channels = new_neck_configs[backbone][
+                        "in_channels"
+                    ]
+                else:
+                    cfg.model.neck.in_channels = new_neck_configs[backbone][
+                        "in_channels"
+                    ]
+
+            if dataset != dataset_ref:
+                #! the voc reference didn´t have a batchsize now we use the batchsize of the model reference
+                original_train_batch_size = cfg.train_dataloader.batch_size
+                original_val_batch_size = cfg.val_dataloader.batch_size
+                original_test_batch_size = cfg.test_dataloader.batch_size
+
+                dataset_assigner(cfg, voc0712_data_root, voc0712_dataset_type, voc0712_train_pipeline, voc0712_test_pipeline, voc_train_dataloader, voc_val_dataloader, voc0712_val_evaluator)
+
+                cfg.train_dataloader.batch_size = original_train_batch_size
+                cfg.val_dataloader.batch_size = original_val_batch_size
+                cfg.test_dataloader.batch_size = original_test_batch_size
+
+                config_keybased_value_changer(
+                    config_dictionary=cfg._cfg_dict,
+                    searched_key="num_classes",
+                    do_new=True,
+                    new_absolute_value=20,
+                    change_old_value_by=1,
+                    prefix="",
+                )
+
+                if cfg.train_cfg.type == "EpochBasedTrainLoop":
+                    config_keybased_value_changer(
+                        config_dictionary=cfg._cfg_dict,
+                        searched_key="max_epochs",
+                        do_new=False,
+                        new_absolute_value=0,
+                        change_old_value_by=3,
+                        prefix="",
+                    )
+                    adjust_param_scheduler(cfg, factor=3)
+
         if hasattr(cfg, "auto_scale_lr"):
             cfg.auto_scale_lr.enable = True
         else:
@@ -755,15 +804,13 @@ for (neck, backbone, dataset), found in all_combis.items():
         destination_file = os.path.join(
             "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
         )
-
         cfg.dump(destination_file)
         all_combis[(neck, backbone, dataset)] = True
+
     else:
-        # print(f"Missing reference for {neck}")
         missing_refrences.add(neck)
 
 
-# print(all_combis)
 print(
     f"{sum(all_combis.values())} files created, {len(all_combis) - sum(all_combis.values())} missing"
 )
