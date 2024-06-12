@@ -71,13 +71,11 @@ old_dataset_names = [old_coco_dataset, old_lvis_dataset]
 #! add more files
 files_which_we_have = [
     "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
-    # DO NOT USE "./mmdetection/configs/centripetalnet/centripetalnet_hourglass104_16xb6-crop511-210e-mstest_coco.py",
     "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
     "./mmdetection/configs/ddod/ddod_r50_fpn_1x_coco.py",
     "./mmdetection/configs/conditional_detr/conditional-detr_r50_8xb2-50e_coco.py",
     "./mmdetection/configs/dab_detr/dab-detr_r50_8xb2-50e_coco.py",
-    #! added more but not sure if right
-    "./mmdetection/configs/fast_rcnn/fast-rcnn_r50_fpn_2x_coco.py",  #! not pretrained might have to train
+    "./mmdetection/configs/fast_rcnn/fast-rcnn_r50_fpn_2x_coco.py",  #! not pretrained might have
     "./mmdetection/configs/faster_rcnn/faster-rcnn_r50_fpn_ms-3x_coco.py",  #! not pretrained might have to train
     "./mmdetection/configs/rpn/rpn_r50_fpn_2x_coco.py",
     "./mmdetection/configs/retinanet/retinanet_r50_fpn_ms-640-800-3x_coco.py",
@@ -124,17 +122,12 @@ files_which_we_have = [
     "./mmdetection/configs/sparse_rcnn/sparse-rcnn_r101_fpn_300-proposals_crop-ms-480-800-3x_coco.py",
     "./mmdetection/configs/tood/tood_r101_fpn_ms-2x_coco.py",
     "./mmdetection/configs/centernet/centernet-update_r50_fpn_8xb8-amp-lsj-200e_coco.py",
-    # "./mmdetection/configs/fcos/fcos_r50_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     "./mmdetection/configs/centernet/centernet-update_r101_fpn_8xb8-amp-lsj-200e_coco.py",
-    # "./mmdetection/configs/fcos/fcos_r101_fpn_gn-head-center-normbbox-centeronreg-giou_8xb8-amp-lsj-200e_coco.py",
     "./mmdetection/projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py",
-    #! should add swin-b and convnext files such that they do not get retrained unnecessarily
     "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py",
-    #! add swin-b
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_4xb32-100e_coco.py",
     "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py",
     "./mmdetection/projects/Detic_new/configs/detic_centernet2_swin-b_fpn_4x_lvis_in21k-lvis.py",
-    #! others
     "./mmdetection/configs/yolo/yolov3_d53_8xb8-ms-608-273e_coco.py",
     # "./mmdetection/configs/cornernet/cornernet_hourglass104_10xb5-crop511-210e-mstest_coco.py",
     "./mmdetection/configs/guided_anchoring/ga-faster-rcnn_x101-64x4d_fpn_1x_coco.py",
@@ -143,14 +136,13 @@ files_which_we_have = [
     "./mmdetection/configs/glip/glip_atss_swin-t_a_fpn_dyhead_16xb2_ms-2x_funtune_coco.py",
     "./mmdetection/projects/EfficientDet/configs/efficientdet_effb3_bifpn_8xb16-crop896-300e_coco.py",
     # "./mmdetection/projects/ViTDet/configs/vitdet_mask-rcnn_vit-b-mae_lsj-100e.py",
-    #! add swin-l when everything is done
 ]
 
 
 #! Add SWIN-L -> Ask supervisor
 # for specifying the parameters
 new_backbone_configs = {
-    "swin-b": {
+    "swin-b": {  # "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py"
         "type": "SwinTransformer",
         "pretrain_img_size": 384,
         "embed_dims": 128,
@@ -173,7 +165,7 @@ new_backbone_configs = {
             checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth",
         ),
     },
-    "convnext-b": {
+    "convnext-b": {  # "./mmdetection/configs/rtmdet/rtmdet_l_convnext_b_4xb32-100e_coco.py"
         # "_delete_": True,
         "type": "mmpretrain.ConvNeXt",
         "arch": "base",
@@ -588,7 +580,16 @@ def adjust_param_scheduler(cfg, factor=3):
         print("param_scheduler not found in configuration.")
 
 
-def dataset_assigner(cfg, data_root, dataset_type, train_pipeline, test_pipeline, train_dataloader, val_dataloader, val_evaluator):
+def dataset_assigner(
+    cfg,
+    data_root,
+    dataset_type,
+    train_pipeline,
+    test_pipeline,
+    train_dataloader,
+    val_dataloader,
+    val_evaluator,
+):
     cfg.data_root = data_root
     cfg.dataset_type = dataset_type
 
@@ -601,8 +602,6 @@ def dataset_assigner(cfg, data_root, dataset_type, train_pipeline, test_pipeline
 
     cfg.val_evaluator = val_evaluator
     cfg.test_evaluator = val_evaluator
-
-
 
 
 #! Take in more files
@@ -703,8 +702,16 @@ for (neck, backbone, dataset), found in all_combis.items():
                 prefix="",
             )
             #! put in a reference for the coco dataset
-            dataset_assigner(cfg, coco_data_root, coco_dataset_type, coco_train_pipeline, coco_test_pipeline, coco_train_dataloader, coco_val_dataloader, coco_val_evaluator)
-
+            dataset_assigner(
+                cfg,
+                coco_data_root,
+                coco_dataset_type,
+                coco_train_pipeline,
+                coco_test_pipeline,
+                coco_train_dataloader,
+                coco_val_dataloader,
+                coco_val_evaluator,
+            )
 
         elif neck == "Detic_new" and dataset == "voc0712":
             config_keybased_value_changer(
@@ -719,7 +726,16 @@ for (neck, backbone, dataset), found in all_combis.items():
             original_val_batch_size = cfg.val_dataloader.batch_size
             original_test_batch_size = cfg.test_dataloader.batch_size
 
-            dataset_assigner(cfg, voc0712_data_root, voc0712_dataset_type, voc0712_train_pipeline, voc0712_test_pipeline, voc_train_dataloader, voc_val_dataloader, voc0712_val_evaluator)
+            dataset_assigner(
+                cfg,
+                voc0712_data_root,
+                voc0712_dataset_type,
+                voc0712_train_pipeline,
+                voc0712_test_pipeline,
+                voc_train_dataloader,
+                voc_val_dataloader,
+                voc0712_val_evaluator,
+            )
 
             cfg.train_dataloader.batch_size = original_train_batch_size
             cfg.val_dataloader.batch_size = original_val_batch_size
@@ -764,7 +780,16 @@ for (neck, backbone, dataset), found in all_combis.items():
                 original_val_batch_size = cfg.val_dataloader.batch_size
                 original_test_batch_size = cfg.test_dataloader.batch_size
 
-                dataset_assigner(cfg, voc0712_data_root, voc0712_dataset_type, voc0712_train_pipeline, voc0712_test_pipeline, voc_train_dataloader, voc_val_dataloader, voc0712_val_evaluator)
+                dataset_assigner(
+                    cfg,
+                    voc0712_data_root,
+                    voc0712_dataset_type,
+                    voc0712_train_pipeline,
+                    voc0712_test_pipeline,
+                    voc_train_dataloader,
+                    voc_val_dataloader,
+                    voc0712_val_evaluator,
+                )
 
                 cfg.train_dataloader.batch_size = original_train_batch_size
                 cfg.val_dataloader.batch_size = original_val_batch_size
