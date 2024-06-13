@@ -1,10 +1,5 @@
 import os
 from mmengine.config import Config
-# from mmdetection.configs._base_.datasets.voc0712 import (
-#     backend_args as backend_args,
-# )
-
-
 from voc0712_cocofmt_reference import (
     METAINFO as voc0712_METAINFO,
     data_root as voc0712_data_root,
@@ -12,63 +7,13 @@ from voc0712_cocofmt_reference import (
     train_pipeline as voc0712_train_pipeline,
     test_pipeline as voc0712_test_pipeline,
     val_evaluator as voc0712_val_evaluator,
-    # train_dataloader as voc0712_train_dataloader,
-    # val_dataloader as voc0712_val_dataloader,
 )
-
-#! how to import num classes for each voc model in the right way !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 from rich.traceback import install
+
 
 install()
 
 
-# for searching
-old_swin_b_backbones = ["swin_b", "swin-b"]
-old_swin_l_backbones = ["swin-l", "swinl", "swin_l"]
-old_convnext_b_backbones = ["convnext_b"]
-old_resnet_50_backbones = ["r50"]
-old_resnet_101_backbones = ["r101"]
-
-# ? not used
-old_convnext_t_backbones = []
-
-old_backbone_names = [
-    old_swin_b_backbones,
-    old_swin_l_backbones,
-    old_convnext_b_backbones,
-    old_convnext_t_backbones,
-    old_resnet_50_backbones,
-    old_resnet_101_backbones,
-]
-
-# main_old_backbone_names = []
-# for oldb in old_backbone_names:
-#     for suboldb in oldb:
-#         main_old_backbone_names.append(suboldb)
-# print(main_old_backbone_names)
-
-old_coco_dataset = ["coco"]
-old_lvis_dataset = ["lvis"]
-
-old_dataset_names = [old_coco_dataset, old_lvis_dataset]
-
-# main_old_dataset_names = []
-# for oldd in old_dataset_names:
-#     for suboldd in oldd:
-#         main_old_dataset_names.append(suboldd)
-# print(main_old_dataset_names)
-
-# print(main_old_backbone_names)
-
-# for naming
-# new_backbones = ["swin-b", "swin-l", "convnext-b", "convnext-t", "r50", "r101"]
-
-
-# ? files_to_use_to_change = []
-# for testing just those that only have one implementation
-
-#! add more files
 files_which_we_have = [
     "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
     "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
@@ -139,7 +84,6 @@ files_which_we_have = [
 ]
 
 
-#! Add SWIN-L -> Ask supervisor
 # for specifying the parameters
 new_backbone_configs = {
     "swin-b": {  # "./mmdetection/configs/rtmdet/rtmdet_l_swin_b_p6_4xb16-100e_coco.py"
@@ -203,9 +147,30 @@ new_backbone_configs = {
         "init_cfg": dict(type="Pretrained", checkpoint="torchvision://resnet50"),
     },
 }
+swin_b_max_epochs = 100
+swin_b_base_lr = 0.001
+swin_b_optim_wrapper = dict(
+    optimizer=dict(lr=0.001, type="AdamW", weight_decay=0.05),
+    paramwise_cfg=dict(bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
+    type="OptimWrapper",
+)
+swin_b_param_scheduler = [
+    dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
+    dict(
+        T_max=50,
+        begin=50,
+        by_epoch=True,
+        convert_to_iter_based=True,
+        end=100,
+        eta_min=5e-05,
+        type="CosineAnnealingLR",
+    ),
+]
 
 
-#! Add SWIN-L -> Ask supervisor
+convnext_max_epochs = 100
+
+
 new_neck_configs = {
     "swin-b": {"in_channels": [256, 512, 1024, 2048]},
     "convnext-b": {"in_channels": [256, 512, 1024]},
@@ -241,110 +206,9 @@ voc_val_dataloader = dict(
         pipeline=voc0712_test_pipeline,
     )
 )
-# new_dataset_type = {
-#     "coco": "CocoDataset",
-#     "voc0712": "VOCDataset",
-#     # "lvis": "LVISV1Dataset",
-# }
-
-#! seperatly set "data_root": "data/coco/" ???
-#! came till here with checking
-# new_train_dataloader_dataset = {
-#     "voc0712": dict(
-#         dataset=dict(
-#             ignore_keys=["dataset_type"],
-#             datasets=[
-#                 dict(
-#                     type="VOCDataset",
-#                     data_root="data/VOCdevkit/",
-#                     ann_file="VOC2007/ImageSets/Main/trainval.txt",
-#                     data_prefix=dict(sub_data_root="VOC2007/"),
-#                     filter_cfg=dict(filter_empty_gt=True, min_size=32),
-#                     pipeline=train_pipeline,
-#                 ),
-#                 dict(
-#                     type="VOCDataset",
-#                     data_root="data/VOCdevkit/",
-#                     ann_file="VOC2012/ImageSets/Main/trainval.txt",
-#                     data_prefix=dict(sub_data_root="VOC2012/"),
-#                     filter_cfg=dict(filter_empty_gt=True, min_size=32),
-#                     pipeline=train_pipeline,
-#                 ),
-#             ],
-#         )
-#     ),
-# }
 
 
-# new_val_dataloader = {
-#     "coco": dict(
-#         batch_size=1,
-#         dataset=dict(
-#             ann_file="annotations/instances_val2017.json",
-#             backend_args=None,
-#             data_prefix=dict(img="val2017/"),
-#             data_root="data/coco/",
-#             pipeline=[
-#                 dict(backend_args=None, type="LoadImageFromFile"),
-#                 dict(
-#                     keep_ratio=True,
-#                     scale=(
-#                         1333,
-#                         800,
-#                     ),
-#                     type="Resize",
-#                 ),
-#                 dict(type="LoadAnnotations", with_bbox=True),
-#                 dict(
-#                     meta_keys=(
-#                         "img_id",
-#                         "img_path",
-#                         "ori_shape",
-#                         "img_shape",
-#                         "scale_factor",
-#                     ),
-#                     type="PackDetInputs",
-#                 ),
-#             ],
-#             test_mode=True,
-#             type="CocoDataset",
-#         ),
-#         drop_last=False,
-#         num_workers=2,
-#         persistent_workers=True,
-#         sampler=dict(shuffle=False, type="DefaultSampler"),
-#     ),
-# "voc0712": dict(),
-# "lvis": dict(
-#     dataset=dict(
-#         data_root="data/coco/",
-#         type="LVISV1Dataset",
-#         ann_file="annotations/lvis_od_val.json",
-#         data_prefix=dict(img=""),
-#     )
-# ),
-# }
-
-# new_val_evaluator = {
-#     "coco": dict(
-#         ann_file="data/coco/annotations/instances_val2017.json",
-#         backend_args=None,
-#         format_only=False,
-#         metric="bbox",
-#         type="CocoMetric",
-#     ),
-#     "voc0712": dict(),
-#     # "lvis": dict(
-#     #     _delete_=True,
-#     #     type="LVISFixedAPMetric",
-#     #     ann_file="data/coco/" + "annotations/lvis_od_val.json",
-#     # ),
-# }
-
-#! extend to all
-# necks_we_want = ["double_heads", "dynamic_rcnn", ]
 necks_we_want = [
-    # ? got to go through till yolo
     "fast_rcnn",
     "faster_rcnn",
     "rpn",
@@ -397,11 +261,10 @@ backbones_we_want = [
     "convnext-b",
     "r50",
     "r101",
-]  #! extend for swin-l when ready
+]
 datasets_we_want = [
     "coco",
     "voc0712",
-    # "lvis"
 ]
 
 
@@ -604,11 +467,9 @@ def dataset_assigner(
     cfg.test_evaluator = val_evaluator
 
 
-#! Take in more files
 reference_configs = {
     "double_heads": "./mmdetection/configs/double_heads/dh-faster-rcnn_r50_fpn_1x_coco.py",
     "dynamic_rcnn": "./mmdetection/configs/dynamic_rcnn/dynamic-rcnn_r50_fpn_1x_coco.py",
-    #! added some but not sure if right
     "fast_rcnn": "./mmdetection/configs/fast_rcnn/fast-rcnn_r50_fpn_2x_coco.py",
     "faster_rcnn": "./mmdetection/configs/faster_rcnn/faster-rcnn_r50_fpn_ms-3x_coco.py",
     "rpn": "./mmdetection/configs/rpn/rpn_r50_fpn_2x_coco.py",
@@ -681,9 +542,6 @@ for (neck, backbone, dataset), found in all_combis.items():
         continue
 
     if neck in reference_configs.keys():
-        # if reference_configs[neck] == "configs":
-        #     neck = "EfficientDet"
-
         reference_file = reference_configs[neck]
         backbone_ref, neck_ref, dataset_ref = which(reference_file)
         cfg = Config.fromfile(reference_file)
@@ -702,16 +560,16 @@ for (neck, backbone, dataset), found in all_combis.items():
                 prefix="",
             )
             #! put in a reference for the coco dataset
-            dataset_assigner(
-                cfg,
-                coco_data_root,
-                coco_dataset_type,
-                coco_train_pipeline,
-                coco_test_pipeline,
-                coco_train_dataloader,
-                coco_val_dataloader,
-                coco_val_evaluator,
-            )
+            # dataset_assigner(
+            #     cfg,
+            #     coco_data_root,
+            #     coco_dataset_type,
+            #     coco_train_pipeline,
+            #     coco_test_pipeline,
+            #     coco_train_dataloader,
+            #     coco_val_dataloader,
+            #     coco_val_evaluator,
+            # )
 
         elif neck == "Detic_new" and dataset == "voc0712":
             config_keybased_value_changer(
@@ -764,7 +622,6 @@ for (neck, backbone, dataset), found in all_combis.items():
         else:
             if backbone != backbone_ref:
                 cfg.model.backbone = new_backbone_configs[backbone]
-                # print(f"{neck, backbone, dataset}")
                 if neck == "libra_rcnn":
                     cfg.model.neck[0].in_channels = new_neck_configs[backbone][
                         "in_channels"
@@ -815,6 +672,7 @@ for (neck, backbone, dataset), found in all_combis.items():
                     )
                     adjust_param_scheduler(cfg, factor=3)
 
+        #! currently only activated for configs which we made!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> can put in trainer itself?
         if hasattr(cfg, "auto_scale_lr"):
             cfg.auto_scale_lr.enable = True
         else:
