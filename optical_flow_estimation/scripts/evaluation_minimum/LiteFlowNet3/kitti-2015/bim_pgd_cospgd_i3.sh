@@ -11,7 +11,7 @@
 #SBATCH --output=slurm/liteflownet3_pseudoreg_kitti-2015_bim_pgd_cospgd_i3_%A_%a.out
 #SBATCH --error=slurm/liteflownet3_pseudoreg_kitti-2015_bim_pgd_cospgd_i3_err_%A_%a.out
 
-model="liteflownet3_pseudoreg_pseudoreg"
+model="liteflownet3_pseudoreg"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"

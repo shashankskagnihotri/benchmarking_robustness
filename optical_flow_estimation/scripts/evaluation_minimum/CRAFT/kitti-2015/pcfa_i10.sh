@@ -5,7 +5,7 @@
 #SBATCH --time=15:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4
+#SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-1%2
 #SBATCH --job-name=craft_kitti-2015_pcfa_i10
 #SBATCH --output=slurm/craft_kitti-2015_pcfa_i10_%A_%a.out
