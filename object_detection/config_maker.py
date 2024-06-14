@@ -619,6 +619,9 @@ for (neck, backbone, dataset), found in all_combis.items():
                 )
                 adjust_param_scheduler(cfg, factor=3)
 
+        elif neck == "Yolo":
+            pass
+
         else:
             if backbone != backbone_ref:
                 cfg.model.backbone = new_backbone_configs[backbone]
@@ -672,13 +675,7 @@ for (neck, backbone, dataset), found in all_combis.items():
                     )
                     adjust_param_scheduler(cfg, factor=3)
 
-        #! currently only activated for configs which we made!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> can put in trainer itself?
-        if hasattr(cfg, "auto_scale_lr"):
-            cfg.auto_scale_lr.enable = True
-        else:
-            cfg.auto_scale_lr = dict(enable=True)
-
-        #! put in for real in training
+        #! put in for real in training and testing!!!
         # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
         # cfg.visualizer.vis_backends[0].init_kwargs = dict(
         #     project=f"{neck}_{backbone}_{dataset}"
@@ -700,11 +697,28 @@ print(
 print(f"References are needed for {missing_refrences}")
 
 
-folder_path = "./configs_to_train"
-files = os.listdir(folder_path)
+training_folder_path = "./configs_to_train"
+files = os.listdir(training_folder_path)
 
 for file in files:
     if "None" in file:
-        file_path = os.path.join(folder_path, file)
+        file_path = os.path.join(training_folder_path, file)
         os.remove(file_path)
         print(f"Deleted file: {file_path}")
+    else:
+        cfg = Config.fromfile(os.path.join(training_folder_path, file))
+        if hasattr(cfg, "auto_scale_lr"):
+            cfg.auto_scale_lr.enable = True
+        else:
+            cfg.auto_scale_lr = dict(enable=True)
+
+
+test_folder_path = "./configs_to_test"
+test_files = os.listdir(test_folder_path)
+
+for test_file in test_files:
+    cfg = Config.fromfile(os.path.join(test_folder_path, test_file))
+    if hasattr(cfg, "auto_scale_lr"):
+        cfg.auto_scale_lr.enable = True
+    else:
+        cfg.auto_scale_lr = dict(enable=True)
