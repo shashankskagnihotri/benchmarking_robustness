@@ -56,13 +56,14 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
         backbone_cfg.train_dataloader.persistent_workers
     )
 
-    #! depending on what tutor says keep or drop -> also for config_maker
     if hasattr(cfg, "auto_scale_lr"):
         cfg.auto_scale_lr.enable = True
     else:
         cfg.auto_scale_lr = dict(enable=True)
 
-    cfg.dump(f"{folder_path}/{filename}")
+    cfg.dump(
+        f"{folder_path}/{filename}"
+    )  #! maybe all to training such that retest or only test on subset
 
 
 for filename in filenames_to_train:
@@ -88,3 +89,41 @@ for filename in filenames_to_test:
         change_training_implementation(filename, path_folder_to_test, swin_b_cfg)
     elif "convnext_b" in filename:
         change_training_implementation(filename, path_folder_to_test, convnext_b_cfg)
+
+
+#! find all parts, where iterations are needed and change them to epochs
+#! function which calculates needed iterations based on batchsize, dataset size and epochs
+
+
+def calculate_iterations(epochs, batch_size, dataset):
+    #! cfg.train_dataloader.batch_size
+    #! epochs the depending cfg. ....
+    if dataset == "coco":
+        dataset_size = 0  #! get dataset size
+    elif dataset == "voc":
+        dataset_size = 0  #! get dataset size
+
+    steps_per_epoch = dataset_size / batch_size
+    total_iterations = epochs * steps_per_epoch
+
+    return int(total_iterations)
+
+
+# for ...
+# neck, backbone, dataset = ...
+# if neck == "DiffusionDet" and backbone =="swin-b" and dataset == "coco":
+# ....
+# elif neck == "DiffusionDet" and backbone =="swin-b" and dataset == "voc":
+# ....
+# elif neck == "DiffusionDet" and backbone =="convnext-b" and dataset == "coco":
+# ....
+# elif neck == "DiffusionDet" and backbone =="convnext-b" and dataset == "voc":
+# ....
+# elif neck == "Detic" and backbone =="swin-b" and dataset == "coco":
+# ....
+# elif neck == "Detic" and backbone =="swin-b" and dataset == "voc":
+# ....
+# elif neck == "Detic" and backbone =="convnext-b" and dataset == "coco":
+# ....
+# elif neck == "Detic" and backbone =="convnext-b" and dataset == "voc":
+# ....
