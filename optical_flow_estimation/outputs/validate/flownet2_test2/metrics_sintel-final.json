@@ -1,0 +1,23 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-06-03 10:05:35",
+            "model": "flownet2",
+            "checkpoint": "/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/checkpoints/flownet2/test2.ckpt",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-03 10:09:41",
+            "duration": "00:04:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.746139390868253,
+                "px1": 0.20625690845386993,
+                "px3": 0.4376288508517298,
+                "px5": 0.5539431278344802,
+                "outlier": 56.23711404326658,
+                "own_epe": 12.746138845064912,
+                "cosim": 0.1828765034212537
+            }
+        }
+    ]
+}
