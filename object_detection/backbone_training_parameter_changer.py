@@ -97,13 +97,9 @@ def calculate_iterations(epochs, batch_size, dataset):
     #! cfg.train_dataloader.batch_size
     #! epochs the depending cfg. ....
     if dataset == "coco":
-        dataset_size = (
-            0  #! get the right dataset size -> from log (srun does´t show right)
-        )
+        dataset_size = 0  #! get the right absolute dataset size
     elif dataset == "voc":
-        dataset_size = (
-            0  #! get the right dataset size -> from log (srun does´t show right)
-        )
+        dataset_size = 0  #! get the right absolute dataset size
 
     steps_per_epoch = dataset_size / batch_size
     total_iterations = epochs * steps_per_epoch

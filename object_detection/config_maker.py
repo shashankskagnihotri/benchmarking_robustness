@@ -10,6 +10,7 @@ from voc0712_cocofmt_reference import (
 )
 from rich.traceback import install
 
+#! import the reference configuration of voc with voc metric but keep as much as possible e.g. metainfos
 
 install()
 
