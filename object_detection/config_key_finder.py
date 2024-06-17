@@ -73,8 +73,10 @@ print("Collected Keys:", all_keys)
 print("Unique Custom Hook Types:", unique_custom_hook_types)
 
 
+files_with_default_hooks = []
 files_with_custom_hooks = []
 files_with_scope = []
+
 
 for folder in folders:
     for filename in os.listdir(folder):
@@ -90,12 +92,20 @@ for folder in folders:
             files_with_custom_hooks.append(filename)
             print(cfg.custom_hooks)
             print("\n\n")
+        if hasattr(cfg, "default_hooks"):
+            print(f"default_hooks found in {filename}")
+            files_with_default_hooks.append(filename)
+            print(cfg.default_hooks)
+            print("\n\n")
 
 
 files_with_scope.sort()
+files_with_default_hooks.sort()
 files_with_custom_hooks.sort()
 
+
 print("Files with _scope_ in train_cfg:", files_with_scope)
+print("Files with default_hooks:", files_with_default_hooks)
 print("Files with custom_hooks:", files_with_custom_hooks)
 
 
@@ -108,9 +118,9 @@ print("Files with custom_hooks:", files_with_custom_hooks)
 #! scope seems to have default value -> registers
 #! custom_hooks all except yolox can be overwritten by the backbone specific custom_hooks (only training relevant not augumentation) for yolox check how to treat epochs in custom_hooks and what they specifically do
 
-#! https://github.com/open-mmlab/mmdetection/issues/6444 <- SyncNormHook
+
 #! https://mmdetection.readthedocs.io/en/3.x/_modules/mmdet/engine/hooks/sync_norm_hook.html <- SyncNormHook : think should be kept
-#!https://mmdetection.readthedocs.io/zh-cn/v3.1.0/_modules/mmdet/engine/hooks/yolox_mode_switch_hook.html <- YOLOXModeSwitchHook : think should be kept
+#! https://mmdetection.readthedocs.io/zh-cn/v3.1.0/_modules/mmdet/engine/hooks/yolox_mode_switch_hook.html <- YOLOXModeSwitchHook : think should be kept
 
 
 # ? check dynamic intervalls, max_iters then ask how to proceed and implement it in this way

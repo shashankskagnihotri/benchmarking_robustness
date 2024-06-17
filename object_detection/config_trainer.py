@@ -4,6 +4,8 @@ from mmengine.config import Config
 import submitit
 from tqdm import tqdm
 
+from config_maker import which
+
 from new_trainer import trainer
 from new_distributed_trainer import train_with_multiple_gpus
 
@@ -15,7 +17,7 @@ install(show_locals=False)
 
 #! put in for real in training and !!!!!testing!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 from wandb_cfg_implementation import implement_wandb
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use "which" function output + "training"
 
 slurm_log_folder_path = "./slurm/train_work_dir"  # ? change to eval for evaluation
 slurm_log_folders = os.listdir(slurm_log_folder_path)
@@ -76,7 +78,6 @@ def has_been_started_before(config_file, slurm_log_folders):
     return False
 
 
-#! atss_swin-b_coco -> changed to success
 def has_been_completed(config_file, slurm_log_folders):
     if has_been_started_before(config_file, slurm_log_folders):
         for model_log_folder_name in slurm_log_folders:
@@ -186,7 +187,6 @@ for config_file in folder_entry_list_configs_to_train:
                                                 path_erroneous_configs, config_file
                                             ),
                                         )
-
     else:
         print(f"training {config_file} from {config_path}")
         specific_slurm_work_dir = (

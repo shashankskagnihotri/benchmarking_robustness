@@ -1,12 +1,14 @@
 import os
 from mmengine.config import Config
+from config_maker import config_keybased_value_changer, adjust_param_scheduler, which
 
 
 #! check if it works properly
 
 
 #! optimizer (lr, weight decay etc), paramscheduler, epochs, batchsize, autoscale, scheduling, expMomentumEMA?
-#! same for voc use the functions out of configmaker to change in right way
+
+#! same for voc use the functions (config_keybased_value_changer, adjust_param_scheduler) out of configmaker to change in right way
 
 # Load reference configs
 swin_b_cfg = Config.fromfile("rtmdet_swin_b_coco.py")
@@ -33,13 +35,9 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
         cfg.train_cfg.type == "EpochBasedTrainLoop"
     ):  #!!!! how to handle iteration based?
         cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
-    #! straight up import cfg.train_cfg from backbone_cfg or only change the necessary parts?
+    #! look into individual cfg.train_cfg and depending on implementation import full cfg.train_cfg from backbone_cfg or keep some parts (iterationbased, _scope_, dynamic intervals -> change the iterations based on epochs etc)
 
-    #! do not want to only have the custom hook of swin_b but keep old also
-    #! find all custom hooks, check which affect lr epochs etc and drop them and keep the rest
-    #! recursive function to find all custom hooks in present config
-    #! same for default hooks
-    # cfg.custom_hooks = backbone_cfg.custom_hooks[0]
+    # cfg.custom_hooks = backbone_cfg.custom_hooks[0] #! only use exp_ema and wait for call of tutor regarding the keeping of yolox custom hooks
 
     if hasattr(cfg, "custom_hooks") and cfg.custom_hooks:
         print(f"Custom hooks in {filename} found:")
@@ -99,9 +97,13 @@ def calculate_iterations(epochs, batch_size, dataset):
     #! cfg.train_dataloader.batch_size
     #! epochs the depending cfg. ....
     if dataset == "coco":
-        dataset_size = 0  #! get dataset size
+        dataset_size = (
+            0  #! get the right dataset size -> from log (srun does´t show right)
+        )
     elif dataset == "voc":
-        dataset_size = 0  #! get dataset size
+        dataset_size = (
+            0  #! get the right dataset size -> from log (srun does´t show right)
+        )
 
     steps_per_epoch = dataset_size / batch_size
     total_iterations = epochs * steps_per_epoch
@@ -109,14 +111,17 @@ def calculate_iterations(epochs, batch_size, dataset):
     return int(total_iterations)
 
 
-# for ...
-# neck, backbone, dataset = ...
+#! iteration based configs
+for filename in filenames_to_train:
+    filepath = os.join(path_folder_to_train, filename)
+    neck, backbone, dataset = which(filepath)
 # if neck == "DiffusionDet" and backbone =="swin-b" and dataset == "coco":
-# ....
+# cfg = Config.fromfile(filepath)
+# .... iterationstuff
 # elif neck == "DiffusionDet" and backbone =="swin-b" and dataset == "voc":
-# ....
+# .... iterationstuff
 # elif neck == "DiffusionDet" and backbone =="convnext-b" and dataset == "coco":
-# ....
+# .... iterationstuff
 # elif neck == "DiffusionDet" and backbone =="convnext-b" and dataset == "voc":
 # ....
 # elif neck == "Detic" and backbone =="swin-b" and dataset == "coco":
