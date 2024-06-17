@@ -1,0 +1,122 @@
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: libnvjpeg.so.11: cannot open shared object file: No such file or directory
+  warn(f"Failed to load image Python extension: {e}")
+[rank: 0] Global seed set to 1234
+06/13/2024 10:08:31 - INFO: Loading 79 samples from KITTI_2012_2015 dataset.
+GPU available: True (cuda), used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/setup.py:176: PossibleUserWarning: GPU available but not used. Set `accelerator` and `devices` using `Trainer(accelerator='gpu', devices=1)`.
+  rank_zero_warn(
+[rank: 0] Global seed set to 1234
+Initializing distributed: GLOBAL_RANK: 0, MEMBER: 1/1
+06/13/2024 10:08:32 - INFO: Added key: store_based_barrier_key:1 to store for rank: 0
+06/13/2024 10:08:32 - INFO: Rank 0: Completed store-based barrier for key:store_based_barrier_key:1 with 1 nodes.
+----------------------------------------------------------------------------------------------------
+distributed_backend=gloo
+All distributed processes registered. Starting with 1 processes
+----------------------------------------------------------------------------------------------------
+
+06/13/2024 10:08:33 - INFO: Loading 315 samples from KITTI_2012_2015 dataset.
+
+   | Name          | Type                      | Params
+-------------------------------------------------------------
+0  | loss_fn       | MultiScale                | 0     
+1  | train_metrics | FlowMetrics               | 0     
+2  | val_metrics   | FlowMetrics               | 0     
+3  | conv1a        | Sequential                | 448   
+4  | conv1aa       | Sequential                | 2.3 K 
+5  | conv1b        | Sequential                | 2.3 K 
+6  | conv2a        | Sequential                | 4.6 K 
+7  | conv2aa       | Sequential                | 9.2 K 
+8  | conv2b        | Sequential                | 9.2 K 
+9  | conv3a        | Sequential                | 18.5 K
+10 | conv3aa       | Sequential                | 36.9 K
+11 | conv3b        | Sequential                | 36.9 K
+12 | conv4a        | Sequential                | 55.4 K
+13 | conv4aa       | Sequential                | 83.0 K
+14 | conv4b        | Sequential                | 83.0 K
+15 | conv5a        | Sequential                | 110 K 
+16 | conv5aa       | Sequential                | 147 K 
+17 | conv5b        | Sequential                | 147 K 
+18 | conv6aa       | Sequential                | 225 K 
+19 | conv6a        | Sequential                | 345 K 
+20 | conv6b        | Sequential                | 345 K 
+21 | leakyRELU     | LeakyReLU                 | 0     
+22 | corr          | SpatialCorrelationSampler | 0     
+23 | conv6_0       | Sequential                | 93.4 K
+24 | conv6_1       | Sequential                | 240 K 
+25 | conv6_2       | Sequential                | 291 K 
+26 | conv6_3       | Sequential                | 249 K 
+27 | conv6_4       | Sequential                | 143 K 
+28 | predict_flow6 | Conv2d                    | 9.5 K 
+29 | deconv6       | ConvTranspose2d           | 66    
+30 | upfeat6       | ConvTranspose2d           | 16.9 K
+31 | conv5_0       | Sequential                | 245 K 
+32 | conv5_1       | Sequential                | 392 K 
+33 | conv5_2       | Sequential                | 405 K 
+34 | conv5_3       | Sequential                | 325 K 
+35 | conv5_4       | Sequential                | 181 K 
+36 | predict_flow5 | Conv2d                    | 11.9 K
+37 | deconv5       | ConvTranspose2d           | 66    
+38 | upfeat5       | ConvTranspose2d           | 21.2 K
+39 | conv4_0       | Sequential                | 208 K 
+40 | conv4_1       | Sequential                | 356 K 
+41 | conv4_2       | Sequential                | 377 K 
+42 | conv4_3       | Sequential                | 307 K 
+43 | conv4_4       | Sequential                | 171 K 
+44 | predict_flow4 | Conv2d                    | 11.3 K
+45 | deconv4       | ConvTranspose2d           | 66    
+46 | upfeat4       | ConvTranspose2d           | 20.1 K
+47 | conv3_0       | Sequential                | 171 K 
+48 | conv3_1       | Sequential                | 319 K 
+49 | conv3_2       | Sequential                | 350 K 
+50 | conv3_3       | Sequential                | 288 K 
+51 | conv3_4       | Sequential                | 162 K 
+52 | predict_flow3 | Conv2d                    | 10.7 K
+53 | deconv3       | ConvTranspose2d           | 66    
+54 | upfeat3       | ConvTranspose2d           | 19.1 K
+55 | conv2_0       | Sequential                | 134 K 
+56 | conv2_1       | Sequential                | 282 K 
+57 | conv2_2       | Sequential                | 322 K 
+58 | conv2_3       | Sequential                | 270 K 
+59 | conv2_4       | Sequential                | 153 K 
+60 | predict_flow2 | Conv2d                    | 10.2 K
+61 | upsample1     | Upsample                  | 0     
+62 | dc_conv1      | Sequential                | 651 K 
+63 | dc_conv2      | Sequential                | 147 K 
+64 | dc_conv3      | Sequential                | 147 K 
+65 | dc_conv4      | Sequential                | 110 K 
+66 | dc_conv5      | Sequential                | 55.4 K
+67 | dc_conv6      | Sequential                | 18.5 K
+68 | dc_conv7      | Conv2d                    | 578   
+-------------------------------------------------------------
+9.4 M     Trainable params
+0         Non-trainable params
+9.4 M     Total params
+37.497    Total estimated model params size (MB)
+SLURM auto-requeueing enabled. Setting signal handlers.
+06/13/2024 10:08:44 - INFO: Loading 79 samples from KITTI_2012_2015 dataset.
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:224: PossibleUserWarning: The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 80 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  rank_zero_warn(
+06/13/2024 10:08:57 - INFO: Loading 315 samples from KITTI_2012_2015 dataset.
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/utilities/data.py:83: UserWarning: Trying to infer the `batch_size` from an ambiguous collection. The batch size we found is 4. To avoid any miscalculations, use `self.log(..., batch_size=batch_size)`.
+  warning_cache.warn(
+06/13/2024 10:09:38 - INFO: Reducer buckets have been rebuilt in this iteration.
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/utilities/data.py:83: UserWarning: Trying to infer the `batch_size` from an ambiguous collection. The batch size we found is 3. To avoid any miscalculations, use `self.log(..., batch_size=batch_size)`.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/epe', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/px1', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/px3', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/px5', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/outlier', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/loss', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('epe', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+`Trainer.fit` stopped: `max_epochs=10` reached.
