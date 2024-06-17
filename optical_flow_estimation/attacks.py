@@ -84,6 +84,8 @@ delta_bound = 0.005
 
 config_logging()
 
+# import os
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:100"
 
 def _init_parser() -> ArgumentParser:
     parser = ArgumentParser()
@@ -655,7 +657,9 @@ def attack_one_dataloader(
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
-                    preds = model(inputs)
+                    from torch.cuda.amp import GradScaler, autocast
+                    with autocast():
+                        preds = model(inputs)
 
             if args.warm_start:
                 if (
@@ -746,9 +750,13 @@ def attack_one_dataloader(
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
                 metrics_sum[k] += metrics[k].item()
+
+            free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
                 epe=metrics_sum["val/epe"] / (i + 1),
                 outlier=metrics_sum["val/outlier"] / (i + 1),
+                total=total,
+                free=free
             )
 
             filename = ""
