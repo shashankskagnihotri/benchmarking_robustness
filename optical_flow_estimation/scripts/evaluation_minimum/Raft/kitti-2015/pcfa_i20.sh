@@ -7,11 +7,13 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=rpknet_kitti-2015_pcfa_i20
-#SBATCH --output=slurm/rpknet_kitti-2015_pcfa_i20_%A_%a.out
-#SBATCH --error=slurm/rpknet_kitti-2015_pcfa_i20_err_%A_%a.out
+#SBATCH --job-name=raft_kitti-2015_pcfa_i20
+#SBATCH --output=slurm/raft_kitti-2015_pcfa_i20.out
+#SBATCH --error=slurm/raft_kitti-2015_pcfa_i20_err_%A_%a.out
 
-model="rpknet"
+
+
+model="raft"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True"

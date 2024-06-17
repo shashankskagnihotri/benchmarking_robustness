@@ -6,19 +6,19 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --array=0-44%4
-#SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i3
-#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i3_%A_%a.out
-#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i3_err_%A_%a.out
+#SBATCH --array=0-15%4
+#SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i10
+#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i10.out
+#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i10.err
 
 model="raft"
 dataset="kitti-2015"
 checkpoint="kitti"
-targeteds="True False"
+targeteds="False"
 targets="negative zero"
 norms="inf two"
 attacks="bim pgd cospgd"
-iterations="3"
+iterations="10"
 jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 
@@ -66,7 +66,7 @@ do
                                         --attack_epsilon $epsilon \
                                         --attack_targeted $targeted \
                                         --attack_target $target \
-                                        --write_outputs                                       
+                                        --write_outputs                                     
                                     #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                                 fi
                                 jobnum=$((jobnum + 1))

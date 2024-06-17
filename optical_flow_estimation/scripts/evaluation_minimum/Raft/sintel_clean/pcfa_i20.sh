@@ -2,18 +2,20 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=30:00:00
+#SBATCH --time=49:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=rpknet_kitti-2015_pcfa_i20
-#SBATCH --output=slurm/rpknet_kitti-2015_pcfa_i20_%A_%a.out
-#SBATCH --error=slurm/rpknet_kitti-2015_pcfa_i20_err_%A_%a.out
+#SBATCH --job-name=raft_sintel-clean_pcfa_i20
+#SBATCH --output=slurm/raft_sintel-clean_pcfa_i20_%A_%a.out
+#SBATCH --error=slurm/raft_sintel-clean_pcfa_i20_err_%A_%a.out
 
-model="rpknet"
-dataset="kitti-2015"
-checkpoint="kitti"
+
+
+model="raft"
+dataset="sintel-clean"
+checkpoint="sintel"
 targeteds="True"
 targets="negative zero"
 norms="two"

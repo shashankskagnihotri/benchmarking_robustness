@@ -8,8 +8,8 @@
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-44%4
 #SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i20
-#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i20.out
-#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_err.out
+#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_%A_%a.out
+#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_err_%A_%a.out
 
 model="raft"
 dataset="kitti-2015"
