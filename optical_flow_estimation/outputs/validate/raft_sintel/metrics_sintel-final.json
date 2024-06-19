@@ -10300,6 +10300,61 @@
                 "own_epe": 78.0687694183115,
                 "cosim": 0.27561295404124425
             }
+        },
+        {
+            "start_time": "2024-06-17 15:32:15",
+            "model": "raft",
+            "checkpoint": "sintel",
+            "attack": "cospgd",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-06-17 18:44:23",
+            "duration": "03:12:07",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.392319155329128,
+                "px1": 0.4642353376519965,
+                "px3": 0.9273536042287931,
+                "px5": 0.947980420973499,
+                "outlier": 7.264638851152726,
+                "own_epe": 2.3923190516937707,
+                "epe_orig_preds": 12.33115196196536,
+                "own_epe_orig_preds": 12.331151403565457,
+                "cosim_target": 0.0,
+                "cosim_orig_preds": 0.11831953938023619,
+                "epe_ground_truth": 12.524802986213958,
+                "own_epe_ground_truth": 12.524802483525217,
+                "cosim_ground_truth": 0.1130890319425023
+            }
+        },
+        {
+            "start_time": "2024-06-17 15:57:21",
+            "model": "raft",
+            "checkpoint": "sintel",
+            "attack": "cospgd",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-06-17 19:09:06",
+            "duration": "03:11:44",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 72.76324610934591,
+                "px1": 0.013677779011003439,
+                "px3": 0.07551202906273563,
+                "px5": 0.12507244870855763,
+                "outlier": 92.41532420837227,
+                "own_epe": 72.76324284889742,
+                "cosim": 0.3754992684010348
+            }
         }
     ]
 }
