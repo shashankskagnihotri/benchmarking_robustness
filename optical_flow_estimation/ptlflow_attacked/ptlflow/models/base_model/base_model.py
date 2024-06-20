@@ -1149,7 +1149,7 @@ class BaseModel(pl.LightningModule):
         for v in args:
             if v in ["clean", "final"]:
                 pass_names = [v]
-            elif v in ["train", "val", "trainval", "test"]:
+            elif v in ["train", "val", "trainval", "test", "tr115"]:
                 split = v
             elif v == "occ":
                 get_occlusion_mask = True
