@@ -523,39 +523,99 @@ def _init_parser() -> ArgumentParser:
         type=int,
         help="the number of iters for gma/raft model, to override the ptlflow setting.",
     )
-    parser.add_argument('--weather_flakesize_max', default=71, type=int,
-                help="the maximal size for particles in pixels.")
-    parser.add_argument('--weather_depth_decay', default=10, type=float,
-                help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.")
-    parser.add_argument('--weather_constant_transparency', default=0, type=float,
-                help="if set to a value != 0, this is the default transparency for all initialized particles. Otherwise, the transparency is a hat-function that reaches its peak at a depth of 2.")
-    parser.add_argument('--weather_motion_y', default=0., type=float,
-                help="the motion in y-direction for all particles between frames.")
-    parser.add_argument('--weather_motion_random_scale', default=0.0, type=float,
-                help="randomizes the magnitude of the particle motion relative to the motion vector length. By setting to 0.5, the motion vector can be longer or smaller up to half its length. (default=0.0)")
-    parser.add_argument('--weather_motion_random_angle', default=0.0, type=float,
-                help="maximal random offset angle for the particle motion in degree. (default=0.0, max=180)")
+    parser.add_argument(
+        "--weather_flakesize_max",
+        default=71,
+        type=int,
+        help="the maximal size for particles in pixels.",
+    )
+    parser.add_argument(
+        "--weather_depth_decay",
+        default=10,
+        type=float,
+        help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.",
+    )
+    parser.add_argument(
+        "--weather_constant_transparency",
+        default=0,
+        type=float,
+        help="if set to a value != 0, this is the default transparency for all initialized particles. Otherwise, the transparency is a hat-function that reaches its peak at a depth of 2.",
+    )
+    parser.add_argument(
+        "--weather_motion_y",
+        default=0.0,
+        type=float,
+        help="the motion in y-direction for all particles between frames.",
+    )
+    parser.add_argument(
+        "--weather_motion_random_scale",
+        default=0.0,
+        type=float,
+        help="randomizes the magnitude of the particle motion relative to the motion vector length. By setting to 0.5, the motion vector can be longer or smaller up to half its length. (default=0.0)",
+    )
+    parser.add_argument(
+        "--weather_motion_random_angle",
+        default=0.0,
+        type=float,
+        help="maximal random offset angle for the particle motion in degree. (default=0.0, max=180)",
+    )
 
     # parser.add_argument('--weather_do_motionblur', default=True, type=ast.literal_eval,
     #         help="control if particles are rendered with motion blur (default=True).")
-    parser.add_argument('--weather_flake_r', default=255, type=int,
-            help="the R value for the particle RGB")
-    parser.add_argument('--weather_flake_g', default=255, type=int,
-            help="the G value for the particle RGB")
-    parser.add_argument('--weather_flake_b', default=255, type=int,
-            help="the B value for the particle RGB")
-    parser.add_argument('--weather_flake_random_h', default=0, type=float,
-                help="the upper bound for HSL color Hue (H) randomization. Hue runs from 0° to 360°, hence values >= 180 will give fully randomized hues.")
-    parser.add_argument('--weather_flake_random_l', default=0, type=float,
-                help="the upper bound for HSL color Lightness (L) randomization. Lightness runs from 0 (black) over 0.5 (color) to 1 (white).")
-    parser.add_argument('--weather_frame_per_scene', default=0, type=int,
-                help="the number of optimization scenes per sintel-sequence (if 0, all scenes per sequence are taken).")
-    parser.add_argument('--weather_no_flake_dat', default=True, type=ast.literal_eval,
-                help="if this flag is used, no data about the particle (positions, flakes, transparencies) will be stored.")
-    parser.add_argument('--weather_lr', type=float, default=0.00001,
-                help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001.")
-    parser.add_argument('--weather_unregistered_artifacts', default=True, type=ast.literal_eval,
-        help="if True, artifacts are saved to the output folder but not registered. Saves time and memory during training.")
+    parser.add_argument(
+        "--weather_flake_r",
+        default=255,
+        type=int,
+        help="the R value for the particle RGB",
+    )
+    parser.add_argument(
+        "--weather_flake_g",
+        default=255,
+        type=int,
+        help="the G value for the particle RGB",
+    )
+    parser.add_argument(
+        "--weather_flake_b",
+        default=255,
+        type=int,
+        help="the B value for the particle RGB",
+    )
+    parser.add_argument(
+        "--weather_flake_random_h",
+        default=0,
+        type=float,
+        help="the upper bound for HSL color Hue (H) randomization. Hue runs from 0° to 360°, hence values >= 180 will give fully randomized hues.",
+    )
+    parser.add_argument(
+        "--weather_flake_random_l",
+        default=0,
+        type=float,
+        help="the upper bound for HSL color Lightness (L) randomization. Lightness runs from 0 (black) over 0.5 (color) to 1 (white).",
+    )
+    parser.add_argument(
+        "--weather_frame_per_scene",
+        default=0,
+        type=int,
+        help="the number of optimization scenes per sintel-sequence (if 0, all scenes per sequence are taken).",
+    )
+    parser.add_argument(
+        "--weather_no_flake_dat",
+        default=True,
+        type=ast.literal_eval,
+        help="if this flag is used, no data about the particle (positions, flakes, transparencies) will be stored.",
+    )
+    parser.add_argument(
+        "--weather_lr",
+        type=float,
+        default=0.00001,
+        help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001.",
+    )
+    parser.add_argument(
+        "--weather_unregistered_artifacts",
+        default=True,
+        type=ast.literal_eval,
+        help="if True, artifacts are saved to the output folder but not registered. Saves time and memory during training.",
+    )
     return parser
 
 
@@ -786,7 +846,11 @@ def attack_one_dataloader(
                 orig_preds = model(inputs)
             torch.cuda.empty_cache()
 
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather":
+            if (
+                attack_args["attack_targeted"]
+                or attack_args["attack"] == "pcfa"
+                or attack_args["attack"] == "weather"
+            ):
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
                 else:
@@ -814,7 +878,7 @@ def attack_one_dataloader(
                 case "pcfa":
                     preds = pcfa(attack_args, model, targeted_inputs)
                 case "weather":
-                    preds = weather(
+                    preds, perturbed_inputs = weather(
                         attack_args, model, targeted_inputs, i, args.output_path
                     )
                 case "common_corruptions":
@@ -822,10 +886,10 @@ def attack_one_dataloader(
                 case "none":
                     # from torch.cuda.amp import GradScaler, autocast
                     # with autocast():
-                        preds = model(inputs)
+                    preds = model(inputs)
                 # case "3dcc" | "none":
                 #     preds = model(inputs)
-                
+
             for key in preds:
                 preds[key] = preds[key].detach()
 
@@ -868,14 +932,20 @@ def attack_one_dataloader(
                 metrics = model.val_metrics(preds, targeted_inputs)
 
                 criterion = LossCriterion("epe")
-                loss = criterion.loss(preds["flows"].squeeze(0).float(), targeted_inputs["flows"].squeeze(0).float())
+                loss = criterion.loss(
+                    preds["flows"].squeeze(0).float(),
+                    targeted_inputs["flows"].squeeze(0).float(),
+                )
                 loss = loss.mean()
                 metrics["val/own_epe"] = loss
 
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
 
-                loss = criterion.loss(preds["flows"].squeeze(0).float(), orig_preds["flows"].squeeze(0).float())
+                loss = criterion.loss(
+                    preds["flows"].squeeze(0).float(),
+                    orig_preds["flows"].squeeze(0).float(),
+                )
                 loss = loss.mean()
                 metrics["val/own_epe_orig_preds"] = loss
 
@@ -889,11 +959,15 @@ def attack_one_dataloader(
                         get_flow_tensors(preds), get_flow_tensors(orig_preds)
                     )
                 )
+
                 if has_ground_truth:
                     metrics_ground_truth = model.val_metrics(preds, inputs)
                     metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
-                    
-                    loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+
+                    loss = criterion.loss(
+                        preds["flows"].squeeze(0).float(),
+                        inputs["flows"].squeeze(0).float(),
+                    )
                     loss = loss.mean()
                     metrics["val/own_epe_ground_truth"] = loss
 
@@ -904,12 +978,15 @@ def attack_one_dataloader(
                     )
             else:
                 metrics = model.val_metrics(preds, inputs)
-                
+
                 criterion = LossCriterion("epe")
-                loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                loss = criterion.loss(
+                    preds["flows"].squeeze(0).float(),
+                    inputs["flows"].squeeze(0).float(),
+                )
                 loss = loss.mean()
                 metrics["val/own_epe"] = loss
-                
+
                 metrics["val/cosim"] = torch.mean(
                     cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs))
                 )
@@ -924,7 +1001,7 @@ def attack_one_dataloader(
                 epe=metrics_sum["val/epe"] / (i + 1),
                 outlier=metrics_sum["val/outlier"] / (i + 1),
                 total=total,
-                free=free
+                free=free,
             )
 
             filename = ""
@@ -940,7 +1017,6 @@ def attack_one_dataloader(
             if attack_args["attack"] != "none":
                 generate_outputs(
                     args,
-                    targeted_inputs,
                     preds,
                     dataloader_name,
                     i,
@@ -949,9 +1025,7 @@ def attack_one_dataloader(
                     attack_args,
                 )
             else:
-                generate_outputs(
-                    args, preds, dataloader_name, i, inputs.get("meta")
-                )
+                generate_outputs(args, preds, dataloader_name, i, inputs.get("meta"))
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
 
@@ -967,6 +1041,141 @@ def attack_one_dataloader(
         metrics_mean[k] = v / len(dataloader)
 
     return metrics_mean
+
+
+def generate_outputs(
+    args: Namespace,
+    preds: Dict[str, torch.Tensor],
+    dataloader_name: str,
+    batch_idx: int,
+    metadata: Optional[Dict[str, Any]] = None,
+    perturbed_inputs: Optional[Dict[str, torch.Tensor]] = None,
+    attack_args: Optional[Dict[str, List[object]]] = None,
+) -> None:
+    """Display on screen and/or save outputs to disk, if required.
+
+    Parameters
+    ----------
+    args : Namespace
+        The arguments with the required values to manage the outputs.
+    inputs : Dict[str, torch.Tensor]
+        The inputs loaded from the dataset (images, groundtruth).
+    preds : Dict[str, torch.Tensor]
+        The model predictions (optical flow and others).
+    dataloader_name : str
+        A string to identify from which dataloader these inputs came from.
+    batch_idx : int
+        Indicates in which position of the loader this input is.
+    metadata : Dict[str, Any], optional
+        Metadata about this input, if available.
+    """
+
+    preds = tensor_dict_to_numpy(preds)
+    preds["flows_viz"] = flow_utils.flow_to_rgb(preds["flows"])[:, :, ::-1]
+    if preds.get("flows_b") is not None:
+        preds["flows_b_viz"] = flow_utils.flow_to_rgb(preds["flows_b"])[:, :, ::-1]
+
+    if args.write_outputs:
+        if perturbed_inputs is not None:
+            perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
+            _write_to_npy_file(
+                args,
+                preds,
+                dataloader_name,
+                batch_idx,
+                metadata,
+                perturbed_inputs,
+                attack_args,
+            )
+        else:
+            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
+
+
+def _write_to_npy_file(
+    args: Namespace,
+    preds: Dict[str, torch.Tensor],
+    dataloader_name: str,
+    batch_idx: int,
+    metadata: Optional[Dict[str, Any]] = None,
+    perturbed_inputs: Dict[str, torch.Tensor] = None,
+    attack_args: Optional[Dict[str, List[object]]] = None,
+) -> None:
+    out_root_dir = Path(args.output_path) / dataloader_name
+    extra_dirs = ""
+    if metadata is not None:
+        img_path = Path(metadata["image_paths"][0][0])
+        image_name = img_path.stem
+        if "sintel" in dataloader_name:
+            seq_name = img_path.parts[-2]
+            extra_dirs = seq_name
+    else:
+        image_name = f"{batch_idx:08d}"
+
+    for k, v in preds.items():
+        if isinstance(v, np.ndarray):
+            out_dir = out_root_dir
+            if perturbed_inputs is not None:
+                for arg, val in attack_args.items():
+                    out_dir = out_dir / f"{arg}={val}"
+
+            if k == "flows":
+                out_dir_flows = out_dir / k / extra_dirs
+                out_dir_flows.mkdir(parents=True, exist_ok=True)
+                np.savez_compressed(
+                    str(out_dir_flows / f"{image_name}"), v.astype(np.uint8)
+                )
+
+    if perturbed_inputs is not None:
+        for k, v in perturbed_inputs.items():
+            if isinstance(v, np.ndarray):
+                if k == "images":
+                    out_dir_imgs = out_dir / k / extra_dirs
+                    out_dir_imgs.mkdir(parents=True, exist_ok=True)
+                    np.savez_compressed(
+                        str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8)
+                    )
+
+
+def _write_to_file(
+    args: Namespace,
+    preds: Dict[str, torch.Tensor],
+    dataloader_name: str,
+    batch_idx: int,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> None:
+    out_root_dir = Path(args.output_path) / dataloader_name
+    # pdb.set_trace()
+    extra_dirs = ""
+    if metadata is not None:
+        img_path = Path(metadata["image_paths"][0][0])
+        image_name = img_path.stem
+        if "sintel" in dataloader_name:
+            seq_name = img_path.parts[-2]
+            extra_dirs = seq_name
+    else:
+        image_name = f"{batch_idx:08d}"
+
+    if args.flow_format != "original":
+        flow_ext = args.flow_format
+    else:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
+            flow_ext = "png"
+        else:
+            flow_ext = "flo"
+
+    for k, v in preds.items():
+        if isinstance(v, np.ndarray):
+            out_dir = out_root_dir / k / extra_dirs
+            out_dir.mkdir(parents=True, exist_ok=True)
+            if k == "flows" or k == "flows_b":
+                flow_utils.flow_write(out_dir / f"{image_name}.{flow_ext}", v)
+            elif len(v.shape) == 2 or (
+                len(v.shape) == 3 and (v.shape[2] == 1 or v.shape[2] == 3)
+            ):
+                if v.max() <= 1:
+                    v = v * 255
+                pdb.set_trace()
+                cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
 
 
 if __name__ == "__main__":
@@ -998,4 +1207,3 @@ if __name__ == "__main__":
         attack(args, model)
     else:
         attack_list_of_models(args)
-
