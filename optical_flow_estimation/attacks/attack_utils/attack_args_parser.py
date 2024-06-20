@@ -81,6 +81,10 @@ weather_arguments = [
     "weather_motion_random_angle",
     "weather_flake_random_h",
     "weather_flake_random_l",
+    "weather_frame_per_scene",
+    "weather_no_flake_dat",
+    "weather_lr",
+    "weather_unregistered_artifacts",
 ]
 tdcc_arguments = [
     "attack",
