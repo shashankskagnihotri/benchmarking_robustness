@@ -7,6 +7,7 @@ from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import (
     get_image_tensors,
     get_flow_tensors,
+    replace_images_dic
 )
 
 from attacks.help_function import weather_model
@@ -44,8 +45,15 @@ def weather(
     print("Print all keys", attack_args)
 
     # substitude model specific args
-    if attack_args["model"] in ("gma", "raft", "flowformer"):
+    if attack_args["model"] in ("gma", "raft"):
         model.args.iters = attack_args["weather_model_iters"]
+    # elif attack_args["model"] in ("flowformer"):
+    #     model.args.iters = attack_args["weather_decoder_depth"]
+    #     model.args.iters = attack_args["weather_ecoder_depth"]
+    #     model.args.iters = attack_args["weather_ecoder__latent_dim"]
+    #     model.args.iters = attack_args["weather_cost_latent_dim"]
+    #     model.args.iters = attack_args["weather_cost_latent_input_dim"]
+    #     model.args.iters = attack_args["weather_query_latent_dim"]
 
     # Define what device we are using
     if not torch.cuda.is_available():
@@ -123,7 +131,7 @@ def weather(
     scene_data = [i.to(device) for i in scene_data]
     weather = [i.to(device) for i in weather]
 
-    preds = attack_image(
+    preds, image1_weather, image2_weather = attack_image(
         model,
         targeted_inputs,
         attack_args,
@@ -137,7 +145,9 @@ def weather(
     )
     print("preds", preds)
 
-    return preds
+    perturbed_inputs = replace_images_dic(targeted_inputs, image1_weather, image2_weather)
+
+    return preds, perturbed_inputs
 
 
 def attack_image(
@@ -158,6 +168,10 @@ def attack_image(
 
     image1, image2 = get_image_tensors(targeted_inputs)
     image1, image2 = image1.to(device), image2.to(device)
+
+    # bgr2rgb
+    image1 = image1[:, [2, 1, 0], :, :]
+    image2 = image2[:, [2, 1, 0], :, :]
 
     # pdb.set_trace()
     flow = get_flow_tensors(targeted_inputs)
@@ -258,7 +272,9 @@ def attack_image(
     flow_weather_pred_init.requires_grad = False
 
     with torch.no_grad():
-        preds_init = model(image1, image2, weather=None, scene_data=None, args_=attack_args)
+        preds_init = model(
+            image1, image2, weather=None, scene_data=None, args_=attack_args
+        )
     flow_init = preds_init["flows"].squeeze(0)
     flow_init = flow_init.to(device).detach()
 
@@ -346,7 +362,7 @@ def attack_image(
         )
         flow_weather_pred = preds["flows"].squeeze(0)
         flow_weather_pred = flow_weather_pred.to(device)
-        print("PRINT Pred is: ", flow_weather_pred)
+        # print("PRINT Pred is: ", flow_weather_pred)
         torch.cuda.empty_cache()
 
     # save image
@@ -408,4 +424,4 @@ def attack_image(
         flow_name=f"ATTACKED_[im_{image_index}]_[w_step_{attack_args['weather_steps']}]_[w_m_samples_{attack_args['weather_motionblur_samples']}]",
     )
 
-    return preds
+    return preds, image1_weather, image2_weather
