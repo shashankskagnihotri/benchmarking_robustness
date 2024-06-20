@@ -28,6 +28,9 @@ import json
 
 import os
 
+import cv2 as cv
+import numpy as np
+
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -59,6 +62,7 @@ from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
     attack_arg_string,
 )
+from attacks.attack_utils.loss_criterion import LossCriterion
 from ptlflow_attacked.validate import (
     validate_one_dataloader,
     generate_outputs,
@@ -256,7 +260,7 @@ def _init_parser() -> ArgumentParser:
     parser.add_argument(
         "--attack_loss",
         type=str,
-        default=loss_function,
+        default="epe",
         nargs="*",
         help="Set the name of the used loss function (mse, epe)",
     )
@@ -544,7 +548,14 @@ def _init_parser() -> ArgumentParser:
                 help="the upper bound for HSL color Hue (H) randomization. Hue runs from 0° to 360°, hence values >= 180 will give fully randomized hues.")
     parser.add_argument('--weather_flake_random_l', default=0, type=float,
                 help="the upper bound for HSL color Lightness (L) randomization. Lightness runs from 0 (black) over 0.5 (color) to 1 (white).")
-
+    parser.add_argument('--weather_frame_per_scene', default=0, type=int,
+                help="the number of optimization scenes per sintel-sequence (if 0, all scenes per sequence are taken).")
+    parser.add_argument('--weather_no_flake_dat', default=True, type=ast.literal_eval,
+                help="if this flag is used, no data about the particle (positions, flakes, transparencies) will be stored.")
+    parser.add_argument('--weather_lr', type=float, default=0.00001,
+                help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001.")
+    parser.add_argument('--weather_unregistered_artifacts', default=True, type=ast.literal_eval,
+        help="if True, artifacts are saved to the output folder but not registered. Saves time and memory during training.")
     return parser
 
 
@@ -588,16 +599,13 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             if "_" in key:
                 key = key.split("_")[1]
             if isinstance(value, float):
-                value = round(value, 2)
+                value = round(value, 4)
             output_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
-            if args.attack == "none":
-                metrics_mean = validate_one_dataloader(args, model, dl, dataset_name)
-            else:
-                metrics_mean = attack_one_dataloader(
-                    args, attack_args, model, dl, dataset_name
-                )
+            metrics_mean = attack_one_dataloader(
+                args, attack_args, model, dl, dataset_name
+            )
 
             end_time = datetime.now()
             output_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
@@ -741,6 +749,7 @@ def attack_one_dataloader(
     #     )
     if attack_args["attack"] == "weather":
         attack_args["model"] = args.model
+        # attack_args["val_dataset"] = args.weather_dataset
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -772,8 +781,11 @@ def attack_one_dataloader(
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
             has_ground_truth = True
             targeted_inputs = None
+
             with torch.no_grad():
                 orig_preds = model(inputs)
+            torch.cuda.empty_cache()
+
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather":
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
@@ -807,8 +819,15 @@ def attack_one_dataloader(
                     )
                 case "common_corruptions":
                     preds = common_corrupt(attack_args, inputs, model)
-                case "3dcc" | "none":
-                    preds = model(inputs)
+                case "none":
+                    # from torch.cuda.amp import GradScaler, autocast
+                    # with autocast():
+                        preds = model(inputs)
+                # case "3dcc" | "none":
+                #     preds = model(inputs)
+                
+            for key in preds:
+                preds[key] = preds[key].detach()
 
             if args.warm_start:
                 if (
@@ -824,6 +843,9 @@ def attack_one_dataloader(
 
             inputs = io_adapter.unscale(inputs, image_only=True)
             preds = io_adapter.unscale(preds)
+
+            if attack_args["attack"] != "none":
+                perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
 
             if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
                 if args.seq_val_mode == "first":
@@ -844,8 +866,19 @@ def attack_one_dataloader(
 
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                 metrics = model.val_metrics(preds, targeted_inputs)
+
+                criterion = LossCriterion("epe")
+                loss = criterion.loss(preds["flows"].squeeze(0).float(), targeted_inputs["flows"].squeeze(0).float())
+                loss = loss.mean()
+                metrics["val/own_epe"] = loss
+
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
+
+                loss = criterion.loss(preds["flows"].squeeze(0).float(), orig_preds["flows"].squeeze(0).float())
+                loss = loss.mean()
+                metrics["val/own_epe_orig_preds"] = loss
+
                 metrics["val/cosim_target"] = torch.mean(
                     cosine_similarity(
                         get_flow_tensors(preds), get_flow_tensors(targeted_inputs)
@@ -859,6 +892,11 @@ def attack_one_dataloader(
                 if has_ground_truth:
                     metrics_ground_truth = model.val_metrics(preds, inputs)
                     metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
+                    
+                    loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                    loss = loss.mean()
+                    metrics["val/own_epe_ground_truth"] = loss
+
                     metrics["val/cosim_ground_truth"] = torch.mean(
                         cosine_similarity(
                             get_flow_tensors(preds), get_flow_tensors(inputs)
@@ -866,6 +904,12 @@ def attack_one_dataloader(
                     )
             else:
                 metrics = model.val_metrics(preds, inputs)
+                
+                criterion = LossCriterion("epe")
+                loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                loss = loss.mean()
+                metrics["val/own_epe"] = loss
+                
                 metrics["val/cosim"] = torch.mean(
                     cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs))
                 )
@@ -874,9 +918,13 @@ def attack_one_dataloader(
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
                 metrics_sum[k] += metrics[k].item()
+
+            free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
                 epe=metrics_sum["val/epe"] / (i + 1),
                 outlier=metrics_sum["val/outlier"] / (i + 1),
+                total=total,
+                free=free
             )
 
             filename = ""
@@ -889,18 +937,20 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+            if attack_args["attack"] != "none":
                 generate_outputs(
                     args,
                     targeted_inputs,
                     preds,
                     dataloader_name,
                     i,
-                    targeted_inputs.get("meta"),
+                    inputs.get("meta"),
+                    perturbed_inputs,
+                    attack_args,
                 )
             else:
                 generate_outputs(
-                    args, inputs, preds, dataloader_name, i, inputs.get("meta")
+                    args, preds, dataloader_name, i, inputs.get("meta")
                 )
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
@@ -915,6 +965,7 @@ def attack_one_dataloader(
     metrics_mean = {}
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
+
     return metrics_mean
 
 
