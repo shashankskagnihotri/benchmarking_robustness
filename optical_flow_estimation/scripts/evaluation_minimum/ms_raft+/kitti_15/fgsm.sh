@@ -7,13 +7,13 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-14%4
-#SBATCH --job-name=liteflownet2_kitti-2015_fgsm
-#SBATCH --output=slurm/liteflownet2_kitti-2015_fgsm_%A_%a.out
-#SBATCH --error=slurm/liteflownet2_kitti-2015_fgsm_err_%A_%a.out
+#SBATCH --job-name=ms_raft+_kitti-2015_fgsm
+#SBATCH --output=slurm/ms_raft+_kitti-2015_fgsm_%A_%a.out
+#SBATCH --error=slurm/ms_raft+_kitti-2015_fgsm_err_%A_%a.out
 
-model="liteflownet2"
+model="ms_raft+"
 dataset="kitti-2015"
-checkpoint="sintel"
+checkpoint="mixed"
 targeteds="True False"
 targets="negative zero"
 norms="inf two"
