@@ -572,7 +572,6 @@ def attack_one_dataloader(
     Dict[str, float]
         The average metric values for this dataloader.
     """
-
     metrics_sum = {}
     if attack_args["attack"] == "3dcc":
         dataloader = get_dataset_3DCC(
@@ -611,8 +610,12 @@ def attack_one_dataloader(
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
             has_ground_truth = True
             targeted_inputs = None
+
             with torch.no_grad():
                 orig_preds = model(inputs)
+                #orig_preds = {key: value.cpu() for key, value in orig_preds.items()}
+            torch.cuda.empty_cache()
+
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
@@ -657,9 +660,10 @@ def attack_one_dataloader(
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
-                    from torch.cuda.amp import GradScaler, autocast
-                    with autocast():
-                        preds = model(inputs)
+                    preds = model(inputs)
+                
+            for key in preds:
+                preds[key] = preds[key].detach()
 
             if args.warm_start:
                 if (
@@ -796,6 +800,7 @@ def attack_one_dataloader(
     metrics_mean = {}
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
+
     return metrics_mean
 
 
