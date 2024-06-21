@@ -14,6 +14,7 @@ import math
 from dataloader import get_dataset
 from torch.utils.data import DataLoader
 from models import *
+from dataloader.summary_logger import TensorboardSummary
 
 parser = argparse.ArgumentParser(description='PSMNet')
 parser.add_argument('--dataset', required=True, 
@@ -35,6 +36,9 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='enables CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
+parser.add_argument('--eval', action='store_true', default=False,
+                    help='evaluate model on test set')
+
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -51,6 +55,9 @@ if args.cuda:
 # TestImgLoader = torch.utils.data.DataLoader(
 #          SceneFlowFlyingThings3DDataset(test_left_img,test_right_img,test_left_disp, False), 
 #          batch_size= 8, shuffle= False, num_workers= 4, drop_last=False)
+
+logger_path = './runs'
+logger = TensorboardSummary(logger_path).config_logger(0)
 
 train_dataset = get_dataset(args.dataset, args.datapath, architeture_name="PSMNet", split="Train")
 test_dataset  = get_dataset(args.dataset, args.datapath, architeture_name="PSMNet", split="Test")
@@ -71,14 +78,16 @@ if args.cuda:
     model = nn.DataParallel(model)
     model.cuda()
 
+optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
+
 if args.loadmodel is not None:
     print('Load pretrained model')
     pretrain_dict = torch.load(args.loadmodel)
     model.load_state_dict(pretrain_dict['state_dict'])
+    if 'optimizer_state_dict' in pretrain_dict:
+        optimizer.load_state_dict(pretrain_dict['optimizer_state_dict'])
 
 print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
-
-optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
 
 def train(imgL,imgR, disp_L):
         model.train()
@@ -172,24 +181,20 @@ def main():
             total_train_loss += loss
         print('epoch %d total training loss = %.3f' %(epoch, total_train_loss/len(TrainImgLoader)))
 
+        #INFERENCE
+        total_test_loss = inference(TestImgLoader)
+
         #SAVE
         savefilename = args.savemodel+'/checkpoint_'+str(epoch)+'.tar'
         torch.save({
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
-                        'train_loss': total_train_loss/len(TrainImgLoader),
+                'train_loss': total_train_loss/len(TrainImgLoader),
+                'optimizer_state_dict': optimizer.state_dict(),
             }, savefilename)
         
     print('full training time = %.2f HR' %((time.time() - start_full_time)/3600))
 
-	#------------- TEST ------------------------------------------------------------
-    total_test_loss = 0
-    for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
-        test_loss = test(imgL,imgR, disp_L)
-        print('Iter %d test loss = %.3f' %(batch_idx, test_loss))
-        total_test_loss += test_loss
-
-    print('total test loss = %.3f' %(total_test_loss/len(TestImgLoader)))
 	#----------------------------------------------------------------------------------
 	#SAVE test information
     savefilename = args.savemodel+'testinformation.tar'
@@ -197,7 +202,21 @@ def main():
 		    'test_loss': total_test_loss/len(TestImgLoader),
 		}, savefilename)
 
+def inference(TestImgLoader: DataLoader):
+    	#------------- TEST ------------------------------------------------------------
+    total_test_loss = 0
+    for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
+        test_loss = test(imgL,imgR, disp_L)
+        print('Iter %d test loss = %.3f' %(batch_idx, test_loss))
+        total_test_loss += test_loss
+
+    print('total test loss = %.3f' %(total_test_loss/len(TestImgLoader)))
+    return total_test_loss
 
 if __name__ == '__main__':
-   main()
+    if args.eval:
+        inference(TestImgLoader)
+    else:
+        main()
+        
     
