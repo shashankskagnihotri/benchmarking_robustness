@@ -48,7 +48,7 @@ parser.add_argument('--summary_freq', type=int, default=20, help='the frequency 
 parser.add_argument('--save_freq', type=int, default=1, help='the frequency of saving checkpoint')
 
 # parse arguments, set seeds
-args = parser.parse_args()
+args, _ = parser.parse_known_args()
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
 os.makedirs(args.logdir, exist_ok=True)
