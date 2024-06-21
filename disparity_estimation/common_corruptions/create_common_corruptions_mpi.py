@@ -80,7 +80,7 @@ def parallel_process(dataloader):
             future.result()  # Rufe result auf, um mögliche Ausnahmen zu erfassen
 
 # get dataset
-dataloader = get_dataset('mpisintel','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/mpi_sintel_stereo/','train','')
+dataloader = get_dataset('mpisintel','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/mpi_sintel_stereo/','test','')
 
 parallel_process(dataloader)
 

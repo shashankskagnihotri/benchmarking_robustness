@@ -42,12 +42,15 @@ def process_batch(batch_indices, dataloader, corruption_names):
                     logger.info(f'{i} {len(dataloader)} images corrupted {corruption} {severity} alredy exists')
                     continue
                 
+                print("Loading Image")
                 image_left_arr = np.array(image_left)
                 image_right_arr = np.array(image_right)
 
+                print("Corrupting Image")
                 corrupted_left = corrupt(image_left_arr, corruption_name=corruption, severity=severity+1)
                 corrupted_right = corrupt(image_right_arr, corruption_name=corruption, severity=severity+1)
 
+                print("Saving Image")
                 os.makedirs(os.path.dirname(image_left_path_corrupted), exist_ok=True)
                 os.makedirs(os.path.dirname(image_right_path_corrupted), exist_ok=True)
 
@@ -77,6 +80,9 @@ def parallel_process(dataloader):
 # get dataset
 dataloader = get_dataset('kitti','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/KITTI_2015','test','')
 
-parallel_process(dataloader)
+# parallel_process(dataloader)
+
+# Läuft rückwarts
+process_batch(range(len(dataloader) - 1, -1, -1), dataloader, get_corruption_names())
 
 logging.shutdown()
