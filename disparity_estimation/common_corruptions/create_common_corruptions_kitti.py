@@ -12,7 +12,7 @@ logging.basicConfig(
     level=logging.INFO,  # oder ein anderes gewünschtes Log-Level
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logfile_kitti.log', mode='a'),  # Dateihandler für Log-Datei
+        logging.FileHandler('logfile_kitti.log'),  # Dateihandler für Log-Datei
         logging.StreamHandler()  # Stream-Handler für Konsole
     ]
 )
