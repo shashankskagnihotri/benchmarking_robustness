@@ -5,13 +5,13 @@
 #SBATCH --time=30:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4_a100
+#SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=ccmr_kitti-2015_pcfa_i20
-#SBATCH --output=slurm/ccmr_kitti-2015_pcfa_i20.out
-#SBATCH --error=slurm/ccmr_kitti-2015_pcfa_i20_err_%A_%a.out
+#SBATCH --job-name=scopeflow_kitti-2015_pcfa_i20
+#SBATCH --output=slurm/scopeflow_kitti-2015_pcfa_i20.out
+#SBATCH --error=slurm/scopeflow_kitti-2015_pcfa_i20_err_%A_%a.out
 
-model="ccmr"
+model="scopeflow"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True"

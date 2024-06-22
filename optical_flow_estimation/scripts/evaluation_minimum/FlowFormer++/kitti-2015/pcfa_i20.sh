@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-1%2
-#SBATCH --job-name=ccmr_kitti-2015_pcfa_i20
-#SBATCH --output=slurm/ccmr_kitti-2015_pcfa_i20.out
-#SBATCH --error=slurm/ccmr_kitti-2015_pcfa_i20_err_%A_%a.out
+#SBATCH --job-name=flowformer++_kitti-2015_pcfa_i20
+#SBATCH --output=slurm/flowformer++_kitti-2015_pcfa_i20.out
+#SBATCH --error=slurm/flowformer++_kitti-2015_pcfa_i20_err_%A_%a.out
 
-model="ccmr"
+model="flowformer++"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True"

@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-14%4
-#SBATCH --job-name=ccmr_kitti-2015_fgsm
-#SBATCH --output=slurm/ccmr_kitti-2015_fgsm_%A_%a.out
-#SBATCH --error=slurm/ccmr_kitti-2015_fgsm_err_%A_%a.out
+#SBATCH --job-name=dip_kitti-2015_fgsm
+#SBATCH --output=slurm/dip_kitti-2015_fgsm_%A_%a.out
+#SBATCH --error=slurm/dip_kitti-2015_fgsm_err_%A_%a.out
 
-model="ccmr"
+model="dip"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"

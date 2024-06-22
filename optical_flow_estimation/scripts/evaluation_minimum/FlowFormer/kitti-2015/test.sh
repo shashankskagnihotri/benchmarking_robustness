@@ -12,3 +12,4 @@
 
 cd ../../../../
 python attacks.py flowformer --pretrained_ckpt kitti --val_dataset kitti-2015
+torch.cuda.mem_get_info()

@@ -7,18 +7,18 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-35%4
-#SBATCH --job-name=ccmr_kitti-2015_bim_pgd_cospgd_i3
-#SBATCH --output=slurm/ccmr_kitti-2015_bim_pgd_cospgd_i3_%A_%a.out
-#SBATCH --error=slurm/ccmr_kitti-2015_bim_pgd_cospgd_i3_err_%A_%a.out
+#SBATCH --job-name=dip_kitti-2015_bim_pgd_cospgd_i10
+#SBATCH --output=slurm/dip_kitti-2015_bim_pgd_cospgd_i10_%A_%a.out
+#SBATCH --error=slurm/dip_kitti-2015_bim_pgd_cospgd_i10_err_%A_%a.out
 
-model="ccmr"
+model="dip"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"
 targets="negative zero"
 norms="inf"
 attacks="bim pgd cospgd"
-iterations="3"
+iterations="10"
 jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 
