@@ -1,0 +1,116 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-06-18 03:56:34",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0039,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-06-18 03:58:27",
+            "duration": "00:01:52",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 70.90900632023812,
+                "px1": 0.0950085113305613,
+                "px3": 0.1417273554995154,
+                "px5": 0.170241592759412,
+                "outlier": 85.82723850250244,
+                "own_epe": 64.90630337238312,
+                "epe_orig_preds": 12.44278583586216,
+                "own_epe_orig_preds": 12.44278591811657,
+                "cosim_target": -0.6640336768329144,
+                "cosim_orig_preds": 0.6640336768329144,
+                "epe_ground_truth": 6.3717876783013345,
+                "own_epe_ground_truth": 28.27652174293995,
+                "cosim_ground_truth": 0.17082932562101633
+            }
+        },
+        {
+            "start_time": "2024-06-18 03:58:29",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0039,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-06-18 04:00:59",
+            "duration": "00:02:30",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 34.98198661744595,
+                "px1": 0.11296011878032913,
+                "px3": 0.19629872819801675,
+                "px5": 0.24565770084940597,
+                "outlier": 80.37012755870819,
+                "own_epe": 34.07690914452076,
+                "epe_orig_preds": 12.444677627682687,
+                "own_epe_orig_preds": 12.4446776419878,
+                "cosim_target": 0.0,
+                "cosim_orig_preds": 0.6640447210147977,
+                "epe_ground_truth": 6.372846810519695,
+                "own_epe_ground_truth": 28.27777982056141,
+                "cosim_ground_truth": 0.17083139345049858
+            }
+        },
+        {
+            "start_time": "2024-06-18 04:00:30",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0039,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-06-18 04:02:21",
+            "duration": "00:01:50",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 18.988283579945563,
+                "px1": 0.40226197522271834,
+                "px3": 0.668083613923809,
+                "px5": 0.7463660873589106,
+                "outlier": 31.813225363492965,
+                "own_epe": 56.00419692993164,
+                "cosim": 0.17517528033582494
+            }
+        },
+        {
+            "start_time": "2024-06-18 04:00:31",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0078,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-06-18 04:02:24",
+            "duration": "00:01:52",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 40.64799025058746,
+                "px1": 0.07696262246385231,
+                "px3": 0.1821074624855828,
+                "px5": 0.23687115122032992,
+                "outlier": 81.78925365447998,
+                "own_epe": 44.513412501811985,
+                "epe_orig_preds": 23.69778928756714,
+                "own_epe_orig_preds": 23.697789243459702,
+                "cosim_target": 0.0,
+                "cosim_orig_preds": 0.6250928042083979,
+                "epe_ground_truth": 13.122751461863517,
+                "own_epe_ground_truth": 38.91125061273575,
+                "cosim_ground_truth": 0.1646420851140283
+            }
+        }
+    ]
+}  }
+        }
+    ]
+}

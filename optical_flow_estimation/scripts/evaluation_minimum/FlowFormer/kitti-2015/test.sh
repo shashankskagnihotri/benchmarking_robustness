@@ -5,11 +5,22 @@
 #SBATCH --time=00:29:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4_a100
-#SBATCH --job-name=test
-#SBATCH --output=slurm/test.out
-#SBATCH --error=slurm/test_err.out
+#SBATCH --partition=gpu_4
+#SBATCH --array=0-14%4
+#SBATCH --job-name=flowformer_kitti-2015_test
+#SBATCH --output=slurm/flowformer_kitti-2015_test_%A_%a.out
+#SBATCH --error=slurm/flowformer_kitti-2015_test_err_%A_%a.out
+
+model="flowformer"
+dataset="kitti-2015"
+checkpoint="kitti"
+targeteds="True False"
+targets="negative zero"
+norms="inf two"
+attacks="test"
+jobnum=0
+#SLURM_ARRAY_TASK_ID=0
 
 cd ../../../../
-python attacks.py flowformer --pretrained_ckpt kitti --val_dataset kitti-2015
-torch.cuda.mem_get_info()
+
+python attacks_flowformer.py flowformer --val_dataset kitti-2015 --pretrained_ckpt kitti

@@ -1,0 +1,23 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-06-03 09:51:18",
+            "model": "flownet2",
+            "checkpoint": "things",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-03 09:55:23",
+            "duration": "00:04:04",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 2.2221587985381843,
+                "px1": 0.8393187378313998,
+                "px3": 0.9200425479672026,
+                "px5": 0.9408534999425083,
+                "outlier": 7.658046302230394,
+                "own_epe": 2.22215870699839,
+                "cosim": 0.8875304039184803
+            }
+        }
+    ]
+}
