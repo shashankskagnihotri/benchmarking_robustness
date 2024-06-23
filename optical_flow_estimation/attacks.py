@@ -84,6 +84,8 @@ delta_bound = 0.005
 
 config_logging()
 
+# import os
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:100"
 
 def _init_parser() -> ArgumentParser:
     parser = ArgumentParser()
@@ -570,7 +572,6 @@ def attack_one_dataloader(
     Dict[str, float]
         The average metric values for this dataloader.
     """
-
     metrics_sum = {}
     if attack_args["attack"] == "3dcc":
         dataloader = get_dataset_3DCC(
@@ -609,8 +610,12 @@ def attack_one_dataloader(
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
             has_ground_truth = True
             targeted_inputs = None
+
             with torch.no_grad():
                 orig_preds = model(inputs)
+                #orig_preds = {key: value.cpu() for key, value in orig_preds.items()}
+            torch.cuda.empty_cache()
+
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
@@ -656,6 +661,9 @@ def attack_one_dataloader(
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
                     preds = model(inputs)
+                
+            for key in preds:
+                preds[key] = preds[key].detach()
 
             if args.warm_start:
                 if (
@@ -746,9 +754,13 @@ def attack_one_dataloader(
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
                 metrics_sum[k] += metrics[k].item()
+
+            free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
                 epe=metrics_sum["val/epe"] / (i + 1),
                 outlier=metrics_sum["val/outlier"] / (i + 1),
+                total=total,
+                free=free
             )
 
             filename = ""
@@ -788,6 +800,7 @@ def attack_one_dataloader(
     metrics_mean = {}
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
+
     return metrics_mean
 
 
