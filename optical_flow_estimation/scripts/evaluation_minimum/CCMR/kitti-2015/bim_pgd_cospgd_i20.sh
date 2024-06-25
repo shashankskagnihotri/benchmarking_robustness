@@ -5,7 +5,7 @@
 #SBATCH --time=00:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4_a100
+#SBATCH --partition=gpu_4
 #SBATCH --array=0-44%4
 #SBATCH --job-name=ccmr_kitti-2015_bim_pgd_cospgd_i20
 #SBATCH --output=slurm/ccmr_kitti-2015_bim_pgd_cospgd_i20_%A_%a.out

@@ -348,6 +348,25 @@
                 "own_epe_ground_truth": 23.119961980432272,
                 "cosim_ground_truth": 0.18147788199596107
             }
+        },
+        {
+            "start_time": "2024-06-24 20:10:01",
+            "model": "fastflownet",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-24 20:11:48",
+            "duration": "00:01:47",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.168762878775597,
+                "px1": 0.7344644635543227,
+                "px3": 0.8881893736124039,
+                "px5": 0.9250501443445682,
+                "outlier": 8.320158975869417,
+                "own_epe": 23.1337261903286,
+                "cosim": 0.18147994485218077
+            }
         }
     ]
 }
