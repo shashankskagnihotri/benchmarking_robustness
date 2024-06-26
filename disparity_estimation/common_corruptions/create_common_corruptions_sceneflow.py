@@ -23,7 +23,8 @@ logger = logging.getLogger()
 # Beispiel-Log-Nachrichten
 logger.info('Begin of corruption')
 
-
+import sys
+start_at = int(sys.argv[1])
 
 
 # FlyingThings3D
@@ -60,17 +61,13 @@ def process_batch(batch_indices, dataloader, corruption_names):
                 logger.info(f'{i} {len(dataloader)} images corrupted {corruption} {severity}')
                 # print(f'{i} {len(dataloader)} images corrupted {corruption} {severity}')
 
-def split_indices(num_items, batch_size):
-    return [range(i, min(i + batch_size, num_items)) for i in range(0, num_items, batch_size)]
 
 def parallel_process(dataloader):
     corruption_names = get_corruption_names()
     num_images = len(dataloader)
-    batch_size = 1
-    batches = split_indices(num_images, batch_size)
-
+    
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        futures = [executor.submit(process_batch, batch, dataloader, corruption_names) for batch in batches]
+        futures = [executor.submit(process_batch, [i], dataloader, corruption_names) for i in range(start_at, start_at+100)]
         for future in concurrent.futures.as_completed(futures):
             future.result()  # Rufe result auf, um mögliche Ausnahmen zu erfassen
 
@@ -78,5 +75,33 @@ def parallel_process(dataloader):
 dataloader = get_dataset('sceneflow','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D','test','')
 
 parallel_process(dataloader)
+
+# created = 0
+# not_created = 0
+
+# corruption_names = get_corruption_names()
+
+# for i in range(len(dataloader)):
+#     image_left_path = dataloader.img_left_filenames[i]
+#     image_right_path = dataloader.img_right_filenames[i]
+#     image_left = dataloader.load_image(image_left_path)
+#     image_right = dataloader.load_image(image_right_path)
+
+#     for corruption in corruption_names:
+#         for severity in range(5):
+            
+#             image_left_path_corrupted = image_left_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
+#             image_right_path_corrupted = image_right_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
+            
+#             if os.path.isfile(image_left_path_corrupted) and os.path.isfile(image_right_path_corrupted):
+#                 # logger.info(f'{i} {len(dataloader)} images corrupted {corruption} {severity} alredy exists')
+#                 created += 1
+#             else:
+#                 not_created += 1
+
+#     print(f'{i} created: {created}, not created: {not_created}')
+
+# print(f'created: {created}, not created: {not_created}')
+
 
 logging.shutdown()
