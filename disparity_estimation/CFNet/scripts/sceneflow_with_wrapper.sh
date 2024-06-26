@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-set -x
+
 DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D"
 CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/CFNet/checkpoints/sceneflow_pretraining.ckpt"
 
-python main.py --dataset sceneflow \
+python wrapper.py -a cfnet -m train \
+    --dataset sceneflow \
     --datapath $DATAPATH \
     --epochs 20 \
     --lr 0.001 \

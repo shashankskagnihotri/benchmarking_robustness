@@ -5,7 +5,7 @@
 import logging
 import os
 
-from tensorboardX import SummaryWriter
+from tensorboard import SummaryWriter
 
 
 class TensorboardSummary(object):

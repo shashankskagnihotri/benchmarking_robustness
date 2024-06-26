@@ -8,6 +8,7 @@ import torchvision.utils as vutils
 import torch.nn.functional as F
 import numpy as np
 import copy
+import mlflow
 
 
 def make_iterative_func(func):
@@ -64,10 +65,11 @@ def save_scalars(logger, mode_tag, scalar_dict, global_step):
         if not isinstance(values, list) and not isinstance(values, tuple):
             values = [values]
         for idx, value in enumerate(values):
-            scalar_name = '{}/{}'.format(mode_tag, tag)
+            scalar_name = '{}_{}'.format(mode_tag, tag)
             # if len(values) > 1:
             scalar_name = scalar_name + "_" + str(idx)
-            logger.add_scalar(scalar_name, value, global_step)
+            #logger.add_scalar(scalar_name, value, global_step)
+            mlflow.log_metric(scalar_name, value, global_step)
 
 
 def save_images(logger, mode_tag, images_dict, global_step):
@@ -81,12 +83,13 @@ def save_images(logger, mode_tag, images_dict, global_step):
             value = value[:1]
             value = torch.from_numpy(value)
 
-            image_name = '{}/{}'.format(mode_tag, tag)
+            image_name = '{}_{}'.format(mode_tag, tag)
             if len(values) > 1:
                 image_name = image_name + "_" + str(idx)
-            logger.add_image(image_name, vutils.make_grid(value, padding=0, nrow=1, normalize=True, scale_each=True),
-                             global_step)
-
+            # logger.add_image(image_name, vutils.make_grid(value, padding=0, nrow=1, normalize=True, scale_each=True),
+            #                  global_step)
+            # mlflow.log_figure(image_name, vutils.make_grid(value, padding=0, nrow=1, normalize=True, scale_each=True),
+            #                   global_step)
 
 def adjust_learning_rate(optimizer, epoch, base_lr, lrepochs):
     splits = lrepochs.split(':')

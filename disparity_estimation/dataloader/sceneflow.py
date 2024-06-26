@@ -16,14 +16,22 @@ from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
 
 # SceneFlow dataloader from CFNet
 class SceneFlowFlyingThings3DDataset(Dataset):
-    def __init__(self, datadir:str, model_name:str, train:bool=True):
+    def __init__(self, datadir, architecture_name, split='train'):
         super().__init__()
 
         self.datadir = datadir
-        self.model_name = model_name.lower()
+        self.model_name = architecture_name.lower()
         
-        self.split_folder = 'TRAIN' if train else 'TEST'
-        self.training = train
+        if split.upper() == 'TRAIN':
+            self.split_folder = 'TRAIN'
+        elif split.upper() == 'TEST':
+            self.split_folder = 'TEST'
+        elif split.upper() == 'CORRUPTED':
+            self.split_folder = 'CORRUPTED'
+        else:
+            raise ValueError(f"Invalid split value: {split}")
+
+        self.training = True if split.lower() in "train" else False
 
         self._read_data()
 
@@ -73,8 +81,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         img_right = self.load_image(self.img_right_filenames[index])
         disp_left = self.load_disp(self.disp_left_filenames[index])
         disp_right = self.load_disp(self.disp_right_filenames[index])
-        occ_left = self.load_occ(self.occ_left_filenames[index])
-        occ_right = self.load_occ(self.occ_right_filenames[index])
         
         if self.model_name == 'cfnet':
             return self.get_item_cfnet(img_left, img_right, disp_left)
@@ -83,6 +89,9 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         elif self.model_name in ['gwcnet', 'gwcnet-g', 'gwcnet-gc']:
             return self.get_item_gwcnet(img_left, img_right, disp_left)
         elif self.model_name == 'sttr':
+            # This might give an error here because there are less oclusion files then others
+            occ_left = self.load_occ(self.occ_left_filenames[index])
+            occ_right = self.load_occ(self.occ_right_filenames[index])
             return self.get_item_sttr(img_left, img_right, disp_left, disp_right, occ_left, occ_right)
         elif self.model_name == 'hsmnet':
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
