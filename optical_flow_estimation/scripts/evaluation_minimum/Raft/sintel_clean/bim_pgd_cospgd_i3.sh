@@ -12,7 +12,7 @@
 #SBATCH --error=slurm/raft_sintel-clean_bim_pgd_cospgd_i3_err_%A_%a.out
 
 model="raft"
-dataset="sintel-final"
+dataset="sintel-clean"
 checkpoint="sintel"
 targeteds="True False"
 targets="negative zero"

@@ -12,7 +12,7 @@
 # User whose jobs you want to monitor
 USER="ma_jcaspary"
 LOGFILE="automated_run_2.log"
-cd /pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/maskflownet_s/sintel_final
+cd /pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/automated_script
 # List of shell script names and their corresponding job amounts
 declare -A scripts_and_amounts=(
   ["/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/CCMR/sintel_clean/bim_pgd_cospgd_i3.sh"]=36
@@ -76,6 +76,8 @@ get_running_jobs_count() {
 submit_job() {
   local script_name=$1
   log "Submitting job: $script_name"
+  DIR=$(dirname "$script_name")
+  cd $DIR
   sbatch $script_name
 }
 
