@@ -16,11 +16,12 @@ from torch.utils.tensorboard import SummaryWriter
 # from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 import gc
 
 
 from dataloader import get_dataset
+import mlflow
 
 cudnn.benchmark = True
 
@@ -48,7 +49,7 @@ parser.add_argument('--summary_freq', type=int, default=20, help='the frequency 
 parser.add_argument('--save_freq', type=int, default=1, help='the frequency of saving checkpoint')
 
 # parse arguments, set seeds
-args = parser.parse_args()
+args, _ = parser.parse_known_args()
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
 os.makedirs(args.logdir, exist_ok=True)
@@ -64,7 +65,15 @@ logger = SummaryWriter(args.logdir)
 train_dataset = get_dataset(args.dataset, args.datapath, architeture_name="CFNet", split='train')
 test_dataset  = get_dataset(args.dataset, args.datapath, architeture_name="CFNet", split='test')
 
-TrainImgLoader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
+val_size = int(0.2 * len(train_dataset))  # 20% for validation
+train_size = len(train_dataset) - val_size
+
+# Split the dataset
+train_subset, val_subset = random_split(train_dataset, [train_size, val_size])
+del train_dataset
+
+ValImgLoader = DataLoader(val_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
+TrainImgLoader = DataLoader(train_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TestImgLoader = DataLoader(test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False)
 
 
@@ -73,6 +82,7 @@ model = __models__[args.model](args.maxdisp)
 model = nn.DataParallel(model)
 model.cuda()
 optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999))
+best_val_loss = -1
 
 # load parameters
 start_epoch = 0
@@ -110,7 +120,7 @@ def train():
             loss, scalar_outputs, image_outputs = train_sample(sample, compute_metrics=do_summary)
             if do_summary:
                 save_scalars(logger, 'train', scalar_outputs, global_step)
-                save_images(logger, 'train', image_outputs, global_step)
+                #save_images(logger, 'train', image_outputs, global_step)
             del scalar_outputs, image_outputs
             print('Epoch {}/{}, Iter {}/{}, train loss = {:.3f}, time = {:.3f}'.format(epoch_idx, args.epochs,
                                                                                        batch_idx,
@@ -118,9 +128,34 @@ def train():
                                                                                        time.time() - start_time))
         # saving checkpoints
         if (epoch_idx + 1) % args.save_freq == 0:
-            checkpoint_data = {'epoch': epoch_idx, 'model': model.state_dict(), 'optimizer': optimizer.state_dict()}
+            checkpoint_data = {'epoch': epoch_idx, 'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': global_step, 'loss': loss}
             torch.save(checkpoint_data, "{}/checkpoint_{:0>6}.ckpt".format(args.logdir, epoch_idx))
         gc.collect()
+
+        # --- validation
+        for batch_idx, sample in enumerate(ValImgLoader):
+            global_step = len(ValImgLoader) * epoch_idx + batch_idx
+            start_time = time.time()
+            do_summary = global_step % args.summary_freq == 0
+            loss, scalar_outputs, image_outputs = test_sample(sample, compute_metrics=do_summary)
+            if do_summary:
+                save_scalars(logger, 'val', scalar_outputs, global_step)
+                #save_images(logger, 'val', image_outputs, global_step)
+            avg_test_scalars.update(scalar_outputs)
+            del scalar_outputs, image_outputs
+            print('Epoch {}/{}, Iter {}/{}, val loss = {:.3f}, time = {:3f}'.format(epoch_idx, args.epochs,
+                                                                                     batch_idx,
+                                                                                     len(TestImgLoader), loss,
+                                                                                     time.time() - start_time))
+        # save checkpoint for lowest loss
+        if loss < best_val_loss:
+            checkpoint_data = {'epoch': epoch_idx, 'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': global_step, 'loss': loss}
+            torch.save(checkpoint_data, "{}/checkpoint_{:0>6}_best.ckpt".format(args.logdir, epoch_idx))
+            mlflow.log_metric('best_mode_epoch', epoch_idx, global_step)
+            best_val_loss = loss
+
+        gc.collect()
+        # --- validation - END
 
         # testing
         avg_test_scalars = AverageMeterDict()
@@ -133,7 +168,7 @@ def train():
             loss, scalar_outputs, image_outputs = test_sample(sample, compute_metrics=do_summary)
             if do_summary:
                 save_scalars(logger, 'test', scalar_outputs, global_step)
-                save_images(logger, 'test', image_outputs, global_step)
+                #save_images(logger, 'test', image_outputs, global_step)
             avg_test_scalars.update(scalar_outputs)
             del scalar_outputs, image_outputs
             print('Epoch {}/{}, Iter {}/{}, test loss = {:.3f}, time = {:3f}'.format(epoch_idx, args.epochs,
