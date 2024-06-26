@@ -47,13 +47,7 @@ def weather(
     # substitude model specific args
     if attack_args["model"] in ("gma", "raft"):
         model.args.iters = attack_args["weather_model_iters"]
-    # elif attack_args["model"] in ("flowformer"):
-    #     model.args.iters = attack_args["weather_decoder_depth"]
-    #     model.args.iters = attack_args["weather_ecoder_depth"]
-    #     model.args.iters = attack_args["weather_ecoder__latent_dim"]
-    #     model.args.iters = attack_args["weather_cost_latent_dim"]
-    #     model.args.iters = attack_args["weather_cost_latent_input_dim"]
-    #     model.args.iters = attack_args["weather_query_latent_dim"]
+        
 
     # Define what device we are using
     if not torch.cuda.is_available():
@@ -257,15 +251,8 @@ def attack_image(
     )
 
     # rendered_image1, rendered_image2 = render(image1, image2, scene_data, weather, args=attack_args)
-
     # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
-    with torch.no_grad():
-        preds = model(
-            image1, image2, weather=weather, scene_data=scene_data, args_=attack_args
-        )
-    torch.cuda.empty_cache()
-    flow_weather_pred = preds["flows"].squeeze(0)
-    flow_weather_pred = flow_weather_pred.to(device)
+
 
     # define the initial flow, the target, and update mu
     flow_weather_pred_init = flow_weather_pred.detach().clone()
@@ -278,6 +265,27 @@ def attack_image(
     flow_init = preds_init["flows"].squeeze(0)
     flow_init = flow_init.to(device).detach()
 
+
+    with torch.no_grad():
+        preds = model(
+            image1, image2, weather=weather, scene_data=scene_data, args_=attack_args
+        )
+    torch.cuda.empty_cache()
+    flow_weather_pred = preds["flows"].squeeze(0)
+    flow_weather_pred = flow_weather_pred.to(device)
+
+    # # 调换顺序至257-266 define the initial flow, the target, and update mu
+    # flow_weather_pred_init = flow_weather_pred.detach().clone()
+    # flow_weather_pred_init.requires_grad = False
+
+    # with torch.no_grad():
+    #     preds_init = model(
+    #         image1, image2, weather=None, scene_data=None, args_=attack_args
+    #     )
+    # flow_init = preds_init["flows"].squeeze(0)
+    # flow_init = flow_init.to(device).detach()
+
+    #======================================================================
     # from DistractingDownpour.helper_functions.own_models import ScaledInputWeatherModel
     # # 创建 ScaledInputWeatherModel 的实例
     # modelw = ScaledInputWeatherModel(args=attack_args, model="GMA", make_unit_input=False)
@@ -352,7 +360,7 @@ def attack_image(
             flakes_color_img.clone().detach(),
             flakes_transp.clone().detach(),
         )
-
+        #with torch.no_grad():
         preds = model(
             image1.detach().clone(),
             image2.detach().clone(),
