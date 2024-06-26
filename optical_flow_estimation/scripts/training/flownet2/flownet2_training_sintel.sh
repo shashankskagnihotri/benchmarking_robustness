@@ -11,4 +11,4 @@
 
 cd ../../../ptlflow_attacked
 
-python train.py flownet2 --train_dataset sintel-train --pretrained_ckpt things --train_crop_size 768 384 --lr 0.0000001 --train_batch_size 8 --max_epochs 20 --gpus 1 --clear_train_state
+python train.py flownet2 --train_dataset sintel-train --pretrained_ckpt things --train_crop_size 768 384 --lr 0.0000001 --train_batch_size 8 --max_epochs 50 --gpus 1 --clear_train_state
