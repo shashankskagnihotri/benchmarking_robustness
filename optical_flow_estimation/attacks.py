@@ -608,6 +608,7 @@ def attack_one_dataloader(
 
             if inputs["images"].max() > 1.0:
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
+                attack_args["attack_alpha"] = attack_args["attack_alpha"] * 255
             has_ground_truth = True
             targeted_inputs = None
 
@@ -678,9 +679,14 @@ def attack_one_dataloader(
                             prev_preds[k] = v.detach()
 
             inputs = io_adapter.unscale(inputs, image_only=True)
+            # TODO: should this be done after each prediction in PCFA?
             preds = io_adapter.unscale(preds)
+
+
             if attack_args["attack"] != "none":
                 perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
+                if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+                    targeted_inputs = io_adapter.unscale(targeted_inputs, image_only=True)
 
             if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
                 if args.seq_val_mode == "first":

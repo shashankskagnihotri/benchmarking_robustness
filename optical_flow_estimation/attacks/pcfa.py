@@ -131,8 +131,6 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
     nw_input1 = None
     nw_input2 = None
 
-    flow_pred_init = None
-
     # Set up the optimizer and variables if individual perturbations delta1 and delta2 for images 1 and 2 should be trained
     delta1.requires_grad = False
     delta2.requires_grad = False
@@ -158,10 +156,6 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
     flow_pred = preds["flows"].squeeze(0)
     flow_pred = flow_pred.to(device)
 
-    # define the initial flow, the target, and update mu
-    flow_pred_init = flow_pred.detach().clone()
-    flow_pred_init.requires_grad = False
-
     # define target (potentially based on first flow prediction)
     target = get_flow_tensors(targeted_inputs)
     target = target.to(device)
@@ -170,8 +164,6 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
     # Zero all existing gradients
     model.zero_grad()
     optimizer.zero_grad()
-
-    l2_delta1, l2_delta2, l2_delta12 = 0, 0, 0
 
     for steps in range(attack_args["attack_iterations"]):
         # Calculate the deltas from the quantities that go into the network
