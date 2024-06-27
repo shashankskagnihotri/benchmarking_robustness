@@ -87,6 +87,7 @@ config_logging()
 # import os
 # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:100"
 
+
 def _init_parser() -> ArgumentParser:
     parser = ArgumentParser()
     parser.add_argument(
@@ -614,7 +615,7 @@ def attack_one_dataloader(
 
             with torch.no_grad():
                 orig_preds = model(inputs)
-                #orig_preds = {key: value.cpu() for key, value in orig_preds.items()}
+                # orig_preds = {key: value.cpu() for key, value in orig_preds.items()}
             torch.cuda.empty_cache()
 
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
@@ -628,6 +629,9 @@ def attack_one_dataloader(
 
                 targeted_inputs = inputs.copy()
                 targeted_inputs["flows"] = targeted_flow_tensor
+            # for logging
+            if attack_args["attack"] == "none":
+                targeted_inputs = inputs.copy()
 
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
@@ -655,14 +659,12 @@ def attack_one_dataloader(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pcfa":
-                    preds, perturbed_inputs = pcfa(
-                        attack_args, model, targeted_inputs
-                    )
+                    preds, perturbed_inputs = pcfa(attack_args, model, targeted_inputs)
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
                     preds = model(inputs)
-                
+
             for key in preds:
                 preds[key] = preds[key].detach()
 
@@ -682,11 +684,12 @@ def attack_one_dataloader(
             # TODO: should this be done after each prediction in PCFA?
             preds = io_adapter.unscale(preds)
 
-
             if attack_args["attack"] != "none":
                 perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
                 if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
-                    targeted_inputs = io_adapter.unscale(targeted_inputs, image_only=True)
+                    targeted_inputs = io_adapter.unscale(
+                        targeted_inputs, image_only=True
+                    )
 
             if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
                 if args.seq_val_mode == "first":
@@ -710,16 +713,22 @@ def attack_one_dataloader(
                 metrics = model.val_metrics(preds, targeted_inputs)
 
                 criterion = LossCriterion("epe")
-                loss = criterion.loss(preds["flows"].squeeze(0).float(), targeted_inputs["flows"].squeeze(0).float())
+                loss = criterion.loss(
+                    preds["flows"].squeeze(0).float(),
+                    targeted_inputs["flows"].squeeze(0).float(),
+                )
                 loss = loss.mean()
                 metrics["val/own_epe"] = loss
 
                 metrics_orig_preds = model.val_metrics(preds, orig_preds)
                 metrics["val/epe_orig_preds"] = metrics_orig_preds["val/epe"]
 
-                loss = criterion.loss(preds["flows"].squeeze(0).float(), orig_preds["flows"].squeeze(0).float())
+                loss = criterion.loss(
+                    preds["flows"].squeeze(0).float(),
+                    orig_preds["flows"].squeeze(0).float(),
+                )
                 loss = loss.mean()
-                metrics["val/own_epe_orig_preds"] = loss               
+                metrics["val/own_epe_orig_preds"] = loss
 
                 metrics["val/cosim_target"] = torch.mean(
                     cosine_similarity(
@@ -735,10 +744,13 @@ def attack_one_dataloader(
                     metrics_ground_truth = model.val_metrics(preds, inputs)
                     metrics["val/epe_ground_truth"] = metrics_ground_truth["val/epe"]
 
-                    loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                    loss = criterion.loss(
+                        preds["flows"].squeeze(0).float(),
+                        inputs["flows"].squeeze(0).float(),
+                    )
                     loss = loss.mean()
                     metrics["val/own_epe_ground_truth"] = loss
-                    
+
                     metrics["val/cosim_ground_truth"] = torch.mean(
                         cosine_similarity(
                             get_flow_tensors(preds), get_flow_tensors(inputs)
@@ -748,13 +760,64 @@ def attack_one_dataloader(
                 metrics = model.val_metrics(preds, inputs)
 
                 criterion = LossCriterion("epe")
-                loss = criterion.loss(preds["flows"].squeeze(0).float(), inputs["flows"].squeeze(0).float())
+                loss = criterion.loss(
+                    preds["flows"].squeeze(0).float(),
+                    inputs["flows"].squeeze(0).float(),
+                )
                 loss = loss.mean()
                 metrics["val/own_epe"] = loss
 
                 metrics["val/cosim"] = torch.mean(
                     cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs))
                 )
+
+                if attack_args["attack"] == "none":
+                    targeted_flow_tensor_negative = -orig_preds["flows"].clone()
+                    targeted_flow_tensor_zero = torch.zeros_like(orig_preds["flows"])
+                    loss_initial_neg = criterion.loss(
+                        preds["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_negative.squeeze(0).float(),
+                    )
+                    loss_initial_neg = loss_initial_neg.mean()
+                    loss_initial_zero = criterion.loss(
+                        preds["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_zero.squeeze(0).float(),
+                    )
+                    loss_initial_zero = loss_initial_zero.mean()
+                    metrics["val/epe_initial_to_negative"] = loss_initial_neg
+                    metrics["val/epe_initial_to_zero"] = loss_initial_zero
+
+                    loss_ground_truth_neg = criterion.loss(
+                        inputs["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_negative.squeeze(0).float(),
+                    )
+                    loss_ground_truth_neg = loss_ground_truth_neg.mean()
+                    loss_ground_truth_zero = criterion.loss(
+                        inputs["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_zero.squeeze(0).float(),
+                    )
+                    loss_ground_truth_zero = loss_ground_truth_zero.mean()
+                    metrics["val/own_epe_ground_truth_to_negative"] = (
+                        loss_ground_truth_neg
+                    )
+                    metrics["val/own_epe_ground_truth_to_zero"] = loss_ground_truth_zero
+
+                    targeted_inputs["flows"] = targeted_flow_tensor_negative.float()
+
+                    metrics_ground_truth_negative = model.val_metrics(
+                        targeted_inputs, inputs
+                    )
+                    metrics["val/epe_ground_truth_to_negative"] = (
+                        metrics_ground_truth_negative["val/epe"]
+                    )
+
+                    targeted_inputs["flows"] = targeted_flow_tensor_zero.float()
+                    metrics_ground_truth_zero = model.val_metrics(
+                        targeted_inputs, inputs
+                    )
+                    metrics["val/epe_ground_truth_to_zero"] = metrics_ground_truth_zero[
+                        "val/epe"
+                    ]
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
@@ -766,7 +829,7 @@ def attack_one_dataloader(
                 epe=metrics_sum["val/epe"] / (i + 1),
                 outlier=metrics_sum["val/outlier"] / (i + 1),
                 total=total,
-                free=free
+                free=free,
             )
 
             filename = ""
@@ -790,9 +853,7 @@ def attack_one_dataloader(
                     attack_args,
                 )
             else:
-                generate_outputs(
-                    args, preds, dataloader_name, i, inputs.get("meta")
-                )
+                generate_outputs(args, preds, dataloader_name, i, inputs.get("meta"))
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
 
@@ -845,7 +906,15 @@ def generate_outputs(
     if args.write_outputs:
         if perturbed_inputs is not None:
             perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
-            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata, perturbed_inputs, attack_args)
+            _write_to_npy_file(
+                args,
+                preds,
+                dataloader_name,
+                batch_idx,
+                metadata,
+                perturbed_inputs,
+                attack_args,
+            )
         else:
             _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
 
@@ -880,7 +949,9 @@ def _write_to_npy_file(
             if k == "flows":
                 out_dir_flows = out_dir / k / extra_dirs
                 out_dir_flows.mkdir(parents=True, exist_ok=True)
-                np.savez_compressed(str(out_dir_flows / f"{image_name}"), v.astype(np.uint8))
+                np.savez_compressed(
+                    str(out_dir_flows / f"{image_name}"), v.astype(np.uint8)
+                )
 
     if perturbed_inputs is not None:
         for k, v in perturbed_inputs.items():
@@ -888,7 +959,9 @@ def _write_to_npy_file(
                 if k == "images":
                     out_dir_imgs = out_dir / k / extra_dirs
                     out_dir_imgs.mkdir(parents=True, exist_ok=True)
-                    np.savez_compressed(str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8))
+                    np.savez_compressed(
+                        str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8)
+                    )
 
 
 def _write_to_file(
@@ -931,7 +1004,6 @@ def _write_to_file(
                     v = v * 255
                 pdb.set_trace()
                 cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
-
 
 
 if __name__ == "__main__":
