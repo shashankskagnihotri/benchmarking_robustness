@@ -1,0 +1,66 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-06-27 10:47:22",
+            "model": "fastflownet",
+            "checkpoint": "sintel",
+            "attack": "pcfa",
+            "epsilon": 0.005,
+            "boxconstraint": "change_of_variables",
+            "iterations": 10,
+            "alpha": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-06-27 14:48:18",
+            "duration": "04:00:55",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 8.02991167090182,
+                "px1": 0.4917653919226882,
+                "px3": 0.6339643650729077,
+                "px5": 0.7069014528420215,
+                "outlier": 36.07448183522022,
+                "own_epe": 8.029911347302562,
+                "epe_orig_preds": 19.602059361742278,
+                "own_epe_orig_preds": 19.602058453816387,
+                "cosim_target": 0.4207694690465309,
+                "cosim_orig_preds": -0.4207694690465309,
+                "epe_ground_truth": 19.83142001584788,
+                "own_epe_ground_truth": 19.831419188053303,
+                "cosim_ground_truth": -0.34673044953853566
+            }
+        },
+        {
+            "start_time": "2024-06-27 13:25:22",
+            "model": "fastflownet",
+            "checkpoint": "sintel",
+            "attack": "pcfa",
+            "epsilon": 0.005,
+            "boxconstraint": "change_of_variables",
+            "iterations": 10,
+            "alpha": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-06-27 17:32:51",
+            "duration": "04:07:28",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.472502113256414,
+                "px1": 0.7236701381355826,
+                "px3": 0.8374156665575725,
+                "px5": 0.8791024492750831,
+                "outlier": 16.25843182130913,
+                "own_epe": 2.4725020022617294,
+                "epe_orig_preds": 11.22493906432224,
+                "own_epe_orig_preds": 11.224938554963048,
+                "cosim_target": 0.0,
+                "cosim_orig_preds": 0.291977237624222,
+                "epe_ground_truth": 11.756801755910992,
+                "own_epe_ground_truth": 11.756801280319175,
+                "cosim_ground_truth": 0.2752230749690863
+            }
+        }
+    ]
+}

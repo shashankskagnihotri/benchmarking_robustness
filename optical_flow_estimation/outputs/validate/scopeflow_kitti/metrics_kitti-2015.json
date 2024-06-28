@@ -418,6 +418,31 @@
                 "own_epe": 23.99644795946777,
                 "cosim": 0.18228729065973312
             }
+        },
+        {
+            "start_time": "2024-06-27 13:45:06",
+            "model": "scopeflow",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-27 13:46:58",
+            "duration": "00:01:51",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.3082430559396743,
+                "px1": 0.8156054417043924,
+                "px3": 0.9351616656780243,
+                "px5": 0.9595453906059265,
+                "outlier": 4.309548014551401,
+                "own_epe": 23.99644795946777,
+                "cosim": 0.18228729065973312,
+                "epe_initial_to_negative": 62.41277266204357,
+                "epe_initial_to_zero": 31.206386331021786,
+                "own_epe_ground_truth_to_negative": 38.66926848560572,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 73.4706941986084,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
         }
     ]
 }
