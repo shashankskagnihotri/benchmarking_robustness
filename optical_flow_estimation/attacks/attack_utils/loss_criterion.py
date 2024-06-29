@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 
 class LossCriterion:
@@ -26,75 +27,71 @@ def avg_epe(flow1, flow2):
     return torch.mean(epe)
 
 
-# From FlowUnderAttack
-# def epe(flow1, flow2):
-#     """ "
-#     Compute the  endpoint errors (EPEs) between two flow fields.
-#     The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
-#     (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
-
-#     Args:
-#         flow1 (tensor):
-#             represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
-#         flow2 (tensor):
-#             represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
-
-#     Raises:
-#         ValueError: dimensons not valid
-
-#     Returns:
-#         float: scalar average endpoint error
-#     """
-#     diff_squared = (flow1 - flow2) ** 2
-#     if len(diff_squared.size()) == 3:
-#         # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-#         epe = torch.sum(diff_squared, dim=0).sqrt()
-#     elif len(diff_squared.size()) == 4:
-#         # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-#         epe = torch.sum(diff_squared, dim=1).sqrt()
-#     else:
-#         raise ValueError(
-#             "The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: "
-#             + str(flow1.size())
-#             + " and "
-#             + str(flow1.size())
-#         )
-#     return epe
+def calc_epe_metrics(model, preds, inputs, iteration, targeted_inputs=None):
+    epe_gt = model.val_metrics(preds, inputs)["val/epe"]
+    if targeted_inputs is None:
+        return {
+            f"epe_gt_i{iteration}": epe_gt
+        }
+    else:
+        epe_tgt = model.val_metrics(preds, targeted_inputs)["val/epe"]
+        return {
+            f"epe_ground_truth_i{iteration}": epe_gt,
+            f"epe_target_i{iteration}": epe_tgt
+        }
 
 
-# def avg_epe(flow1, flow2):
-#     """ "
-#     Compute the average endpoint errors (AEE) between two flow fields.
-#     The epe measures the euclidean- / 2-norm of the difference of two optical flow vectors
-#     (u0, v0) and (u1, v1) and is defined as sqrt((u0 - u1)^2 + (v0 - v1)^2).
+def calc_delta_metrics(delta1, delta2, iteration=None):
+    l2_delta1 = torchfloat_to_float64(two_norm_avg(delta1))
+    l2_delta2 = torchfloat_to_float64(two_norm_avg(delta2))
+    l2_delta12 = torchfloat_to_float64(two_norm_avg_delta(delta1, delta2))
 
-#     Args:
-#         flow1 (tensor):
-#             represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
-#         flow2 (tensor):
-#             represents a flow field with dimension (2,M,N) or (b,2,M,N) where M ~ u-component and N ~v-component
+    l0_delta1 = torchfloat_to_float64(l0_norm(delta1))
+    l0_delta2 = torchfloat_to_float64(l0_norm(delta2))
+    l0_delta12 = torchfloat_to_float64(l0_norm_delta(delta1, delta2))
 
-#     Raises:
-#         ValueError: dimensons not valid
+    l_inf_delta1 = torchfloat_to_float64(l_infinity_norm(delta1))
+    l_inf_delta2 = torchfloat_to_float64(l_infinity_norm(delta2))
+    l_inf_delta12 = torchfloat_to_float64(l_infinity_norm_delta(delta1, delta2))
 
-#     Returns:
-#         float: scalar average endpoint error
-#     """
-#     diff_squared = (flow1 - flow2) ** 2
-#     if len(diff_squared.size()) == 3:
-#         # here, dim=0 is the 2-dimension (u and v direction of flow [2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-#         epe = torch.mean(torch.sum(diff_squared, dim=0).sqrt())
-#     elif len(diff_squared.size()) == 4:
-#         # here, dim=0 is the 2-dimension (u and v direction of flow [b,2,M,N]) , which needs to be added BEFORE taking the square root. To get the length of a flow vector, we need to do sqrt(u_ij^2 + v_ij^2)
-#         epe = torch.mean(torch.sum(diff_squared, dim=1).sqrt())
-#     else:
-#         raise ValueError(
-#             "The flow tensors for which the EPE should be computed do not have a valid number of dimensions (either [b,2,M,N] or [2,M,N]). Here: "
-#             + str(flow1.size())
-#             + " and "
-#             + str(flow1.size())
-#         )
-#     return epe
+    if iteration is None:
+        return {
+            "l2_delta1": l2_delta1,
+            "l2_delta2": l2_delta2,
+            "l2_delta12": l2_delta12,
+            "l0_delta1": l0_delta1,
+            "l0_delta2": l0_delta2,
+            "l0_delta12": l0_delta12,
+            "l_inf_delta1": l_inf_delta1,
+            "l_inf_delta2": l_inf_delta2,
+            "l_inf_delta12": l_inf_delta12
+        }   
+    else:
+        return {
+            f"l2_delta1_i{iteration}": l2_delta1,
+            f"l2_delta2_i{iteration}": l2_delta2,
+            f"l2_delta12_i{iteration}": l2_delta12,
+            f"l0_delta1_i{iteration}": l0_delta1,
+            f"l0_delta2_i{iteration}": l0_delta2,
+            f"l0_delta12_i{iteration}": l0_delta12,
+            f"l_inf_delta1_i{iteration}": l_inf_delta1,
+            f"l_inf_delta2_i{iteration}": l_inf_delta2,
+            f"l_inf_delta12_i{iteration}": l_inf_delta12
+        }
+
+
+def torchfloat_to_float64(torch_float):
+    """helper function to convert a torch.float to numpy float
+
+    Args:
+        torch_float (torch.float):
+            scalar floating point number in torch
+
+    Returns:
+        numpy.float: floating point number in numpy
+    """
+    float_val = np.float64(torch_float.detach().cpu().numpy())
+    return float_val
 
 
 def avg_mse(flow1, flow2):
@@ -214,6 +211,56 @@ def two_norm_avg(x):
     sqrt_numels = numels_x**0.5
     two_norm = torch.sqrt(torch.sum(torch.pow(torch.flatten(x), 2)))
     return two_norm / sqrt_numels
+
+
+def l0_norm(x):
+    """Computes the L0-norm of the input, which is the count of non-zero elements.
+
+    Args:
+        x (tensor): input tensor with variable dimensions
+
+    Returns:
+        float: L0-norm (count of non-zero elements)
+    """
+    return torch.sum(x != 0).float()
+
+
+def l_infinity_norm(x):
+    """Computes the L-infinity norm of the input, which is the maximum absolute value.
+
+    Args:
+        x (tensor): input tensor with variable dimensions
+
+    Returns:
+        float: L-infinity norm (maximum absolute value)
+    """
+    return torch.max(torch.abs(x))
+
+
+def l0_norm_delta(delta1, delta2):
+    """Computes the sum of L0-norms of two perturbations.
+
+    Args:
+        delta1 (tensor): perturbation applied to the first image
+        delta2 (tensor): perturbation applied to the second image
+
+    Returns:
+        float: sum of L0-norms of two perturbations
+    """
+    return l0_norm(delta1) + l0_norm(delta2)
+
+
+def l_infinity_norm_delta(delta1, delta2):
+    """Computes the maximum of the L-infinity norms of two perturbations.
+
+    Args:
+        delta1 (tensor): perturbation applied to the first image
+        delta2 (tensor): perturbation applied to the second image
+
+    Returns:
+        float: maximum of the L-infinity norms of two perturbations
+    """
+    return max(l_infinity_norm(delta1), l_infinity_norm(delta2))
 
 
 def get_loss(f_type, pred, target):

@@ -59,6 +59,7 @@ from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
     attack_arg_string,
 )
+import attacks.attack_utils.loss_criterion as losses
 from attacks.attack_utils.loss_criterion import LossCriterion
 from ptlflow_attacked.validate import (
     _get_model_names,
@@ -67,7 +68,7 @@ from ptlflow_attacked.validate import (
 # Import cosPGD functions
 import torch.nn as nn
 from torch.nn.functional import cosine_similarity
-from attacks.attack_utils.utils import get_flow_tensors
+from attacks.attack_utils.utils import get_flow_tensors, get_image_tensors
 
 
 # Default Attack parameters
@@ -574,6 +575,7 @@ def attack_one_dataloader(
         The average metric values for this dataloader.
     """
     metrics_sum = {}
+    iteration_metrics_sum = {}
     if attack_args["attack"] == "3dcc":
         dataloader = get_dataset_3DCC(
             model,
@@ -615,7 +617,6 @@ def attack_one_dataloader(
 
             with torch.no_grad():
                 orig_preds = model(inputs)
-                # orig_preds = {key: value.cpu() for key, value in orig_preds.items()}
             torch.cuda.empty_cache()
 
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
@@ -633,21 +634,23 @@ def attack_one_dataloader(
             if attack_args["attack"] == "none":
                 targeted_inputs = inputs.copy()
 
+            iteration_metrics = {}
+
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    preds, perturbed_inputs = fgsm(
+                    preds, perturbed_inputs, = fgsm(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pgd":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "cospgd":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "bim":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "apgd":
@@ -659,7 +662,9 @@ def attack_one_dataloader(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pcfa":
-                    preds, perturbed_inputs = pcfa(attack_args, model, targeted_inputs)
+                    preds, perturbed_inputs, iteration_metrics = pcfa(
+                        attack_args, inputs, model, targeted_inputs
+                        )
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
@@ -681,7 +686,6 @@ def attack_one_dataloader(
                             prev_preds[k] = v.detach()
 
             inputs = io_adapter.unscale(inputs, image_only=True)
-            # TODO: should this be done after each prediction in PCFA?
             preds = io_adapter.unscale(preds)
 
             if attack_args["attack"] != "none":
@@ -818,11 +822,24 @@ def attack_one_dataloader(
                     metrics["val/epe_ground_truth_to_zero"] = metrics_ground_truth_zero[
                         "val/epe"
                     ]
+                else:
+                    adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
+                    image1, image2 = get_image_tensors(inputs)
+                    delta1 = adv_image1 - image1
+                    delta2 = adv_image2 - image2
+                    delta_dic = losses.calc_delta_metrics(delta1, delta2)
+                    for k, v in delta_dic.items():
+                        metrics[f"val/{k}"] = v
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
                 metrics_sum[k] += metrics[k].item()
+
+            for k in iteration_metrics.keys():
+                if iteration_metrics_sum.get(k) is None:
+                    iteration_metrics_sum[k] = 0.0
+                iteration_metrics_sum[k] + iteration_metrics[k].item()
 
             free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
@@ -868,7 +885,12 @@ def attack_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
 
-    return metrics_mean
+    iteration_metrics_mean = {}
+    for k, v in iteration_metrics_sum.items():
+        iteration_metrics_mean[k] = v / len(dataloader)
+
+    # TODO: implement json file logging for iteration_metrics_mean
+    return metrics_mean, iteration_metrics_mean
 
 
 def generate_outputs(

@@ -16,6 +16,7 @@ import torch.optim as optim
 
 def pcfa(
     attack_args: Dict[str, List[object]],
+    inputs: Dict[str, torch.Tensor],
     model: BaseModel,
     targeted_inputs: Dict[str, torch.Tensor],
 ):
@@ -39,18 +40,18 @@ def pcfa(
     for param in model.parameters():
         param.requires_grad = False
 
-    preds, delta1, delta2 = pcfa_attack(
-        model, targeted_inputs, eps_box, device, optim_mu, attack_args
+    preds, delta1, delta2, iteration_metrics = pcfa_attack(
+        model, targeted_inputs, inputs, eps_box, device, optim_mu, attack_args
     )
     image1, image2 = get_image_tensors(targeted_inputs)
     perturbed_image1 = image1 + delta1
     perturbed_image2 = image2 + delta2
     perturbed_inputs = replace_images_dic(targeted_inputs, perturbed_image1, perturbed_image2, clone=True)
 
-    return preds, perturbed_inputs 
+    return preds, perturbed_inputs, iteration_metrics
 
 
-def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
+def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attack_args):
     """Subroutine to optimize a PCFA perturbation on a given image pair. For a specified number of steps.
 
     Args:
@@ -108,6 +109,9 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
         Files in .npy and .png format of initial images and flow, perturbations, and the adversarial images and flow are saved.
         The best attack perturbation images and flows are labeled with "*best*" and correspond to the values of "*_min*".
     """
+    # For logging of different norms for the deltas and EPE for each iteration
+    iteration_metrics = {}
+
     torch.autograd.set_detect_anomaly(True)
 
     model = InputModel(model, eps_box, variable_change=attack_args["pcfa_boxconstraint"] in ["change_of_variables"])
@@ -237,11 +241,10 @@ def pcfa_attack(model, targeted_inputs, eps_box, device, optim_mu, attack_args):
         flow_pred = preds["flows"].squeeze(0)
         flow_pred = flow_pred.to(device)
 
-        # l2_delta1 = torchfloat_to_float64(losses.two_norm_avg(delta1))
-        # l2_delta2 = torchfloat_to_float64(losses.two_norm_avg(delta2))
-        # l2_delta12 = torchfloat_to_float64(losses.two_norm_avg_delta(delta1, delta2))
+        iteration_metrics = iteration_metrics | losses.calc_delta_metrics(delta1, delta2, steps)
+        iteration_metrics = iteration_metrics | losses.calc_epe_metrics(model.model_loaded, preds, inputs, steps, targeted_inputs)
 
-    return preds, delta1, delta2
+    return preds, delta1, delta2, iteration_metrics
 
 
 # For PCFA
