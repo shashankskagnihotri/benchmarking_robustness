@@ -18,13 +18,11 @@ def fgsm(
     model: BaseModel,
     targeted_inputs: Optional[Dict[str, torch.Tensor]],
 ):
-    # TODO: ADD NORMALIZATION + EPSILON SCALING!
     criterion = LossCriterion(attack_args["attack_loss"])
 
-    orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
-    orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
+    orig_image_1 = inputs["images"][0][0].unsqueeze(0)
+    orig_image_2 = inputs["images"][0][1].unsqueeze(0)
 
-    # TODO: watch out for overwrite of labels, include different method later, move this whole thing into attack_dataloader
     if attack_args["attack_targeted"]:
         labels = targeted_inputs["flows"].squeeze(0)
     else:
@@ -39,16 +37,16 @@ def fgsm(
     loss = loss.mean()
     loss.backward()
 
-    image_1, image_2 = get_image_tensors(inputs)
+    image_1, image_2 = get_image_tensors(inputs, clone=True)
     image_1_grad, image_2_grad = get_image_grads(inputs)
 
     image_1_adv = fgsm_attack(attack_args, image_1, image_1_grad, orig_image_1)
     image_2_adv = fgsm_attack(attack_args, image_2, image_2_grad, orig_image_2)
 
-    perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv)
+    perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv, clone=True)
     preds = model(perturbed_inputs)
 
-    return preds, perturbed_inputs # inputs["images"], labels, preds, loss.item()
+    return preds, perturbed_inputs
 
 
 def fgsm_attack(

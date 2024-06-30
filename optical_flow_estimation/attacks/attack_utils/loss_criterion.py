@@ -36,62 +36,48 @@ def calc_epe_metrics(model, preds, inputs, iteration, targeted_inputs=None):
     else:
         epe_tgt = model.val_metrics(preds, targeted_inputs)["val/epe"]
         return {
-            f"epe_ground_truth_i{iteration}": epe_gt,
-            f"epe_target_i{iteration}": epe_tgt
+            f"val/epe_ground_truth_i{iteration}": epe_gt,
+            f"val/epe_target_i{iteration}": epe_tgt
         }
 
 
 def calc_delta_metrics(delta1, delta2, iteration=None):
-    l2_delta1 = torchfloat_to_float64(two_norm_avg(delta1))
-    l2_delta2 = torchfloat_to_float64(two_norm_avg(delta2))
-    l2_delta12 = torchfloat_to_float64(two_norm_avg_delta(delta1, delta2))
+    l2_delta1 = two_norm_avg(delta1)
+    l2_delta2 = two_norm_avg(delta2)
+    l2_delta12 = two_norm_avg_delta(delta1, delta2)
 
-    l0_delta1 = torchfloat_to_float64(l0_norm(delta1))
-    l0_delta2 = torchfloat_to_float64(l0_norm(delta2))
-    l0_delta12 = torchfloat_to_float64(l0_norm_delta(delta1, delta2))
+    l0_delta1 = l0_norm(delta1)
+    l0_delta2 = l0_norm(delta2)
+    l0_delta12 = l0_norm_delta(delta1, delta2)
 
-    l_inf_delta1 = torchfloat_to_float64(l_infinity_norm(delta1))
-    l_inf_delta2 = torchfloat_to_float64(l_infinity_norm(delta2))
-    l_inf_delta12 = torchfloat_to_float64(l_infinity_norm_delta(delta1, delta2))
+    l_inf_delta1 = l_infinity_norm(delta1)
+    l_inf_delta2 = l_infinity_norm(delta2)
+    l_inf_delta12 = l_infinity_norm_delta(delta1, delta2)
 
     if iteration is None:
         return {
-            "l2_delta1": l2_delta1,
-            "l2_delta2": l2_delta2,
-            "l2_delta12": l2_delta12,
-            "l0_delta1": l0_delta1,
-            "l0_delta2": l0_delta2,
-            "l0_delta12": l0_delta12,
-            "l_inf_delta1": l_inf_delta1,
-            "l_inf_delta2": l_inf_delta2,
-            "l_inf_delta12": l_inf_delta12
+            "val/l2_delta1": l2_delta1,
+            "val/l2_delta2": l2_delta2,
+            "val/l2_delta12": l2_delta12,
+            "val/l0_delta1": l0_delta1,
+            "val/l0_delta2": l0_delta2,
+            "val/l0_delta12": l0_delta12,
+            "val/l_inf_delta1": l_inf_delta1,
+            "val/l_inf_delta2": l_inf_delta2,
+            "val/l_inf_delta12": l_inf_delta12
         }   
     else:
         return {
-            f"l2_delta1_i{iteration}": l2_delta1,
-            f"l2_delta2_i{iteration}": l2_delta2,
-            f"l2_delta12_i{iteration}": l2_delta12,
-            f"l0_delta1_i{iteration}": l0_delta1,
-            f"l0_delta2_i{iteration}": l0_delta2,
-            f"l0_delta12_i{iteration}": l0_delta12,
-            f"l_inf_delta1_i{iteration}": l_inf_delta1,
-            f"l_inf_delta2_i{iteration}": l_inf_delta2,
-            f"l_inf_delta12_i{iteration}": l_inf_delta12
+            f"val/l2_delta1_i{iteration}": l2_delta1,
+            f"val/l2_delta2_i{iteration}": l2_delta2,
+            f"val/l2_delta12_i{iteration}": l2_delta12,
+            f"val/l0_delta1_i{iteration}": l0_delta1,
+            f"val/l0_delta2_i{iteration}": l0_delta2,
+            f"val/l0_delta12_i{iteration}": l0_delta12,
+            f"val/l_inf_delta1_i{iteration}": l_inf_delta1,
+            f"val/l_inf_delta2_i{iteration}": l_inf_delta2,
+            f"val/l_inf_delta12_i{iteration}": l_inf_delta12
         }
-
-
-def torchfloat_to_float64(torch_float):
-    """helper function to convert a torch.float to numpy float
-
-    Args:
-        torch_float (torch.float):
-            scalar floating point number in torch
-
-    Returns:
-        numpy.float: floating point number in numpy
-    """
-    float_val = np.float64(torch_float.detach().cpu().numpy())
-    return float_val
 
 
 def avg_mse(flow1, flow2):

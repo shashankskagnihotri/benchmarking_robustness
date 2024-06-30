@@ -43,7 +43,7 @@ def pcfa(
     preds, delta1, delta2, iteration_metrics = pcfa_attack(
         model, targeted_inputs, inputs, eps_box, device, optim_mu, attack_args
     )
-    image1, image2 = get_image_tensors(targeted_inputs)
+    image1, image2 = get_image_tensors(targeted_inputs, clone=True)
     perturbed_image1 = image1 + delta1
     perturbed_image2 = image2 + delta2
     perturbed_inputs = replace_images_dic(targeted_inputs, perturbed_image1, perturbed_image2, clone=True)
@@ -52,63 +52,8 @@ def pcfa(
 
 
 def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attack_args):
-    """Subroutine to optimize a PCFA perturbation on a given image pair. For a specified number of steps.
+    """Subroutine to optimize a PCFA perturbation on a given image pair. For a specified number of steps."""
 
-    Args:
-        model (torch.nn.module):
-            a pytorch model which is set to eval and which is implemented in ownutilities.['preprocess_img','compute_flow','postprocess_flow']
-        image1 (torch.tensor):
-            image 1 of a scene with dimensions (b,3,h,w)
-        image2 (torch.tensor):
-            image 2 of a scene with dimensions (b,3,h,w)
-        flow (torch.tensor):
-            intial (unattacked) flow field (resulting from img1 and img2) which can be used to log the current effect induced by the patch (same spatial dimension as images!)
-        batch (int):
-            current image counter in the enumeration of the test set
-        distortion_folder (string):
-            name for a folder that will be created to hold data and visualizations of the distortions that are trained during the PCFA
-        eps_box (float):
-            relaxation of the box constraint due to numerical reasons (try 1e-07)
-        device (torch.device):
-            Select the device for the images.
-        optimizer_lr (float):
-            optimizer learning rate (try 5e-03)
-        has_gt (boolean):
-            is the ground truth known
-        optim_mu (float):
-            regularization parameter of the constraint in the unconstraing optimization (try 5e05)
-        args (Namespace):
-            command line arguments
-
-
-    Returns:
-        aee_gt (float):
-            Average Endpoint Error of the ground truth w.r.t. zero flow (none if has_gt is false)
-        aee_tgt (float):
-            Average Endpoint Error of the target flow w.r.t. zero flow
-        aee_gt_tgt (float):
-            Average Endpoint Error of the ground truth towards the target flow (none if has_gt is false)
-        aee_adv_tgt (float):
-            Average Endpoint Error of the adversarial predicted flow (after the perturbation is added) towards the target flow
-        aee_adv_pred (float):
-            Average Endpoint Error of the adversarial predicted flow (after the perturbation is added) towards the initially predicted flow
-        l2_delta2 (float):
-            l2 error of the preturbation on image1
-        l2_delta2 (float):
-            l2 error of the preturbation on image2
-        l2_delta12 (float):
-            scalar average L2-norm of two perturbations
-        aee_adv_tgt_min_val (float):
-            minimal (best attack) Average Endpoint Error of the adversarial predicted flow towards the target flow, while also not violating the constraint, i.e. delta12 < args.delta_bound
-        aee_adv_pred_min_val (float):
-            best attack Average Endpoint Error of the adversarial predicted flow towards the initially predicted flow, while also not violating the constraint
-        delta12_min_val (float):
-            scalar average L2-norm of two perturbations of the best attack
-
-    Extended Output:
-        Files in .npy and .png format of initial images and flow, perturbations, and the adversarial images and flow are saved.
-        The best attack perturbation images and flows are labeled with "*best*" and correspond to the values of "*_min*".
-    """
     # For logging of different norms for the deltas and EPE for each iteration
     iteration_metrics = {}
 
@@ -118,9 +63,6 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
 
     image1, image2 = get_image_tensors(targeted_inputs)
     image1, image2 = image1.to(device), image2.to(device)
-    # pdb.set_trace()
-    flow = get_flow_tensors(targeted_inputs)
-    flow = flow.to(device)
 
     # Set requires_grad attribute of tensor. Important for Attack
     image1.requires_grad = False
@@ -156,7 +98,7 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
     optimizer = optim.LBFGS([nw_input1, nw_input2], max_iter=10)
 
     # Predict the flow
-    preds = model(nw_input1, nw_input2)
+    preds = model(inputs, nw_input1, nw_input2)
     flow_pred = preds["flows"].squeeze(0)
     flow_pred = flow_pred.to(device)
 
@@ -197,7 +139,7 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
             optimizer.zero_grad()
 
             # Predict the flow
-            flow_closure = model(nw_input1, nw_input2)["flows"].squeeze(0)
+            flow_closure = model(inputs, nw_input1, nw_input2)["flows"].squeeze(0)
             flow_closure = flow_closure.to(device)
 
             delta1_closure, delta2_closure = extract_deltas(
@@ -237,12 +179,12 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
         # The nw_inputs remain unchanged in this case, and can be directly fed into the network again for further perturbation training
 
         # Re-predict flow with the perturbed image, and update the flow prediction for the next iteration
-        preds = model(nw_input1, nw_input2)
+        preds = model(inputs, nw_input1, nw_input2)
         flow_pred = preds["flows"].squeeze(0)
         flow_pred = flow_pred.to(device)
 
-        iteration_metrics = iteration_metrics | losses.calc_delta_metrics(delta1, delta2, steps)
-        iteration_metrics = iteration_metrics | losses.calc_epe_metrics(model.model_loaded, preds, inputs, steps, targeted_inputs)
+        iteration_metrics = iteration_metrics | losses.calc_delta_metrics(delta1, delta2, steps+1)
+        iteration_metrics = iteration_metrics | losses.calc_epe_metrics(model.model_loaded, preds, inputs, steps+1, targeted_inputs)
 
     return preds, delta1, delta2, iteration_metrics
 
@@ -281,15 +223,6 @@ def torchfloat_to_float64(torch_float):
 
 class InputModel(nn.Module):
     def __init__(self, model, eps_box, variable_change=False,  **kwargs):
-        """
-        Initializes a Model with rescaled input requirements. It calls a pretrained model that takes inputs in [0,255], but the ScaledInputModel version of it can handle inputs in [0,1] and transforms them before passing them to the pretrained model.
-        This might be necessary for attacks that work on different paramter spaces, or with substitued variables
-        Args:
-            net: a string describing the network type
-            make_unit_input (bool): if True, the Model assumes that it receives inputs in [0,1], but that the pretrained model requires them in [0,255]
-            variable_change (bool): if True, the Model assumes that it will be given a variable as required for the change of variable proposed in the Carlini&Wagner attack.
-            **kwargs: Futher arguments for ownutilities.import_and_load()
-        """
         super(InputModel, self).__init__()
 
         self.var_change = variable_change
@@ -299,27 +232,7 @@ class InputModel(nn.Module):
         self.model_loaded = model
 
 
-    def forward(self, image1, image2):
-        """
-        Performs a forward pass of the pretrained model as specified in self.model_loaded.
-        Optionally, it transforms the input image1 and image2 previous to feeding them into the model.
-        When specifying delta1 or delta2, one or both of these tensors are added as perturbations to the input images.
-        If only "delta1" is specified, this tensor is added to both images and the result is cliped to the allowed image range [0,1].
-        If make_unit_input=True was specified for the ScaledInputModel, images1 and 2 are assumed to be in [0,1] when they enter forward, but will be rescaled to [0,255] before being passed to the pretrained model.
-        If variable_change=True was specified for the ScaledInputModel, images1 and 2 are assumed to be not the image information, but the w-variable from the Carlini&Wagner model. Hence they are transformed into their image representations, before being fed to to the model.
-
-        Args:
-            image1 (tensor): first input image for model in [0,1] with dimensions (b,3,H,W)
-            image2 (tensor): second input image for model in [0,1] with dimensions (b,3,H,W)
-            *args: additional arguments for model
-            delta1 (optional, tensor): optional distortion to be added to image1 in [0,1] with dimensions (b,3,H,W)
-            delta2 (optional, tensor): optional distortion to be added to image2 in [0,1] with dimensions (b,3,H,W)
-            **kwargs: additional kwargs for model
-
-        Returns:
-            tensor: returns the output of a forward pass of the pytorch.model on image1 and image2, after the specified transformations to images1 and 2.
-        """
-
+    def forward(self, inputs, image1, image2):
         # Perform the Carlini&Wagner Change of Variables, if the ScaledInputModel was configured to do so.
         if self.var_change:
             image1 = (1./2.) * 1. / (1. - self.eps_box) * (torch.tanh(image1) + (1 - self.eps_box) )
@@ -330,7 +243,7 @@ class InputModel(nn.Module):
         image1 = torch.clamp(image1, 0., 1.)
         image2 = torch.clamp(image2, 0., 1.)
 
-        image_pair_tensor = torch.torch.cat((image1, image2)).unsqueeze(0)
-        dic = {"images": image_pair_tensor}
+        pdb.set_trace()
+        dic = replace_images_dic(inputs, image1, image2, clone=True)
 
         return self.model_loaded(dic)
