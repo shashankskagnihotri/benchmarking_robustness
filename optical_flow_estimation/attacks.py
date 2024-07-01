@@ -59,6 +59,7 @@ from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
     attack_arg_string,
 )
+import attacks.attack_utils.loss_criterion as losses
 from attacks.attack_utils.loss_criterion import LossCriterion
 from ptlflow_attacked.validate import (
     _get_model_names,
@@ -67,7 +68,7 @@ from ptlflow_attacked.validate import (
 # Import cosPGD functions
 import torch.nn as nn
 from torch.nn.functional import cosine_similarity
-from attacks.attack_utils.utils import get_flow_tensors
+from attacks.attack_utils.utils import get_flow_tensors, get_image_tensors
 
 
 # Default Attack parameters
@@ -424,10 +425,14 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     }
     overwrite_flag = args.overwrite_output
     output_data = []
+    iteration_data = []
     start_time = datetime.now()
     output_data.append(("start_time", start_time.strftime("%Y-%m-%d %H:%M:%S")))
     output_data.append(("model", args.model))
     output_data.append(("checkpoint", args.pretrained_ckpt))
+    iteration_data.append(("start_time", start_time.strftime("%Y-%m-%d %H:%M:%S")))
+    iteration_data.append(("model", args.model))
+    iteration_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
     for attack_args in attack_args_parser:
         for key, value in attack_args.items():
@@ -436,39 +441,33 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             if isinstance(value, float):
                 value = round(value, 4)
             output_data.append((key, value))
+            iteration_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
-            metrics_mean = attack_one_dataloader(
+            metrics_mean, iteration_metrics_mean = attack_one_dataloader(
                 args, attack_args, model, dl, dataset_name
             )
 
             end_time = datetime.now()
             output_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
+            iteration_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
             time_difference = end_time - start_time
             hours = time_difference.seconds // 3600
             minutes = (time_difference.seconds % 3600) // 60
             seconds = time_difference.seconds % 60
             time_difference_str = "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
             output_data.append(("duration", time_difference_str))
+            iteration_data.append(("duration", time_difference_str))
 
             output_data.append(("dataset", dataset_name))
+            iteration_data.append(("dataset", dataset_name))
             for k in metrics_mean.keys():
                 output_data.append((k, metrics_mean[k]))
+            for k in iteration_metrics_mean.keys():
+                iteration_data.append((k, iteration_metrics_mean[k]))
 
             args.output_path.mkdir(parents=True, exist_ok=True)
-            # metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
-            # if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
-            #     metrics_df_old = pd.read_csv(
-            #         args.output_path / f"metrics_{args.val_dataset}.csv",
-            #         header=None,
-            #         names=["Type", "Value"],
-            #     )
-            #     metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
-            # metrics_df.to_csv(
-            #     args.output_path / f"metrics_{args.val_dataset}.csv",
-            #     header=False,
-            #     index=False,
-            # )
+
             output_dict = {}
             for key, value in output_data:
                 if "val" in key:
@@ -487,7 +486,26 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
 
             with open(output_filename, "w") as json_file:
                 json.dump(metrics, json_file, indent=4)
-    # return metrics_df
+
+            if iteration_metrics_mean:
+                iteration_output_dict = {}
+                for key, value in iteration_data:
+                    if "val" in key:
+                        iteration_output_dict.setdefault("metrics", {})[key.split("/")[1]] = value
+                    else:
+                        iteration_output_dict[key] = value
+                output_filename = args.output_path / f"iteration_metrics_{args.val_dataset}.json"
+
+                if os.path.exists(output_filename) and not overwrite_flag:
+                    with open(output_filename, "r") as json_file:
+                        metrics = json.load(json_file)
+                else:
+                    metrics = {"experiments": []}
+
+                metrics["experiments"].append(iteration_output_dict)
+
+                with open(output_filename, "w") as json_file:
+                    json.dump(metrics, json_file, indent=4)
 
 
 def attack_list_of_models(args: Namespace) -> None:
@@ -574,6 +592,7 @@ def attack_one_dataloader(
         The average metric values for this dataloader.
     """
     metrics_sum = {}
+    iteration_metrics_sum = {}
     if attack_args["attack"] == "3dcc":
         dataloader = get_dataset_3DCC(
             model,
@@ -615,7 +634,6 @@ def attack_one_dataloader(
 
             with torch.no_grad():
                 orig_preds = model(inputs)
-                # orig_preds = {key: value.cpu() for key, value in orig_preds.items()}
             torch.cuda.empty_cache()
 
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
@@ -633,21 +651,23 @@ def attack_one_dataloader(
             if attack_args["attack"] == "none":
                 targeted_inputs = inputs.copy()
 
+            iteration_metrics = {}
+
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    preds, perturbed_inputs = fgsm(
+                    preds, perturbed_inputs, = fgsm(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pgd":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "cospgd":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "bim":
-                    preds, perturbed_inputs = bim_pgd_cospgd(
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "apgd":
@@ -659,7 +679,9 @@ def attack_one_dataloader(
                         attack_args, inputs, model, targeted_inputs
                     )
                 case "pcfa":
-                    preds, perturbed_inputs = pcfa(attack_args, model, targeted_inputs)
+                    preds, perturbed_inputs, iteration_metrics = pcfa(
+                        attack_args, inputs, model, targeted_inputs
+                        )
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
@@ -681,7 +703,6 @@ def attack_one_dataloader(
                             prev_preds[k] = v.detach()
 
             inputs = io_adapter.unscale(inputs, image_only=True)
-            # TODO: should this be done after each prediction in PCFA?
             preds = io_adapter.unscale(preds)
 
             if attack_args["attack"] != "none":
@@ -818,11 +839,24 @@ def attack_one_dataloader(
                     metrics["val/epe_ground_truth_to_zero"] = metrics_ground_truth_zero[
                         "val/epe"
                     ]
+                else:
+                    adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
+                    image1, image2 = get_image_tensors(inputs)
+                    delta1 = adv_image1 - image1
+                    delta2 = adv_image2 - image2
+                    delta_dic = losses.calc_delta_metrics(delta1, delta2)
+                    for k, v in delta_dic.items():
+                        metrics[k] = v
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
                 metrics_sum[k] += metrics[k].item()
+
+            for k in iteration_metrics.keys():
+                if iteration_metrics_sum.get(k) is None:
+                    iteration_metrics_sum[k] = 0.0
+                iteration_metrics_sum[k] += iteration_metrics[k].item()
 
             free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
@@ -868,7 +902,11 @@ def attack_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
 
-    return metrics_mean
+    iteration_metrics_mean = {}
+    for k, v in iteration_metrics_sum.items():
+        iteration_metrics_mean[k] = v / len(dataloader)
+
+    return metrics_mean, iteration_metrics_mean
 
 
 def generate_outputs(
