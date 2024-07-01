@@ -30,14 +30,12 @@ def avg_epe(flow1, flow2):
 def calc_epe_metrics(model, preds, inputs, iteration, targeted_inputs=None):
     epe_gt = model.val_metrics(preds, inputs)["val/epe"]
     if targeted_inputs is None:
-        return {
-            f"epe_gt_i{iteration}": epe_gt
-        }
+        return {f"val/epe_gt_i{iteration}": epe_gt}
     else:
         epe_tgt = model.val_metrics(preds, targeted_inputs)["val/epe"]
         return {
             f"val/epe_ground_truth_i{iteration}": epe_gt,
-            f"val/epe_target_i{iteration}": epe_tgt
+            f"val/epe_target_i{iteration}": epe_tgt,
         }
 
 
@@ -64,8 +62,8 @@ def calc_delta_metrics(delta1, delta2, iteration=None):
             "val/l0_delta12": l0_delta12,
             "val/l_inf_delta1": l_inf_delta1,
             "val/l_inf_delta2": l_inf_delta2,
-            "val/l_inf_delta12": l_inf_delta12
-        }   
+            "val/l_inf_delta12": l_inf_delta12,
+        }
     else:
         return {
             f"val/l2_delta1_i{iteration}": l2_delta1,
@@ -76,7 +74,7 @@ def calc_delta_metrics(delta1, delta2, iteration=None):
             f"val/l0_delta12_i{iteration}": l0_delta12,
             f"val/l_inf_delta1_i{iteration}": l_inf_delta1,
             f"val/l_inf_delta2_i{iteration}": l_inf_delta2,
-            f"val/l_inf_delta12_i{iteration}": l_inf_delta12
+            f"val/l_inf_delta12_i{iteration}": l_inf_delta12,
         }
 
 
