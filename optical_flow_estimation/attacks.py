@@ -491,10 +491,14 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
                 iteration_output_dict = {}
                 for key, value in iteration_data:
                     if "val" in key:
-                        iteration_output_dict.setdefault("metrics", {})[key.split("/")[1]] = value
+                        iteration_output_dict.setdefault("metrics", {})[
+                            key.split("/")[1]
+                        ] = value
                     else:
                         iteration_output_dict[key] = value
-                output_filename = args.output_path / f"iteration_metrics_{args.val_dataset}.json"
+                output_filename = (
+                    args.output_path / f"iteration_metrics_{args.val_dataset}.json"
+                )
 
                 if os.path.exists(output_filename) and not overwrite_flag:
                     with open(output_filename, "r") as json_file:
@@ -655,9 +659,10 @@ def attack_one_dataloader(
 
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    preds, perturbed_inputs, = fgsm(
-                        attack_args, inputs, model, targeted_inputs
-                    )
+                    (
+                        preds,
+                        perturbed_inputs,
+                    ) = fgsm(attack_args, inputs, model, targeted_inputs)
                 case "pgd":
                     preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
                         attack_args, inputs, model, targeted_inputs
@@ -681,7 +686,7 @@ def attack_one_dataloader(
                 case "pcfa":
                     preds, perturbed_inputs, iteration_metrics = pcfa(
                         attack_args, inputs, model, targeted_inputs
-                        )
+                    )
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
@@ -839,14 +844,14 @@ def attack_one_dataloader(
                     metrics["val/epe_ground_truth_to_zero"] = metrics_ground_truth_zero[
                         "val/epe"
                     ]
-                else:
-                    adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
-                    image1, image2 = get_image_tensors(inputs)
-                    delta1 = adv_image1 - image1
-                    delta2 = adv_image2 - image2
-                    delta_dic = losses.calc_delta_metrics(delta1, delta2)
-                    for k, v in delta_dic.items():
-                        metrics[k] = v
+            if attack_args["attack"] != "none":
+                adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
+                image1, image2 = get_image_tensors(inputs)
+                delta1 = adv_image1 - image1
+                delta2 = adv_image2 - image2
+                delta_dic = losses.calc_delta_metrics(delta1, delta2)
+                for k, v in delta_dic.items():
+                    metrics[k] = v
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
