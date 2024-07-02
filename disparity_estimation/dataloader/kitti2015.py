@@ -125,7 +125,7 @@ class KITTIBaseDataset(data.Dataset):
             return self.get_item_GWCNET(img_left, img_right, disp_left)
 
         elif self.architecture_name == 'cfnet':
-            raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
+            return self.get_item_CFNET(img_left, img_right, disp_left)
 
         elif self.architecture_name == 'hsmnet':
             raise NotImplemented(f"No dataloder for {self.architecture_name} implemented") 
