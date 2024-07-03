@@ -16,16 +16,23 @@ args, args_unknown = parser.parse_known_args()
 # Add the CFNet directory to the PYTHONPATH
 cfnet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'CFNet'))
 sys.path.append(cfnet_path)
-
+args, _ = parser.parse_known_args()
 # https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.start_run
 with mlflow.start_run(experiment_id='128987742873377588'):
 
+    print("Selecting Model")
     mlflow.log_params(vars(args))
-    if args.architecture.lower() == "cfnet":
+    # if args.architecture.lower() == "cfnet":
         
+    #     if args.mode.lower() == "train":
+    #         from CFNet import main
+    #         main.train()
+    #     else:
+    #         from CFNet import test
+    #         main.test()
+
+    if args.architecture.lower() == "cfnet2":
         if args.mode.lower() == "train":
-            from CFNet import main
-            main.train()
-        else:
-            from CFNet import test
-            main.test()
+                from CFNet import main_lightning
+                main_lightning.main()
+    print("END")
