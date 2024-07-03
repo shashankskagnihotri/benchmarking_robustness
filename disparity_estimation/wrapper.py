@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-a', '--architecture', required=True, help='Specify an architecture')
 parser.add_argument('-m', '--mode', required=True, help='Specify whether to train or test the model', choices=['train', 'test'])
 
-args, unknown = parser.parse_known_args()
+args, args_unknown = parser.parse_known_args()
 # name = args.name
 # print(name)
 
@@ -20,6 +20,7 @@ sys.path.append(cfnet_path)
 # https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.start_run
 with mlflow.start_run(experiment_id='128987742873377588'):
 
+    mlflow.log_params(vars(args))
     if args.architecture.lower() == "cfnet":
         
         if args.mode.lower() == "train":

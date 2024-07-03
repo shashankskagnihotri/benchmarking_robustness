@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D"
-CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/CFNet/checkpoints/sceneflow_pretraining.ckpt"
+DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/KITTI_2015/"
+
+cd /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/
 
 python wrapper.py -a cfnet -m train \
-    --dataset sceneflow \
+    --dataset kitti2015 \
     --datapath $DATAPATH \
     --epochs 20 \
     --lr 0.001 \
@@ -12,5 +13,5 @@ python wrapper.py -a cfnet -m train \
     --batch_size 1 \
     --maxdisp 256 \
     --model cfnet \
-    --logdir ./checkpoints/sceneflow/uniform_sample_d256  \
+    --logdir /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/checkpoints/cfnet/  \
     --test_batch_size 1

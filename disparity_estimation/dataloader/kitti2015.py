@@ -30,7 +30,7 @@ from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastS
 
 
 class KITTIBaseDataset(data.Dataset):
-    def __init__(self, datadir, architecture_name, split='train'['train', 'test', 'validation', 'validation_all', 'corrupted']):
+    def __init__(self, datadir, architecture_name, split='train'): #['train', 'test', 'validation', 'validation_all', 'corrupted']
         super(KITTIBaseDataset, self).__init__()
 
         self.datadir = datadir
@@ -340,7 +340,7 @@ class KITTIBaseDataset(data.Dataset):
 
 
     def get_item_CFNET(self, left_img:Image, right_img:Image, disparity:np.ndarray) -> dict:
-        if self.training:
+        if self.split == 'train':
             th, tw = 256, 512
             #th, tw = 320, 704
             random_brightness = np.random.uniform(0.5, 2.0, 2)

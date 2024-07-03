@@ -50,6 +50,7 @@ parser.add_argument('--save_freq', type=int, default=1, help='the frequency of s
 
 # parse arguments, set seeds
 args, _ = parser.parse_known_args()
+mlflow.log_params(vars(args))
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
 os.makedirs(args.logdir, exist_ok=True)
