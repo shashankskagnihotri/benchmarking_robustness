@@ -11,6 +11,9 @@ import re
 import torchvision.transforms.functional as F
 import torch
 from torchvision import transforms
+import torchvision
+
+from .kitti import flow_transforms
 
 
 # Imports
@@ -37,10 +40,11 @@ class KITTIBaseDataset(data.Dataset):
         self.split = split
         self.architecture_name = architecture_name.lower()
 
-        if split == 'train' or split == 'validation' or split == 'validation_all':
+        if split == 'train' or split == 'validation' or split == 'validation_all' or split=='test':
+            # Note: Kitty has no test set with disp_occ, please create your own test set from the training set
             self.sub_folder = 'training/'
-        elif split == 'test':
-            self.sub_folder = 'testing/'
+        # elif split == 'test':
+        #     raise NotImplementedError("Note: Kitty has no test set with disp_occ, please create your own test set from the training set")
 
         self.left_fold = 'image_2/'
         self.right_fold = 'image_3/'
@@ -385,6 +389,7 @@ class KITTIBaseDataset(data.Dataset):
             left_img = augmented[0]
             right_img = augmented[1]
 
+            right_img = np.array(right_img, copy=True)
             right_img.flags.writeable = True
             if np.random.binomial(1,0.2):
               sx = int(np.random.uniform(35,100))

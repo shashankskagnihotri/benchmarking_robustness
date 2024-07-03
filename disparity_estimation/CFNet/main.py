@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 # from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Subset
 import gc
 
 
@@ -66,12 +66,37 @@ logger = SummaryWriter(args.logdir)
 train_dataset = get_dataset(args.dataset, args.datapath, architeture_name="CFNet", split='train')
 test_dataset  = get_dataset(args.dataset, args.datapath, architeture_name="CFNet", split='test')
 
-val_size = int(0.2 * len(train_dataset))  # 20% for validation
-train_size = len(train_dataset) - val_size
 
-# Split the dataset
-train_subset, val_subset = random_split(train_dataset, [train_size, val_size])
+if 'kitti' in args.dataset.lower(): # Define split sizes
+    val_size = int(0.2 * len(train_dataset))  # 20% for validation
+    test_size = int(0.1 * len(train_dataset))  # 10% for testing
+    train_size = len(train_dataset) - val_size - test_size
+
+    # Split the dataset
+    train_subset, val_subset, test_dataset = random_split(train_dataset, [train_size, val_size, test_size])
+else:
+    val_size = int(0.2 * len(train_dataset))  # 20% for validation
+    train_size = len(train_dataset) - val_size
+
+    # Split the dataset
+    train_subset, val_subset = random_split(train_dataset, [train_size, val_size])
+
 del train_dataset
+
+
+fast_dev_run = True
+if fast_dev_run == True:
+    # Create small subsets for fast_dev_run
+    fast_dev_run_size = 10  # Number of data points to use in fast_dev_run
+
+    # Create subsets for training, validation, and testing
+    train_indices = list(range(fast_dev_run_size))
+    val_indices = list(range(fast_dev_run_size, 2 * fast_dev_run_size))
+    test_indices = list(range(fast_dev_run_size))
+
+    train_subset = Subset(train_subset, train_indices)
+    val_subset = Subset(val_subset, val_indices)
+    test_dataset = Subset(test_dataset, test_indices)
 
 ValImgLoader = DataLoader(val_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
 TrainImgLoader = DataLoader(train_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True)
@@ -83,7 +108,7 @@ model = __models__[args.model](args.maxdisp)
 model = nn.DataParallel(model)
 model.cuda()
 optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999))
-best_val_loss = -1
+
 
 # load parameters
 start_epoch = 0
@@ -107,6 +132,7 @@ print("start at epoch {}".format(start_epoch))
 
 
 def train():
+    best_val_loss = -1
     bestepoch = 0
     error = 100
     print("Batch size: ", TestImgLoader.batch_size)
@@ -134,6 +160,7 @@ def train():
         gc.collect()
 
         # --- validation
+        avg_test_scalars = AverageMeterDict()
         for batch_idx, sample in enumerate(ValImgLoader):
             global_step = len(ValImgLoader) * epoch_idx + batch_idx
             start_time = time.time()
@@ -159,7 +186,7 @@ def train():
         # --- validation - END
 
         # testing
-        avg_test_scalars = AverageMeterDict()
+        avg_val_scalars = AverageMeterDict()
         #bestepoch = 0
         #error = 100
         for batch_idx, sample in enumerate(TestImgLoader):
@@ -170,7 +197,7 @@ def train():
             if do_summary:
                 save_scalars(logger, 'test', scalar_outputs, global_step)
                 #save_images(logger, 'test', image_outputs, global_step)
-            avg_test_scalars.update(scalar_outputs)
+            avg_val_scalars.update(scalar_outputs)
             del scalar_outputs, image_outputs
             print('Epoch {}/{}, Iter {}/{}, test loss = {:.3f}, time = {:3f}'.format(epoch_idx, args.epochs,
                                                                                      batch_idx,

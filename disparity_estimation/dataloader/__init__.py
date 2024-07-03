@@ -13,6 +13,8 @@ def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
     
     elif dataset_name == 'kitti' or dataset_name == 'kitti2015':
         from .kitti2015 import KITTIBaseDataset
+        if split == 'test':
+            return None
         return KITTIBaseDataset(datadir, architeture_name, split)
     elif dataset_name == 'eth3d':
         from .eth3d     import ETH3DDataset
