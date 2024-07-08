@@ -37,44 +37,41 @@ class PGD(Attack):
         self.random_start = random_start
         self.supported_mode = ["default", "targeted"]
 
-    def forward(self, images, labels):
-        r"""
-        Overridden.
-        """
-
-        images = images.clone().detach().to(self.device)
+    def forward(self, x1, x2, labels):
+        x1 = x1.clone().detach().to(self.device)
+        x2 = x2.clone().detach().to(self.device)
         labels = labels.clone().detach().to(self.device)
 
-        if self.targeted:
-            target_labels = self.get_target_label(images, labels)
-
         loss = nn.CrossEntropyLoss()
-        adv_images = images.clone().detach()
+        adv_x1 = x1.clone().detach()
+        adv_x2 = x2.clone().detach()
 
         if self.random_start:
-            # Starting at a uniformly random point
-            adv_images = adv_images + torch.empty_like(adv_images).uniform_(
-                -self.eps, self.eps
-            )
-            adv_images = torch.clamp(adv_images, min=0, max=1).detach()
+            # Start at a uniformly random point
+            adv_x1 = adv_x1 + torch.empty_like(adv_x1).uniform_(-self.eps, self.eps)
+            adv_x2 = adv_x2 + torch.empty_like(adv_x2).uniform_(-self.eps, self.eps)
+            adv_x1 = torch.clamp(adv_x1, min=0, max=1).detach()
+            adv_x2 = torch.clamp(adv_x2, min=0, max=1).detach()
 
         for _ in range(self.steps):
-            adv_images.requires_grad = True
-            outputs = self.get_logits(adv_images)
+            adv_x1.requires_grad = True
+            adv_x2.requires_grad = True
+            outputs = self.model(adv_x1, adv_x2)
 
             # Calculate loss
-            if self.targeted:
-                cost = -loss(outputs, target_labels)
-            else:
-                cost = loss(outputs, labels)
+            cost = loss(outputs, labels)
 
             # Update adversarial images
-            grad = torch.autograd.grad(
-                cost, adv_images, retain_graph=False, create_graph=False
-            )[0]
+            grad_x1, grad_x2 = torch.autograd.grad(cost, [adv_x1, adv_x2], 
+                                                   retain_graph=False, create_graph=False)
 
-            adv_images = adv_images.detach() + self.alpha * grad.sign()
-            delta = torch.clamp(adv_images - images, min=-self.eps, max=self.eps)
-            adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+            adv_x1 = adv_x1.detach() + self.alpha * grad_x1.sign()
+            adv_x2 = adv_x2.detach() + self.alpha * grad_x2.sign()
 
-        return adv_images
+            delta_x1 = torch.clamp(adv_x1 - x1, min=-self.eps, max=self.eps)
+            delta_x2 = torch.clamp(adv_x2 - x2, min=-self.eps, max=self.eps)
+
+            adv_x1 = torch.clamp(x1 + delta_x1, min=0, max=1).detach()
+            adv_x2 = torch.clamp(x2 + delta_x2, min=0, max=1).detach()
+
+        return adv_x1, adv_x2
