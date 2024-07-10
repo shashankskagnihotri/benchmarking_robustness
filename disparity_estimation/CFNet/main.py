@@ -272,5 +272,23 @@ def test_sample(sample, compute_metrics=True):
     return tensor2float(loss), tensor2float(scalar_outputs), image_outputs
 
 
+
+
+def attack():
+    
+    from attacks import CosPGDAttack
+    epsilon = 0.03
+    alpha = 0.01
+    num_iterations = 10
+    
+    attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, num_classes=None, targeted=False)
+    
+
+    for batch_idx, sample in enumerate(TestImgLoader):
+        attacker.attack(sample['left'], sample['right'], sample['disparity'])
+        perturbed_left_image, perturbed_right_image = attacker.attack(sample['left'], sample['right'], sample['disparity'])
+
+        print("batch", batch_idx)
+
 if __name__ == '__main__':
     train()

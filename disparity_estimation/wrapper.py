@@ -30,4 +30,5 @@ with mlflow.start_run(experiment_id='128987742873377588'):
             main.train()
         else:
             run_name = f"CFNet_corruption_brightness_severity_5"
-            main.test()
+            main.attack()
+            # main.test()
