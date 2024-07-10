@@ -1,4 +1,5 @@
 import argparse
+import logging
 import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
@@ -8,6 +9,14 @@ from typing import Callable
 from typing import Sequence
 from dotenv import load_dotenv
 import os
+from typing import Dict, List, Optional, Sequence, Union
+from mmengine.logging import print_log
+from mmengine.registry import LOOPS
+from mmengine.runner.base_loop import BaseLoop
+from torch.utils.data import DataLoader
+from mmengine.evaluator import Evaluator
+import wandb
+
 
 # move this?
 load_dotenv()
@@ -202,22 +211,6 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
     return batch * std.view(1, -1, 1, 1) + mean.view(1, -1, 1, 1)
 
 
-class AdversarialAttackHook(Hook):
-    def __init__(self, attack: Callable, attack_kwargs: dict):
-        self.attack = attack
-        self.attack_kwargs = attack_kwargs
-
-    def before_val_iter(self, runner, batch_idx: int, data_batch: Sequence[dict]):
-        with torch.enable_grad():
-            data_batch_prepro = self.attack(data_batch, runner, **self.attack_kwargs)
-        runner.data_batch = data_batch_prepro  # overwrite the data_batch
-
-    def after_val_iter(
-        self, runner, batch_idx: int, data_batch: Sequence[dict], outputs
-    ):
-        pass
-
-
 def run_attack_val(
     attack: Callable | None,
     config_file: str,
@@ -251,12 +244,88 @@ def run_attack_val(
         )
     )
 
-    # Initialize the runner
-    runner = Runner.from_cfg(cfg)
+    # Hopefully avoids CUDA OOM errors
+    torch.cuda.empty_cache()
 
     # Register the attack hook if an attack is provided
     if attack is not None:
-        runner.register_hook(AdversarialAttackHook(attack, attack_kwargs))
+        LOOPS.module_dict.pop("ValLoop")
+
+        @LOOPS.register_module()
+        class ValLoop(BaseLoop):
+            def __init__(
+                self,
+                runner,
+                dataloader: Union[DataLoader, Dict],
+                evaluator: Union[Evaluator, Dict, List],
+                fp16: bool = False,
+            ) -> None:
+                super().__init__(runner, dataloader)
+
+                if isinstance(evaluator, (dict, list)):
+                    self.evaluator = runner.build_evaluator(evaluator)
+                else:
+                    assert isinstance(evaluator, Evaluator), (
+                        "evaluator must be one of dict, list or Evaluator instance, "
+                        f"but got {type(evaluator)}."
+                    )
+                    self.evaluator = evaluator
+                if hasattr(self.dataloader.dataset, "metainfo"):
+                    self.evaluator.dataset_meta = getattr(
+                        self.dataloader.dataset, "metainfo"
+                    )
+                    self.runner.visualizer.dataset_meta = getattr(
+                        self.dataloader.dataset, "metainfo"
+                    )
+                else:
+                    print_log(
+                        f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
+                        "metainfo. ``dataset_meta`` in evaluator, metric and "
+                        "visualizer will be None.",
+                        logger="current",
+                        level=logging.WARNING,
+                    )
+                self.fp16 = fp16
+
+            def run(self) -> dict:
+                self.runner.call_hook("before_val")
+                self.runner.call_hook("before_val_epoch")
+                self.runner.model.eval()
+                for idx, data_batch in enumerate(self.dataloader):
+                    self.run_iter(idx, data_batch)
+
+                metrics = self.evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
+                wandb.log(metrics)
+                self.runner.call_hook("after_val_epoch", metrics=metrics)
+                self.runner.call_hook("after_val")
+                return metrics
+
+            def run_iter(
+                self,
+                idx,
+                data_batch: Sequence[dict],
+            ):
+                self.runner.call_hook(
+                    "before_val_iter", batch_idx=idx, data_batch=data_batch
+                )
+
+                data_batch_prepro = attack(data_batch, self.runner, **attack_kwargs)
+
+                with torch.no_grad():
+                    outputs = self.runner.model(**data_batch_prepro, mode="predict")
+
+                self.evaluator.process(
+                    data_samples=outputs, data_batch=data_batch_prepro
+                )
+                self.runner.call_hook(
+                    "after_val_iter",
+                    batch_idx=idx,
+                    data_batch=data_batch_prepro,
+                    outputs=outputs,
+                )
+
+    # Initialize the runner
+    runner = Runner.from_cfg(cfg)
 
     # Run the attack
     runner.val()
