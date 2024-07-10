@@ -66,9 +66,8 @@ def bim_pgd_cospgd(
         attack_args["attack_alpha"] = attack_args["attack_epsilon"]
 
     perturbed_inputs = replace_images_dic(inputs, image_1, image_2, clone=True)
-    perturbed_images = perturbed_inputs["images"]
-    perturbed_images.requires_grad = True
-    perturbed_inputs["images"] = perturbed_images
+
+    perturbed_inputs["images"].requires_grad_(True)
 
     preds = model(perturbed_inputs)
     pred_flows = preds["flows"].squeeze(0)
@@ -137,9 +136,8 @@ def bim_pgd_cospgd(
         perturbed_inputs = replace_images_dic(
             perturbed_inputs, image_1_adv, image_2_adv
         )
-        perturbed_images = perturbed_inputs["images"]
-        perturbed_images.requires_grad = True
-        perturbed_inputs["images"] = perturbed_images
+
+        perturbed_inputs["images"].requires_grad_(True)
 
         preds = model(perturbed_inputs)
         pred_flows = preds["flows"].squeeze(0)
