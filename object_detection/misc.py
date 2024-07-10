@@ -11,6 +11,7 @@ def find_latest_epoch_file(directory):
     # Regex to match files of the form 'epoch_{n}.pth' where {n} is an integer
     pattern = re.compile(r"^epoch_(\d+)\.pth$")
 
+    # Find the file with the highest epoch number
     for file in root_dir.iterdir():
         match = pattern.match(file.name)
         if match:
@@ -18,6 +19,15 @@ def find_latest_epoch_file(directory):
             if current_num > max_num:
                 max_num = current_num
                 latest_file = file
+
+    # check if there is a single *.pth file
+    if not latest_file:
+        pth_files = list(root_dir.glob("*.pth"))
+        if len(pth_files) == 1:
+            return pth_files[0]
+        else:
+            return None
+
     return latest_file
 
 

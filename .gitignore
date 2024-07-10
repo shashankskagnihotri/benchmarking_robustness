@@ -187,3 +187,4 @@ object_detection/wandb/
 object_detection/slurm/log_errors/
 object_detection/slurm/train_results/
 object_detection/slurm/train_work_dir/
+object_detection/artifacts/
