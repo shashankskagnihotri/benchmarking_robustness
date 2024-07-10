@@ -30,7 +30,8 @@ from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastS
 
 
 class KITTIBaseDataset(data.Dataset):
-    def __init__(self, datadir, architecture_name, split='train'['train', 'test', 'validation', 'validation_all', 'corrupted']):
+    def __init__(self, datadir, architecture_name, split='train'):
+        # ['train', 'test', 'validation', 'validation_all', 'corrupted']
         super(KITTIBaseDataset, self).__init__()
 
         self.datadir = datadir
