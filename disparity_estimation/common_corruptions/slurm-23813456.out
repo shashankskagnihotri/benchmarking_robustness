@@ -1,0 +1,15 @@
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n424
+Job ID: 23813456
+Cluster: uc2
+User/Group: ma_adackerm/ma_ma
+State: FAILED (exit code 1)
+Nodes: 1
+Cores per node: 2
+CPU Utilized: 00:00:01
+CPU Efficiency: 1.67% of 00:01:00 core-walltime
+Job Wall-clock time: 00:00:30
+Memory Utilized: 2.57 MB
+Memory Efficiency: 0.01% of 40.00 GB

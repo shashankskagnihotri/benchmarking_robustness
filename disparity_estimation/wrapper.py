@@ -4,16 +4,20 @@ import sys
 import mlflow
 
 mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/mlflow/")
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-a', '--architecture', required=True, help='Specify an architecture')
-parser.add_argument('-m', '--mode', required=True, help='Specify whether to train or test the model', choices=['train', 'test'])
+parser.add_argument('-p', '--phase', required=False, help='Specify whether to train or test the model', choices=['train', 'test'])
+parser.add_argument('-c', '--commoncorruption', required=False, help='Specify the name of the common corruptions to apply')
+parser.add_argument('-s', '--severity', required=False, help='Specify the severity level of the common corruptions to apply')
 
 args, unknown = parser.parse_known_args()
+
+if args.commoncorruption is not None:
+    pass
 # name = args.name
 # print(name)
 
-# Add the CFNet directory to the PYTHONPATH
+# Add the CFN#
 cfnet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'CFNet'))
 sys.path.append(cfnet_path)
 
@@ -21,10 +25,10 @@ sys.path.append(cfnet_path)
 with mlflow.start_run(experiment_id='128987742873377588'):
 
     if args.architecture.lower() == "cfnet":
-        
-        if args.mode.lower() == "train":
-            from CFNet import main
+        from CFNet import main
+        if "" == "train":
             main.train()
         else:
-            from CFNet import test
-            main.test()
+            run_name = f"CFNet_corruption_brightness_severity_5"
+            main.attack()
+            # main.test()
