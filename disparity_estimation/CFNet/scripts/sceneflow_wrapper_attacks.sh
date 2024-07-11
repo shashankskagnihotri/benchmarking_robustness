@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/$CORRUPTION_TYPE/$SEVERITY_LEVEL"
+DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/"
 CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/CFNet/checkpoints/sceneflow_pretraining.ckpt"
 
-CORRUPTION_TYPE="$1"
-SEVERITY_LEVEL="$2"
+ATTACK_TYPE="$1"
 
-if [[ -z "$CORRUPTION_TYPE" || -z "$SEVERITY_LEVEL" ]]; then
-    echo "Error: Corruption type and severity level must be provided."
+echo "Attack type: $ATTACK_TYPE"
+
+if [[ -z "$ATTACK_TYPE" ]]; then
+    echo "Error: Attack type must be provided."
     exit 1
 fi
 
 python wrapper.py --architecture cfnet \
-    --mode commoncorruption \
+    --scenario attack \
+    --attack_type $ATTACK_TYPE \
     --dataset sceneflow \
     --datapath $DATAPATH \
     --loadckpt $CHECKPOINTPATH \
