@@ -274,14 +274,17 @@ def test_sample(sample, compute_metrics=True):
 
 
 
-def attack():
+def attack(attack_type: str):
     
     from attacks import CosPGDAttack
     epsilon = 0.03
     alpha = 0.01
     num_iterations = 10
     
-    attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, num_classes=None, targeted=False)
+    if attack_type == "cospgd":
+        attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, num_classes=None, targeted=False)
+    else:
+        raise ValueError("Attack type not recognized")
     
 
     for batch_idx, sample in enumerate(TestImgLoader):
