@@ -28,13 +28,17 @@ filenames_to_test = os.listdir(path_folder_to_test)
 def change_training_implementation(filename, folder_path, backbone_cfg):
     cfg = Config.fromfile(f"{folder_path}/{filename}")
 
-    cfg.optim_wrapper = backbone_cfg.optim_wrapper
-    cfg.param_scheduler = backbone_cfg.param_scheduler
-    cfg.max_epochs = backbone_cfg.max_epochs
     if (
         cfg.train_cfg.type == "EpochBasedTrainLoop"
     ):  #!!!! how to handle iteration based?
+        cfg.optim_wrapper = backbone_cfg.optim_wrapper
+        cfg.param_scheduler = backbone_cfg.param_scheduler
+        cfg.max_epochs = backbone_cfg.max_epochs
         cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
+
+    # ? So we keep the dataset / augumentations specific to the model and only change the backbones, neck_inchannels, optimizer (lr, weight decay etc), epochs, batchsize, autoscale, scheduling, expMomentumEMA?
+    # ? Answer: Yes
+
     #! look into individual cfg.train_cfg and depending on implementation import full cfg.train_cfg from backbone_cfg or keep some parts (iterationbased, _scope_, dynamic intervals -> change the iterations based on epochs etc)
 
     # cfg.custom_hooks = backbone_cfg.custom_hooks[0] #! only use exp_ema and wait for call of tutor regarding the keeping of yolox custom hooks
@@ -101,16 +105,43 @@ def calculate_iterations(epochs, batch_size, dataset):
     elif dataset == "voc":
         dataset_size = 0  #! get the right absolute dataset size
 
+    #! traing, val and testsizes (look into annotations?)
     steps_per_epoch = dataset_size / batch_size
     total_iterations = epochs * steps_per_epoch
 
     return int(total_iterations)
 
 
+def change_interations(filename, folder_path, backbone_cfg):
+    cfg = Config.fromfile(f"{folder_path}/{filename}")
+
+    if cfg.train_cfg.type == "IterBasedTrainLoop":  #!!!! how to handle iteration based?
+        cfg.param_scheduler = backbone_cfg.param_scheduler
+        cfg.max_epochs = backbone_cfg.max_epochs
+        cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
+
+    cfg.default_hooks.param_scheduler = backbone_cfg.default_hooks.param_scheduler
+
+    cfg.train_dataloader.batch_size = backbone_cfg.train_dataloader.batch_size
+
+    cfg.dump(f"{folder_path}/{filename}")
+
+
 #! iteration based configs
 for filename in filenames_to_train:
     filepath = os.join(path_folder_to_train, filename)
     neck, backbone, dataset = which(filepath)
+
+#! Swin- b Defined and or used in:
+# •	train_cfg with max_epochs=100 and val_interval=10.
+# •	custom_hooks with switch_epoch=90, and logger
+# •	Used in:
+# •	default_hooks for checkpointing (interval=10).
+# •	param_scheduler for learning rate schedule (ends at epoch 100).
+# •	log_processor for processing logs by epoch.
+#! Convnext-b Defined and or used in:
+
+
 # if neck == "DiffusionDet" and backbone =="swin-b" and dataset == "coco":
 # cfg = Config.fromfile(filepath)
 # .... iterationstuff
@@ -120,6 +151,8 @@ for filename in filenames_to_train:
 # .... iterationstuff
 # elif neck == "DiffusionDet" and backbone =="convnext-b" and dataset == "voc":
 # ....
+
+
 # elif neck == "Detic" and backbone =="swin-b" and dataset == "coco":
 # ....
 # elif neck == "Detic" and backbone =="swin-b" and dataset == "voc":
