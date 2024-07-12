@@ -105,24 +105,72 @@ def calculate_iterations(epochs, batch_size, dataset):
     elif dataset == "voc":
         dataset_size = 0  #! get the right absolute dataset size
 
-    #! traing, val and testsizes (look into annotations?)
+    #! traing, val and testsizes (look into annotations? -> first decide, which annotations to use because of the switch to vocmetrics
     steps_per_epoch = dataset_size / batch_size
     total_iterations = epochs * steps_per_epoch
 
     return int(total_iterations)
 
 
-def change_interations(filename, folder_path, backbone_cfg):
+def change_interations(filename, folder_path, backbone_cfg, dataset):
     cfg = Config.fromfile(f"{folder_path}/{filename}")
 
-    if cfg.train_cfg.type == "IterBasedTrainLoop":  #!!!! how to handle iteration based?
-        cfg.param_scheduler = backbone_cfg.param_scheduler
-        cfg.max_epochs = backbone_cfg.max_epochs
-        cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
+    # Trainingrelated
+    #! paramscheduler is actually already converting into iterationbased
 
-    cfg.default_hooks.param_scheduler = backbone_cfg.default_hooks.param_scheduler
+    cfg.train_cfg.type = "IterBasedTrainLoop"
+    cfg.train_cfg.max_iters = calculate_iterations(
+        epochs=cfg.max_epochs,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
 
-    cfg.train_dataloader.batch_size = backbone_cfg.train_dataloader.batch_size
+    cfg.default_hooks.checkpoint.by_epoch = False
+    cfg.default_hooks.checkpoint.interval = calculate_iterations(
+        epochs=cfg.default_hooks.checkpoint.interval,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
+    cfg.default_hooks.logger.interval = calculate_iterations(
+        epochs=cfg.default_hooks.logger.interval,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
+    cfg.log_processor.by_epochs = False
+    cfg.log_processor.window_size = calculate_iterations(
+        epochs=cfg.log_processor.window_size,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
+
+    #  keep phase 1 as is because it has by_epoch = false already
+    cfg.param_scheduler[1].by_epoch = False
+    cfg.param_scheduler[1].convert_to_iterations = False
+    cfg.param_scheduler[1].T_max = calculate_iterations(
+        epochs=cfg.param_scheduler[1].T_max,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
+    cfg.param_scheduler[1].begin = calculate_iterations(
+        epochs=cfg.param_scheduler[1].begin,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
+
+    cfg.param_scheduler[1].end = calculate_iterations(
+        epochs=cfg.param_scheduler[1].end,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset=dataset,
+    )
+
+    # Validationrelated
+    cfg.train_cfg.val_interval = calculate_iterations(
+        epochs=cfg.train_cfg.val_interval,
+        batch_size=cfg.val_dataloader.batch_size,
+        dataset=dataset,
+    )
+
+    # Testrelated
 
     cfg.dump(f"{folder_path}/{filename}")
 
@@ -153,6 +201,7 @@ for filename in filenames_to_train:
 # ....
 
 
+#! detic has batchsize [4,16] in train_dataloader find out how this works and what to assign
 # elif neck == "Detic" and backbone =="swin-b" and dataset == "coco":
 # ....
 # elif neck == "Detic" and backbone =="swin-b" and dataset == "voc":
