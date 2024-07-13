@@ -85,6 +85,7 @@ weather_arguments = [
     "weather_no_flake_dat",
     "weather_lr",
     "weather_unregistered_artifacts",
+    "weather_num_flakes",
 ]
 tdcc_arguments = [
     "attack",

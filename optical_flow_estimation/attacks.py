@@ -27,6 +27,7 @@ from datetime import datetime
 import json
 
 import os
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 
 import cv2 as cv
 import numpy as np
@@ -616,6 +617,8 @@ def _init_parser() -> ArgumentParser:
         type=ast.literal_eval,
         help="if True, artifacts are saved to the output folder but not registered. Saves time and memory during training.",
     )
+    parser.add_argument('--weather_num_flakes', default=1000, type=int,
+        help="the number of particles that will be generated initially.")
     return parser
 
 
