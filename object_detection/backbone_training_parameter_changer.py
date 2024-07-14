@@ -28,25 +28,30 @@ filenames_to_test = os.listdir(path_folder_to_test)
 def change_training_implementation(filename, folder_path, backbone_cfg):
     cfg = Config.fromfile(f"{folder_path}/{filename}")
 
-    if (
-        cfg.train_cfg.type == "EpochBasedTrainLoop"
-    ):  #!!!! how to handle iteration based?
-        cfg.optim_wrapper = backbone_cfg.optim_wrapper
-        cfg.param_scheduler = backbone_cfg.param_scheduler
-        cfg.max_epochs = backbone_cfg.max_epochs
-        cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
+    cfg.optim_wrapper = backbone_cfg.optim_wrapper
+    cfg.param_scheduler = backbone_cfg.param_scheduler
+    cfg.max_epochs = backbone_cfg.max_epochs
+    cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
 
-    # ? So we keep the dataset / augumentations specific to the model and only change the backbones, neck_inchannels, optimizer (lr, weight decay etc), epochs, batchsize, autoscale, scheduling, expMomentumEMA?
+    # ? So we keep the dataset / augumentations specific to the model and only change the backbones, neck_inchannels, optimizer (lr, weight decay etc), epochs, batchsize, autoscale, expMomentumEMA?
     # ? Answer: Yes
 
     #! look into individual cfg.train_cfg and depending on implementation import full cfg.train_cfg from backbone_cfg or keep some parts (iterationbased, _scope_, dynamic intervals -> change the iterations based on epochs etc)
 
-    # cfg.custom_hooks = backbone_cfg.custom_hooks[0] #! only use exp_ema and wait for call of tutor regarding the keeping of yolox custom hooks
+    #! should I also change the validation? because it could be used for training as well
 
     if hasattr(cfg, "custom_hooks") and cfg.custom_hooks:
-        print(f"Custom hooks in {filename} found:")
-        for hook in cfg.custom_hooks:
-            print(hook)
+        num_hooks = len(cfg.custom_hooks)
+        found_expema = False
+        for h in range(num_hooks):
+            if cfg.custom_hooks[h].type == "ExpMomentumEMA":
+                cfg.custom_hooks[h] = backbone_cfg.custom_hooks[0]
+                found_expema = True
+                break
+        if not found_expema:
+            cfg.custom_hooks.append(backbone_cfg.custom_hooks[0])
+    else:
+        cfg.custom_hooks = [backbone_cfg.custom_hooks[0]]
 
     cfg.default_hooks.param_scheduler = backbone_cfg.default_hooks.param_scheduler
     cfg.deault_hooks.sampler_seed = backbone_cfg.default_hooks.sampler_seed
@@ -98,8 +103,6 @@ for filename in filenames_to_test:
 
 
 def calculate_iterations(epochs, batch_size, dataset):
-    #! cfg.train_dataloader.batch_size
-    #! epochs the depending cfg. ....
     if dataset == "coco":
         dataset_size = 0  #! get the right absolute dataset size
     elif dataset == "voc":
