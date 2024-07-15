@@ -3,27 +3,18 @@ import logging
 import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
-from mmengine.runner.runner import Hook
 from torchvision import transforms
 from typing import Callable
 from typing import Sequence
 from dotenv import load_dotenv
 import os
-from typing import Dict, List, Optional, Sequence, Union
+from typing import Dict, List, Union
 from mmengine.logging import print_log
 from mmengine.registry import LOOPS
 from mmengine.runner.base_loop import BaseLoop
 from torch.utils.data import DataLoader
 from mmengine.evaluator import Evaluator
 import wandb
-
-
-# move this?
-load_dotenv()
-WAND_PROJECT = os.getenv("WANDB_PROJECT")
-WAND_ENTITY = os.getenv("WANDB_ENTITY")
-assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
-assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
 
 def pgd_attack(
@@ -247,7 +238,7 @@ def run_attack_val(
     # Hopefully avoids CUDA OOM errors
     torch.cuda.empty_cache()
 
-    # Register the attack hook if an attack is provided
+    # Register the attack loop if an attack is provided
     if attack is not None:
         LOOPS.module_dict.pop("ValLoop")
 
@@ -387,6 +378,12 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
+
+    load_dotenv()
+    WAND_PROJECT = os.getenv("WANDB_PROJECT")
+    WAND_ENTITY = os.getenv("WANDB_ENTITY")
+    assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
+    assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
     # Select right attack function
     if args.attack == "pgd":
