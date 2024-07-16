@@ -656,7 +656,7 @@ def attack_one_dataloader(
                 targeted_inputs = inputs.copy()
 
             iteration_metrics = {}
-
+            #pdb.set_trace()
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
                     (
@@ -693,7 +693,18 @@ def attack_one_dataloader(
                     preds = model(inputs)
 
             for key in preds:
-                preds[key] = preds[key].detach()
+                if torch.is_tensor(preds[key]):
+                    preds[key] = preds[key].detach()
+            for key in inputs:
+                if torch.is_tensor(inputs[key]):
+                    inputs[key] = inputs[key].detach()
+            if attack_args["attack"] != "none":
+                for key in perturbed_inputs:
+                    if torch.is_tensor(perturbed_inputs[key]):
+                        perturbed_inputs[key] = perturbed_inputs[key].detach()
+            for key in iteration_metrics:
+                if torch.is_tensor(iteration_metrics[key]):
+                    iteration_metrics[key] = iteration_metrics[key].detach()
 
             if args.warm_start:
                 if (
@@ -895,6 +906,13 @@ def attack_one_dataloader(
                 generate_outputs(args, preds, dataloader_name, i, inputs.get("meta"))
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
+
+            del preds
+            del inputs
+            del iteration_metrics
+            if attack_args["attack"] != "none":
+                del perturbed_inputs
+            torch.cuda.empty_cache()
 
     if args.write_individual_metrics:
         ind_df = pd.DataFrame(metrics_individual)
