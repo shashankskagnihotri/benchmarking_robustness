@@ -3,7 +3,7 @@ import shutil
 from mmengine.config import Config
 import submitit
 
-from new_distributed_trainer import train_with_multiple_gpus
+from new_distributed_tester import test_with_multiple_gpus
 
 from config_maker import which
 
@@ -14,22 +14,22 @@ from rich.traceback import install
 install(show_locals=False)
 
 
-slurm_log_folder_path = "./slurm/train_work_dir"  # ? change to eval for evaluation
+#! where are the checkpoitns? -> implement them into tester
+
+slurm_log_folder_path = "./slurm/eval_work_dir"
 slurm_log_folders = os.listdir(slurm_log_folder_path)
 
-slurm_results_path = "slurm/train_results"  # ? change to eval for evaluation
-path_erroneous_configs = (
-    "./configs_erroneous_training"  # ? change to eval for evaluation
-)
+slurm_results_path = "./slurm/eval_results"
+path_erroneous_configs = "./configs_erroneous_eval"
 
 
-path_verified_configs = "./configs_verified"  # ? change to eval for evaluation
-folder_entry_list_configs_to_train = os.listdir(
-    path_verified_configs
+path_trained_configs = "./configs_to_test"  # ? change to eval for evaluation
+folder_entry_list_configs_to_test = os.listdir(
+    path_trained_configs
 )  # ? change to eval for evaluation
 
 
-path_configs_to_test = "./configs_to_test"
+path_configs_done = "./configs_evaluated"
 
 
 #! wandb vis gets currently implemented into config files!!!!!
@@ -46,15 +46,15 @@ jobs = []
 
 
 if verify_subset:
-    folder_entry_list_configs_to_train = [
-        folder_entry_list_configs_to_train[0],
-        folder_entry_list_configs_to_train[1],
+    folder_entry_list_configs_to_test = [
+        folder_entry_list_configs_to_test[0],
+        folder_entry_list_configs_to_test[1],
     ]
-    path_configs_to_test = "./configs_to_test_subset"
+    path_configs_done = "./configs_to_test_subset"
 
 
-print(f"folder_entry_list_configs_to_train : {folder_entry_list_configs_to_train}")
-print(f"path_configs_to_test : {path_configs_to_test}")
+print(f"folder_entry_list_configs_to_test : {folder_entry_list_configs_to_test}")
+print(f"path_configs_done : {path_configs_done}")
 
 
 def highest_job_number(model_log_folder_path):
@@ -95,31 +95,31 @@ def has_been_completed(config_file, slurm_log_folders):
                                 logfile_content = file.read()
                                 if "Job completed successfully" in logfile_content:
                                     print(
-                                        f"moving {config_file} to {path_configs_to_test} folder"
+                                        f"moving {config_file} to {path_configs_done} folder"
                                     )
                                     config_path = os.path.join(
-                                        path_verified_configs, config_file
+                                        path_trained_configs, config_file
                                     )
 
                                     if os.path.exists(config_path):
                                         shutil.move(
                                             config_path,
                                             os.path.join(
-                                                path_configs_to_test,
+                                                path_configs_done,
                                                 config_file,
                                             ),
                                         )
-                                        folder_entry_list_configs_to_train.remove(
+                                        folder_entry_list_configs_to_test.remove(
                                             config_file
                                         )
 
 
-for config_file in folder_entry_list_configs_to_train:
+for config_file in folder_entry_list_configs_to_test:
     has_been_completed(config_file, slurm_log_folders)
 
-for config_file in folder_entry_list_configs_to_train:
+for config_file in folder_entry_list_configs_to_test:
     print(f"config_file : {config_file}")
-    config_path = os.path.join(path_verified_configs, config_file)
+    config_path = os.path.join(path_trained_configs, config_file)
     print(f"config_path : {config_path}")
 
     if has_been_started_before(config_file, slurm_log_folders):
@@ -153,7 +153,7 @@ for config_file in folder_entry_list_configs_to_train:
                                     or "TypeError: can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime_info_hook.RuntimeInfoHook"
                                     in logfile_content
                                 ):
-                                    print(f"training {config_file} from {config_path}")
+                                    print(f"testing {config_file} from {config_path}")
                                     specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
                                     specific_slurm_result_dir = f"{slurm_results_path}/{os.path.splitext(config_file)[0]}"
 
@@ -174,12 +174,13 @@ for config_file in folder_entry_list_configs_to_train:
                                     ].type = "WandbVisBackend"
                                     neck, backbone, dataset = which(config_file)
                                     cfg.visualizer.vis_backends[0].init_kwargs = dict(
-                                        project=f"{neck}_{backbone}_{dataset}_train"
+                                        project=f"{neck}_{backbone}_{dataset}_test"
                                     )
 
                                     executor.submit(
-                                        train_with_multiple_gpus,
+                                        test_with_multiple_gpus,
                                         config_path,
+                                        check_point,
                                         specific_slurm_result_dir,
                                         GPU_NUM,
                                     )
@@ -196,7 +197,7 @@ for config_file in folder_entry_list_configs_to_train:
                                             ),
                                         )
     else:
-        print(f"training {config_file} from {config_path}")
+        print(f"testing {config_file} from {config_path}")
         specific_slurm_work_dir = (
             f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
         )
@@ -217,12 +218,13 @@ for config_file in folder_entry_list_configs_to_train:
         cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
         neck, backbone, dataset = which(config_file)
         cfg.visualizer.vis_backends[0].init_kwargs = dict(
-            project=f"{neck}_{backbone}_{dataset}_train"
+            project=f"{neck}_{backbone}_{dataset}_test"
         )
 
         executor.submit(
-            train_with_multiple_gpus,
+            test_with_multiple_gpus,
             config_path,
+            check_point,
             specific_slurm_result_dir,
             GPU_NUM,
         )

@@ -54,24 +54,31 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
         cfg.custom_hooks = [backbone_cfg.custom_hooks[0]]
 
     cfg.default_hooks.param_scheduler = backbone_cfg.default_hooks.param_scheduler
-    cfg.deault_hooks.sampler_seed = backbone_cfg.default_hooks.sampler_seed
+    # cfg.deault_hooks.sampler_seed = backbone_cfg.default_hooks.sampler_seed
 
-    cfg.train_dataloader.batch_sample = backbone_cfg.train_dataloader.batch_sampler
+    # cfg.train_dataloader.batch_sample = backbone_cfg.train_dataloader.batch_sampler
     cfg.train_dataloader.batch_size = backbone_cfg.train_dataloader.batch_size
-    cfg.train_dataloader.num_workers = backbone_cfg.train_dataloader.num_workers
-    cfg.train_dataloader.persistent_workers = (
-        backbone_cfg.train_dataloader.persistent_workers
-    )
+    # cfg.train_dataloader.num_workers = backbone_cfg.train_dataloader.num_workers
+    # cfg.train_dataloader.persistent_workers = (
+    #     backbone_cfg.train_dataloader.persistent_workers
+    # )
+    # cfg.train_dataloader.sampler = backbone_cfg.train_dataloader.sampler
 
     if hasattr(cfg, "auto_scale_lr"):
         cfg.auto_scale_lr.enable = True
+        # cfg.auto_scale_lr.base_batch_size = backbone_cfg.train_dataloader.batch_size
     else:
+        # cfg.auto_scale_lr = dict(
+        #     enable=True, base_batch_size=backbone_cfg.train_dataloader.batch_size
+        # )
         cfg.auto_scale_lr = dict(enable=True)
 
     cfg.dump(
         f"{folder_path}/{filename}"
     )  #! maybe all to training such that retest or only test on subset
 
+
+#! throw all into one extra folder and then check them in there
 
 for filename in filenames_to_train:
     if "swin_b" in filename:
@@ -109,6 +116,7 @@ def calculate_iterations(epochs, batch_size, dataset):
         dataset_size = 0  #! get the right absolute dataset size
 
     #! traing, val and testsizes (look into annotations? -> first decide, which annotations to use because of the switch to vocmetrics
+    #! I think we just use the tainingsize as the approach should be training centric
     steps_per_epoch = dataset_size / batch_size
     total_iterations = epochs * steps_per_epoch
 
@@ -169,13 +177,17 @@ def change_interations(filename, folder_path, backbone_cfg, dataset):
     # Validationrelated
     cfg.train_cfg.val_interval = calculate_iterations(
         epochs=cfg.train_cfg.val_interval,
-        batch_size=cfg.val_dataloader.batch_size,
+        # batch_size=cfg.val_dataloader.batch_size, I think it should be relative to the training
+        batch_size=cfg.train_dataloader.batch_size,
         dataset=dataset,
     )
 
     # Testrelated
 
     cfg.dump(f"{folder_path}/{filename}")
+
+
+#! throw all into one extra folder and then check them in there
 
 
 #! iteration based configs

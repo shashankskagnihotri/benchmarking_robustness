@@ -294,7 +294,7 @@ def which(path):
         if "coco" in path:
             return "coco"
         else:
-            None
+            return "voc0712"
 
     return which_backbone(path), which_neck(path), which_dataset(path)
 
@@ -721,5 +721,8 @@ for test_file in test_files:
     cfg = Config.fromfile(os.path.join(test_folder_path, test_file))
     if hasattr(cfg, "auto_scale_lr"):
         cfg.auto_scale_lr.enable = True
+        # cfg.auto_scale_lr.base_batch_size = cfg.train_dataloader.batch_size
     else:
         cfg.auto_scale_lr = dict(enable=True)
+
+#! Please remember to check the bottom of the specific config file you want to use, it will have auto_scale_lr.base_batch_size if the batch size is not 16. If you can’t find those values, check the config file which in _base_=[xxx] and you will find it. Please do not modify its values if you want to automatically scale the LR.

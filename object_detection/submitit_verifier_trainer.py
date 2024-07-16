@@ -9,7 +9,7 @@ from new_distributed_trainer import train_with_multiple_gpus
 
 # GPU_NUM = 2
 GPU_NUM = 4
-# slurm_partition = "dev_gpu_4_a100" #! does not work?!?!?
+# slurm_partition = "dev_gpu_4_a100"  #! does not work?!?!?
 slurm_partition = "gpu_4"
 
 
@@ -30,14 +30,22 @@ slurm_partition = "gpu_4"
 
 #! to check if repeate datasets actually repeats a epoch -> max_epochs set to 1 should run for 3 epochs
 #! might be under 23720087_submission -> unfortunaly cancled with scancel -u $USER
-#! new run to obtain weights 23737571
-config_file = "./to_check_if_epochs_repeated_atss_r50_voc0712.py"
+#! new run to obtain weights 23737571 -> did run 3 times
+# config_file = "./to_check_if_epochs_repeated_atss_r50_voc0712.py"
+
+
+config_file = "configs_verified/centernet_r50_voc0712_cocometric.py"
 
 slurm_log_folder_path = (
     "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
 )
 specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
 
+# current job 23871411
+
+# voc vs cocometric only changed voc/cocometric eveything else is the same
+# vocmetric job: 23871594
+# cocometric job: 23871596
 
 executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
 
@@ -46,7 +54,7 @@ executor.update_parameters(
     # timeout_min=5, might cause conflicts with slurm_time
     slurm_partition=f"{slurm_partition}",
     slurm_gres=f"gpu:{GPU_NUM}",
-    slurm_time="02:00:00",
+    slurm_time="02:30:00",
 )
 
 #! WORKS WITH WALLTIME ERROR

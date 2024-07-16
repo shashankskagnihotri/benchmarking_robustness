@@ -15,6 +15,9 @@ def get_filenames(folder_paths):
     return filenames
 
 
+files_with_dynamic_intervals = []
+
+
 def unique_train_cfg_finder(folder_paths):
     filenames = get_filenames(folder_paths)
     unique_train_cfgs = set()
@@ -25,10 +28,49 @@ def unique_train_cfg_finder(folder_paths):
             train_cfg = cfg.get("train_cfg")
             if train_cfg is not None:
                 unique_train_cfgs.add(str(train_cfg))
+                if "dynamic_intervals" in str(train_cfg):
+                    files_with_dynamic_intervals.append(filename)
+
         except Exception as e:
             print(f"Error processing file {filename} in folder {folder_path}: {e}")
 
     return unique_train_cfgs
+
+
+def unique_train_dataloader_sampler_finder(folder_paths):
+    filenames = get_filenames(folder_paths)
+    unique_train_dataloader_samplers = set()
+
+    for folder_path, filename in filenames:
+        try:
+            cfg = Config.fromfile(f"{folder_path}/{filename}")
+
+            train_dataloader_sampler = cfg.train_dataloader.sampler
+            if train_dataloader_sampler is not None:
+                unique_train_dataloader_samplers.add(str(train_dataloader_sampler))
+
+        except Exception as e:
+            print(f"Error processing file {filename} in folder {folder_path}: {e}")
+
+    return unique_train_dataloader_samplers
+
+
+def unique_val_interval_finder(folder_paths):
+    filenames = get_filenames(folder_paths)
+    unique_intervals = set()
+
+    for folder_path, filename in filenames:
+        try:
+            cfg = Config.fromfile(f"{folder_path}/{filename}")
+
+            val_interval = cfg.train_cfg.val_interval
+            if val_interval is not None:
+                unique_intervals.add(str(val_interval))
+
+        except Exception as e:
+            print(f"Error processing file {filename} in folder {folder_path}: {e}")
+
+    return unique_intervals
 
 
 folder_paths = [
@@ -40,9 +82,27 @@ folder_paths = [
 
 unique_train_cfgs = unique_train_cfg_finder(folder_paths)
 
+print("train_cfg")
 for cfg in unique_train_cfgs:
     print(cfg)
+print("\n\n\n")
 
+
+unique_train_dataloader_sampler = unique_train_dataloader_sampler_finder(folder_paths)
+
+print("dataloader")
+for dataloader in unique_train_dataloader_sampler:
+    print(dataloader)
+print("\n\n\n")
+
+unique_intervals = unique_val_interval_finder(folder_paths)
+
+for interval in unique_intervals:
+    print(interval)
+print("\n\n\n")
+
+
+print(files_with_dynamic_intervals)
 
 # {'max_epochs': 24, 'type': 'EpochBasedTrainLoop', 'val_interval': 1}
 # {'max_epochs': 150, 'type': 'EpochBasedTrainLoop', 'val_interval': 1}
@@ -67,3 +127,12 @@ for cfg in unique_train_cfgs:
 # {'max_epochs': 300, 'type': 'EpochBasedTrainLoop', 'val_interval': 10}
 # {'max_epochs': 50, 'type': 'EpochBasedTrainLoop', 'val_interval': 1}
 # {'max_epochs': 8, 'type': 'EpochBasedTrainLoop', 'val_interval': 1}
+
+
+# train_cfg intervals
+# 75000
+# 10
+# 180000
+# 1
+# 5
+# 7

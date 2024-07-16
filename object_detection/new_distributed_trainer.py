@@ -29,11 +29,10 @@ def train_with_multiple_gpus(
 
 if __name__ == "__main__":
     train_with_multiple_gpus(
-        config="configs_erroneous/verification/yolox_r101_coco.py",
+        config="configs_verified/centernet_r50_voc0712.py",
         work_dir="slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer",
         gpus=3,
     )
 
-# yolox_r101_coco.py
 
 # python -m pudb new_distributed_trainer.py
