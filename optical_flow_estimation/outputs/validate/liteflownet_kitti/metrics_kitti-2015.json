@@ -399,6 +399,47 @@
                 "own_epe_ground_truth": 23.69183036841452,
                 "cosim_ground_truth": 0.18225565345492215
             }
+        },
+        {
+            "start_time": "2024-07-08 20:05:39",
+            "model": "liteflownet",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.05,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-07-08 20:08:14",
+            "duration": "00:02:34",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 35.42054696559906,
+                "px1": 0.022997721855454074,
+                "px3": 0.12098485303053166,
+                "px5": 0.2085772435204126,
+                "outlier": 87.90151472091675,
+                "own_epe": 30.231266024112703,
+                "epe_orig_preds": 12.518882405757903,
+                "own_epe_orig_preds": 12.518882486820221,
+                "cosim_target": 0.0,
+                "cosim_orig_preds": 0.5317535460274666,
+                "epe_ground_truth": 12.343696571588517,
+                "own_epe_ground_truth": 25.54997126579285,
+                "cosim_ground_truth": 0.14584182826802133,
+                "l2_delta1": 0.04799922099336982,
+                "l2_delta2": 0.04801319394260645,
+                "l2_delta12": 0.048006249852478505,
+                "l0_delta1": 1317605.665,
+                "l0_delta2": 1317810.45,
+                "l0_delta12": 2635416.115,
+                "l_inf_delta1": 0.050000011920928955,
+                "l_inf_delta2": 0.050000011920928955,
+                "l_inf_delta12": 0.050000011920928955
+            }
+        }
+    ]
+}}
         }
     ]
 }

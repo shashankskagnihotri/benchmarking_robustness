@@ -44,4 +44,9 @@ conda install conda-forge::cudatoolkit-dev=11.6.0
 
 ```
 
+If you get ImportError: cannot import name 'packaging' from 'pkg_resources', try:
+```
+python -m pip install setuptools==69.5.1
+```
+
 Additionally, if you are working on a cluster and have problems with the installation of the optional dependencies, try claiming a GPU via srun and try installing again.

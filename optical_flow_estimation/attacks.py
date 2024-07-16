@@ -656,7 +656,7 @@ def attack_one_dataloader(
                 targeted_inputs = inputs.copy()
 
             iteration_metrics = {}
-
+            #pdb.set_trace()
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
                     (
@@ -693,7 +693,18 @@ def attack_one_dataloader(
                     preds = model(inputs)
 
             for key in preds:
-                preds[key] = preds[key].detach()
+                if torch.is_tensor(preds[key]):
+                    preds[key] = preds[key].detach()
+            for key in inputs:
+                if torch.is_tensor(inputs[key]):
+                    inputs[key] = inputs[key].detach()
+            if attack_args["attack"] != "none":
+                for key in perturbed_inputs:
+                    if torch.is_tensor(perturbed_inputs[key]):
+                        perturbed_inputs[key] = perturbed_inputs[key].detach()
+            for key in iteration_metrics:
+                if torch.is_tensor(iteration_metrics[key]):
+                    iteration_metrics[key] = iteration_metrics[key].detach()
 
             if args.warm_start:
                 if (
@@ -896,6 +907,13 @@ def attack_one_dataloader(
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
 
+            del preds
+            del inputs
+            del iteration_metrics
+            if attack_args["attack"] != "none":
+                del perturbed_inputs
+            torch.cuda.empty_cache()
+
     if args.write_individual_metrics:
         ind_df = pd.DataFrame(metrics_individual)
         args.output_path.mkdir(parents=True, exist_ok=True)
@@ -948,7 +966,7 @@ def generate_outputs(
 
     if args.write_outputs:
         if perturbed_inputs is not None:
-            perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
+            #perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
             _write_to_npy_file(
                 args,
                 preds,
@@ -971,16 +989,28 @@ def _write_to_npy_file(
     perturbed_inputs: Dict[str, torch.Tensor] = None,
     attack_args: Optional[Dict[str, List[object]]] = None,
 ) -> None:
+
     out_root_dir = Path(args.output_path) / dataloader_name
     extra_dirs = ""
     if metadata is not None:
         img_path = Path(metadata["image_paths"][0][0])
+        img2_path = Path(metadata["image_paths"][1][0])
         image_name = img_path.stem
+        image2_name = img2_path.stem
         if "sintel" in dataloader_name:
             seq_name = img_path.parts[-2]
             extra_dirs = seq_name
     else:
         image_name = f"{batch_idx:08d}"
+        image2_name = f"{batch_idx:08d}_2"
+
+    if args.flow_format != "original":
+            flow_ext = args.flow_format
+    else:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
+            flow_ext = "png"
+        else:
+            flow_ext = "flo"
 
     for k, v in preds.items():
         if isinstance(v, np.ndarray):
@@ -989,22 +1019,35 @@ def _write_to_npy_file(
                 for arg, val in attack_args.items():
                     out_dir = out_dir / f"{arg}={val}"
 
-            if k == "flows":
+        if flow_ext == "png":
+            if k == "flows_viz":
                 out_dir_flows = out_dir / k / extra_dirs
                 out_dir_flows.mkdir(parents=True, exist_ok=True)
-                np.savez_compressed(
-                    str(out_dir_flows / f"{image_name}"), v.astype(np.uint8)
-                )
+                # np.savez_compressed(
+                #     str(out_dir_flows / f"{image_name}"), v.astype(np.uint8)
+                # )
+                cv.imwrite(str(out_dir_flows / f"{image_name}.{flow_ext}"), v.astype(np.uint8))
+        elif k == "flows":
+                flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
 
     if perturbed_inputs is not None:
         for k, v in perturbed_inputs.items():
-            if isinstance(v, np.ndarray):
-                if k == "images":
-                    out_dir_imgs = out_dir / k / extra_dirs
-                    out_dir_imgs.mkdir(parents=True, exist_ok=True)
-                    np.savez_compressed(
-                        str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8)
-                    )
+            if k == "images":
+                out_dir_imgs = out_dir / k / extra_dirs
+                out_dir_imgs.mkdir(parents=True, exist_ok=True)
+                if v.max() <= 1:
+                    v = v * 255
+                
+                image = v[0, 0].detach().cpu()
+                image2 = v[0, 1].detach().cpu()
+                # Convert from (C, H, W) to (H, W, C)
+                image = image.permute(1, 2, 0).numpy()
+                image2 = image2.permute(1, 2, 0).numpy()
+                output_filepath = out_dir_imgs / f"{image_name}.png"
+                output_filepath2 = out_dir_imgs / f"{image2_name}.png"
+
+                cv.imwrite(str(output_filepath), image.astype(np.uint8))
+                cv.imwrite(str(output_filepath2), image2.astype(np.uint8))
 
 
 def _write_to_file(
