@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --array=0-74%4
+#SBATCH --array=0-14%4
 #SBATCH --job-name=skflow_sintel-clean_cc
 #SBATCH --output=slurm/skflow_sintel-clean_cc_%A_%a.out
 #SBATCH --error=slurm/skflow_sintel-clean_cc_err_%A_%a.out
@@ -16,7 +16,7 @@ dataset="sintel-clean"
 checkpoint="sintel"
 attack="common_corruptions"
 cc_names="gaussian_noise shot_noise impulse_noise defocus_blur glass_blur motion_blur zoom_blur snow frost fog brightness contrast elastic_transform pixelate jpeg_compression"
-cc_severitys="1 2 3 4 5"
+cc_severitys="3"
 jobnum=0
 
 #SLURM_ARRAY_TASK_ID=0
