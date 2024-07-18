@@ -1,8 +1,0 @@
-GpuFreq=control_disabled
-submitit WARNING (2024-05-10 13:13:52,657) - Bypassing signal SIGCONT
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 23562672 ON uc2n513 CANCELLED AT 2024-05-10T13:15:53 DUE TO TIME LIMIT ***
-slurmstepd: error: *** STEP 23562672.0 ON uc2n513 CANCELLED AT 2024-05-10T13:15:53 DUE TO TIME LIMIT ***
-submitit WARNING (2024-05-10 13:15:53,600) - Bypassing signal SIGTERM
-submitit WARNING (2024-05-10 13:15:53,600) - Bypassing signal SIGCONT
-submitit WARNING (2024-05-10 13:15:53,601) - Bypassing signal SIGTERM
