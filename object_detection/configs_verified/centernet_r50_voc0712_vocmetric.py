@@ -32,7 +32,7 @@ image_size = (
 load_from = None
 log_level = "INFO"
 log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
-max_epochs = 8
+max_epochs = 4
 model = dict(
     backbone=dict(
         depth=50,
@@ -326,7 +326,7 @@ test_pipeline = [
         type="PackDetInputs",
     ),
 ]
-train_cfg = dict(max_epochs=8, type="EpochBasedTrainLoop", val_interval=5)
+train_cfg = dict(max_epochs=4, type="EpochBasedTrainLoop", val_interval=1)
 train_dataloader = dict(
     batch_size=8,
     dataset=dict(

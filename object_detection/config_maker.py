@@ -620,6 +620,15 @@ for (neck, backbone, dataset), found in all_combis.items():
                 )
                 adjust_param_scheduler(cfg, factor=3)
 
+                config_keybased_value_changer(
+                    config_dictionary=cfg._cfg_dict,
+                    searched_key="val_interval",
+                    do_new=False,
+                    new_absolute_value=0,
+                    change_old_value_by=3,
+                    prefix="",
+                )
+
         elif neck == "Yolo":
             pass
 
@@ -676,6 +685,15 @@ for (neck, backbone, dataset), found in all_combis.items():
                     )
                     adjust_param_scheduler(cfg, factor=3)
 
+                    config_keybased_value_changer(
+                        config_dictionary=cfg._cfg_dict,
+                        searched_key="val_interval",
+                        do_new=False,
+                        new_absolute_value=0,
+                        change_old_value_by=3,
+                        prefix="",
+                    )
+
         #! put in for real in training and testing!!!
         # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
         # cfg.visualizer.vis_backends[0].init_kwargs = dict(
@@ -712,6 +730,7 @@ for file in files:
             cfg.auto_scale_lr.enable = True
         else:
             cfg.auto_scale_lr = dict(enable=True)
+            cfg.auto_scale_lr.base_batch_size = 16
 
 
 test_folder_path = "./configs_to_test"
@@ -721,8 +740,9 @@ for test_file in test_files:
     cfg = Config.fromfile(os.path.join(test_folder_path, test_file))
     if hasattr(cfg, "auto_scale_lr"):
         cfg.auto_scale_lr.enable = True
-        # cfg.auto_scale_lr.base_batch_size = cfg.train_dataloader.batch_size
     else:
         cfg.auto_scale_lr = dict(enable=True)
+        cfg.auto_scale_lr.base_batch_size = 16
+
 
 #! Please remember to check the bottom of the specific config file you want to use, it will have auto_scale_lr.base_batch_size if the batch size is not 16. If you can’t find those values, check the config file which in _base_=[xxx] and you will find it. Please do not modify its values if you want to automatically scale the LR.
