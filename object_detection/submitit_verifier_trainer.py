@@ -8,7 +8,7 @@ from new_trainer import trainer
 from new_distributed_trainer import train_with_multiple_gpus
 
 # GPU_NUM = 2
-GPU_NUM = 4
+GPU_NUM = 1
 # slurm_partition = "dev_gpu_4_a100"  #! does not work?!?!?
 slurm_partition = "gpu_4"
 
@@ -44,8 +44,8 @@ specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_fil
 # current job 23871411
 
 # voc vs cocometric only changed voc/cocometric eveything else is the same
-# vocmetric job: 23871594
-# cocometric job: 23871596
+# vocmetric job: 23875097, 23877306
+# cocometric job: 23875095, 23877307
 
 executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
 
@@ -54,7 +54,7 @@ executor.update_parameters(
     # timeout_min=5, might cause conflicts with slurm_time
     slurm_partition=f"{slurm_partition}",
     slurm_gres=f"gpu:{GPU_NUM}",
-    slurm_time="02:30:00",
+    slurm_time="01:30:00",
 )
 
 #! WORKS WITH WALLTIME ERROR
