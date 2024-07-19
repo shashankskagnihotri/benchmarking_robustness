@@ -11,6 +11,10 @@ from misc import find_latest_epoch_file, find_python_files, format_value
 
 load_dotenv()  # Load environment variables from .env file
 my_email = os.getenv("MY_EMAIL")
+WAND_PROJECT = os.getenv("WANDB_PROJECT")
+WAND_ENTITY = os.getenv("WANDB_ENTITY")
+assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
+assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 assert my_email is not None, "Please set the MY_EMAIL environment variable"
 
 # Set up the logging configuration to use RichHandler
@@ -28,11 +32,11 @@ TARGETED = False
 RANDOM_START = False
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models"
-ATTACKS = {"PGD": pgd_attack, "FGSM": fgsm_attack, "BIM": bim_attack, "none": "none"}
+ATTACKS = {"PGD": pgd_attack, "FGSM": fgsm_attack, "BIM": bim_attack, "none": None}
 STEPS_ATTACK = {
-    "PGD": [1, 20],  # [1, 5, 10, 20]
+    "PGD": [20],
     "FGSM": [None],
-    "BIM": [1, 20],
+    "BIM": [20],
     "none": [1],
 }
 EPSILONS = {
@@ -85,22 +89,11 @@ def get_configs_and_checkpoints(model_dir):
     return config_files, checkpoint_files
 
 
-def submit_attack(config_file, checkpoint_file, attack, attack_kwargs, result_dir):
-    job = executor.submit(
-        run_attack_val,
-        attack,
-        config_file,
-        checkpoint_file,
-        attack_kwargs,
-        result_dir,
-    )
-    return job
-
-
 config_files, checkpoint_files = get_configs_and_checkpoints(MODEL_DIR)
 
 logger.info(f"found {len(config_files)} config and checkpoint files")
 
+# Set up executor for slurm
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
     slurm_partition="gpu_4",
@@ -108,11 +101,13 @@ executor.update_parameters(
     nodes=1,
     cpus_per_task=1,
     tasks_per_node=1,
-    slurm_mem=10_000,  # 10GB per task
+    slurm_mem=20_000,
     slurm_mail_type="all",
+    slurm_job_name="attacks",
 )
 jobs = []
 
+# Submit every new parameter combination
 for attack_name, attack in ATTACKS.items():
     num_steps = STEPS_ATTACK[attack_name]
     epsilons = EPSILONS[attack_name]
@@ -143,12 +138,14 @@ for attack_name, attack in ATTACKS.items():
                     del attack_kwargs["norm"]
                 elif attack == bim_attack:
                     del attack_kwargs["random_start"]
-                elif attack == "none":
+                elif attack is None:
                     attack_kwargs = {
                         "epsilon": 0,
                         "alpha": 0,
                         "steps": 0,
                     }
+                else:
+                    raise ValueError(f"Unknown attack: {attack}")
 
                 logger.debug(str(config_file))
                 logger.debug(str(checkpoint_file))
@@ -164,10 +161,11 @@ for attack_name, attack in ATTACKS.items():
                 else:
                     logger.info(f"running attack {attack_name} with {attack_kwargs}")
                     logger.info(f"saving results to {result_dir}")
-                    job = submit_attack(
+                    job = executor.submit(
+                        run_attack_val,
+                        attack,
                         config_file,
                         checkpoint_file,
-                        attack,
                         attack_kwargs,
                         result_dir,
                     )

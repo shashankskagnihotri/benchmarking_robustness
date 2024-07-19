@@ -1,5 +1,7 @@
 import argparse
 import logging
+from time import sleep
+import pandas as pd
 import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
@@ -15,6 +17,7 @@ from mmengine.runner.base_loop import BaseLoop
 from torch.utils.data import DataLoader
 from mmengine.evaluator import Evaluator
 import wandb
+from copy import deepcopy
 
 
 def pgd_attack(
@@ -25,18 +28,17 @@ def pgd_attack(
     alpha: float,
     targeted: bool,
     random_start: bool,
+    evaluators: List[Evaluator],
 ):
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
 
+    # Preprocess the data
     images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-
-    # from retinanet_r50_fpn.py. TODO: read from runner.model
-    mean = [123.675, 116.28, 103.53]
-    std = [58.395, 57.12, 57.375]
-
+    assert isinstance(images, torch.Tensor)
+    mean = runner.model.data_preprocessor.mean
+    std = runner.model.data_preprocessor.std
     images = denorm(images, mean, std)
     adv_images = images.clone().float().detach().to("cuda")
-    adv_images.requires_grad = True
 
     if targeted:
         raise NotImplementedError
@@ -44,7 +46,9 @@ def pgd_attack(
     if random_start:
         raise NotImplementedError
 
-    for _ in range(steps):
+    evaluator_process(evaluators[0], data_batch_prepro, runner)
+
+    for step in range(steps):
         adv_images.requires_grad = True
         data_batch_prepro["inputs"][0] = adv_images
         losses = runner.model(**data_batch_prepro, mode="loss")
@@ -59,15 +63,27 @@ def pgd_attack(
         delta = torch.clamp(adv_images - images, min=-epsilon, max=epsilon)
         adv_images = torch.clamp(images + delta, min=0, max=255).detach()
 
-    adv_images.requires_grad = False
-    transforms.Normalize(mean, std, inplace=True)(adv_images)
-    data_batch_prepro["inputs"][0] = adv_images
+        data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
     return data_batch_prepro
 
 
+def evaluator_process(evaluator, data_batch_prepro, runner):
+    with torch.no_grad():
+        outputs = runner.model(**data_batch_prepro, mode="predict")
+
+    evaluator.process(data_samples=outputs, data_batch=data_batch_prepro)
+
+
 def fgsm_attack(
-    data_batch: dict, runner, epsilon: float, alpha: float, norm: str, targeted: bool
+    data_batch: dict,
+    runner,
+    epsilon: float,
+    alpha: float,
+    norm: str,
+    targeted: bool,
+    evaluators: List[Evaluator],
 ):
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
 
@@ -80,6 +96,8 @@ def fgsm_attack(
 
     images = denorm(images, mean, std)
     adv_images = images.clone().float().detach().to("cuda")
+
+    evaluator_process(evaluators[0], data_batch_prepro, runner)
 
     # Get gradient
     adv_images.requires_grad = True
@@ -113,8 +131,8 @@ def fgsm_attack(
 
     # Return the perturbed image
     adv_images.requires_grad = False
-    transforms.Normalize(mean, std, inplace=True)(adv_images)
-    data_batch_prepro["inputs"][0] = adv_images
+    data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+    evaluator_process(evaluators[1], data_batch_prepro, runner)
 
     return data_batch_prepro
 
@@ -127,6 +145,7 @@ def bim_attack(
     norm: str,
     targeted: bool,
     steps: int,
+    evaluators: List[Evaluator],
 ):
     """see https://arxiv.org/pdf/1607.02533.pdf"""
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
@@ -140,8 +159,9 @@ def bim_attack(
 
     images = denorm(images, mean, std)
     adv_images = images.clone().float().detach().to("cuda")
+    evaluator_process(evaluators[0], data_batch_prepro, runner)
 
-    for _ in range(steps):
+    for step in range(steps):
         # Get gradient
         adv_images.requires_grad = True
         data_batch_prepro["inputs"][0] = adv_images
@@ -172,17 +192,15 @@ def bim_attack(
             delta = delta * factor.view(-1, 1, 1, 1)
         adv_images = torch.clamp(images + delta, 0, 255)
 
-    # Return the perturbed image
-    adv_images.requires_grad = False
-    transforms.Normalize(mean, std, inplace=True)(adv_images)
-    data_batch_prepro["inputs"][0] = adv_images
+        data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
     return data_batch_prepro
 
 
 # restores the tensors to their original scale
 # https://pytorch.org/tutorials/beginner/fgsm_tutorial.html
-def denorm(batch, mean=[0.1307], std=[0.3081]):
+def denorm(batch, mean, std):
     """
     Convert a batch of tensors to their original scale.
 
@@ -200,6 +218,110 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
         std = torch.tensor(std).to("cuda")
 
     return batch * std.view(1, -1, 1, 1) + mean.view(1, -1, 1, 1)
+
+
+def replace_val_loop(attack: Callable, attack_kwargs: dict):
+    LOOPS.module_dict.pop("ValLoop")
+
+    @LOOPS.register_module()
+    class ValLoop(BaseLoop):
+        def __init__(
+            self,
+            runner,
+            dataloader: Union[DataLoader, Dict],
+            evaluator: Union[Evaluator, Dict, List],
+            fp16: bool = False,
+        ) -> None:
+            super().__init__(runner, dataloader)
+
+            if isinstance(evaluator, (dict, list)):
+                self.evaluator = runner.build_evaluator(evaluator)
+            else:
+                assert isinstance(evaluator, Evaluator), (
+                    "evaluator must be one of dict, list or Evaluator instance, "
+                    f"but got {type(evaluator)}."
+                )
+                self.evaluator = evaluator
+            if hasattr(self.dataloader.dataset, "metainfo"):
+                self.evaluator.dataset_meta = getattr(
+                    self.dataloader.dataset, "metainfo"
+                )
+                self.runner.visualizer.dataset_meta = getattr(
+                    self.dataloader.dataset, "metainfo"
+                )
+            else:
+                print_log(
+                    f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
+                    "metainfo. ``dataset_meta`` in evaluator, metric and "
+                    "visualizer will be None.",
+                    logger="current",
+                    level=logging.WARNING,
+                )
+            self.fp16 = fp16
+
+        def run(self) -> list[dict]:
+            self.runner.call_hook("before_val")
+            self.runner.call_hook("before_val_epoch")
+            self.runner.model.eval()
+
+            steps = attack_kwargs.get("steps", 1)
+            # +1 since we want to evaluate the original data as well
+            evaluators = [deepcopy(self.evaluator) for _ in range(steps + 1)]
+
+            for idx, data_batch in enumerate(self.dataloader):
+                self.run_iter(idx, data_batch, evaluators)
+                if idx > 10:
+                    break
+
+            metrics = [
+                evaluator.evaluate(10)  # type: ignore
+                for evaluator in evaluators
+            ]
+
+            # Log history of metrics to wandb
+            wandb.define_metric("step")
+            wandb.define_metric("*", step_metric="step")
+
+            for step, metric in enumerate(metrics):
+                wandb.log({**metric, "step": step})
+                sleep(2)
+
+            metrics_w_steps = [
+                {**item, "steps": index} for index, item in enumerate(metrics)
+            ]
+            metrics_df = pd.DataFrame(metrics_w_steps)
+            table = wandb.Table(dataframe=metrics_df)
+            wandb.log({"metrics": table})
+
+            self.runner.call_hook(
+                "after_val_epoch", metrics=metrics[-1]
+            )  # metrics now a list of dicts, standard hooks expect dict
+            self.runner.call_hook("after_val")
+            return metrics
+
+        def run_iter(
+            self,
+            idx,
+            data_batch: Sequence[dict],
+            evaluators: List[Evaluator],
+        ):
+            self.runner.call_hook(
+                "before_val_iter", batch_idx=idx, data_batch=data_batch
+            )
+
+            data_batch_prepro = attack(
+                data_batch, self.runner, **attack_kwargs, evaluators=evaluators
+            )
+
+            with torch.no_grad():
+                outputs = self.runner.model(**data_batch_prepro, mode="predict")
+
+            self.runner.call_hook(
+                "after_val_iter",
+                batch_idx=idx,
+                data_batch=data_batch_prepro,
+                outputs=outputs,
+            )
 
 
 def run_attack_val(
@@ -235,85 +357,12 @@ def run_attack_val(
         )
     )
 
-    # Hopefully avoids CUDA OOM errors
+    # Hopefully voids CUDA OOM errors
     torch.cuda.empty_cache()
 
     # Register the attack loop if an attack is provided
     if attack is not None:
-        LOOPS.module_dict.pop("ValLoop")
-
-        @LOOPS.register_module()
-        class ValLoop(BaseLoop):
-            def __init__(
-                self,
-                runner,
-                dataloader: Union[DataLoader, Dict],
-                evaluator: Union[Evaluator, Dict, List],
-                fp16: bool = False,
-            ) -> None:
-                super().__init__(runner, dataloader)
-
-                if isinstance(evaluator, (dict, list)):
-                    self.evaluator = runner.build_evaluator(evaluator)
-                else:
-                    assert isinstance(evaluator, Evaluator), (
-                        "evaluator must be one of dict, list or Evaluator instance, "
-                        f"but got {type(evaluator)}."
-                    )
-                    self.evaluator = evaluator
-                if hasattr(self.dataloader.dataset, "metainfo"):
-                    self.evaluator.dataset_meta = getattr(
-                        self.dataloader.dataset, "metainfo"
-                    )
-                    self.runner.visualizer.dataset_meta = getattr(
-                        self.dataloader.dataset, "metainfo"
-                    )
-                else:
-                    print_log(
-                        f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
-                        "metainfo. ``dataset_meta`` in evaluator, metric and "
-                        "visualizer will be None.",
-                        logger="current",
-                        level=logging.WARNING,
-                    )
-                self.fp16 = fp16
-
-            def run(self) -> dict:
-                self.runner.call_hook("before_val")
-                self.runner.call_hook("before_val_epoch")
-                self.runner.model.eval()
-                for idx, data_batch in enumerate(self.dataloader):
-                    self.run_iter(idx, data_batch)
-
-                metrics = self.evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
-                wandb.log(metrics)
-                self.runner.call_hook("after_val_epoch", metrics=metrics)
-                self.runner.call_hook("after_val")
-                return metrics
-
-            def run_iter(
-                self,
-                idx,
-                data_batch: Sequence[dict],
-            ):
-                self.runner.call_hook(
-                    "before_val_iter", batch_idx=idx, data_batch=data_batch
-                )
-
-                data_batch_prepro = attack(data_batch, self.runner, **attack_kwargs)
-
-                with torch.no_grad():
-                    outputs = self.runner.model(**data_batch_prepro, mode="predict")
-
-                self.evaluator.process(
-                    data_samples=outputs, data_batch=data_batch_prepro
-                )
-                self.runner.call_hook(
-                    "after_val_iter",
-                    batch_idx=idx,
-                    data_batch=data_batch_prepro,
-                    outputs=outputs,
-                )
+        replace_val_loop(attack, attack_kwargs)
 
     # Initialize the runner
     runner = Runner.from_cfg(cfg)
