@@ -243,7 +243,6 @@ class InputModel(nn.Module):
         image1 = torch.clamp(image1, 0., 1.)
         image2 = torch.clamp(image2, 0., 1.)
 
-        pdb.set_trace()
         dic = replace_images_dic(inputs, image1, image2, clone=True)
 
         return self.model_loaded(dic)
