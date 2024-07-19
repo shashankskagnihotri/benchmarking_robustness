@@ -54,7 +54,6 @@ CORRUPTIONS = [
     "cc/shot_noise",
     "cc/snow",
     "cc/zoom_blur",
-    "none",  # might be duplicated if used with multiple severities
 ]
 SEVERITIES = [3]
 # SEVERITIES = [1, 2, 3, 4, 5]
