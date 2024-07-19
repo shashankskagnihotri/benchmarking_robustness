@@ -27,16 +27,36 @@ WORK_DIR = "slurm/logs/corruptions/%j"
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models"
 CORRUPTIONS = [
-    # only examples so far
-    "3dcc/bit_error",
+    # "3dcc/bit_error",
     "3dcc/color_quant",
     "3dcc/far_focus",
+    "3dcc/fog_3d",
+    "3dcc/h265_abr",
+    "3dcc/h265_crf",
+    "3dcc/iso_noise",
+    "3dcc/low_light",
+    "3dcc/motion_blur_vid",
+    "3dcc/near_focus",
+    "3dcc/xy_motion_blur",
+    "3dcc/z_motion_blur",
+    "3dcc/zoom_blur_vid",
     "cc/brightness",
     "cc/contrast",
     "cc/defocus_blur",
+    "cc/elastic_transform",
+    "cc/fog",
+    "cc/frost",
+    "cc/gaussian_blur",
+    "cc/impulse_noise",
+    "cc/jpeg_compression",
+    "cc/motion_blur",
+    "cc/pixelate",
+    "cc/shot_noise",
+    "cc/snow",
+    "cc/zoom_blur",
     "none",  # might be duplicated if used with multiple severities
 ]
-SEVERITIES = [1, 5]
+SEVERITIES = [3]
 # SEVERITIES = [1, 2, 3, 4, 5]
 
 logger.debug("Starting attack tasks")
@@ -80,6 +100,7 @@ executor.update_parameters(
     tasks_per_node=1,
     slurm_mem=10_000,  # 10GB per task
     slurm_mail_type="all",
+    slurm_job_name="corruptions",
 )
 jobs = []
 
