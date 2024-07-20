@@ -117,7 +117,7 @@ for attack_name, attack in ATTACKS.items():
     for steps, epsilon, alpha, norm in itertools.product(
         num_steps, epsilons, alphas, norms
     ):
-        slurm_time = f"{120 if steps is None else 120*steps}:00"
+        slurm_time = f"48:00:00"
         executor.update_parameters(slurm_time=slurm_time)
 
         with executor.batch():

@@ -270,11 +270,9 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict):
 
             for idx, data_batch in enumerate(self.dataloader):
                 self.run_iter(idx, data_batch, evaluators)
-                if idx > 10:
-                    break
 
             metrics = [
-                evaluator.evaluate(10)  # type: ignore
+                evaluator.evaluate(len(self.dataloader.dataset))  # type: ignore
                 for evaluator in evaluators
             ]
 
@@ -285,13 +283,6 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict):
             for step, metric in enumerate(metrics):
                 wandb.log({**metric, "step": step})
                 sleep(2)
-
-            metrics_w_steps = [
-                {**item, "steps": index} for index, item in enumerate(metrics)
-            ]
-            metrics_df = pd.DataFrame(metrics_w_steps)
-            table = wandb.Table(dataframe=metrics_df)
-            wandb.log({"metrics": table})
 
             self.runner.call_hook(
                 "after_val_epoch", metrics=metrics[-1]
