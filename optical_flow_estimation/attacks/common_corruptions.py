@@ -1,7 +1,7 @@
 from typing import Dict, List
 import torch
 import numpy as np
-from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
+from ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import (
     get_image_tensors,
     replace_images_dic,

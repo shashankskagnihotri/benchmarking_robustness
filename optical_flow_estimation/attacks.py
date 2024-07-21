@@ -35,12 +35,16 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import ptlflow
-from ptlflow_attacked.ptlflow import get_model, get_model_reference
-from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
-from ptlflow_attacked.ptlflow.utils import flow_utils
-from ptlflow_attacked.ptlflow.utils.io_adapter import IOAdapter
-from ptlflow_attacked.ptlflow.utils.utils import (
+current_directory = os.path.dirname(os.path.abspath(__file__))
+ptl_directory = os.path.join(current_directory, "ptlflow")
+
+sys.path.insert(0, ptl_directory)
+
+from ptlflow import get_model, get_model_reference
+from ptlflow.models.base_model.base_model import BaseModel
+from ptlflow.utils import flow_utils
+from ptlflow.utils.io_adapter import IOAdapter
+from ptlflow.utils.utils import (
     add_datasets_to_parser,
     config_logging,
     get_list_of_available_models_list,
@@ -61,7 +65,7 @@ from attacks.attack_utils.attack_args_parser import (
 )
 import attacks.attack_utils.loss_criterion as losses
 from attacks.attack_utils.loss_criterion import LossCriterion
-from ptlflow_attacked.validate import (
+from validate import (
     _get_model_names,
 )
 
@@ -656,7 +660,7 @@ def attack_one_dataloader(
                 targeted_inputs = inputs.copy()
 
             iteration_metrics = {}
-            #pdb.set_trace()
+            # pdb.set_trace()
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
                     (
@@ -966,7 +970,7 @@ def generate_outputs(
 
     if args.write_outputs:
         if perturbed_inputs is not None:
-            #perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
+            # perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
             _write_to_npy_file(
                 args,
                 preds,
@@ -1005,7 +1009,7 @@ def _write_to_npy_file(
         image2_name = f"{batch_idx:08d}_2"
 
     if args.flow_format != "original":
-            flow_ext = args.flow_format
+        flow_ext = args.flow_format
     else:
         if "kitti" in dataloader_name or "hd1k" in dataloader_name:
             flow_ext = "png"
@@ -1026,9 +1030,13 @@ def _write_to_npy_file(
                 # np.savez_compressed(
                 #     str(out_dir_flows / f"{image_name}"), v.astype(np.uint8)
                 # )
-                cv.imwrite(str(out_dir_flows / f"{image_name}.{flow_ext}"), v.astype(np.uint8))
+                cv.imwrite(
+                    str(out_dir_flows / f"{image_name}.{flow_ext}"), v.astype(np.uint8)
+                )
         elif k == "flows":
-                flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
+            out_dir_flows = out_dir / k / extra_dirs
+            out_dir_flows.mkdir(parents=True, exist_ok=True)
+            flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
 
     if perturbed_inputs is not None:
         for k, v in perturbed_inputs.items():
@@ -1037,7 +1045,7 @@ def _write_to_npy_file(
                 out_dir_imgs.mkdir(parents=True, exist_ok=True)
                 if v.max() <= 1:
                     v = v * 255
-                
+
                 image = v[0, 0].detach().cpu()
                 image2 = v[0, 1].detach().cpu()
                 # Convert from (C, H, W) to (H, W, C)
@@ -1088,7 +1096,7 @@ def _write_to_file(
             ):
                 if v.max() <= 1:
                     v = v * 255
-                pdb.set_trace()
+                # pdb.set_trace()
                 cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
 
 
@@ -1102,7 +1110,7 @@ if __name__ == "__main__":
         FlowModel = get_model_reference(sys.argv[1])
         parser = FlowModel.add_model_specific_args(parser)
 
-    add_datasets_to_parser(parser, "./ptlflow_attacked/datasets.yml")
+    add_datasets_to_parser(parser, "./ptlflow/datasets.yml")
 
     args = parser.parse_args()
 
