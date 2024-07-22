@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 import torch
-from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
+from ptlflow.models.base_model.base_model import BaseModel
 from attacks.adversarial_attacks_pytorch.torchattacks import FAB
 
 
@@ -21,4 +21,4 @@ def fab(
     images = None
     labels = None
 
-    return preds, perturbed_inputs # images, labels, preds, None
+    return preds, perturbed_inputs  # images, labels, preds, None

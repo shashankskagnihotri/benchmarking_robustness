@@ -1,7 +1,7 @@
 from argparse import Namespace
 from typing import Any, Dict, List, Optional
 import torch
-from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
+from ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import (
     get_image_tensors,
     get_image_grads,
@@ -10,7 +10,6 @@ from attacks.attack_utils.utils import (
 )
 import torch.nn as nn
 import attacks.attack_utils.loss_criterion as losses
-import pdb
 import torch.optim as optim
 
 
@@ -26,7 +25,7 @@ def pcfa(
 
     optim_mu = 2500.0 / attack_args["attack_epsilon"]
     if attack_args["attack_target"] not in ["zero"]:
-            optim_mu = 1.5*optim_mu
+        optim_mu = 1.5 * optim_mu
 
     eps_box = attack_args["attack_alpha"]
 
@@ -46,7 +45,9 @@ def pcfa(
     image1, image2 = get_image_tensors(targeted_inputs, clone=True)
     perturbed_image1 = image1 + delta1
     perturbed_image2 = image2 + delta2
-    perturbed_inputs = replace_images_dic(targeted_inputs, perturbed_image1, perturbed_image2, clone=True)
+    perturbed_inputs = replace_images_dic(
+        targeted_inputs, perturbed_image1, perturbed_image2, clone=True
+    )
 
     return preds, perturbed_inputs, iteration_metrics
 
@@ -59,7 +60,11 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
 
     torch.autograd.set_detect_anomaly(True)
 
-    model = InputModel(model, eps_box, variable_change=attack_args["pcfa_boxconstraint"] in ["change_of_variables"])
+    model = InputModel(
+        model,
+        eps_box,
+        variable_change=attack_args["pcfa_boxconstraint"] in ["change_of_variables"],
+    )
 
     image1, image2 = get_image_tensors(targeted_inputs)
     image1, image2 = image1.to(device), image2.to(device)
@@ -106,7 +111,7 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
     target = get_flow_tensors(targeted_inputs)
     target = target.to(device)
     target.requires_grad = False
-    
+
     # Zero all existing gradients
     model.zero_grad()
     optimizer.zero_grad()
@@ -183,8 +188,12 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
         flow_pred = preds["flows"].squeeze(0)
         flow_pred = flow_pred.to(device)
 
-        iteration_metrics = iteration_metrics | losses.calc_delta_metrics(delta1, delta2, steps+1)
-        iteration_metrics = iteration_metrics | losses.calc_epe_metrics(model.model_loaded, preds, inputs, steps+1, targeted_inputs)
+        iteration_metrics = iteration_metrics | losses.calc_delta_metrics(
+            delta1, delta2, steps + 1
+        )
+        iteration_metrics = iteration_metrics | losses.calc_epe_metrics(
+            model.model_loaded, preds, inputs, steps + 1, targeted_inputs
+        )
 
     return preds, delta1, delta2, iteration_metrics
 
@@ -220,9 +229,8 @@ def torchfloat_to_float64(torch_float):
     return float_val
 
 
-
 class InputModel(nn.Module):
-    def __init__(self, model, eps_box, variable_change=False,  **kwargs):
+    def __init__(self, model, eps_box, variable_change=False, **kwargs):
         super(InputModel, self).__init__()
 
         self.var_change = variable_change
@@ -231,17 +239,25 @@ class InputModel(nn.Module):
 
         self.model_loaded = model
 
-
     def forward(self, inputs, image1, image2):
         # Perform the Carlini&Wagner Change of Variables, if the ScaledInputModel was configured to do so.
         if self.var_change:
-            image1 = (1./2.) * 1. / (1. - self.eps_box) * (torch.tanh(image1) + (1 - self.eps_box) )
-            image2 = (1./2.) * 1. / (1. - self.eps_box) * (torch.tanh(image2) + (1 - self.eps_box) )
-
+            image1 = (
+                (1.0 / 2.0)
+                * 1.0
+                / (1.0 - self.eps_box)
+                * (torch.tanh(image1) + (1 - self.eps_box))
+            )
+            image2 = (
+                (1.0 / 2.0)
+                * 1.0
+                / (1.0 - self.eps_box)
+                * (torch.tanh(image2) + (1 - self.eps_box))
+            )
 
         # Clipping case, which will only clip something if change of variables was not defined. otherwise, the change of variables has already brought the iamges into the range [0,1]
-        image1 = torch.clamp(image1, 0., 1.)
-        image2 = torch.clamp(image2, 0., 1.)
+        image1 = torch.clamp(image1, 0.0, 1.0)
+        image2 = torch.clamp(image2, 0.0, 1.0)
 
         dic = replace_images_dic(inputs, image1, image2, clone=True)
 
