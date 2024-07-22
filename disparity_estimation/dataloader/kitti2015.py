@@ -30,7 +30,7 @@ from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastS
 # from .kitti2015 import psmnet_preprocess 
 # from .cfnet_data_io import get_transform_cfnet, pfm_imread_cfnet
 
-
+# test
 
 class KITTIBaseDataset(data.Dataset):
     def __init__(self, datadir, architecture_name, split='train'): #['train', 'test', 'validation', 'validation_all', 'corrupted']

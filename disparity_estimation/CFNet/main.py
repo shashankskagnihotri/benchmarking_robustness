@@ -21,7 +21,7 @@ import gc
 
 
 from dataloader import get_dataset
-import mlflow
+# import mlflow
 
 cudnn.benchmark = True
 
@@ -179,7 +179,7 @@ def train():
         if loss < best_val_loss:
             checkpoint_data = {'epoch': epoch_idx, 'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': global_step, 'loss': loss}
             torch.save(checkpoint_data, "{}/checkpoint_{:0>6}_best.ckpt".format(args.logdir, epoch_idx))
-            mlflow.log_metric('best_mode_epoch', epoch_idx, global_step)
+            # mlflow.log_metric('best_mode_epoch', epoch_idx, global_step)
             best_val_loss = loss
 
         gc.collect()
@@ -214,6 +214,26 @@ def train():
         gc.collect()
     print('MAX epoch %d total test error = %.5f' % (bestepoch, error))
 
+
+def test():
+    # testing
+    avg_test_scalars = AverageMeterDict()
+    for batch_idx, sample in enumerate(TestImgLoader):
+        global_step = len(TestImgLoader) * batch_idx
+        start_time = time.time()
+        do_summary = global_step % args.summary_freq == 0
+        loss, scalar_outputs, image_outputs = test_sample(sample, compute_metrics=do_summary)
+        if do_summary:
+            save_scalars(logger, 'test', scalar_outputs, batch_idx)
+            #save_images(logger, 'test', image_outputs, global_step)
+            print(batch_idx, scalar_outputs)
+        avg_test_scalars.update(scalar_outputs)
+        del scalar_outputs, image_outputs
+        print('Iter {}/{}, test loss = {:.3f}, time = {:3f}'.format(batch_idx, len(TestImgLoader), loss,
+                                                                     time.time() - start_time))
+    avg_test_scalars = avg_test_scalars.mean()
+    save_scalars(logger, 'fulltest', avg_test_scalars, len(TestImgLoader) * (batch_idx + 1))
+    print("avg_test_scalars", avg_test_scalars)
 
 # train one sample
 def train_sample(sample, compute_metrics=False):
@@ -279,6 +299,27 @@ def test_sample(sample, compute_metrics=True):
 
     return tensor2float(loss), tensor2float(scalar_outputs), image_outputs
 
+
+
+
+def attack(attack_type: str):
+    
+    from attacks import CosPGDAttack
+    epsilon = 0.03
+    alpha = 0.01
+    num_iterations = 10
+    
+    if attack_type == "cospgd":
+        attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, num_classes=None, targeted=False)
+    else:
+        raise ValueError("Attack type not recognized")
+    
+
+    for batch_idx, sample in enumerate(TestImgLoader):
+        attacker.attack(sample['left'], sample['right'], sample['disparity'])
+        perturbed_left_image, perturbed_right_image = attacker.attack(sample['left'], sample['right'], sample['disparity'])
+
+        print("batch", batch_idx)
 
 if __name__ == '__main__':
     train()

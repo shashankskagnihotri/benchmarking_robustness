@@ -279,9 +279,9 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             left_img = processed(left_img)
             right_img = processed(right_img)
 
-            return {"left": left_img,
-                    "right": right_img,
-                    "disparity": disparity,
+            return {"left": torch.Tensor(left_img),
+                    "right": torch.Tensor(right_img),
+                    "disparity": torch.Tensor(disparity),
                     "top_pad": 0,
                     "right_pad": 0}
 
