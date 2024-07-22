@@ -37,3 +37,10 @@ summary.writer.add_scalar(mode + '/iou', stats['iou'], epoch)
 summary.writer.add_scalar(mode + '/3px_error', stats['px_error_rate'], epoch)
 
 
+### PSMNet 
+# no logging of metrics
+
+### HSMNet
+log.scalar_summary('train/loss_batch',loss, total_iters)
+log.histo_summary('train/disparity_hist',vis['output3'], total_iters)
+log.histo_summary('train/gt_hist',np.asarray(disp_crop_L), total_iters)
