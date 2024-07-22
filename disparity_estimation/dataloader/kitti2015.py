@@ -293,31 +293,31 @@ class KITTIBaseDataset(data.Dataset):
                     "right": right_img,
                     "disparity": torch.from_numpy(disparity)}
         
-        
-        else:
-            # Apply the same preprocessing steps as in data_io.py
-            transform = transforms.Compose([
-                transforms.Resize((384, 1248)),  # Resize to the target size
-                transforms.ToTensor(),           # Convert PIL image to tensor
-            ])
+        # WE DO NOT USE TESTING
+        # else:
+        #     # Apply the same preprocessing steps as in data_io.py
+        #     transform = transforms.Compose([
+        #         transforms.Resize((384, 1248)),  # Resize to the target size
+        #         transforms.ToTensor(),           # Convert PIL image to tensor
+        #     ])
 
-            left_img = transform(left_img)
-            right_img = transform(right_img)
+        #     left_img = transform(left_img)
+        #     right_img = transform(right_img)
 
-            # Pad disparity gt if not None
-            if disparity is not None:
-                # Resize the disparity map
-                disparity = Image.fromarray(disparity)
-                disparity = disparity.resize((1248, 384), Image.NEAREST)
-                disparity = np.array(disparity, dtype=np.float32) / 256.
+        #     # Pad disparity gt if not None
+        #     if disparity is not None:
+        #         # Resize the disparity map
+        #         disparity = Image.fromarray(disparity)
+        #         disparity = disparity.resize((1248, 384), Image.NEAREST)
+        #         disparity = np.array(disparity, dtype=np.float32) / 256.
 
-            if disparity is not None:
-                return {"left": left_img,
-                        "right": right_img,
-                        "disparity": disparity}
-            else:
-                return {"left": left_img,
-                        "right": right_img}
+        #     if disparity is not None:
+        #         return {"left": left_img,
+        #                 "right": right_img,
+        #                 "disparity": disparity}
+        #     else:
+        #         return {"left": left_img,
+        #                 "right": right_img}
 
             # if disparity is not None:
             #     return {"left": left_img,
@@ -389,8 +389,12 @@ class KITTIBaseDataset(data.Dataset):
             left_img = augmented[0]
             right_img = augmented[1]
 
+            # Ensure the arrays are writable
             right_img = np.array(right_img, copy=True)
             right_img.flags.writeable = True
+            left_img = np.array(left_img, copy=True)
+            left_img.flags.writeable = True
+
             if np.random.binomial(1,0.2):
               sx = int(np.random.uniform(35,100))
               sy = int(np.random.uniform(25,75))
@@ -407,40 +411,43 @@ class KITTIBaseDataset(data.Dataset):
             return {"left": left_img,
                     "right": right_img,
                     "disparity": disparity}
-        else:
-            w, h = left_img.size
+        
+        # WE DO NOT USE TESTING
+        # else:
+        #     w, h = left_img.size
 
-            # normalize
-            processed = cfnet.data_io.get_transform()
-            left_img = processed(left_img).numpy()
-            right_img = processed(right_img).numpy()
+        #     # normalize
+        #     processed = cfnet.data_io.get_transform()
+        #     left_img = processed(left_img).numpy()
+        #     right_img = processed(right_img).numpy()
 
-            # pad to size 1248x384
-            top_pad = 384 - h
-            right_pad = 1248 - w
-            assert top_pad > 0 and right_pad > 0
-            # pad images
-            left_img = np.lib.pad(left_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
-            right_img = np.lib.pad(right_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant',
-                                   constant_values=0)
-            # pad disparity gt
-            if disparity is not None:
-                assert len(disparity.shape) == 2
-                disparity = np.lib.pad(disparity, ((top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
+        #     # pad to size 1248x384
+        #     top_pad = 384 - h
+        #     right_pad = 1248 - w
+        #     assert top_pad > 0 and right_pad > 0
+        #     # pad images
+        #     left_img = np.lib.pad(left_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
+        #     right_img = np.lib.pad(right_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant',
+        #                            constant_values=0)
+        #     # pad disparity gt
+        #     if disparity is not None:
+        #         assert len(disparity.shape) == 2
+        #         disparity = np.lib.pad(disparity, ((top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
 
-            if disparity is not None:
-                return {"left": left_img,
-                        "right": right_img,
-                        "disparity": disparity,
-                        "top_pad": top_pad,
-                        "right_pad": right_pad,
-                        "left_filename": self.left_filenames[index],
-                        "right_filename": self.right_filenames[index]
-                        }
-            else:
-                return {"left": left_img,
-                        "right": right_img,
-                        "top_pad": top_pad,
-                        "right_pad": right_pad,
-                        "left_filename": self.left_filenames[index],
-                        "right_filename": self.right_filenames[index]}
+        #     if disparity is not None:
+        #         return {"left": left_img,
+        #                 "right": right_img,
+        #                 "disparity": disparity,
+        #                 "top_pad": top_pad,
+        #                 "right_pad": right_pad,
+        #                 "left_filename": self.left_filenames[index],
+        #                 "right_filename": self.right_filenames[index]
+        #                 }
+        #     else:
+        #         return {"left": left_img,
+        #                 "right": right_img,
+        #                 "top_pad": top_pad,
+        #                 "right_pad": right_pad,
+        #                 "left_filename": self.left_filenames[index],
+        #                 "right_filename": self.right_filenames[index]}
+        

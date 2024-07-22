@@ -4,7 +4,7 @@ DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/
 
 cd /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/
 
-python wrapper.py -a cfnet -m train \
+python wrapper.py \
     --dataset kitti2015 \
     --datapath $DATAPATH \
     --epochs 20 \
@@ -12,7 +12,7 @@ python wrapper.py -a cfnet -m train \
     --lrepochs "12,16,18,20:2" \
     --batch_size 1 \
     --maxdisp 256 \
-    --model cfnet \
+    --architecture gwcnet \
     --scenario train \
-    --logdir /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/checkpoints/cfnet/  \
+    --logdir /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/checkpoints/gwcnet/  \
     --test_batch_size 1 \

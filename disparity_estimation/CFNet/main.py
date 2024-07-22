@@ -19,11 +19,9 @@ from models import __models__, model_loss
 from utils import *
 from torch.utils.data import DataLoader, random_split, Subset
 import gc
+import mlflow
 
-
-from dataloader import get_dataset
-
-# import mlflow
+from dataloader import get_dataset, get_data_loader_1
 
 cudnn.benchmark = True
 
@@ -38,11 +36,9 @@ parser.add_argument(
 )
 parser.add_argument("--maxdisp", type=int, default=192, help="maximum disparity")
 
+#parser.add_argument("--eval", action="store_true", help="to do evaluation")
 parser.add_argument("--dataset", required=True, help="dataset name")
 parser.add_argument("--datapath", required=True, help="data path")
-# parser.add_argument('--trainlist', required=True, help='training list')
-# parser.add_argument('--testlist', required=True, help='testing list')
-
 parser.add_argument("--lr", type=float, default=0.001, help="base learning rate")
 parser.add_argument("--batch_size", type=int, default=4, help="training batch size")
 parser.add_argument("--test_batch_size", type=int, default=4, help="testing batch size")
@@ -83,61 +79,11 @@ os.makedirs(args.logdir, exist_ok=True)
 print("creating new summary file")
 logger = SummaryWriter(args.logdir)
 
-# dataset, dataloader
-# StereoDataset = __datasets__[args.dataset]
-# train_dataset = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=True)
-# test_dataset  = SceneFlowFlyingThings3DDataset(args.datapath, model_name="CFNet", train=False)
-train_dataset = get_dataset(
-    args.dataset, args.datapath, architeture_name="CFNet", split="train"
-)
-test_dataset = get_dataset(
-    args.dataset, args.datapath, architeture_name="CFNet", split="test"
-)
+### START - Prepare Data
 
+TrainImgLoader, ValImgLoader, TestImgLoader = get_data_loader_1(args, "CFNet")
 
-if "kitti" in args.dataset.lower():  # Define split sizes
-    val_size = int(0.2 * len(train_dataset))  # 20% for validation
-    test_size = int(0.1 * len(train_dataset))  # 10% for testing
-    train_size = len(train_dataset) - val_size - test_size
-
-    # Split the dataset
-    train_subset, val_subset, test_dataset = random_split(
-        train_dataset, [train_size, val_size, test_size]
-    )
-else:
-    val_size = int(0.2 * len(train_dataset))  # 20% for validation
-    train_size = len(train_dataset) - val_size
-
-    # Split the dataset
-    train_subset, val_subset = random_split(train_dataset, [train_size, val_size])
-
-del train_dataset
-
-
-fast_dev_run = True
-if fast_dev_run == True:
-    # Create small subsets for fast_dev_run
-    fast_dev_run_size = 10  # Number of data points to use in fast_dev_run
-
-    # Create subsets for training, validation, and testing
-    train_indices = list(range(fast_dev_run_size))
-    val_indices = list(range(fast_dev_run_size, 2 * fast_dev_run_size))
-    test_indices = list(range(fast_dev_run_size))
-
-    train_subset = Subset(train_subset, train_indices)
-    val_subset = Subset(val_subset, val_indices)
-    test_dataset = Subset(test_dataset, test_indices)
-
-ValImgLoader = DataLoader(
-    val_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True
-)
-TrainImgLoader = DataLoader(
-    train_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True
-)
-TestImgLoader = DataLoader(
-    test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False
-)
-
+### END - Prepare Data
 
 # model, optimizer
 model = __models__[args.model](args.maxdisp)
@@ -251,7 +197,6 @@ def train():
                 checkpoint_data,
                 "{}/checkpoint_{:0>6}_best.ckpt".format(args.logdir, epoch_idx),
             )
-            # mlflow.log_metric('best_mode_epoch', epoch_idx, global_step)
             best_val_loss = loss
 
         gc.collect()
