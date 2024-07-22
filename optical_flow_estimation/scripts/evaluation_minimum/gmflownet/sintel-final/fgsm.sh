@@ -2,18 +2,18 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=00:29:59
+#SBATCH --time=00:44:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-6%4
-#SBATCH --job-name=gmflow_kitti-2015_fgsm
-#SBATCH --output=slurm/gmflow_kitti-2015_fgsm_%A_%a.out
-#SBATCH --error=slurm/gmflow_kitti-2015_fgsm_err_%A_%a.out
+#SBATCH --job-name=gmflownet_sintel-final_fgsm
+#SBATCH --output=slurm/gmflownet_sintel-final_fgsm_%A_%a.out
+#SBATCH --error=slurm/gmflownet_sintel-final_fgsm_err_%A_%a.out
 
 model="gmflownet"
-dataset="kitti-2015"
-checkpoint="kitti"
+dataset="sintel-final"
+checkpoint="sintel"
 targeteds="True False"
 targets="negative zero"
 norms="inf two"
