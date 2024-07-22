@@ -256,10 +256,7 @@ test_pipeline = [
         type='PackDetInputs'),
 ]
 train_cfg = dict(
-    max_epochs=100,
-    max_iters=450000,
-    type='IterBasedTrainLoop',
-    val_interval=75000)
+    max_epochs=100, type='EpochBasedTrainLoop', val_interval=75000)
 train_dataloader = dict(
     batch_sampler=dict(_scope_='mmdet', type='AspectRatioBatchSampler'),
     batch_size=16,

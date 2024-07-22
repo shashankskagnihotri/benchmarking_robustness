@@ -32,7 +32,11 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
     cfg.optim_wrapper = backbone_cfg.optim_wrapper
     cfg.param_scheduler = backbone_cfg.param_scheduler
     cfg.max_epochs = backbone_cfg.max_epochs
+    cfg.train_cfg.type = backbone_cfg.train_cfg.type
     cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
+
+    if hasattr(cfg.train_cfg, "max_iters"):
+        del cfg.train_cfg.max_iters
 
     if hasattr(cfg, "custom_hooks") and cfg.custom_hooks:
         num_hooks = len(cfg.custom_hooks)

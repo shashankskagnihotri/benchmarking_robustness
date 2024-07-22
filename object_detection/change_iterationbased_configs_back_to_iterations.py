@@ -34,6 +34,9 @@ def change_interations(filename, folder_path, dataset):
         dataset=dataset,
     )
 
+    if hasattr(cfg.train_cfg, "max_epochs"):
+        del cfg.train_cfg.max_epochs
+
     cfg.default_hooks.checkpoint.by_epoch = False
     cfg.default_hooks.checkpoint.interval = calculate_iterations(
         epochs=cfg.default_hooks.checkpoint.interval,

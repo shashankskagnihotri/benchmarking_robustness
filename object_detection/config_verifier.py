@@ -28,8 +28,8 @@ slurm_results_path = "slurm/results"
 
 verify_subset = False
 # one_epoch = False
-GPU_NUM = 1
-slurm_partition = "gpu_4"
+GPU_NUM = 2
+slurm_partition = "gpu_4_a100"
 
 
 submitit.helpers.CommandFunction(["module", "load", "devel/cuda/11.8"])

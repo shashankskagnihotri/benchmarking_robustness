@@ -34,7 +34,7 @@ slurm_partition = "gpu_4"
 # config_file = "./to_check_if_epochs_repeated_atss_r50_voc0712.py"
 
 
-config_file = "configs_verified/centernet_r50_voc0712_cococmetric.py"
+config_file = "configs_verified/centernet_r50_voc0712_vocmetric_3x_p_t.py"
 
 slurm_log_folder_path = (
     "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
@@ -44,8 +44,10 @@ specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_fil
 # current job 23871411
 
 # voc vs cocometric only changed voc/cocometric eveything else is the same
-# vocmetric job: 23875097, 23877306, 23880820
-# cocometric job: 23875095, 23877307, 23880821
+# vocmetric job: 23875097, 23877306, 23880820, 23881551, 23883119, 23886921
+# cocometric job: 23875095, 23877307, 23880853, 23883120, 23886920
+# vocmetric 3x job: 23892625
+# cocometric 3x job: 23892618
 
 executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
 
@@ -54,7 +56,7 @@ executor.update_parameters(
     # timeout_min=5, might cause conflicts with slurm_time
     slurm_partition=f"{slurm_partition}",
     slurm_gres=f"gpu:{GPU_NUM}",
-    slurm_time="04:30:00",
+    slurm_time="15:00:00",
 )
 
 #! WORKS WITH WALLTIME ERROR

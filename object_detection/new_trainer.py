@@ -104,8 +104,5 @@ if __name__ == "__main__":
         local_rank=0,
     )
 
-# python -m pudb new_trainer.py configs_erroneous/verification/yolo_swin-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
 
-# python -m pudb new_trainer.py configs_erroneous/verification/reppoints_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
-
-# python -m pudb new_trainer.py configs_erroneous/verification/reppoints_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb new_trainer.py configs_erroneous/verification/vfnet_convnext-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer

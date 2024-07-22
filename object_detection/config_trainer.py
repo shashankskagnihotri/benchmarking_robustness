@@ -34,10 +34,10 @@ path_configs_to_test = "./configs_to_test"
 
 #! wandb vis gets currently implemented into config files!!!!!
 
-verify_subset = True  #! for checking functionality
+verify_subset = False
 GPU_NUM = 1  #! setting right settings for slurm
-TIME = "00:10:00"
-SLURM_PARTITION = "dev_gpu_4"
+TIME = "05:00:00"
+SLURM_PARTITION = "gpu_4_a100"
 
 
 submitit.helpers.CommandFunction(["module", "load", "devel/cuda/11.8"])
@@ -122,107 +122,117 @@ for config_file in folder_entry_list_configs_to_train:
     config_path = os.path.join(path_verified_configs, config_file)
     print(f"config_path : {config_path}")
 
-    if has_been_started_before(config_file, slurm_log_folders):
-        for model_log_folder_name in slurm_log_folders:
-            if config_file.split(".")[0] == model_log_folder_name:
-                model_log_folder_path = os.path.join(
-                    slurm_log_folder_path, model_log_folder_name
-                )
-                print(f"Checking folderpath {model_log_folder_path} for {config_file}")
+    if "swin-b" or "convnext-b" in config_file:  #! only train swin and convnext
+        if has_been_started_before(config_file, slurm_log_folders):
+            for model_log_folder_name in slurm_log_folders:
+                if config_file.split(".")[0] == model_log_folder_name:
+                    model_log_folder_path = os.path.join(
+                        slurm_log_folder_path, model_log_folder_name
+                    )
+                    print(
+                        f"Checking folderpath {model_log_folder_path} for {config_file}"
+                    )
 
-                highest_job_number_for_model = highest_job_number(model_log_folder_path)
-                print(f"Highest job number {highest_job_number_for_model}")
+                    highest_job_number_for_model = highest_job_number(
+                        model_log_folder_path
+                    )
+                    print(f"Highest job number {highest_job_number_for_model}")
 
-                model_logfiles = os.listdir(model_log_folder_path)
+                    model_logfiles = os.listdir(model_log_folder_path)
 
-                for model_logfile in model_logfiles:
-                    if highest_job_number_for_model in model_logfile:
-                        print(f"Checking logfile {model_logfile}")
-                        model_logfile_ending = model_logfile.split(".")[1]
+                    for model_logfile in model_logfiles:
+                        if highest_job_number_for_model in model_logfile:
+                            print(f"Checking logfile {model_logfile}")
+                            model_logfile_ending = model_logfile.split(".")[1]
 
-                        if "err" in model_logfile_ending:
-                            print(f"checking Errorfile of {model_logfile}")
-                            with open(
-                                os.path.join(model_log_folder_path, model_logfile), "r"
-                            ) as file:
-                                logfile_content = file.read()
-                                if (
-                                    "DUE TO TIME LIMIT" in logfile_content
-                                    or "min(max_walltime * 0.8, max_walltime - 10 * 60"
-                                    in logfile_content
-                                    or "TypeError: can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime_info_hook.RuntimeInfoHook"
-                                    in logfile_content
-                                ):
-                                    print(f"training {config_file} from {config_path}")
-                                    specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
-                                    specific_slurm_result_dir = f"{slurm_results_path}/{os.path.splitext(config_file)[0]}"
-
-                                    executor = submitit.AutoExecutor(
-                                        folder=specific_slurm_work_dir
-                                    )
-
-                                    executor.update_parameters(
-                                        timeout_min=1,
-                                        slurm_partition=f"{SLURM_PARTITION}",
-                                        slurm_gres=f"gpu:{GPU_NUM}",
-                                        slurm_time=f"{TIME}",
-                                    )
-
-                                    cfg = Config.fromfile(config_path)
-                                    cfg.visualizer.vis_backends[
-                                        0
-                                    ].type = "WandbVisBackend"
-                                    neck, backbone, dataset = which(config_file)
-                                    cfg.visualizer.vis_backends[0].init_kwargs = dict(
-                                        project=f"{neck}_{backbone}_{dataset}_train"
-                                    )
-
-                                    executor.submit(
-                                        train_with_multiple_gpus,
-                                        config_path,
-                                        specific_slurm_result_dir,
-                                        GPU_NUM,
-                                    )
-                                else:
-                                    # elif "Error" in logfile_content:
-                                    print(
-                                        f"moving {config_file} to {path_erroneous_configs} folder"
-                                    )
-                                    if os.path.exists(config_path):
-                                        shutil.move(
-                                            config_path,
-                                            os.path.join(
-                                                path_erroneous_configs, config_file
-                                            ),
+                            if "err" in model_logfile_ending:
+                                print(f"checking Errorfile of {model_logfile}")
+                                with open(
+                                    os.path.join(model_log_folder_path, model_logfile),
+                                    "r",
+                                ) as file:
+                                    logfile_content = file.read()
+                                    if (
+                                        "DUE TO TIME LIMIT" in logfile_content
+                                        or "min(max_walltime * 0.8, max_walltime - 10 * 60"
+                                        in logfile_content
+                                        or "TypeError: can't multiply sequence by non-int of type 'float' in <mmengine.hooks.runtime_info_hook.RuntimeInfoHook"
+                                        in logfile_content
+                                    ):
+                                        print(
+                                            f"training {config_file} from {config_path}"
                                         )
-    else:
-        print(f"training {config_file} from {config_path}")
-        specific_slurm_work_dir = (
-            f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
-        )
-        specific_slurm_result_dir = (
-            f"{slurm_results_path}/{os.path.splitext(config_file)[0]}"
-        )
+                                        specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
+                                        specific_slurm_result_dir = f"{slurm_results_path}/{os.path.splitext(config_file)[0]}"
 
-        executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
+                                        executor = submitit.AutoExecutor(
+                                            folder=specific_slurm_work_dir
+                                        )
 
-        executor.update_parameters(
-            timeout_min=1,
-            slurm_partition=f"{SLURM_PARTITION}",
-            slurm_gres=f"gpu:{GPU_NUM}",
-            slurm_time=f"{TIME}",
-        )
+                                        executor.update_parameters(
+                                            timeout_min=1,
+                                            slurm_partition=f"{SLURM_PARTITION}",
+                                            slurm_gres=f"gpu:{GPU_NUM}",
+                                            slurm_time=f"{TIME}",
+                                        )
 
-        cfg = Config.fromfile(config_path)
-        cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-        neck, backbone, dataset = which(config_file)
-        cfg.visualizer.vis_backends[0].init_kwargs = dict(
-            project=f"{neck}_{backbone}_{dataset}_train"
-        )
+                                        cfg = Config.fromfile(config_path)
+                                        cfg.visualizer.vis_backends[
+                                            0
+                                        ].type = "WandbVisBackend"
+                                        neck, backbone, dataset = which(config_file)
+                                        cfg.visualizer.vis_backends[
+                                            0
+                                        ].init_kwargs = dict(
+                                            project=f"{neck}_{backbone}_{dataset}_train"
+                                        )
 
-        executor.submit(
-            train_with_multiple_gpus,
-            config_path,
-            specific_slurm_result_dir,
-            GPU_NUM,
-        )
+                                        executor.submit(
+                                            train_with_multiple_gpus,
+                                            config_path,
+                                            specific_slurm_result_dir,
+                                            GPU_NUM,
+                                        )
+                                    else:
+                                        # elif "Error" in logfile_content:
+                                        print(
+                                            f"moving {config_file} to {path_erroneous_configs} folder"
+                                        )
+                                        if os.path.exists(config_path):
+                                            shutil.move(
+                                                config_path,
+                                                os.path.join(
+                                                    path_erroneous_configs, config_file
+                                                ),
+                                            )
+        else:
+            print(f"training {config_file} from {config_path}")
+            specific_slurm_work_dir = (
+                f"{slurm_log_folder_path}/{os.path.splitext(config_file)[0]}"
+            )
+            specific_slurm_result_dir = (
+                f"{slurm_results_path}/{os.path.splitext(config_file)[0]}"
+            )
+
+            executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
+
+            executor.update_parameters(
+                timeout_min=1,
+                slurm_partition=f"{SLURM_PARTITION}",
+                slurm_gres=f"gpu:{GPU_NUM}",
+                slurm_time=f"{TIME}",
+            )
+
+            cfg = Config.fromfile(config_path)
+            cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
+            neck, backbone, dataset = which(config_file)
+            cfg.visualizer.vis_backends[0].init_kwargs = dict(
+                project=f"{neck}_{backbone}_{dataset}_train"
+            )
+
+            executor.submit(
+                train_with_multiple_gpus,
+                config_path,
+                specific_slurm_result_dir,
+                GPU_NUM,
+            )
