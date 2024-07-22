@@ -120,8 +120,6 @@ class RAFT(BaseModel):
         return up_flow.reshape(N, 2, 8 * H, 8 * W)
 
     def forward(self, inputs):
-        # import pdb
-
         """Estimate optical flow between pair of frames"""
         images, image_resizer = self.preprocess_images(
             inputs["images"],
@@ -135,7 +133,7 @@ class RAFT(BaseModel):
 
         image1 = images[:, 0]
         image2 = images[:, 1]
-        # pdb.set_trace()
+
         hdim = self.hidden_dim
         cdim = self.context_dim
 
@@ -184,6 +182,7 @@ class RAFT(BaseModel):
 
             flow_up = self.postprocess_predictions(flow_up, image_resizer, is_flow=True)
             flow_predictions.append(flow_up)
+
         if self.training:
             outputs = {"flows": flow_up[:, None], "flow_preds": flow_predictions}
         else:
