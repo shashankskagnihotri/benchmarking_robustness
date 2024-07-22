@@ -7,12 +7,12 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --job-name=raft_kitti-2015_pcfa_i20
-#SBATCH --output=slurm/raft_kitti-2015_pcfa_i20_%A.out
-#SBATCH --error=slurm/raft_kitti-2015_pcfa_i20_err_%A.out
+#SBATCH --output=slurm/raft_kitti-2015_pcfa_sintel_test_005_%A.out
+#SBATCH --error=slurm/raft_kitti-2015_pcfa_sintel_test_005_err_%A.out
 
 model="raft"
 dataset="kitti-2015"
-checkpoint="kitti"
+checkpoint="sintel"
 targeteds="True"
 targets="zero"
 norms="two"
@@ -25,7 +25,7 @@ cd ../../../../
 
 for norm in $norms
 do
-    epsilons="0.005"
+    epsilons="0.01"
     alphas="0.0000001"
     for epsilon in $epsilons
     do
