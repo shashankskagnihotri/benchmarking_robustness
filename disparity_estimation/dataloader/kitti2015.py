@@ -138,6 +138,7 @@ class KITTIBaseDataset(data.Dataset):
         elif self.architecture_name == 'psmnet':
             return self.get_item_PSMNet(img_left, img_right, disp_left)
         else:
+            print(f"No dataloder for {self.architecture_name} implemented")
             raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
 
    

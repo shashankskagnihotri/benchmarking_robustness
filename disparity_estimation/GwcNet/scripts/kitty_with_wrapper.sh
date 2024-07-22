@@ -12,7 +12,7 @@ python wrapper.py \
     --lrepochs "12,16,18,20:2" \
     --batch_size 1 \
     --maxdisp 256 \
-    --architecture gwcnet \
+    --architecture "gwcnet-g" \
     --scenario train \
     --logdir /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/checkpoints/gwcnet/  \
     --test_batch_size 1 \

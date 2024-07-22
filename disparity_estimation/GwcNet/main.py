@@ -82,7 +82,7 @@ logger = SummaryWriter(args.logdir)
 
 ### START - Prepare Data
 
-TrainImgLoader, ValImgLoader, TestImgLoader = get_data_loader_1(args, "GWCNet")
+TrainImgLoader, ValImgLoader, TestImgLoader = get_data_loader_1(args, "gwcnet-g") # TODO: Refine args here with architecture and model
 
 ### END - Prepare Data
 

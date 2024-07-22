@@ -35,7 +35,7 @@ with mlflow.start_run(experiment_id='128987742873377588'):
     if args.architecture == "cfnet":
         from CFNet import main
         print("Loaded cfnet")
-    elif args.architecture == "gwcnet":
+    elif args.architecture == "gwcnet-g":
         from GwcNet import main
         print("Loaded gwcnet")
     else:
