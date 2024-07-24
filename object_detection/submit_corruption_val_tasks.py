@@ -100,15 +100,13 @@ executor.update_parameters(
     slurm_mem=10_000,  # 10GB per task
     slurm_mail_type="all",
     slurm_job_name="corruptions",
+    slurm_time="30:00",
 )
 jobs = []
 
-for corruption, severity in itertools.product(CORRUPTIONS, SEVERITIES):
-    slurm_time = "30:00"
-    executor.update_parameters(slurm_time=slurm_time)
-
+for config_file, checkpoint_file in zip(config_files, checkpoint_files):
     with executor.batch():
-        for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+        for corruption, severity in itertools.product(CORRUPTIONS, SEVERITIES):
             logger.debug(str(config_file))
             logger.debug(str(checkpoint_file))
 
