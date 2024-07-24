@@ -96,7 +96,7 @@ logger.info(f"found {len(config_files)} config and checkpoint files")
 # Set up executor for slurm
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
-    slurm_partition="gpu_4",
+    slurm_partition="gpu_4_a100",
     slurm_gres="gpu:1",
     nodes=1,
     cpus_per_task=1,
@@ -117,59 +117,58 @@ for attack_name, attack in ATTACKS.items():
     for steps, epsilon, alpha, norm in itertools.product(
         num_steps, epsilons, alphas, norms
     ):
-        slurm_time = f"48:00:00"
+        slurm_time = "48:00:00"
         executor.update_parameters(slurm_time=slurm_time)
 
-        with executor.batch():
-            for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+        for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+            attack_kwargs = {
+                "epsilon": epsilon,
+                "alpha": alpha,
+                "targeted": TARGETED,
+                "steps": steps,
+                "random_start": RANDOM_START,
+                "norm": norm,
+            }
+
+            if attack == fgsm_attack:
+                del attack_kwargs["steps"]
+                del attack_kwargs["random_start"]
+            elif attack == pgd_attack:
+                del attack_kwargs["norm"]
+            elif attack == bim_attack:
+                del attack_kwargs["random_start"]
+            elif attack is None:
                 attack_kwargs = {
-                    "epsilon": epsilon,
-                    "alpha": alpha,
-                    "targeted": TARGETED,
-                    "steps": steps,
-                    "random_start": RANDOM_START,
-                    "norm": norm,
+                    "epsilon": 0,
+                    "alpha": 0,
+                    "steps": 0,
                 }
+            else:
+                raise ValueError(f"Unknown attack: {attack}")
 
-                if attack == fgsm_attack:
-                    del attack_kwargs["steps"]
-                    del attack_kwargs["random_start"]
-                elif attack == pgd_attack:
-                    del attack_kwargs["norm"]
-                elif attack == bim_attack:
-                    del attack_kwargs["random_start"]
-                elif attack is None:
-                    attack_kwargs = {
-                        "epsilon": 0,
-                        "alpha": 0,
-                        "steps": 0,
-                    }
-                else:
-                    raise ValueError(f"Unknown attack: {attack}")
+            logger.debug(str(config_file))
+            logger.debug(str(checkpoint_file))
 
-                logger.debug(str(config_file))
-                logger.debug(str(checkpoint_file))
+            model_name = str(config_file).split("/")[-1][0:-3]
+            result_dir = os.path.join(
+                f"{RESULT_DIR}/{model_name}/{attack_name}_"
+                + "_".join([k + format_value(v) for k, v in attack_kwargs.items()])
+            )
 
-                model_name = str(config_file).split("/")[-1][0:-3]
-                result_dir = os.path.join(
-                    f"{RESULT_DIR}/{model_name}/{attack_name}_"
-                    + "_".join([k + format_value(v) for k, v in attack_kwargs.items()])
+            if os.path.exists(result_dir):
+                logger.info(f"skipping {result_dir} as it already exists")
+            else:
+                logger.info(f"running attack {attack_name} with {attack_kwargs}")
+                logger.info(f"saving results to {result_dir}")
+                job = executor.submit(
+                    run_attack_val,
+                    attack,
+                    config_file,
+                    checkpoint_file,
+                    attack_kwargs,
+                    result_dir,
                 )
-
-                if os.path.exists(result_dir):
-                    logger.info(f"skipping {result_dir} as it already exists")
-                else:
-                    logger.info(f"running attack {attack_name} with {attack_kwargs}")
-                    logger.info(f"saving results to {result_dir}")
-                    job = executor.submit(
-                        run_attack_val,
-                        attack,
-                        config_file,
-                        checkpoint_file,
-                        attack_kwargs,
-                        result_dir,
-                    )
-                    jobs.append(job)
+                jobs.append(job)
 
 logger.info(
     "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
