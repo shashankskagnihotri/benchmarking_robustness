@@ -348,9 +348,6 @@ def run_attack_val(
         )
     )
 
-    # Hopefully voids CUDA OOM errors
-    torch.cuda.empty_cache()
-
     # Register the attack loop if an attack is provided
     if attack is not None:
         replace_val_loop(attack, attack_kwargs)
