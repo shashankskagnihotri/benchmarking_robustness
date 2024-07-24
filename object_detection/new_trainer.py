@@ -105,4 +105,11 @@ if __name__ == "__main__":
     )
 
 
-# python -m pudb new_trainer.py configs_erroneous/verification/vfnet_convnext-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb configs_erroneous/verification/yolox_swin-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+
+# testing yolox_convnext-b_coco.py -> ran successfully
+# testing yolox_swin-b_coco.py -> error
+# testing yolox_r50_coco.py -> ran successfully
+
+
+# resnet and swin have same output size
