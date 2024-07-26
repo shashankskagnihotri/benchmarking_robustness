@@ -18,6 +18,13 @@ from torch.utils.data import DataLoader
 from mmengine.evaluator import Evaluator
 import wandb
 from copy import deepcopy
+from mmengine.optim import OptimWrapper
+
+load_dotenv()
+WAND_PROJECT = os.getenv("WANDB_PROJECT")
+WAND_ENTITY = os.getenv("WANDB_ENTITY")
+assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
+assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
 
 def pgd_attack(
@@ -51,6 +58,7 @@ def pgd_attack(
     for step in range(steps):
         adv_images.requires_grad = True
         data_batch_prepro["inputs"][0] = adv_images
+        runner.model.training = True  # avoid missing arguments error in some models
         losses = runner.model(**data_batch_prepro, mode="loss")
         cost, _ = runner.model.parse_losses(losses)
 
@@ -64,6 +72,7 @@ def pgd_attack(
         adv_images = torch.clamp(images + delta, min=0, max=255).detach()
 
         data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        runner.model.training = False  # avoid missing arguments error in some models
         evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
     return data_batch_prepro
@@ -102,7 +111,10 @@ def fgsm_attack(
     # Get gradient
     adv_images.requires_grad = True
     data_batch_prepro["inputs"][0] = adv_images
+
+    runner.model.training = True  # avoid missing arguments error in some models
     losses = runner.model(**data_batch_prepro, mode="loss")
+
     cost, _ = runner.model.parse_losses(losses)
     runner.model.zero_grad()
     cost.backward(retain_graph=True)
@@ -117,7 +129,6 @@ def fgsm_attack(
         sign_data_grad *= -1
     adv_images = adv_images.detach() + alpha * sign_data_grad
 
-    # Adding clipping to maintain [0,1] range
     if norm == "inf":
         delta = torch.clamp(adv_images - images, min=-1 * epsilon, max=epsilon)
     elif norm == "two":
@@ -127,11 +138,14 @@ def fgsm_attack(
         factor = epsilon / delta_norms
         factor = torch.min(factor, torch.ones_like(delta_norms))
         delta = delta * factor.view(-1, 1, 1, 1)
+
+    # Clipping to maintain [0, 255] range
     adv_images = torch.clamp(images + delta, 0, 255)
 
     # Return the perturbed image
     adv_images.requires_grad = False
     data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+    runner.model.training = False  # avoid missing arguments error in some models
     evaluator_process(evaluators[1], data_batch_prepro, runner)
 
     return data_batch_prepro
@@ -165,6 +179,7 @@ def bim_attack(
         # Get gradient
         adv_images.requires_grad = True
         data_batch_prepro["inputs"][0] = adv_images
+        runner.model.training = True  # avoid missing arguments error in some models
         losses = runner.model(**data_batch_prepro, mode="loss")
         cost, _ = runner.model.parse_losses(losses)
         runner.model.zero_grad()
@@ -193,6 +208,7 @@ def bim_attack(
         adv_images = torch.clamp(images + delta, 0, 255)
 
         data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        runner.model.training = False  # avoid missing arguments error in some models
         evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
     return data_batch_prepro
@@ -344,6 +360,7 @@ def run_attack_val(
                 },
                 "name": model_name,
                 "group": model_name,
+                # "tags": ["debug"],
             },
         )
     )
@@ -415,12 +432,6 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-
-    load_dotenv()
-    WAND_PROJECT = os.getenv("WANDB_PROJECT")
-    WAND_ENTITY = os.getenv("WANDB_ENTITY")
-    assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
-    assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
     # Select right attack function
     if args.attack == "pgd":
