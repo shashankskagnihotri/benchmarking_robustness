@@ -112,4 +112,7 @@ if __name__ == "__main__":
 # testing yolox_r50_coco.py -> ran successfully
 
 
-# resnet and swin have same output size
+# resnet and swin have same output siz
+
+
+# python -m pudb new_trainer.py configs_erroneous/verification/EfficientDet_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer

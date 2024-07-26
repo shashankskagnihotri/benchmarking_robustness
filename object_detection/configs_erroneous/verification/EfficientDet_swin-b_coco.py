@@ -1,45 +1,53 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 batch_augments = [
-    dict(size=(
-        896,
-        896,
-    ), type='BatchFixedSizePad'),
+    dict(
+        size=(
+            896,
+            896,
+        ),
+        type="BatchFixedSizePad",
+    ),
 ]
-checkpoint = 'https://download.openmmlab.com/mmclassification/v0/efficientnet/efficientnet-b3_3rdparty_8xb32-aa-advprop_in1k_20220119-53b41118.pth'
+checkpoint = "https://download.openmmlab.com/mmclassification/v0/efficientnet/efficientnet-b3_3rdparty_8xb32-aa-advprop_in1k_20220119-53b41118.pth"
 custom_hooks = [
     dict(
-        ema_type='ExpMomentumEMA',
+        ema_type="ExpMomentumEMA",
         momentum=0.0002,
         priority=49,
-        type='EMAHook',
-        update_buffers=True),
+        type="EMAHook",
+        update_buffers=True,
+    ),
 ]
 custom_imports = dict(
     allow_failed_imports=False,
     imports=[
-        'projects.EfficientDet.efficientdet',
-    ])
-data_root = 'data/coco/'
-dataset_type = 'CocoDataset'
+        "projects.EfficientDet.efficientdet",
+    ],
+)
+data_root = "data/coco/"
+dataset_type = "CocoDataset"
 default_hooks = dict(
-    checkpoint=dict(_scope_='mmdet', interval=15, type='CheckpointHook'),
-    logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
-    param_scheduler=dict(type='ParamSchedulerHook'),
-    sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
-    timer=dict(_scope_='mmdet', type='IterTimerHook'),
-    visualization=dict(_scope_='mmdet', type='DetVisualizationHook'))
-default_scope = 'mmdet'
+    checkpoint=dict(_scope_="mmdet", interval=15, type="CheckpointHook"),
+    logger=dict(_scope_="mmdet", interval=50, type="LoggerHook"),
+    param_scheduler=dict(type="ParamSchedulerHook"),
+    sampler_seed=dict(_scope_="mmdet", type="DistSamplerSeedHook"),
+    timer=dict(_scope_="mmdet", type="IterTimerHook"),
+    visualization=dict(_scope_="mmdet", type="DetVisualizationHook"),
+)
+default_scope = "mmdet"
 env_cfg = dict(
     cudnn_benchmark=True,
-    dist_cfg=dict(backend='nccl'),
-    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
-evalute_type = 'CocoMetric'
+    dist_cfg=dict(backend="nccl"),
+    mp_cfg=dict(mp_start_method="fork", opencv_num_threads=0),
+)
+evalute_type = "CocoMetric"
 image_size = 896
 load_from = None
-log_level = 'INFO'
+log_level = "INFO"
 log_processor = dict(
-    _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
+    _scope_="mmdet", by_epoch=True, type="LogProcessor", window_size=50
+)
 max_epochs = 100
 model = dict(
     backbone=dict(
@@ -50,28 +58,28 @@ model = dict(
             2,
             18,
             2,
-            1,
+            # 1,
         ],
         drop_path_rate=0.3,
         drop_rate=0.0,
         embed_dims=128,
         init_cfg=dict(
-            checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
-            type='Pretrained'),
+            checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth",
+            type="Pretrained",
+        ),
         mlp_ratio=4,
         num_heads=[
             4,
             8,
             16,
             32,
-            64,
+            # 64,
         ],
         out_indices=[
             1,
             2,
             3,
-            4,
+            # 4,
         ],
         patch_norm=True,
         pretrain_img_size=384,
@@ -82,11 +90,12 @@ model = dict(
             2,
             2,
             2,
-            2,
+            # 2,
         ],
-        type='SwinTransformer',
+        type="SwinTransformer",
         window_size=12,
-        with_cp=True),
+        with_cp=True,
+    ),
     bbox_head=dict(
         anchor_generator=dict(
             center_offset=0.5,
@@ -104,7 +113,8 @@ model = dict(
                 64,
                 128,
             ],
-            type='AnchorGenerator'),
+            type="AnchorGenerator",
+        ),
         bbox_coder=dict(
             target_means=[
                 0.0,
@@ -118,28 +128,29 @@ model = dict(
                 1.0,
                 1.0,
             ],
-            type='DeltaXYWHBBoxCoder'),
+            type="DeltaXYWHBBoxCoder",
+        ),
         feat_channels=160,
         in_channels=160,
-        loss_bbox=dict(beta=0.1, loss_weight=50, type='HuberLoss'),
+        loss_bbox=dict(beta=0.1, loss_weight=50, type="HuberLoss"),
         loss_cls=dict(
-            alpha=0.25,
-            gamma=1.5,
-            loss_weight=1.0,
-            type='FocalLoss',
-            use_sigmoid=True),
-        norm_cfg=dict(
-            eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
+            alpha=0.25, gamma=1.5, loss_weight=1.0, type="FocalLoss", use_sigmoid=True
+        ),
+        norm_cfg=dict(eps=0.001, momentum=0.01, requires_grad=True, type="SyncBN"),
         num_classes=80,
         num_ins=5,
         stacked_convs=4,
-        type='EfficientDetSepBNHead'),
+        type="EfficientDetSepBNHead",
+    ),
     data_preprocessor=dict(
         batch_augments=[
-            dict(size=(
-                896,
-                896,
-            ), type='BatchFixedSizePad'),
+            dict(
+                size=(
+                    896,
+                    896,
+                ),
+                type="BatchFixedSizePad",
+            ),
         ],
         bgr_to_rgb=True,
         mean=[
@@ -153,31 +164,34 @@ model = dict(
             57.12,
             57.375,
         ],
-        type='DetDataPreprocessor'),
+        type="DetDataPreprocessor",
+    ),
     neck=dict(
         in_channels=[
             256,
             512,
             1024,
-            2048,
+            # 2048,
         ],
-        norm_cfg=dict(
-            eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
+        norm_cfg=dict(eps=0.001, momentum=0.01, requires_grad=True, type="SyncBN"),
         num_stages=6,
         out_channels=160,
         start_level=0,
-        type='BiFPN'),
+        type="BiFPN",
+    ),
     test_cfg=dict(
         max_per_img=100,
         min_bbox_size=0,
         nms=dict(
             iou_threshold=0.3,
-            method='gaussian',
+            method="gaussian",
             min_score=0.001,
             sigma=0.5,
-            type='soft_nms'),
+            type="soft_nms",
+        ),
         nms_pre=1000,
-        score_thr=0.05),
+        score_thr=0.05,
+    ),
     train_cfg=dict(
         allowed_border=-1,
         assigner=dict(
@@ -185,21 +199,22 @@ model = dict(
             min_pos_iou=0,
             neg_iou_thr=0.5,
             pos_iou_thr=0.5,
-            type='MaxIoUAssigner'),
+            type="MaxIoUAssigner",
+        ),
         debug=False,
         pos_weight=-1,
-        sampler=dict(type='PseudoSampler')),
-    type='EfficientDet')
-norm_cfg = dict(eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN')
+        sampler=dict(type="PseudoSampler"),
+    ),
+    type="EfficientDet",
+)
+norm_cfg = dict(eps=0.001, momentum=0.01, requires_grad=True, type="SyncBN")
 optim_wrapper = dict(
-    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
-    paramwise_cfg=dict(
-        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='OptimWrapper')
+    optimizer=dict(lr=0.001, type="AdamW", weight_decay=0.05),
+    paramwise_cfg=dict(bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
+    type="OptimWrapper",
+)
 param_scheduler = [
-    dict(
-        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
-        type='LinearLR'),
+    dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
     dict(
         T_max=50,
         begin=50,
@@ -207,83 +222,95 @@ param_scheduler = [
         convert_to_iter_based=True,
         end=100,
         eta_min=5e-05,
-        type='CosineAnnealingLR'),
+        type="CosineAnnealingLR",
+    ),
 ]
 resume = False
-test_cfg = dict(_scope_='mmdet', type='TestLoop')
+test_cfg = dict(_scope_="mmdet", type="TestLoop")
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        _scope_='mmdet',
-        ann_file='annotations/instances_val2017.json',
+        _scope_="mmdet",
+        ann_file="annotations/instances_val2017.json",
         backend_args=None,
-        data_prefix=dict(img='val2017/'),
-        data_root='data/coco/',
+        data_prefix=dict(img="val2017/"),
+        data_root="data/coco/",
         pipeline=[
-            dict(backend_args=None, type='LoadImageFromFile'),
-            dict(keep_ratio=True, scale=(
-                896,
-                896,
-            ), type='Resize'),
-            dict(type='LoadAnnotations', with_bbox=True),
+            dict(backend_args=None, type="LoadImageFromFile"),
+            dict(
+                keep_ratio=True,
+                scale=(
+                    896,
+                    896,
+                ),
+                type="Resize",
+            ),
+            dict(type="LoadAnnotations", with_bbox=True),
             dict(
                 meta_keys=(
-                    'img_id',
-                    'img_path',
-                    'ori_shape',
-                    'img_shape',
-                    'scale_factor',
+                    "img_id",
+                    "img_path",
+                    "ori_shape",
+                    "img_shape",
+                    "scale_factor",
                 ),
-                type='PackDetInputs'),
+                type="PackDetInputs",
+            ),
         ],
         test_mode=True,
-        type='CocoDataset'),
+        type="CocoDataset",
+    ),
     drop_last=False,
     num_workers=2,
     persistent_workers=True,
-    sampler=dict(_scope_='mmdet', shuffle=False, type='DefaultSampler'))
+    sampler=dict(_scope_="mmdet", shuffle=False, type="DefaultSampler"),
+)
 test_evaluator = dict(
-    _scope_='mmdet',
-    ann_file='data/coco/annotations/instances_val2017.json',
+    _scope_="mmdet",
+    ann_file="data/coco/annotations/instances_val2017.json",
     backend_args=None,
     format_only=False,
-    metric='bbox',
-    type='CocoMetric')
+    metric="bbox",
+    type="CocoMetric",
+)
 test_pipeline = [
-    dict(backend_args=None, type='LoadImageFromFile'),
-    dict(keep_ratio=True, scale=(
-        896,
-        896,
-    ), type='Resize'),
-    dict(type='LoadAnnotations', with_bbox=True),
+    dict(backend_args=None, type="LoadImageFromFile"),
+    dict(
+        keep_ratio=True,
+        scale=(
+            896,
+            896,
+        ),
+        type="Resize",
+    ),
+    dict(type="LoadAnnotations", with_bbox=True),
     dict(
         meta_keys=(
-            'img_id',
-            'img_path',
-            'ori_shape',
-            'img_shape',
-            'scale_factor',
+            "img_id",
+            "img_path",
+            "ori_shape",
+            "img_shape",
+            "scale_factor",
         ),
-        type='PackDetInputs'),
+        type="PackDetInputs",
+    ),
 ]
 train_cfg = dict(
-    _scope_='mmdet',
-    max_epochs=100,
-    type='EpochBasedTrainLoop',
-    val_interval=1)
+    _scope_="mmdet", max_epochs=100, type="EpochBasedTrainLoop", val_interval=1
+)
 train_dataloader = dict(
-    batch_sampler=dict(_scope_='mmdet', type='AspectRatioBatchSampler'),
+    batch_sampler=dict(_scope_="mmdet", type="AspectRatioBatchSampler"),
     batch_size=16,
     dataset=dict(
-        _scope_='mmdet',
-        ann_file='annotations/instances_train2017.json',
+        _scope_="mmdet",
+        ann_file="annotations/instances_train2017.json",
         backend_args=None,
-        data_prefix=dict(img='train2017/'),
-        data_root='data/coco/',
+        data_prefix=dict(img="train2017/"),
+        data_root="data/coco/",
         filter_cfg=dict(filter_empty_gt=True, min_size=32),
         pipeline=[
-            dict(backend_args=None, type='LoadImageFromFile'),
-            dict(type='LoadAnnotations', with_bbox=True),
+            dict(backend_args=None, type="LoadImageFromFile"),
+            dict(type="LoadAnnotations", with_bbox=True),
             dict(
                 keep_ratio=True,
                 ratio_range=(
@@ -294,21 +321,27 @@ train_dataloader = dict(
                     896,
                     896,
                 ),
-                type='RandomResize'),
-            dict(crop_size=(
-                896,
-                896,
-            ), type='RandomCrop'),
-            dict(prob=0.5, type='RandomFlip'),
-            dict(type='PackDetInputs'),
+                type="RandomResize",
+            ),
+            dict(
+                crop_size=(
+                    896,
+                    896,
+                ),
+                type="RandomCrop",
+            ),
+            dict(prob=0.5, type="RandomFlip"),
+            dict(type="PackDetInputs"),
         ],
-        type='CocoDataset'),
+        type="CocoDataset",
+    ),
     num_workers=8,
     persistent_workers=True,
-    sampler=dict(_scope_='mmdet', shuffle=True, type='DefaultSampler'))
+    sampler=dict(_scope_="mmdet", shuffle=True, type="DefaultSampler"),
+)
 train_pipeline = [
-    dict(backend_args=None, type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True),
+    dict(backend_args=None, type="LoadImageFromFile"),
+    dict(type="LoadAnnotations", with_bbox=True),
     dict(
         keep_ratio=True,
         ratio_range=(
@@ -319,62 +352,75 @@ train_pipeline = [
             896,
             896,
         ),
-        type='RandomResize'),
-    dict(crop_size=(
-        896,
-        896,
-    ), type='RandomCrop'),
-    dict(prob=0.5, type='RandomFlip'),
-    dict(type='PackDetInputs'),
+        type="RandomResize",
+    ),
+    dict(
+        crop_size=(
+            896,
+            896,
+        ),
+        type="RandomCrop",
+    ),
+    dict(prob=0.5, type="RandomFlip"),
+    dict(type="PackDetInputs"),
 ]
-val_cfg = dict(_scope_='mmdet', type='ValLoop')
+val_cfg = dict(_scope_="mmdet", type="ValLoop")
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        _scope_='mmdet',
-        ann_file='annotations/instances_val2017.json',
+        _scope_="mmdet",
+        ann_file="annotations/instances_val2017.json",
         backend_args=None,
-        data_prefix=dict(img='val2017/'),
-        data_root='data/coco/',
+        data_prefix=dict(img="val2017/"),
+        data_root="data/coco/",
         pipeline=[
-            dict(backend_args=None, type='LoadImageFromFile'),
-            dict(keep_ratio=True, scale=(
-                896,
-                896,
-            ), type='Resize'),
-            dict(type='LoadAnnotations', with_bbox=True),
+            dict(backend_args=None, type="LoadImageFromFile"),
+            dict(
+                keep_ratio=True,
+                scale=(
+                    896,
+                    896,
+                ),
+                type="Resize",
+            ),
+            dict(type="LoadAnnotations", with_bbox=True),
             dict(
                 meta_keys=(
-                    'img_id',
-                    'img_path',
-                    'ori_shape',
-                    'img_shape',
-                    'scale_factor',
+                    "img_id",
+                    "img_path",
+                    "ori_shape",
+                    "img_shape",
+                    "scale_factor",
                 ),
-                type='PackDetInputs'),
+                type="PackDetInputs",
+            ),
         ],
         test_mode=True,
-        type='CocoDataset'),
+        type="CocoDataset",
+    ),
     drop_last=False,
     num_workers=2,
     persistent_workers=True,
-    sampler=dict(_scope_='mmdet', shuffle=False, type='DefaultSampler'))
+    sampler=dict(_scope_="mmdet", shuffle=False, type="DefaultSampler"),
+)
 val_evaluator = dict(
-    _scope_='mmdet',
-    ann_file='data/coco/annotations/instances_val2017.json',
+    _scope_="mmdet",
+    ann_file="data/coco/annotations/instances_val2017.json",
     backend_args=None,
     format_only=False,
-    metric='bbox',
-    type='CocoMetric')
+    metric="bbox",
+    type="CocoMetric",
+)
 vis_backends = [
-    dict(type='LocalVisBackend'),
-    dict(type='TensorboardVisBackend'),
+    dict(type="LocalVisBackend"),
+    dict(type="TensorboardVisBackend"),
 ]
 visualizer = dict(
-    _scope_='mmdet',
-    name='visualizer',
-    type='DetLocalVisualizer',
+    _scope_="mmdet",
+    name="visualizer",
+    type="DetLocalVisualizer",
     vis_backends=[
-        dict(type='LocalVisBackend'),
-        dict(type='TensorboardVisBackend'),
-    ])
+        dict(type="LocalVisBackend"),
+        dict(type="TensorboardVisBackend"),
+    ],
+)

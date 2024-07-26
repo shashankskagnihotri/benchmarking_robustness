@@ -34,7 +34,12 @@ slurm_partition = "gpu_4"
 # config_file = "./to_check_if_epochs_repeated_atss_r50_voc0712.py"
 
 
-config_file = "configs_verified/centernet_r50_voc0712_vocmetric_3x_p_t.py"
+# EfficientDet r50, r101 have memory error. Wasn´t fixed by one a100 now testing two a100s
+# configs_erroneous/verification/EfficientDet_r50_coco.py -> 23909208
+# configs_erroneous/verification/EfficientDet_r101_coco.py -> 23909211
+# configs_erroneous/verification/EfficientDet_swin-b_coco.py -> 23909245
+
+config_file = "configs_verified/centernet_r50_voc0712_vocmetric.py"
 
 slurm_log_folder_path = (
     "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
@@ -44,10 +49,10 @@ specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_fil
 # current job 23871411
 
 # voc vs cocometric only changed voc/cocometric eveything else is the same
-# vocmetric job: 23875097, 23877306, 23880820, 23881551, 23883119, 23886921
-# cocometric job: 23875095, 23877307, 23880853, 23883120, 23886920
-# vocmetric 3x job: 23892625
-# cocometric 3x job: 23892618
+# vocmetric job: 23875097, 23877306, 23880820, 23881551, 23883119, 23886921, 23909263
+# cocometric job: 23875095, 23877307, 23880853, 23883120, 23886920,
+# vocmetric 3x job: 23892625,
+# cocometric 3x job: 23892618,
 
 executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
 
