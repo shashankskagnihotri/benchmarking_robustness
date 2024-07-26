@@ -21,30 +21,20 @@ def extract_wandb_runs_to_csv(
     # Get all runs in the specified project
     runs = api.runs(f"{entity_name}/{project_name}")
 
-    summary_list, config_list, name_list = [], [], []
+    results = []
     for run in runs:
-        # .summary contains the output keys/values for metrics like accuracy.
-        # We call ._json_dict to omit large files
-        summary_list.append(run.summary._json_dict)
+        df_history = run.history()
+        if len(df_history) == 0:
+            continue
+        config = run.config
+        config.update({"name": run.name, "state": run.state, "id": run.id})
+        df_config_repeated = pd.json_normalize([config] * len(df_history))
+        df_combined = pd.concat([df_history, df_config_repeated], axis=1)
 
-        # .config contains the hyperparameters.
-        # We remove special values that start with _.
-        config_list.append(
-            {k: v for k, v in run.config.items() if not k.startswith("_")}
-        )
+        results.append(df_combined)
+        # print(df_combined)
 
-        # .name is the human-readable name of the run.
-        name_list.append(run.name)
-
-    # Create dataframes from the lists
-    summary_df = pd.json_normalize(summary_list)
-    config_df = pd.json_normalize(config_list)
-
-    # Combine dataframes along with the run names
-    runs_df = pd.concat([summary_df, config_df], axis=1)
-    runs_df["name"] = name_list
-
-    # Save to CSV
+    runs_df = pd.concat(results, ignore_index=True)
     runs_df.to_csv(output_file, index=False)
 
 
