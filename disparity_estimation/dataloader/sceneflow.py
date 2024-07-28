@@ -59,8 +59,8 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         
 
         directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
+        print("Directory: ", directory)
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
-                       os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
                        os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
 
         seq_folders = []
@@ -75,10 +75,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
         self.img_left_filenames = natsorted(self.img_left_filenames)
         self.img_right_filenames = [img_path.replace('left', 'right') for img_path in self.img_left_filenames]
-        
-        if len(self.img_left_filenames) > 0:
-            print(self.img_left_filenames[0], generate_disparity_path(self.img_left_filenames[0]))
-            print()
         
         self.disp_left_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_left_filenames]
         self.disp_right_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_right_filenames]

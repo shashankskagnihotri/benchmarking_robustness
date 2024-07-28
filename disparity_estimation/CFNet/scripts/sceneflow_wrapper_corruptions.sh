@@ -9,7 +9,7 @@ DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/
 CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
 
 
-DATAPATH=$(get_dataset_path "sceneflow" "true" "$COMMON_CORRUPTION" "$SEVERITY_LEVEL")
+DATAPATH=$(get_dataset_path "sceneflow" "$COMMON_CORRUPTION" "$SEVERITY_LEVEL")
 CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
 
 if [[ -z "$COMMON_CORRUPTION" || -z "$SEVERITY_LEVEL" ]]; then
