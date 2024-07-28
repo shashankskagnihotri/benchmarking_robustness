@@ -40,18 +40,19 @@ def convert_items_from_pil_image_to_numpy(input_data_raw):
     return input_data_processed
 
 class MPISintelDataset(data.Dataset):
-    def __init__(self, datadir:str, model_name:str, train:bool=True):
+    def __init__(self, datadir:str, model_name:str, train:str):
         super(MPISintelDataset, self).__init__()
         
         self.model_name = model_name.lower()
         self.datadir = datadir
-        self.training = train
+        self.training = True if train.lower() == "train" else False
+        self.split = train
         
         self._read_data()
         self._augmentation()
 
     def _read_data(self):
-        directory = os.path.join(self.datadir, 'final_left')
+        directory = os.path.join(self.datadir, self.split, 'final_left')
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))]
 

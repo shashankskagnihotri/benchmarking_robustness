@@ -192,3 +192,7 @@ run/
 
 checkpoints/
 !*.ckpt
+
+## Remove slurm out
+*.out
+*.exclude
