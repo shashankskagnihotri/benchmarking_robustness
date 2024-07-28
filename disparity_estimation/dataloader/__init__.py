@@ -46,9 +46,10 @@ def get_data_loader_1(args, architeture_name):
         test_size = int(0.1 * len(train_dataset))  # 10% for testing
         train_size = len(train_dataset) - val_size - test_size
 
-        # Split the dataset
+        # Split the dataset, because kitti has no test split
         train_subset, val_subset, test_dataset = random_split(
-            train_dataset, [train_size, val_size, test_size]
+            train_dataset, [train_size, val_size, test_size],
+            random_state=42
         )
     else:
         val_size = int(0.2 * len(train_dataset))  # 20% for validation
@@ -60,7 +61,7 @@ def get_data_loader_1(args, architeture_name):
     del train_dataset
 
 
-    fast_dev_run = True
+    fast_dev_run = False
     if fast_dev_run == True:
         # Create small subsets for fast_dev_run
         fast_dev_run_size = 10  # Number of data points to use in fast_dev_run

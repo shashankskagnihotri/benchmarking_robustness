@@ -11,15 +11,16 @@ import mlflow
 
 mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/mlflow/")
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', required=True, help='Specify an architecture', choices=['cfnet', 'gwcnet', 'psmnet', 'sttr', 'sttr-light'])
+parser.add_argument('--model', required=True, help='Specify an model', choices=['cfnet', 'gwcnet', 'psmnet', 'sttr', 'sttr-light'])
 parser.add_argument('--scenario', required=True, help='Specify whether to train or test the model', choices=['train', 'test', 'attack', 'commoncorruption'])
+parser.add_argument('--dataset', required=True, help='Specify the dataset to use', choices=['sceneflow', 'sintel', 'kitti', 'kitti2015', 'eth3d', 'mpisintel'])
 parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
 parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
 parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test')
 
 args, unknown = parser.parse_known_args()
 args.scenario = args.scenario.lower()
-
+args.model = args.model.lower()
 
 if args.scenario == "commoncorruption" and (args.commoncorruption is None or args.severity is None):
     raise ValueError("If --scenario is commoncorruption, --commoncorruption and --severity must be specified")
@@ -38,16 +39,16 @@ with mlflow.start_run(experiment_id='128987742873377588'):
         from GwcNet import main
         print("Loaded gwcnet")
     else:
-        raise ValueError("Architecture (/ Architecture depricated) not recognized")
+        raise ValueError("Architecture/Model (/ Architecture depricated) not recognized")
 
     print(f"Running {args.scenario} mode for {args.model}")
 
 
-    run_name = f"{args.model}_{args.scenario}"
+    run_name = f"{args.model}_{args.scenario}_{args.dataset}"
     if args.scenario == "commoncorruption":
-        run_name = f"{args.model}_{args.scenario}_{args.commoncorruption}_{args.severity}"
+        run_name = f"{args.model}_{args.scenario}_{args.dataset}_{args.commoncorruption}_{args.severity}"
     elif args.scenario == "attack":
-        run_name = f"{args.model}_{args.scenario}_{args.attack_type}"
+        run_name = f"{args.model}_{args.scenario}_{args.dataset}_{args.attack_type}"
 
     mlflow.set_tag("mlflow.runName", run_name)
 

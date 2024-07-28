@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
 
-CORRUPTION_TYPE="$1"
+source ./dataset_path.sh
+
+COMMON_CORRUPTION="$1"
 SEVERITY_LEVEL="$2"
 
 DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/Common_corruptions/$CORRUPTION_TYPE/severity_$SEVERITY_LEVEL"
 CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
 
 
-if [[ -z "$CORRUPTION_TYPE" || -z "$SEVERITY_LEVEL" ]]; then
+DATAPATH=$(get_dataset_path "sceneflow" "true" "$COMMON_CORRUPTION" "$SEVERITY_LEVEL")
+CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
+
+if [[ -z "$COMMON_CORRUPTION" || -z "$SEVERITY_LEVEL" ]]; then
     echo "Error: Corruption type and severity level must be provided."
     exit 1
 fi
 
-python wrapper.py --architecture cfnet \
+python wrapper.py \
     --scenario commoncorruption \
-    --commoncorruption $CORRUPTION_TYPE \
+    --commoncorruption $COMMON_CORRUPTION \
     --severity $SEVERITY_LEVEL \
     --dataset sceneflow \
     --datapath $DATAPATH \
