@@ -11,15 +11,14 @@ import mlflow
 
 mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/mlflow/")
 parser = argparse.ArgumentParser()
-parser.add_argument('--architecture', required=True, help='Specify an architecture') #, choices=['cfnet', 'gwcnet', 'psmnet', 'sttr', 'sttr-light']
-parser.add_argument('--scenario', required=True, help='Specify whether to train or test the architecture', choices=['train', 'test', 'attack', 'commoncorruption'])
+parser.add_argument('--model', required=True, help='Specify an architecture', choices=['cfnet', 'gwcnet', 'psmnet', 'sttr', 'sttr-light'])
+parser.add_argument('--scenario', required=True, help='Specify whether to train or test the model', choices=['train', 'test', 'attack', 'commoncorruption'])
 parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
 parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
 parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test')
 
 args, unknown = parser.parse_known_args()
 args.scenario = args.scenario.lower()
-args.architecture = args.architecture.lower()
 
 
 if args.scenario == "commoncorruption" and (args.commoncorruption is None or args.severity is None):
