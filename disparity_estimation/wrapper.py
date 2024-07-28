@@ -41,25 +41,26 @@ with mlflow.start_run(experiment_id='128987742873377588'):
     else:
         raise ValueError("Architecture (/ Architecture depricated) not recognized")
 
-    print(f"Running {args.scenario} scenario for {args.architecture}")
+    print(f"Running {args.scenario} mode for {args.model}")
+
+
+    run_name = f"{args.model}_{args.scenario}"
+    if args.scenario == "commoncorruption":
+        run_name = f"{args.model}_{args.scenario}_{args.commoncorruption}_{args.severity}"
+    elif args.scenario == "attack":
+        run_name = f"{args.model}_{args.scenario}_{args.attack_type}"
+
+    mlflow.set_tag("mlflow.runName", run_name)
+
         
     if args.scenario == "train":
-        mlflow.set_tag("mlflow.runName", f"{args.architecture}_train")
         main.train()
 
-    elif args.scenario == "test":
-        mlflow.set_tag("mlflow.runName", f"{args.architecture}_test")
+    elif args.scenario == "test" or args.scenario == "commoncorruption":
         main.test()
 
     elif args.scenario == "attack":
-        mlflow.set_tag("mlflow.runName", f"{args.architecture}_attack_{args.attack_type}")
         main.attack(attack_type=args.attack_type)
-    elif args.scenario == "commoncorruption":
 
-        if args.commoncorruption not in args.unknown:
-            raise ValueError("Common corruption not recognized")
-
-        mlflow.set_tag("mlflow.runName", f"{args.scenario}_commoncorruption_{args.commoncorruption}_{args.severity}")
-        main.test()
     else:
         raise ValueError("Scenario not recognized")
