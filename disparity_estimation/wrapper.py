@@ -31,10 +31,10 @@ if args.scenario == "attack" and args.attack_type is None:
 with mlflow.start_run(experiment_id='128987742873377588'):
     mlflow.log_params(vars(args))
 
-    if args.architecture == "cfnet":
+    if args.model == "cfnet":
         from CFNet import main
         print("Loaded cfnet")
-    elif args.architecture == "gwcnet-g":
+    elif args.model == "gwcnet-g":
         from GwcNet import main
         print("Loaded gwcnet")
     else:

@@ -75,10 +75,10 @@ def get_data_loader_1(args, architeture_name):
         test_dataset = Subset(test_dataset, test_indices)
 
     ValImgLoader = DataLoader(
-        val_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True
+        val_subset, args.batch_size, shuffle=False, num_workers=8, drop_last=True
     )
     TrainImgLoader = DataLoader(
-        train_subset, args.batch_size, shuffle=True, num_workers=8, drop_last=True
+        train_subset, args.batch_size, shuffle=False, num_workers=8, drop_last=True
     )
     TestImgLoader = DataLoader(
         test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False

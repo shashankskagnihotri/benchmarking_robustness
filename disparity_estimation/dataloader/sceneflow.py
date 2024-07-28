@@ -36,9 +36,31 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         self._read_data()
 
     def _read_data(self):
+
+        import os
+
+        def generate_disparity_path(original_path):
+            # Zerlege den originalen Pfad in seine Teile
+            parts = original_path.split('/')
+
+            # Finde den Index des Verzeichnisses 'FlyingThings3D'
+            try:
+                flyingthings3d_index = parts.index('FlyingThings3D')
+            except ValueError:
+                raise ValueError("Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis.")
+
+            # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
+            new_parts = parts[:flyingthings3d_index + 1] + ['disparity'] + parts[flyingthings3d_index + 5:]
+
+            # Erstelle den neuen Pfad
+            new_path = "/" + os.path.join(*new_parts)
+            return new_path
+
+        
+
         directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
-                       os.path.isdir(os.path.join(directory, subset))]
+                       os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
 
         seq_folders = []
         for sub_folder in sub_folders:
@@ -52,12 +74,16 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
         self.img_left_filenames = natsorted(self.img_left_filenames)
         self.img_right_filenames = [img_path.replace('left', 'right') for img_path in self.img_left_filenames]
-
-        self.disp_left_filenames = [img_path.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img_path in self.img_left_filenames]
-        self.disp_right_filenames = [img_path.replace('frames_finalpass', 'disparity').replace('.png', '.pfm') for img_path in self.img_right_filenames]
+        
+        if len(self.img_left_filenames) > 0:
+            print(self.img_left_filenames[0], generate_disparity_path(self.img_left_filenames[0]))
+            print()
+        
+        self.disp_left_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_left_filenames]
+        self.disp_right_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_right_filenames]
 
         directory = os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
-        self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)]
+        self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)] if os.path.isdir(directory) else []
         self.occ_left_filenames = natsorted(self.occ_left_filenames)
         self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
         
