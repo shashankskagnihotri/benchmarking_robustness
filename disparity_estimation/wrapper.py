@@ -38,6 +38,12 @@ with mlflow.start_run(experiment_id='128987742873377588'):
     elif args.model == "gwcnet-g":
         from GwcNet import main
         print("Loaded gwcnet")
+    elif args.model == "sttr":
+        # import importlib  
+        # from importlib.import_module("foo-bar") import main
+        from stero_transformer import main # type: ignore
+        print("Loaded sttr")
+        
     else:
         raise ValueError("Architecture/Model (/ Architecture depricated) not recognized")
 
@@ -54,6 +60,7 @@ with mlflow.start_run(experiment_id='128987742873377588'):
 
         
     if args.scenario == "train":
+        print("Started train")
         main.train()
 
     elif args.scenario == "test" or args.scenario == "commoncorruption":

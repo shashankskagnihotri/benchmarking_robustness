@@ -42,7 +42,7 @@ def get_args_parser():
     parser.add_argument('--ft', action='store_true', help='load model from checkpoint, but discard optimizer state')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
-    parser.add_argument('--eval', action='store_true')
+    #parser.add_argument('--eval', action='store_true')
     parser.add_argument('--inference', action='store_true')
     parser.add_argument('--num_workers', default=1, type=int)
     parser.add_argument('--checkpoint', type=str, default='dev', help='checkpoint name for current experiment')
@@ -259,8 +259,17 @@ def main(args):
 
     return
 
-
-if __name__ == '__main__':
+def train():
     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
-    args_ = ap.parse_args()
-    main(args_)
+    args, unknown = ap.parse_known_args()
+    args.eval = False
+    main(args)
+    # ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+    # args_ = ap.parse_known_args()
+
+    # main(args_)
+
+# if __name__ == '__main__':
+#     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+#     args_ = ap.parse_known_args()
+#     main(args_)
