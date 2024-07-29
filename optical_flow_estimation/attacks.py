@@ -538,7 +538,7 @@ def attack_list_of_models(args: Namespace) -> None:
             continue
 
         logging.info(mname)
-        model_ref = ptlflow.get_model_reference(mname)
+        model_ref = get_model_reference(mname)
 
         if hasattr(model_ref, "pretrained_checkpoints"):
             ckpt_names = model_ref.pretrained_checkpoints.keys()
@@ -1011,7 +1011,7 @@ def _write_to_npy_file(
     if args.flow_format != "original":
         flow_ext = args.flow_format
     else:
-        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name or "sintel" in dataloader_name:
             flow_ext = "png"
         else:
             flow_ext = "flo"
