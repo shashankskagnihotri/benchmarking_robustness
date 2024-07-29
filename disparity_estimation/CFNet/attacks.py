@@ -427,36 +427,25 @@ class FGSMAttack:
         return perturbed_image
 
 # Based on code / implementaion by jeffkang (https://github.com/Jeffkang-94/pytorch-adversarial-attack/blob/master/attack/pgd.py)
-import torch
-import torch.nn.functional as F
 class PGDAttack:
-
     def __init__(self, model, epsilon, num_iterations, alpha, random_start=True, targeted=False):
-      
         self.model = model
         self.epsilon = epsilon
-        self.alpha = alpha 
+        self.alpha = alpha
         self.num_iterations = num_iterations
         self.random_start = random_start
         self.targeted = targeted
-        self.clamp = (0, 1)
 
     def _random_init(self, x):
-        x = x + (torch.rand(x.size(), dtype=x.dtype, device=x.device) - 0.5) * 2 * self.config['eps']
-        x = torch.clamp(x, *self.clamp)
+        x = x + (torch.rand(x.size(), dtype=x.dtype, device=x.device) - 0.5) * 2 * self.epsilon
+        x = torch.clamp(x, 0, 1)
         return x
 
-    def attack(self, left_image, right_image, labels):
-        """
-        :param left_image: Left image to perturb
-        :param right_image: Right image to perturb
-        :param labels: Ground-truth disparity
-        :return: Perturbed left and right images
-        """
+    @torch.enable_grad()
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, labels: torch.Tensor):
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
 
-        # Initialize perturbations for both left and right images
         perturbed_left = left_image.clone().detach()
         perturbed_right = right_image.clone().detach()
 
@@ -464,58 +453,43 @@ class PGDAttack:
             perturbed_left = self._random_init(perturbed_left)
             perturbed_right = self._random_init(perturbed_right)
 
-        for _ in range(self.num_iterations):
+        perturbed_results = {}
+        attack_iterations = [1, 3, 4, 5]  # Example iterations to save
+
+        for iteration in range(self.num_iterations):
             perturbed_left.requires_grad = True
             perturbed_right.requires_grad = True
 
-            # Forward pass the perturbed images through the model
             inputs = {"images": [[perturbed_left, perturbed_right]]}
             outputs = self.model(inputs)["disparities"].squeeze(0)
 
-            # Compute the loss
             loss = F.mse_loss(outputs.float(), labels.float())
-            if self.target:
+            if self.targeted:
                 loss = -loss
 
-            # Zero all existing gradients
             self.model.zero_grad()
-
-            # Backward pass to compute gradients of the loss w.r.t the perturbed images
             loss.backward()
 
-            # Collect the gradient data
             left_grad = perturbed_left.grad.detach()
             right_grad = perturbed_right.grad.detach()
 
-            # Perform the attack step for both left and right images
             perturbed_left = self.pgd_attack_step(perturbed_left, left_grad, orig_left_image)
             perturbed_right = self.pgd_attack_step(perturbed_right, right_grad, orig_right_image)
 
-            # Detach the perturbed images to avoid accumulating gradients
             perturbed_left = perturbed_left.detach()
             perturbed_right = perturbed_right.detach()
 
-        return perturbed_left, perturbed_right
+            if iteration in attack_iterations:
+                perturbed_results[iteration] = (perturbed_left, perturbed_right)
 
-    def pgd_attack_step(self, perturbed_image, grad, orig_image):
+        return perturbed_results
+
+    def pgd_attack_step(self, perturbed_image: torch.Tensor, grad: torch.Tensor, orig_image: torch.Tensor):
         grad_sign = grad.sign()
-        if self.target:
+        if self.targeted:
             grad_sign *= -1
 
-        perturbed_image = perturbed_image + self.config['attack_lr'] * grad_sign
-
-        delta = torch.clamp(perturbed_image - orig_image, min=-self.config['eps'], max=self.config['eps'])
+        perturbed_image = perturbed_image + self.alpha * grad_sign
+        delta = torch.clamp(perturbed_image - orig_image, min=-self.epsilon, max=self.epsilon)
         perturbed_image = torch.clamp(orig_image + delta, 0, 1)
-
         return perturbed_image
-
-    
-    def attack(self,):
-
-        for 
-
-    
-    def ...attack(self,):
-    
-
-    

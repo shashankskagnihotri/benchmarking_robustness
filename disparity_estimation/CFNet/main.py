@@ -390,8 +390,8 @@ def attack(attack_type: str):
     elif attack_type == "fgsm":
         attacker = FGSMAttack( model, epsilon, num_iterations,alpha, targeted=False)
 
-    elif attack_type == "":
-        attacker = PGDAttack()
+    elif attack_type == "pgd":
+        attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
     
     else:
         raise ValueError("Attack type not recognized")

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/"
-CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/CFNet/checkpoints/sceneflow_pretraining.ckpt"
+CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_adackerm-team_project_fss2024/benchmarking_robustness/disparity_estimation/checkpoints/CFNet/sceneflow_pretraining.ckpt"
 
 ATTACK_TYPE="$1"
 
