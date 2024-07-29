@@ -5,9 +5,31 @@ import submitit
 import logging
 from rich.logging import RichHandler
 from dotenv import load_dotenv
-import os
 
-load_dotenv()  # Load environment variables from .env file
+load_dotenv()  # needed to add 3DCommonCorruptions to the path and to get the email
+os.chdir("3DCommonCorruptions/create_3dcc")  # deal with relative imports
+
+from create_3dcc import (  # noqa: E402
+    create_dof_data,
+    create_fog_data,
+    create_non3d_data,
+    create_flash_data,
+    create_shadow_data,
+    create_multi_illumination_data,
+    create_motion_data,
+    create_video_data,
+)
+
+corruptions = [
+    create_dof_data,
+    create_fog_data,
+    create_non3d_data,
+    create_flash_data,
+    create_shadow_data,
+    create_multi_illumination_data,
+    create_motion_data,
+    create_video_data,
+]
 my_email = os.getenv("MY_EMAIL")
 
 # Set up the logging configuration to use RichHandler
@@ -66,35 +88,6 @@ def create_depth_info(path_rgb, path_depth):
     logger.info("Depth information creation completed.")
 
 
-def create_3d_corruptions(path_rgb, path_depth, path_target):
-    logger.info("Starting 3D corruption creation...")
-    subprocess.run(
-        [
-            "python",
-            "3DCommonCorruptions/create_3dcc/create_3dcc.py",
-            "--path_rgb",
-            path_rgb,
-            "--path_depth",
-            path_depth,
-            "--path_target",
-            path_target,
-            "--batch_size",
-            "1",
-        ]
-    )
-    logger.info("3D corruption creation completed.")
-
-
-def process_dataset(name, path_rgb, path_depth, path_target, create_depth):
-    logger.info(f"Processing {name} dataset...")
-
-    if create_depth:
-        create_depth_info(path_rgb, path_depth)
-
-    create_3d_corruptions(path_rgb, path_depth, path_target)
-    logger.info(f"{name} dataset processing completed.")
-
-
 def main(args):
     weights_dir = "DPT/weights"
     weights_file = "dpt_hybrid-midas-501f0c75.pt"
@@ -127,7 +120,7 @@ def main(args):
     )
 
     # Submit separate jobs for each dataset
-    executor = submitit.AutoExecutor(folder="logs")
+    executor = submitit.AutoExecutor(folder="slurm/logs/cc/%j")
     executor.update_parameters(
         slurm_partition="gpu_4",
         slurm_gres="gpu:1",
@@ -135,19 +128,34 @@ def main(args):
         nodes=1,
         tasks_per_node=1,
         slurm_mem=30,
-        timeout_min=1800,  # 30 hours
+        slurm_time="48:00:00",
         slurm_mail_type="END,FAIL",
         slurm_mail_user=my_email,
     )
 
     for dataset in selected_datasets:
-        paths = datasets[dataset]
-        job_name = f"{dataset}_processing"
-        executor.update_parameters(name=job_name)
-        job = executor.submit(process_dataset, dataset, *paths, args.create_depth)
-        logger.info(
-            f"Submitted job for {dataset} dataset with ID: {job.job_id} and name: {job_name}"
-        )
+        path_rgb, path_depth, path_target = datasets[dataset]
+
+        if args.create_depth:
+            create_depth_info(path_rgb, path_depth)
+
+        for corruption in corruptions:
+            kwargs = {
+                "BASE_PATH_RGB": path_rgb,
+                "BASE_PATH_DEPTH": path_depth,
+                "BASE_TARGET_PATH": path_target,
+                "BATCH_SIZE": 1,
+            }
+            if corruption.__name__ == "create_non3d_data":
+                del kwargs["BASE_PATH_DEPTH"]
+
+            job_name = f"3dcc_{dataset}_{corruption.__name__}"
+            executor.update_parameters(name=job_name)
+            job = executor.submit(
+                corruption,
+                **kwargs,
+            )
+            logger.info(f"{job.job_id}: {corruption.__name__} - {kwargs}")
 
 
 if __name__ == "__main__":
@@ -168,3 +176,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    main(args)
