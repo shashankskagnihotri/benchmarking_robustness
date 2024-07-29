@@ -245,6 +245,8 @@ def train():
 def test():
     # testing
     avg_test_scalars = AverageMeterDict()
+    print("Batch size: ", TestImgLoader.batch_size)
+    print("Length of TestImgLoader: ", len(TestImgLoader))
     for batch_idx, sample in enumerate(TestImgLoader):
         global_step = len(TestImgLoader) * batch_idx
         start_time = time.time()
