@@ -375,11 +375,11 @@ def test_sample(sample, compute_metrics=True):
 
 def attack(attack_type: str):
 
-    from attacks import CosPGDAttack, FGSMAttack
+    from attacks import CosPGDAttack, FGSMAttack, PGDAttack
 
     epsilon = 0.03
     alpha = 0.01
-    num_iterations = 10
+    num_iterations = 20
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(
@@ -387,6 +387,10 @@ def attack(attack_type: str):
         )
     elif attack_type == "fgsm":
         attacker = FGSMAttack( model, epsilon, num_iterations,alpha, targeted=False)
+
+    elif attack_type == "":
+        attacker = PGDAttack()
+    
     else:
         raise ValueError("Attack type not recognized")
 
