@@ -4584,6 +4584,36 @@
                 "l_inf_delta2": 0.03137257695198059,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-07-22 11:35:13",
+            "model": "raft",
+            "checkpoint": "kitti",
+            "attack": "common_corruptions",
+            "name": "gaussian_noise",
+            "severity": 5,
+            "targeted": false,
+            "end_time": "2024-07-22 11:38:29",
+            "duration": "00:03:16",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 28.72215435743332,
+                "px1": 0.10811143019876908,
+                "px3": 0.30192674899008126,
+                "px5": 0.3886933930963278,
+                "outlier": 68.29682114601135,
+                "own_epe": 52.98314155578613,
+                "cosim": 0.16404327017604373,
+                "l2_delta1": 0.28703330919146536,
+                "l2_delta2": 0.2870797745883465,
+                "l2_delta12": 0.287056687027216,
+                "l0_delta1": 1312323.78,
+                "l0_delta2": 1312728.43,
+                "l0_delta12": 2625052.21,
+                "l_inf_delta1": 1.0,
+                "l_inf_delta2": 1.0,
+                "l_inf_delta12": 1.0
+            }
         }
     ]
 }
