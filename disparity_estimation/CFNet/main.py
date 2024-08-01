@@ -377,7 +377,7 @@ def test_sample(sample, compute_metrics=True):
 
 def attack(attack_type: str):
 
-    from attacks import CosPGDAttack, FGSMAttack, PGDAttack
+    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, AutoPGDAttack
 
     epsilon = 0.03
     alpha = 0.01
@@ -392,6 +392,12 @@ def attack(attack_type: str):
 
     elif attack_type == "pgd":
         attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
+
+    elif attack_type =='bim_pgd_cospgd':
+        attacker = BimPGDAttack() # or corporate into other attack with flag ?? 
+
+    elif attack_type == 'autopgd':
+        attacker = AutoPGDAttack()
     
     else:
         raise ValueError("Attack type not recognized")

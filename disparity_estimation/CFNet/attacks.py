@@ -297,7 +297,7 @@ class CosPGDAttack:
 
         # save perturbed
         perturbed_results = {}
-        attack_iterations = [1,3,4,5] # TODO: check number of iterations
+      
         
         for iteration in range(self.num_iterations):
             perturbed_left.requires_grad = True
@@ -345,9 +345,8 @@ class CosPGDAttack:
                 clamp_max=1
             )
         
-            # check if current iteration matches number in iteration list
-            if iteration in attack_iterations:
-                perturbed_results[iteration]=(perturbed_left, perturbed_right)
+            # save results after every iteration
+            perturbed_results[iteration]=(perturbed_left, perturbed_right)
 
 
         return perturbed_results
@@ -373,7 +372,7 @@ class FGSMAttack:
 
         # save perturbed
         perturbed_results = {}
-        attack_iterations = [1,3,4,5] # TODO: check number of iterations
+       
 
         for iteration in range(self.num_iterations):
             # Set the images to require gradient
@@ -407,9 +406,9 @@ class FGSMAttack:
             perturbed_left = perturbed_left.detach()
             perturbed_right = perturbed_right.detach()
 
-            # check if current iteration matches number in iteration list
-            if iteration in attack_iterations:
-                perturbed_results[iteration]=(perturbed_left, perturbed_right)
+       
+            # save results after every iteration
+            perturbed_results[iteration]=(perturbed_left, perturbed_right)
             
 
         return perturbed_results
@@ -454,8 +453,7 @@ class PGDAttack:
             perturbed_right = self._random_init(perturbed_right)
 
         perturbed_results = {}
-        attack_iterations = [1, 3, 4, 5]  # Example iterations to save
-
+     
         for iteration in range(self.num_iterations):
             perturbed_left.requires_grad = True
             perturbed_right.requires_grad = True
@@ -479,8 +477,9 @@ class PGDAttack:
             perturbed_left = perturbed_left.detach()
             perturbed_right = perturbed_right.detach()
 
-            if iteration in attack_iterations:
-                perturbed_results[iteration] = (perturbed_left, perturbed_right)
+    
+            # save results after every iteration
+            perturbed_results[iteration] = (perturbed_left, perturbed_right)
 
         return perturbed_results
 
@@ -493,3 +492,19 @@ class PGDAttack:
         delta = torch.clamp(perturbed_image - orig_image, min=-self.epsilon, max=self.epsilon)
         perturbed_image = torch.clamp(orig_image + delta, 0, 1)
         return perturbed_image
+
+class AutoPGDAttack:
+    def __init__(self,..):
+        pass
+
+    def attack(self,):
+
+        return  perturbed_results[iteration] = (perturbed_left, perturbed_right)
+
+    
+    def autopgd_attack(self,):
+
+
+        return perturbed_image
+    
+
