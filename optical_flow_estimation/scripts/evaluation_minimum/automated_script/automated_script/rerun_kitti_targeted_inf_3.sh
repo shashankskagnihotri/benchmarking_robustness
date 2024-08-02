@@ -29,6 +29,7 @@ cd ../../../../
 
 for model in $models
 do
+    epsilon="8"
     epsilon=$(echo "scale=10; $epsilon/255" | bc)
     for attack in $attacks
     do
