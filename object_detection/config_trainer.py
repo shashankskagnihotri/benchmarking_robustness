@@ -5,28 +5,25 @@ import submitit
 
 from new_distributed_trainer import train_with_multiple_gpus
 
-from config_maker import which
-
 
 # from mmengine.runner import Runner
 from rich.traceback import install
 
 install(show_locals=False)
 
+print("running config_trainer.py")
 
-slurm_log_folder_path = "./slurm/train_work_dir"  # ? change to eval for evaluation
+slurm_log_folder_path = "./slurm/train_work_dir"  #
 slurm_log_folders = os.listdir(slurm_log_folder_path)
 
-slurm_results_path = "slurm/train_results"  # ? change to eval for evaluation
-path_erroneous_configs = (
-    "./configs_erroneous_training"  # ? change to eval for evaluation
-)
+slurm_results_path = "slurm/train_results"
+path_erroneous_configs = "./configs_erroneous_training"
 
 
-path_verified_configs = "./configs_verified"  # ? change to eval for evaluation
-folder_entry_list_configs_to_train = os.listdir(
-    path_verified_configs
-)  # ? change to eval for evaluation
+# path_verified_configs = "./configs_verified" #! do this when all configs are verified
+path_verified_configs = "./configs_rpn_verified"  #! currently only for rpn configs
+
+folder_entry_list_configs_to_train = os.listdir(path_verified_configs)
 
 
 path_configs_to_test = "./configs_to_test"
@@ -35,8 +32,8 @@ path_configs_to_test = "./configs_to_test"
 #! wandb vis gets currently implemented into config files!!!!!
 
 verify_subset = False
-GPU_NUM = 1  #! setting right settings for slurm
-TIME = "05:00:00"
+GPU_NUM = 1
+TIME = "20:00:00"
 SLURM_PARTITION = "gpu_4_a100"
 
 
@@ -55,6 +52,33 @@ if verify_subset:
 
 print(f"folder_entry_list_configs_to_train : {folder_entry_list_configs_to_train}")
 print(f"path_configs_to_test : {path_configs_to_test}")
+
+
+def namefinder(filename):
+    def neck(filename):
+        return filename.split("_")[0]
+
+    def backbone(filename):
+        if "swin-b" in filename:
+            return "swin-b"
+        elif "convnext-b" in filename:
+            return "convnext-b"
+        elif "r50" in filename:
+            return "r50"
+        elif "r101" in filename:
+            return "r101"
+        else:
+            return "unknown-backbone"
+
+    def dataset(filename):
+        if "coco" in filename:
+            return "coco"
+        elif "voc" in filename:
+            return "voc0712"
+        else:
+            return "unknown-dataset"
+
+    return neck(filename), backbone(filename), dataset(filename)
 
 
 def highest_job_number(model_log_folder_path):
@@ -180,7 +204,9 @@ for config_file in folder_entry_list_configs_to_train:
                                         cfg.visualizer.vis_backends[
                                             0
                                         ].type = "WandbVisBackend"
-                                        neck, backbone, dataset = which(config_file)
+                                        neck, backbone, dataset = namefinder(
+                                            config_file
+                                        )
                                         cfg.visualizer.vis_backends[
                                             0
                                         ].init_kwargs = dict(
@@ -225,7 +251,7 @@ for config_file in folder_entry_list_configs_to_train:
 
             cfg = Config.fromfile(config_path)
             cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-            neck, backbone, dataset = which(config_file)
+            neck, backbone, dataset = namefinder(config_file)
             cfg.visualizer.vis_backends[0].init_kwargs = dict(
                 project=f"{neck}_{backbone}_{dataset}_train"
             )

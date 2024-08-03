@@ -89,29 +89,24 @@ for filename in test_files_with_target_setup:
     print(filename)
 
 
+# Occurrences of each unique val evaluator setup:
+# (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 300, 1000))): 131
+# (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 1, 10))): 4
+# (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'proposal_fast'), ('proposal_nums', (100, 300, 1000))): 4
+# Occurrences of each unique test evaluator setup:
+
+# (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 300, 1000))): 131
+# (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 1, 10))): 4
+# (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'proposal_fast'), ('proposal_nums', (100, 300, 1000))): 4
 
 
-
-
-Occurrences of each unique val evaluator setup:
-(('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 300, 1000))): 131
-(('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 1, 10))): 4
-(('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'proposal_fast'), ('proposal_nums', (100, 300, 1000))): 4
-Occurrences of each unique test evaluator setup:
-
-(('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 300, 1000))): 131
-(('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 1, 10))): 4
-(('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'proposal_fast'), ('proposal_nums', (100, 300, 1000))): 4
-
-
-
-Setup (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 1, 10))):
-  rtmdet_r50_coco.py
-  rtmdet_r101_coco.py
-  rtmdet_swin-b_coco.py
-  rtmdet_convnext-b_coco.py
-Setup (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'proposal_fast'), ('proposal_nums', (100, 300, 1000))):
-  rpn_swin-b_coco.py
-  rpn_convnext-b_coco.py
-  rpn_r50_coco.py
-  rpn_r101_coco.py
+# Setup (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'bbox'), ('proposal_nums', (100, 1, 10))):
+#   rtmdet_r50_coco.py
+#   rtmdet_r101_coco.py
+#   rtmdet_swin-b_coco.py
+#   rtmdet_convnext-b_coco.py
+# Setup (('ann_file', 'data/coco/annotations/instances_val2017.json'), ('metric', 'proposal_fast'), ('proposal_nums', (100, 300, 1000))):
+#   rpn_swin-b_coco.py
+#   rpn_convnext-b_coco.py
+#   rpn_r50_coco.py
+#   rpn_r101_coco.py

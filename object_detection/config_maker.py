@@ -1,18 +1,40 @@
 import os
 from mmengine.config import Config
+import shutil
+
 from voc0712_cocofmt_reference import (
     METAINFO as voc0712_METAINFO,
+    # data_root as voc0712_data_root,
+    # dataset_type as voc0712_dataset_type,
+    # train_pipeline as voc0712_train_pipeline,
+    # test_pipeline as voc0712_test_pipeline,
+    # val_evaluator as voc0712_val_evaluator,
+)
+from mmdetection.configs._base_.datasets.voc0712 import (
     data_root as voc0712_data_root,
     dataset_type as voc0712_dataset_type,
     train_pipeline as voc0712_train_pipeline,
     test_pipeline as voc0712_test_pipeline,
-    val_evaluator as voc0712_val_evaluator,
 )
+
+from mmdetection.configs._base_.datasets.coco_detection import (
+    data_root as coco_data_root,
+    dataset_type as coco_dataset_type,
+    train_pipeline as coco_train_pipeline,
+    test_pipeline as coco_test_pipeline,
+    train_dataloader as coco_train_dataloader,
+    val_dataloader as coco_val_dataloader,
+    val_evaluator as coco_val_evaluator,
+)
+
+
 from rich.traceback import install
 
 #! import the reference configuration of voc with voc metric but keep as much as possible e.g. metainfos
 
 install()
+
+print("running config_maker.py")
 
 
 files_which_we_have = [
@@ -180,32 +202,104 @@ new_neck_configs = {
 }
 
 
+# voc_train_dataloader_coco_fmt = dict(
+#     dataset=dict(
+#         type="RepeatDataset",
+#         times=3,
+#         dataset=dict(
+#             # _delete_=True,
+#             type=voc0712_dataset_type,
+#             data_root=voc0712_data_root,
+#             ann_file="voc_coco_fmt_annotations/voc0712_trainval.json",  # changed from annotations/....
+#             data_prefix=dict(img=""),
+#             metainfo=voc0712_METAINFO,
+#             filter_cfg=dict(filter_empty_gt=True, min_size=32),
+#             pipeline=voc0712_train_pipeline,
+#             backend_args=None,
+#         ),
+#     )
+# )
+
 voc_train_dataloader = dict(
+    batch_size=2,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type="DefaultSampler", shuffle=True),
+    batch_sampler=dict(type="AspectRatioBatchSampler"),
     dataset=dict(
-        type="RepeatDataset",
-        times=3,
+        # type="RepeatDataset", #! removed repetition, since it makes the scheduling more complicated
+        # times=3,
         dataset=dict(
-            # _delete_=True,
-            type=voc0712_dataset_type,
-            data_root=voc0712_data_root,
-            ann_file="voc_coco_fmt_annotations/voc0712_trainval.json",  # changed from annotations/....
-            data_prefix=dict(img=""),
-            metainfo=voc0712_METAINFO,
-            filter_cfg=dict(filter_empty_gt=True, min_size=32),
-            pipeline=voc0712_train_pipeline,
-            backend_args=None,
+            type="ConcatDataset",
+            # VOCDataset will add different `dataset_type` in dataset.metainfo,
+            # which will get error if using ConcatDataset. Adding
+            # `ignore_keys` can avoid this error.
+            ignore_keys=["dataset_type"],
+            datasets=[
+                dict(
+                    type=voc0712_dataset_type,
+                    data_root=voc0712_data_root,
+                    ann_file="VOC2007/ImageSets/Main/trainval.txt",
+                    data_prefix=dict(sub_data_root="VOC2007/"),
+                    filter_cfg=dict(
+                        filter_empty_gt=True, min_size=32, bbox_min_size=32
+                    ),
+                    metainfo=voc0712_METAINFO,
+                    pipeline=voc0712_train_pipeline,
+                    backend_args=None,
+                ),
+                dict(
+                    type=voc0712_dataset_type,
+                    data_root=voc0712_data_root,
+                    ann_file="VOC2012/ImageSets/Main/trainval.txt",
+                    data_prefix=dict(sub_data_root="VOC2012/"),
+                    filter_cfg=dict(
+                        filter_empty_gt=True, min_size=32, bbox_min_size=32
+                    ),
+                    metainfo=voc0712_METAINFO,
+                    pipeline=voc0712_train_pipeline,
+                    backend_args=None,
+                ),
+            ],
         ),
-    )
+    ),
 )
+
+
+# voc_val_dataloader_coco_fmt = dict(
+#     dataset=dict(
+#         type=voc0712_dataset_type,
+#         data_root=voc0712_data_root,  #! was not originally  present
+#         ann_file="voc_coco_fmt_annotations/voc07_test.json",  # changed from annotations/....
+#         data_prefix=dict(img=""),
+#         metainfo=voc0712_METAINFO,
+#         pipeline=voc0712_test_pipeline,
+#     )
+# )
+
 voc_val_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type="DefaultSampler", shuffle=False),
     dataset=dict(
         type=voc0712_dataset_type,
-        data_root=voc0712_data_root,  #! was not originally  present
-        ann_file="voc_coco_fmt_annotations/voc07_test.json",  # changed from annotations/....
-        data_prefix=dict(img=""),
+        data_root=voc0712_data_root,
+        ann_file="VOC2007/ImageSets/Main/test.txt",
+        data_prefix=dict(sub_data_root="VOC2007/"),
+        test_mode=True,
         metainfo=voc0712_METAINFO,
         pipeline=voc0712_test_pipeline,
-    )
+        backend_args=None,
+    ),
+)
+
+voc0712_val_evaluator = dict(
+    type="VOCMetric",
+    metric="mAP",
+    eval_mode="11points",  #! such that we are consistent with the testset since it is only available for voc07
+    iou_thrs=[0.25, 0.30, 0.40, 0.50, 0.70, 0.75],
 )
 
 
@@ -560,17 +654,30 @@ for (neck, backbone, dataset), found in all_combis.items():
                 change_old_value_by=1,
                 prefix="",
             )
-            #! put in a reference for the coco dataset
-            # dataset_assigner(
-            #     cfg,
-            #     coco_data_root,
-            #     coco_dataset_type,
-            #     coco_train_pipeline,
-            #     coco_test_pipeline,
-            #     coco_train_dataloader,
-            #     coco_val_dataloader,
-            #     coco_val_evaluator,
-            # )
+
+            # original_train_batch_size = cfg.train_dataloader.batch_size
+            # original_val_batch_size = cfg.val_dataloader.batch_size
+            # original_test_batch_size = cfg.test_dataloader.batch_size
+
+            dataset_assigner(
+                cfg,
+                coco_data_root,
+                coco_dataset_type,
+                coco_train_pipeline,
+                coco_test_pipeline,
+                coco_train_dataloader,
+                coco_val_dataloader,
+                coco_val_evaluator,
+            )
+
+            # cfg.train_dataloader.batch_size = original_train_batch_size
+            # cfg.val_dataloader.batch_size = original_val_batch_size
+            # cfg.test_dataloader.batch_size = original_test_batch_size
+            destination_file = os.path.join(
+                "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
+            )
+            cfg.dump(destination_file)
+            all_combis[(neck, backbone, dataset)] = True
 
         elif neck == "Detic_new" and dataset == "voc0712":
             config_keybased_value_changer(
@@ -581,9 +688,9 @@ for (neck, backbone, dataset), found in all_combis.items():
                 change_old_value_by=1,
                 prefix="",
             )
-            original_train_batch_size = cfg.train_dataloader.batch_size
-            original_val_batch_size = cfg.val_dataloader.batch_size
-            original_test_batch_size = cfg.test_dataloader.batch_size
+            # original_train_batch_size = cfg.train_dataloader.batch_size
+            # original_val_batch_size = cfg.val_dataloader.batch_size
+            # original_test_batch_size = cfg.test_dataloader.batch_size
 
             dataset_assigner(
                 cfg,
@@ -596,41 +703,35 @@ for (neck, backbone, dataset), found in all_combis.items():
                 voc0712_val_evaluator,
             )
 
-            cfg.train_dataloader.batch_size = original_train_batch_size
-            cfg.val_dataloader.batch_size = original_val_batch_size
-            cfg.test_dataloader.batch_size = original_test_batch_size
+            # cfg.train_dataloader.batch_size = original_train_batch_size
+            # cfg.val_dataloader.batch_size = original_val_batch_size
+            # cfg.test_dataloader.batch_size = original_test_batch_size
 
-            config_keybased_value_changer(
-                config_dictionary=cfg._cfg_dict,
-                searched_key="num_classes",
-                do_new=True,
-                new_absolute_value=20,
-                change_old_value_by=1,
-                prefix="",
+            # if cfg.train_cfg.type == "EpochBasedTrainLoop":
+            #     config_keybased_value_changer(
+            #         config_dictionary=cfg._cfg_dict,
+            #         searched_key="max_epochs",
+            #         do_new=False,
+            #         new_absolute_value=0,
+            #         change_old_value_by=3,
+            #         prefix="",
+            #     )
+            #     adjust_param_scheduler(cfg, factor=3)
+
+            #     config_keybased_value_changer(
+            #         config_dictionary=cfg._cfg_dict,
+            #         searched_key="val_interval",
+            #         do_new=False,
+            #         new_absolute_value=0,
+            #         change_old_value_by=3,
+            #         prefix="",
+            #     )
+
+            destination_file = os.path.join(
+                "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
             )
-
-            if cfg.train_cfg.type == "EpochBasedTrainLoop":
-                config_keybased_value_changer(
-                    config_dictionary=cfg._cfg_dict,
-                    searched_key="max_epochs",
-                    do_new=False,
-                    new_absolute_value=0,
-                    change_old_value_by=3,
-                    prefix="",
-                )
-                adjust_param_scheduler(cfg, factor=3)
-
-                config_keybased_value_changer(
-                    config_dictionary=cfg._cfg_dict,
-                    searched_key="val_interval",
-                    do_new=False,
-                    new_absolute_value=0,
-                    change_old_value_by=3,
-                    prefix="",
-                )
-
-        elif neck == "Yolo":
-            pass
+            cfg.dump(destination_file)
+            all_combis[(neck, backbone, dataset)] = True
 
         else:
             if backbone != backbone_ref:
@@ -645,10 +746,10 @@ for (neck, backbone, dataset), found in all_combis.items():
                     ]
 
             if dataset != dataset_ref:
-                #! the voc reference didn´t have a batchsize now we use the batchsize of the model reference
-                original_train_batch_size = cfg.train_dataloader.batch_size
-                original_val_batch_size = cfg.val_dataloader.batch_size
-                original_test_batch_size = cfg.test_dataloader.batch_size
+                #! the coco fmt voc reference didn´t have a batchsize now we use the batchsize of the model reference
+                # original_train_batch_size = cfg.train_dataloader.batch_size
+                # original_val_batch_size = cfg.val_dataloader.batch_size
+                # original_test_batch_size = cfg.test_dataloader.batch_size
 
                 dataset_assigner(
                     cfg,
@@ -661,9 +762,9 @@ for (neck, backbone, dataset), found in all_combis.items():
                     voc0712_val_evaluator,
                 )
 
-                cfg.train_dataloader.batch_size = original_train_batch_size
-                cfg.val_dataloader.batch_size = original_val_batch_size
-                cfg.test_dataloader.batch_size = original_test_batch_size
+                # cfg.train_dataloader.batch_size = original_train_batch_size
+                # cfg.val_dataloader.batch_size = original_val_batch_size
+                # cfg.test_dataloader.batch_size = original_test_batch_size
 
                 config_keybased_value_changer(
                     config_dictionary=cfg._cfg_dict,
@@ -674,31 +775,33 @@ for (neck, backbone, dataset), found in all_combis.items():
                     prefix="",
                 )
 
-                if cfg.train_cfg.type == "EpochBasedTrainLoop":
-                    config_keybased_value_changer(
-                        config_dictionary=cfg._cfg_dict,
-                        searched_key="max_epochs",
-                        do_new=False,
-                        new_absolute_value=0,
-                        change_old_value_by=3,
-                        prefix="",
-                    )
-                    adjust_param_scheduler(cfg, factor=3)
+                # if cfg.train_cfg.type == "EpochBasedTrainLoop":
+                #     config_keybased_value_changer(
+                #         config_dictionary=cfg._cfg_dict,
+                #         searched_key="max_epochs",
+                #         do_new=False,
+                #         new_absolute_value=0,
+                #         change_old_value_by=3,
+                #         prefix="",
+                #     )
+                #     adjust_param_scheduler(cfg, factor=3)
 
-                    config_keybased_value_changer(
-                        config_dictionary=cfg._cfg_dict,
-                        searched_key="val_interval",
-                        do_new=False,
-                        new_absolute_value=0,
-                        change_old_value_by=3,
-                        prefix="",
-                    )
+                #     config_keybased_value_changer(
+                #         config_dictionary=cfg._cfg_dict,
+                #         searched_key="val_interval",
+                #         do_new=False,
+                #         new_absolute_value=0,
+                #         change_old_value_by=3,
+                #         prefix="",
+                #     )
 
-        #! put in for real in training and testing!!!
-        # cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-        # cfg.visualizer.vis_backends[0].init_kwargs = dict(
-        #     project=f"{neck}_{backbone}_{dataset}"
-        # )
+                if neck == "rtmdet":
+                    cfg.val_evaluator.proposal_nums = (
+                        100,
+                        1,
+                        10,
+                    )
+                    cfg.test_evaluator = cfg.val_evaluator
 
         destination_file = os.path.join(
             "./configs_to_train", f"{neck}_{backbone}_{dataset}.py"
@@ -731,6 +834,7 @@ for file in files:
         else:
             cfg.auto_scale_lr = dict(enable=True)
             cfg.auto_scale_lr.base_batch_size = 16
+        cfg.dump(os.path.join(training_folder_path, file))
 
 
 test_folder_path = "./configs_to_test"
@@ -740,9 +844,18 @@ for test_file in test_files:
     cfg = Config.fromfile(os.path.join(test_folder_path, test_file))
     if hasattr(cfg, "auto_scale_lr"):
         cfg.auto_scale_lr.enable = True
+        cfg.dump(os.path.join(test_folder_path, test_file))
     else:
         cfg.auto_scale_lr = dict(enable=True)
         cfg.auto_scale_lr.base_batch_size = 16
+        cfg.dump(os.path.join(test_folder_path, test_file))
 
+
+src_path = "configs_to_test/Detic_new_swin-b_voc0712.py"
+dst_path = "configs_to_train/Detic_new_swin-b_voc0712.py"
+
+shutil.move(src_path, dst_path)
+
+print(f"Moved {src_path} to {dst_path}")
 
 #! Please remember to check the bottom of the specific config file you want to use, it will have auto_scale_lr.base_batch_size if the batch size is not 16. If you can’t find those values, check the config file which in _base_=[xxx] and you will find it. Please do not modify its values if you want to automatically scale the LR.

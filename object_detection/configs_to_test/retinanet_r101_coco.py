@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=16, enable=False)
+auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 checkpoint_config = dict(interval=0)
 data_root = 'data/coco/'

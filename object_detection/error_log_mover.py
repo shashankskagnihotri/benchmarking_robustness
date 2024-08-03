@@ -33,6 +33,8 @@ for config_file in folder_erroneous_config_files:
                                 "DUE TO TIME LIMIT" in logfile_content
                                 or "min(max_walltime * 0.8, max_walltime - 10 * 60"
                                 in logfile_content
+                                or "mmengine.hooks.runtime_info_hook.RuntimeInfoHook"
+                                in logfile_content
                             ):
                                 pass
 

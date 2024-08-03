@@ -28,7 +28,7 @@ slurm_results_path = "slurm/results"
 
 verify_subset = False
 # one_epoch = False
-GPU_NUM = 2
+GPU_NUM = 1
 slurm_partition = "gpu_4_a100"
 
 

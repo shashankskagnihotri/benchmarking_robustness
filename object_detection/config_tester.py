@@ -5,8 +5,6 @@ import submitit
 
 from new_distributed_tester import test_with_multiple_gpus
 
-from config_maker import which
-
 
 # from mmengine.runner import Runner
 from rich.traceback import install
@@ -23,10 +21,8 @@ slurm_results_path = "./slurm/eval_results"
 path_erroneous_configs = "./configs_erroneous_eval"
 
 
-path_trained_configs = "./configs_to_test"  # ? change to eval for evaluation
-folder_entry_list_configs_to_test = os.listdir(
-    path_trained_configs
-)  # ? change to eval for evaluation
+path_trained_configs = "./configs_to_test"
+folder_entry_list_configs_to_test = os.listdir(path_trained_configs)
 
 
 path_configs_done = "./configs_evaluated"
@@ -55,6 +51,33 @@ if verify_subset:
 
 print(f"folder_entry_list_configs_to_test : {folder_entry_list_configs_to_test}")
 print(f"path_configs_done : {path_configs_done}")
+
+
+def namefinder(filename):
+    def neck(filename):
+        return filename.split("_")[0]
+
+    def backbone(filename):
+        if "swin-b" in filename:
+            return "swin-b"
+        elif "convnext-b" in filename:
+            return "convnext-b"
+        elif "r50" in filename:
+            return "r50"
+        elif "r101" in filename:
+            return "r101"
+        else:
+            return "unknown-backbone"
+
+    def dataset(filename):
+        if "coco" in filename:
+            return "coco"
+        elif "voc" in filename:
+            return "voc0712"
+        else:
+            return "unknown-dataset"
+
+    return neck(filename), backbone(filename), dataset(filename)
 
 
 def highest_job_number(model_log_folder_path):
@@ -172,7 +195,7 @@ for config_file in folder_entry_list_configs_to_test:
                                     cfg.visualizer.vis_backends[
                                         0
                                     ].type = "WandbVisBackend"
-                                    neck, backbone, dataset = which(config_file)
+                                    neck, backbone, dataset = namefinder(config_file)
                                     cfg.visualizer.vis_backends[0].init_kwargs = dict(
                                         project=f"{neck}_{backbone}_{dataset}_test"
                                     )
@@ -216,7 +239,7 @@ for config_file in folder_entry_list_configs_to_test:
 
         cfg = Config.fromfile(config_path)
         cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-        neck, backbone, dataset = which(config_file)
+        neck, backbone, dataset = namefinder(config_file)
         cfg.visualizer.vis_backends[0].init_kwargs = dict(
             project=f"{neck}_{backbone}_{dataset}_test"
         )

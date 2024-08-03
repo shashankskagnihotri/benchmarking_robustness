@@ -4,7 +4,14 @@ from config_maker import which
 
 
 path_folder_to_train = "./configs_to_train"
+path_folder_verified = "./configs_verified"
+path_folder_erroneous = "./configs_erroneous/verification"
+path_folder_to_test = "./configs_to_test"
+
 filenames_to_train = os.listdir(path_folder_to_train)
+filenames_verified = os.listdir(path_folder_verified)
+filenames_erroneous = os.listdir(path_folder_erroneous)
+filenames_to_test = os.listdir(path_folder_to_test)
 
 
 def calculate_iterations(epochs, batch_size, dataset):

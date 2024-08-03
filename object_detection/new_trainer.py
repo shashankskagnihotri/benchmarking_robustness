@@ -115,4 +115,4 @@ if __name__ == "__main__":
 # resnet and swin have same output siz
 
 
-# python -m pudb new_trainer.py configs_erroneous/verification/EfficientDet_r50_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb new_trainer.py configs_erroneous/verification/rtmdet_r50_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer

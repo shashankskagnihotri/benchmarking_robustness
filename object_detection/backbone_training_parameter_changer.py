@@ -29,6 +29,23 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
     print(f"Processing file: {filename} from {folder_path}")
     cfg = Config.fromfile(f"{folder_path}/{filename}")
 
+    if (
+        hasattr(cfg, "optim_wrapper")
+        and hasattr(cfg, "param_scheduler")
+        and cfg.train_cfg == backbone_cfg.train_cfg
+        and not hasattr(cfg.train_cfg, "max_iters")
+        and hasattr(cfg, "custom_hooks")
+    ):
+        if (
+            cfg.optim_wrapper == backbone_cfg.optim_wrapper
+            and cfg.param_scheduler == backbone_cfg.param_scheduler
+            and cfg.custom_hooks[0] == backbone_cfg.custom_hooks[0]
+        ):
+            print(
+                "The relevant parts of the configuration have not changed. No file alteration needed."
+            )
+            return
+
     cfg.optim_wrapper = backbone_cfg.optim_wrapper
     cfg.param_scheduler = backbone_cfg.param_scheduler
     cfg.max_epochs = backbone_cfg.max_epochs
