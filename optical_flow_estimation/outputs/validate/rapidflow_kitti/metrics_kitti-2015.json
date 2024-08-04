@@ -2338,6 +2338,48 @@
                 "l_inf_delta2": 0.0,
                 "l_inf_delta12": 0.0
             }
+        },
+        {
+            "start_time": "2024-07-26 08:29:28",
+            "model": "rapidflow",
+            "checkpoint": "kitti",
+            "attack": "bim",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-07-26 08:36:28",
+            "duration": "00:06:59",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 33.8877403151989,
+                "px1": 0.12647749057401597,
+                "px3": 0.18471624592668376,
+                "px5": 0.23684216106077657,
+                "outlier": 81.52837522506714,
+                "own_epe": 28.385553667768836,
+                "epe_orig_preds": 3.288602176606655,
+                "own_epe_orig_preds": 3.288602215349674,
+                "cosim_target": 0.0,
+                "cosim_orig_preds": 0.9122115650773048,
+                "epe_ground_truth": 3.6518195366859434,
+                "own_epe_ground_truth": 22.232598135732115,
+                "cosim_ground_truth": 0.17990615609567612,
+                "l2_delta1": 0.025667990921065212,
+                "l2_delta2": 0.0,
+                "l2_delta12": 0.018150011291727424,
+                "l0_delta1": 1001686.055,
+                "l0_delta2": 0.0,
+                "l0_delta12": 1001686.055,
+                "l_inf_delta1": 0.03137257695198059,
+                "l_inf_delta2": 0.0,
+                "l_inf_delta12": 0.03137257695198059
+            }
         }
+    ]
+}       }
     ]
 }
