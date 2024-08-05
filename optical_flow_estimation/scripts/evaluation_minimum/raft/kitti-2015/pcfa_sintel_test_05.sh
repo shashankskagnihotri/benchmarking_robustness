@@ -2,23 +2,22 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=15:00:00
+#SBATCH --time=30:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --array=0-1%2
-#SBATCH --job-name=gmflownet_kitti-2015_pcfa_i10
-#SBATCH --output=slurm/gmflownet_kitti-2015_pcfa_i10_%A_%a.out
-#SBATCH --error=slurm/gmflownet_kitti-2015_pcfa_i10_err_%A_%a.out
+#SBATCH --job-name=raft_kitti-2015_pcfa_i20
+#SBATCH --output=slurm/raft_kitti-2015_pcfa_sintel_test_005_%A.out
+#SBATCH --error=slurm/raft_kitti-2015_pcfa_sintel_test_005_err_%A.out
 
-model="gmflownet"
+model="raft"
 dataset="kitti-2015"
-checkpoint="kitti"
+checkpoint="sintel"
 targeteds="True"
-targets="negative zero"
+targets="zero"
 norms="two"
 attacks="pcfa"
-iterations="10"
+iterations="20"
 jobnum=0
 #SLURM_ARRAY_TASK_ID=0
 
@@ -26,7 +25,7 @@ cd ../../../../
 
 for norm in $norms
 do
-    epsilons="0.005"
+    epsilons="0.01"
     alphas="0.0000001"
     for epsilon in $epsilons
     do

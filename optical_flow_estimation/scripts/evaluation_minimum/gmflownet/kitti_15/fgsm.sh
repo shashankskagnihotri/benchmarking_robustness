@@ -6,12 +6,12 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --array=0-6%4
+#SBATCH --array=0-14%4
 #SBATCH --job-name=gmflow_kitti-2015_fgsm
 #SBATCH --output=slurm/gmflow_kitti-2015_fgsm_%A_%a.out
 #SBATCH --error=slurm/gmflow_kitti-2015_fgsm_err_%A_%a.out
 
-model="gmflownet"
+model="gmflow"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"
@@ -25,29 +25,26 @@ cd ../../../../
 
 for norm in $norms
 do
-    for targeted in $targeteds
+    if [[ $norm = "inf" ]]
+    then
+        epsilons="1 2 4 8"
+        alphas="0.01"          
+    else
+        epsilons="0.005"
+        alphas="0.0000001"
+    fi
+    for epsilon in $epsilons
     do
-        if [[ $norm = "inf" && $targeted = "False" ]]
+        if [[ $norm = "inf" ]]
         then
-            epsilons="4 8"
-            alphas="0.01"          
-        elif [[ $norm = "inf" && $targeted = "True" ]]
-        then
-            epsilons="12.75"
-            alphas="0.01"
-        elif [[ $norm = "two" ]]
-        then
-            epsilons="12.75"
-            alphas="0.0001"
-        fi
-        for epsilon in $epsilons
-        do
             epsilon=$(echo "scale=10; $epsilon/255" | bc)
-            for alpha in $alphas
+        fi
+        for alpha in $alphas
+        do
+            for attack in $attacks
             do
-                for attack in $attacks
+                for targeted in $targeteds
                 do
-
                     if [[ $targeted = "True" ]]
                     then
                         for target in $targets
