@@ -24,8 +24,8 @@ voc_train_dataloader = dict(
     sampler=dict(type="DefaultSampler", shuffle=True),
     batch_sampler=dict(type="AspectRatioBatchSampler"),
     dataset=dict(
-        # type="RepeatDataset", #! removed repetition, since it makes the scheduling more complicated
-        # times=3,
+        type="RepeatDataset",  #! removed repetition, since it makes the scheduling more complicated
+        times=1,
         dataset=dict(
             type="ConcatDataset",
             # VOCDataset will add different `dataset_type` in dataset.metainfo,
@@ -596,6 +596,33 @@ def process_files(source_folder):
         elif neck == "foveabox" and backbone == "convnext-b" and dataset == "coco":
             pass
         elif neck == "glip" and backbone == "convnext-b" and dataset == "voc0712":
+            print(f"Condition of {neck}, {backbone}, {dataset} met")
+            cfg = Config.fromfile(filepath)
+
+            if hasattr(cfg, "load_from"):
+                del cfg.load_from
+
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                os.remove(filepath)
+                cfg.dump(destination_file)
+        elif neck == "glip" and backbone == "swin-b" and dataset == "coco":
+            print(f"Condition of {neck}, {backbone}, {dataset} met")
+            cfg = Config.fromfile(filepath)
+
+            if hasattr(cfg, "load_from"):
+                del cfg.load_from
+
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                os.remove(filepath)
+                cfg.dump(destination_file)
+
+        elif neck == "glip" and backbone == "convnext-b" and dataset == "coco":
             pass
         elif neck == "glip" and backbone == "r50" and dataset == "voc0712":
             pass
