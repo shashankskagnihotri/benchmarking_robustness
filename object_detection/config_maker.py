@@ -227,8 +227,8 @@ voc_train_dataloader = dict(
     sampler=dict(type="DefaultSampler", shuffle=True),
     batch_sampler=dict(type="AspectRatioBatchSampler"),
     dataset=dict(
-        # type="RepeatDataset", #! removed repetition, since it makes the scheduling more complicated
-        # times=3,
+        type="RepeatDataset",  #! removed repetition, since it makes the scheduling more complicated
+        times=1,
         dataset=dict(
             type="ConcatDataset",
             # VOCDataset will add different `dataset_type` in dataset.metainfo,
