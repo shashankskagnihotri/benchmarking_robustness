@@ -11,8 +11,15 @@
 #SBATCH -o ./logs/output.%a.out # STDOUT
 
 # Config
-CHECKPOINT_FILE="mmdetection/checkpoints/retinanet_x101_64x4d_fpn_1x_coco_20200130-366f5af1.pth"
-CONFIG_FILE="mmdetection/configs/retinanet/retinanet_x101-64x4d_fpn_1x_coco.py"
+# CHECKPOINT_FILE="mmdetection/checkpoints/retinanet_x101_64x4d_fpn_1x_coco_20200130-366f5af1.pth"
+# CONFIG_FILE="mmdetection/configs/retinanet/retinanet_x101-64x4d_fpn_1x_coco.py"
+# CONFIG_FILE="models/DINO_Swin-L/DINO_Swin-L.py"
+# CHECKPOINT_FILE="models/DINO_Swin-L/latest.pth"
+# CONFIG_FILE="models/TOOD_R-101-dcnv2/TOOD_R-101-dcnv2.py"
+# CHECKPOINT_FILE="models/TOOD_R-101-dcnv2/latest.pth"
+CONFIG_FILE="models/VarifocalNet_R-101-FPN/VarifocalNet_R-101-FPN.py"
+CHECKPOINT_FILE="models/VarifocalNet_R-101-FPN/latest.pth"
+
 ALPHA=2.55
 STEPS=2
 EPSILON=8
@@ -28,4 +35,4 @@ echo "STEPS="${STEPS}
 echo "EPSILON="${EPSILON}
 echo "ATTACK="${ATTACK}
 
-python adv_attack.py --config_file ${CONFIG_FILE} --checkpoint_file ${CHECKPOINT_FILE} --steps $EPSILON --alpha ${ALPHA} --epsilon ${EPSILON} --attack ${ATTACK}
+python -m pudb adv_attack.py --config_file ${CONFIG_FILE} --checkpoint_file ${CHECKPOINT_FILE} --steps ${STEPS} --alpha ${ALPHA} --epsilon ${EPSILON} --attack ${ATTACK} 
