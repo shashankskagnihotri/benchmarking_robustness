@@ -1,6 +1,6 @@
 import os
 from mmengine.config import Config
-from config_maker import which
+from mmengine.runner import Runner
 
 
 path_folder_to_train = "./configs_to_train"
@@ -14,14 +14,34 @@ filenames_erroneous = os.listdir(path_folder_erroneous)
 filenames_to_test = os.listdir(path_folder_to_test)
 
 
-def calculate_iterations(epochs, batch_size, dataset):
-    if dataset == "coco":
-        dataset_size = 0  #! get the right absolute dataset size
-    elif dataset == "voc":
-        dataset_size = 0  #! get the right absolute dataset size
+def namefinder(filename):
+    def neck(filename):
+        return filename.split("_")[0]
 
-    #! traing, val and testsizes (look into annotations? -> first decide, which annotations to use because of the switch to vocmetrics
-    #! I think we just use the tainingsize as the approach should be training centric
+    def backbone(filename):
+        if "swin-b" in filename:
+            return "swin-b"
+        elif "convnext-b" in filename:
+            return "convnext-b"
+        elif "r50" in filename:
+            return "r50"
+        elif "r101" in filename:
+            return "r101"
+        else:
+            return "unknown-backbone"
+
+    def dataset(filename):
+        if "coco" in filename:
+            return "coco"
+        elif "voc" in filename:
+            return "voc0712"
+        else:
+            return "unknown-dataset"
+
+    return neck(filename), backbone(filename), dataset(filename)
+
+
+def calculate_iterations(epochs, batch_size, dataset_size):
     steps_per_epoch = dataset_size / batch_size
     total_iterations = epochs * steps_per_epoch
 
@@ -30,75 +50,26 @@ def calculate_iterations(epochs, batch_size, dataset):
 
 def change_interations(filename, folder_path, dataset):
     cfg = Config.fromfile(f"{folder_path}/{filename}")
+    runner = Runner.from_cfg(cfg)
 
-    # Trainingrelated
-    #! paramscheduler is actually already converting into iterationbased
+    num_train_images = len(runner.train_dataloader.dataset)
 
     cfg.train_cfg.type = "IterBasedTrainLoop"
     cfg.train_cfg.max_iters = calculate_iterations(
         epochs=cfg.max_epochs,
         batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
+        dataset=num_train_images,
     )
 
     if hasattr(cfg.train_cfg, "max_epochs"):
         del cfg.train_cfg.max_epochs
 
-    cfg.default_hooks.checkpoint.by_epoch = False
-    cfg.default_hooks.checkpoint.interval = calculate_iterations(
-        epochs=cfg.default_hooks.checkpoint.interval,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-    cfg.default_hooks.logger.interval = calculate_iterations(
-        epochs=cfg.default_hooks.logger.interval,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-    cfg.log_processor.by_epochs = False
-    cfg.log_processor.window_size = calculate_iterations(
-        epochs=cfg.log_processor.window_size,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-
-    #  keep phase 1 as is because it has by_epoch = false already
-    cfg.param_scheduler[1].by_epoch = False
-    cfg.param_scheduler[1].convert_to_iterations = False
-    cfg.param_scheduler[1].T_max = calculate_iterations(
-        epochs=cfg.param_scheduler[1].T_max,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-    cfg.param_scheduler[1].begin = calculate_iterations(
-        epochs=cfg.param_scheduler[1].begin,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-
-    cfg.param_scheduler[1].end = calculate_iterations(
-        epochs=cfg.param_scheduler[1].end,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-
-    # Validationrelated
-    cfg.train_cfg.val_interval = calculate_iterations(
-        epochs=cfg.train_cfg.val_interval,
-        # batch_size=cfg.val_dataloader.batch_size, I think it should be relative to the training
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=dataset,
-    )
-
-    # Testrelated
-
     cfg.dump(f"{folder_path}/{filename}")
 
 
-#! iteration based configs
 for filename in filenames_to_train:
     filepath = os.join(path_folder_to_train, filename)
-    neck, backbone, dataset = which(filepath)
+    neck, backbone, dataset = namefinder(filename)
     if neck == "DiffusionDet" and backbone == "swin-b" and dataset == "coco":
         change_interations(filename, path_folder_to_train, dataset)
     elif neck == "DiffusionDet" and backbone == "swin-b" and dataset == "voc":
