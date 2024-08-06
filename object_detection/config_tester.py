@@ -18,7 +18,7 @@ slurm_log_folder_path = "./slurm/eval_work_dir"
 slurm_log_folders = os.listdir(slurm_log_folder_path)
 
 slurm_results_path = "./slurm/eval_results"
-path_erroneous_configs = "./configs_erroneous_eval"
+path_erroneous_configs = "./configs_erroneous/evaluation"
 
 
 path_trained_configs = "./configs_to_test"

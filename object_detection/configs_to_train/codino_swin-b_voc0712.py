@@ -83,7 +83,7 @@ log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
 loss_lambda = 2.0
-max_epochs = 12
+max_epochs = 100
 max_iters = 270000
 model = dict(
     backbone=dict(
@@ -446,14 +446,16 @@ optim_wrapper = dict(
     type='OptimWrapper')
 param_scheduler = [
     dict(
-        begin=0,
+        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
+        type='LinearLR'),
+    dict(
+        T_max=50,
+        begin=50,
         by_epoch=True,
-        end=12,
-        gamma=0.1,
-        milestones=[
-            10,
-        ],
-        type='MultiStepLR'),
+        convert_to_iter_based=True,
+        end=100,
+        eta_min=5e-05,
+        type='CosineAnnealingLR'),
 ]
 resume = False
 test_cfg = dict(_scope_='mmdet', type='TestLoop')
@@ -944,7 +946,9 @@ train_dataloader = dict(
             ignore_keys=[
                 'dataset_type',
             ],
-            type='ConcatDataset')),
+            type='ConcatDataset'),
+        times=1,
+        type='RepeatDataset'),
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))

@@ -674,7 +674,7 @@ train_cfg = dict(
     max_epochs=100, type='EpochBasedTrainLoop', val_interval=180000)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=2,
+    batch_size=16,
     dataset=dict(
         dataset=dict(
             datasets=[
@@ -974,7 +974,9 @@ train_dataloader = dict(
             ignore_keys=[
                 'dataset_type',
             ],
-            type='ConcatDataset')),
+            type='ConcatDataset'),
+        times=1,
+        type='RepeatDataset'),
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))

@@ -906,7 +906,9 @@ train_dataloader = dict(
             ignore_keys=[
                 'dataset_type',
             ],
-            type='ConcatDataset')),
+            type='ConcatDataset'),
+        times=1,
+        type='RepeatDataset'),
     num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))

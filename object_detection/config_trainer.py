@@ -17,7 +17,7 @@ slurm_log_folder_path = "./slurm/train_work_dir"  #
 slurm_log_folders = os.listdir(slurm_log_folder_path)
 
 slurm_results_path = "slurm/train_results"
-path_erroneous_configs = "./configs_erroneous_training"
+path_erroneous_configs = "./configs_erroneous/training"
 
 
 # path_verified_configs = "./configs_verified" #! do this when all configs are verified

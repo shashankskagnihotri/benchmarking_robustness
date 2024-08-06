@@ -596,24 +596,13 @@ def process_files(source_folder):
         elif neck == "foveabox" and backbone == "convnext-b" and dataset == "coco":
             pass
         elif neck == "glip" and backbone == "convnext-b" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
-            cfg = Config.fromfile(filepath)
-
-            if hasattr(cfg, "load_from"):
-                del cfg.load_from
-
-            if source_folder != destination_folder:
-                cfg.dump(destination_file)
-                os.remove(filepath)
-            else:
-                os.remove(filepath)
-                cfg.dump(destination_file)
+            pass
         elif neck == "glip" and backbone == "swin-b" and dataset == "coco":
             print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)
 
             if hasattr(cfg, "load_from"):
-                del cfg.load_from
+                cfg.pop("load_from", "Not found")
 
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
@@ -623,7 +612,18 @@ def process_files(source_folder):
                 cfg.dump(destination_file)
 
         elif neck == "glip" and backbone == "convnext-b" and dataset == "coco":
-            pass
+            print(f"Condition of {neck}, {backbone}, {dataset} met")
+            cfg = Config.fromfile(filepath)
+
+            if hasattr(cfg, "load_from"):
+                cfg.pop("load_from", "Not found")
+
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                os.remove(filepath)
+                cfg.dump(destination_file)
         elif neck == "glip" and backbone == "r50" and dataset == "voc0712":
             pass
         elif neck == "glip" and backbone == "r101" and dataset == "voc0712":

@@ -10,7 +10,7 @@ from mmengine.runner import Runner
 
 from mmdet.utils import setup_cache_size_limit_of_dynamo
 
-import wandb
+import torch
 
 
 def parse_args():
@@ -87,8 +87,14 @@ def trainer(
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
+    # # # start training
+    # runner.train()
+
+    # Mixed precision training setup
+
     # start training
-    runner.train()
+    with torch.cuda.amp.autocast():
+        runner.train()
 
 
 if __name__ == "__main__":
@@ -105,7 +111,7 @@ if __name__ == "__main__":
     )
 
 
-# python -m pudb new_trainer.py configs_erroneous/verification/yolox_swin-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb new_trainer.py configs_to_train/codino_convnext-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
 
 # testing yolox_convnext-b_coco.py -> ran successfully
 # testing yolox_swin-b_coco.py -> error

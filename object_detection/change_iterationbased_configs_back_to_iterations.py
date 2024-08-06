@@ -48,43 +48,46 @@ def calculate_iterations(epochs, batch_size, dataset_size):
     return int(total_iterations)
 
 
-def change_interations(filename, folder_path, dataset):
+def change_interations(filename, folder_path):
     cfg = Config.fromfile(f"{folder_path}/{filename}")
+    cfg.work_dir = os.path.join(folder_path, "work_dir")
+
     runner = Runner.from_cfg(cfg)
+    print(f"Filename: {filename}")
 
-    num_train_images = len(runner.train_dataloader.dataset)
+    print(f"train_dataloader: {runner.train_dataloader}")
 
-    cfg.train_cfg.type = "IterBasedTrainLoop"
-    cfg.train_cfg.max_iters = calculate_iterations(
-        epochs=cfg.max_epochs,
-        batch_size=cfg.train_dataloader.batch_size,
-        dataset=num_train_images,
-    )
+    # print(f"train_dataloader.dataset: {runner.train_dataloader.dataset}")
 
-    if hasattr(cfg.train_cfg, "max_epochs"):
-        del cfg.train_cfg.max_epochs
+    # print(f"len(train_dataloader.dataset): {len(runner.train_dataloader.dataset)}")
 
-    cfg.dump(f"{folder_path}/{filename}")
+    # num_train_images = len(runner.train_dataloader.dataset)
+    # # elif "voc" in filename:
+    # #     num_train_images = len(runner.train_dataloader.datasets)
+
+    # cfg.train_cfg.type = "IterBasedTrainLoop"
+    # cfg.train_cfg.max_iters = calculate_iterations(
+    #     epochs=cfg.max_epochs,
+    #     batch_size=cfg.train_dataloader.batch_size,
+    #     dataset_size=num_train_images,
+    # )
+
+    # if hasattr(cfg.train_cfg, "max_epochs"):
+    #     del cfg.train_cfg.max_epochs
+
+    # cfg.dump(f"{folder_path}/{filename}")
 
 
 for filename in filenames_to_train:
-    filepath = os.join(path_folder_to_train, filename)
+    filepath = os.path.join(path_folder_to_train, filename)
     neck, backbone, dataset = namefinder(filename)
-    if neck == "DiffusionDet" and backbone == "swin-b" and dataset == "coco":
-        change_interations(filename, path_folder_to_train, dataset)
-    elif neck == "DiffusionDet" and backbone == "swin-b" and dataset == "voc":
-        change_interations(filename, path_folder_to_train, dataset)
-    elif neck == "DiffusionDet" and backbone == "convnext-b" and dataset == "coco":
-        change_interations(filename, path_folder_to_train, dataset)
-    elif neck == "DiffusionDet" and backbone == "convnext-b" and dataset == "voc":
-        change_interations(filename, path_folder_to_train, dataset)
+    if neck == "DiffusionDet" and backbone == "swin-b":
+        change_interations(filename, path_folder_to_train)
+    elif neck == "DiffusionDet" and backbone == "convnext-b":
+        change_interations(filename, path_folder_to_train)
 
-    #! detic has batchsize [4,16] in train_dataloader find out how this works and what to assign
-    elif neck == "Detic" and backbone == "swin-b" and dataset == "coco":
-        change_interations(filename, path_folder_to_train, dataset)
-    elif neck == "Detic" and backbone == "swin-b" and dataset == "voc":
-        change_interations(filename, path_folder_to_train, dataset)
-    elif neck == "Detic" and backbone == "convnext-b" and dataset == "coco":
-        change_interations(filename, path_folder_to_train, dataset)
-    elif neck == "Detic" and backbone == "convnext-b" and dataset == "voc":
-        change_interations(filename, path_folder_to_train, dataset)
+    # #! detic has batchsize [4,16] in train_dataloader find out how this works and what to assign
+    # elif neck == "Detic" and backbone == "swin-b":
+    #     change_interations(filename, path_folder_to_train)
+    # elif neck == "Detic" and backbone == "convnext-b":
+    #     change_interations(filename, path_folder_to_train)
