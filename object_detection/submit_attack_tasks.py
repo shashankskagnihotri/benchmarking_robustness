@@ -6,16 +6,7 @@ import logging
 from rich.logging import RichHandler
 import os
 import itertools
-from dotenv import load_dotenv
 from misc import find_latest_epoch_file, find_python_files, format_value
-
-load_dotenv()  # Load environment variables from .env file
-my_email = os.getenv("MY_EMAIL")
-WAND_PROJECT = os.getenv("WANDB_PROJECT")
-WAND_ENTITY = os.getenv("WANDB_ENTITY")
-assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
-assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
-assert my_email is not None, "Please set the MY_EMAIL environment variable"
 
 # Set up the logging configuration to use RichHandler
 logging.basicConfig(
@@ -32,7 +23,12 @@ TARGETED = False
 RANDOM_START = False
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models"
-ATTACKS = {"PGD": pgd_attack, "FGSM": fgsm_attack, "BIM": bim_attack, "none": None}
+ATTACKS = {
+    "PGD": pgd_attack,
+    "FGSM": fgsm_attack,
+    "BIM": bim_attack,
+    #    "none": None
+}
 STEPS_ATTACK = {
     "PGD": [20],
     "FGSM": [None],
@@ -93,23 +89,38 @@ config_files, checkpoint_files = get_configs_and_checkpoints(MODEL_DIR)
 
 logger.info(f"found {len(config_files)} config and checkpoint files")
 
+debug = False
+debug_time = "00:30:00"
+debug_GPU = "dev_gpu_4_a100"
+
 # Set up executor for slurm
 executor = submitit.AutoExecutor(folder=WORK_DIR)
 executor.update_parameters(
-    slurm_partition="gpu_4_a100",
     slurm_gres="gpu:1",
     nodes=1,
-    cpus_per_task=1,
+    cpus_per_task=8,
     tasks_per_node=1,
     slurm_mem=20_000,
     slurm_mail_type="all",
     slurm_job_name="attacks",
-    slurm_time="48:00:00",
+    slurm_time="24:00:00" if not debug else debug_time,
 )
 jobs = []
 
 # Submit every new parameter combination
 for config_file, checkpoint_file in zip(config_files, checkpoint_files):
+    if "DINO_Swin" in config_file or "RTMDet-l_Swin" in config_file:
+        # needs more GPU memory
+        slurm_partion = "gpu_4_a100" if not debug else debug_GPU
+    else:
+        slurm_partion = "gpu_4, gpu_4_a100, gpu_4_h100" if not debug else debug_GPU
+
+    executor.update_parameters(slurm_partition=slurm_partion)
+
+    if "DDQ" in config_file and "Swin" in config_file:
+        # needs more time
+        executor.update_parameters(slurm_time="48:00:00" if not debug else debug_time)
+
     with executor.batch():
         for attack_name, attack in ATTACKS.items():
             num_steps = STEPS_ATTACK[attack_name]
@@ -168,7 +179,6 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                         result_dir,
                     )
                     jobs.append(job)
-
 logger.info(
     "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
 )
