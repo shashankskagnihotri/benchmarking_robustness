@@ -674,7 +674,7 @@ train_cfg = dict(
     max_epochs=100, type='EpochBasedTrainLoop', val_interval=180000)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=16,
+    batch_size=2,
     dataset=dict(
         dataset=dict(
             datasets=[

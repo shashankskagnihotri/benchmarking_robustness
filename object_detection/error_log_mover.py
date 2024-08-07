@@ -1,6 +1,17 @@
 import os
 import shutil
-from config_verifier import highest_job_number
+
+
+def highest_job_number(model_log_folder_path):
+    model_logfiles = os.listdir(model_log_folder_path)
+    job_numbers = set()
+
+    for logfile in model_logfiles:
+        job_number = logfile.split("_")[0]
+        if job_number.isdigit():
+            job_numbers.add(job_number)
+    highest_job_number = max(job_numbers)
+    return highest_job_number
 
 
 path_slurm_log_files_folder = "slurm/work_dir"

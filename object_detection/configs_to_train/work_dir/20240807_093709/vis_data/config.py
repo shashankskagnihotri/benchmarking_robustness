@@ -1,12 +1,6 @@
-auto_scale_lr = dict(base_batch_size=128, enable=True)
+auto_scale_lr = dict(base_batch_size=16, enable=True)
+backend = 'pillow'
 backend_args = None
-batch_augments = [
-    dict(size=(
-        896,
-        896,
-    ), type='BatchFixedSizePad'),
-]
-checkpoint = 'https://download.openmmlab.com/mmclassification/v0/efficientnet/efficientnet-b3_3rdparty_8xb32-aa-advprop_in1k_20220119-53b41118.pth'
 custom_hooks = [
     dict(
         ema_type='ExpMomentumEMA',
@@ -18,106 +12,114 @@ custom_hooks = [
 custom_imports = dict(
     allow_failed_imports=False,
     imports=[
-        'projects.EfficientDet.efficientdet',
+        'projects.DiffusionDet.diffusiondet',
     ])
 data_root = 'data/VOCdevkit/'
 dataset_type = 'VOCDataset'
 default_hooks = dict(
-    checkpoint=dict(_scope_='mmdet', interval=15, type='CheckpointHook'),
+    checkpoint=dict(
+        _scope_='mmdet',
+        by_epoch=False,
+        interval=75000,
+        max_keep_ckpts=3,
+        type='CheckpointHook'),
     logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
-    param_scheduler=dict(_scope_='mmdet', type='ParamSchedulerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
     sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
     timer=dict(_scope_='mmdet', type='IterTimerHook'),
     visualization=dict(_scope_='mmdet', type='DetVisualizationHook'))
 default_scope = 'mmdet'
 env_cfg = dict(
-    cudnn_benchmark=True,
+    cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
-evalute_type = 'CocoMetric'
-image_size = 896
 load_from = None
 log_level = 'INFO'
 log_processor = dict(
-    _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 300
+    _scope_='mmdet', by_epoch=False, type='LogProcessor', window_size=50)
+max_epochs = 100
 model = dict(
     backbone=dict(
-        depth=101,
-        frozen_stages=1,
-        init_cfg=dict(checkpoint='torchvision://resnet101', type='Pretrained'),
-        norm_cfg=dict(requires_grad=True, type='BN'),
-        norm_eval=True,
-        num_stages=4,
+        arch='base',
+        drop_path_rate=0.7,
+        gap_before_final_norm=False,
+        init_cfg=dict(
+            checkpoint=
+            'https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth',
+            prefix='backbone.',
+            type='Pretrained'),
+        layer_scale_init_value=1.0,
         out_indices=[
-            0,
             1,
             2,
             3,
         ],
-        style='pytorch',
-        type='ResNet'),
+        type='mmpretrain.ConvNeXt',
+        with_cp=True),
     bbox_head=dict(
-        anchor_generator=dict(
-            center_offset=0.5,
-            octave_base_scale=4,
-            ratios=[
-                1.0,
-                0.5,
-                2.0,
-            ],
-            scales_per_octave=3,
-            strides=[
+        criterion=dict(
+            assigner=dict(
+                candidate_topk=5,
+                center_radius=2.5,
+                match_costs=[
+                    dict(
+                        alpha=0.25,
+                        eps=1e-08,
+                        gamma=2.0,
+                        type='FocalLossCost',
+                        weight=2.0),
+                    dict(box_format='xyxy', type='BBoxL1Cost', weight=5.0),
+                    dict(iou_mode='giou', type='IoUCost', weight=2.0),
+                ],
+                type='DiffusionDetMatcher'),
+            loss_bbox=dict(loss_weight=5.0, reduction='sum', type='L1Loss'),
+            loss_cls=dict(
+                alpha=0.25,
+                gamma=2.0,
+                loss_weight=2.0,
+                reduction='sum',
+                type='FocalLoss',
+                use_sigmoid=True),
+            loss_giou=dict(loss_weight=2.0, reduction='sum', type='GIoULoss'),
+            num_classes=20,
+            type='DiffusionDetCriterion'),
+        ddim_sampling_eta=1.0,
+        deep_supervision=True,
+        feat_channels=256,
+        num_classes=20,
+        num_heads=6,
+        num_proposals=500,
+        prior_prob=0.01,
+        roi_extractor=dict(
+            featmap_strides=[
+                4,
                 8,
                 16,
                 32,
-                64,
-                128,
             ],
-            type='AnchorGenerator'),
-        bbox_coder=dict(
-            target_means=[
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-            ],
-            target_stds=[
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-            ],
-            type='DeltaXYWHBBoxCoder'),
-        feat_channels=160,
-        in_channels=160,
-        loss_bbox=dict(beta=0.1, loss_weight=50, type='HuberLoss'),
-        loss_cls=dict(
-            alpha=0.25,
-            gamma=1.5,
-            loss_weight=1.0,
-            type='FocalLoss',
-            use_sigmoid=True),
-        norm_cfg=dict(
-            eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
-        num_classes=20,
-        num_ins=5,
-        stacked_convs=4,
-        type='EfficientDetSepBNHead'),
+            out_channels=256,
+            roi_layer=dict(output_size=7, sampling_ratio=2, type='RoIAlign'),
+            type='SingleRoIExtractor'),
+        sampling_timesteps=1,
+        single_head=dict(
+            act_cfg=dict(inplace=True, type='ReLU'),
+            dim_feedforward=2048,
+            dropout=0.0,
+            dynamic_conv=dict(dynamic_dim=64, dynamic_num=2),
+            num_cls_convs=1,
+            num_heads=8,
+            num_reg_convs=3,
+            type='SingleDiffusionDetHead'),
+        snr_scale=2.0,
+        type='DynamicDiffusionDetHead'),
     data_preprocessor=dict(
-        batch_augments=[
-            dict(size=(
-                896,
-                896,
-            ), type='BatchFixedSizePad'),
-        ],
         bgr_to_rgb=True,
         mean=[
             123.675,
             116.28,
             103.53,
         ],
-        pad_size_divisor=896,
+        pad_size_divisor=32,
         std=[
             58.395,
             57.12,
@@ -129,54 +131,38 @@ model = dict(
             256,
             512,
             1024,
-            2048,
         ],
-        norm_cfg=dict(
-            eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
-        num_stages=6,
-        out_channels=160,
-        start_level=0,
-        type='BiFPN'),
+        num_outs=4,
+        out_channels=256,
+        type='FPN'),
     test_cfg=dict(
-        max_per_img=100,
         min_bbox_size=0,
-        nms=dict(
-            iou_threshold=0.3,
-            method='gaussian',
-            min_score=0.001,
-            sigma=0.5,
-            type='soft_nms'),
-        nms_pre=1000,
-        score_thr=0.05),
-    train_cfg=dict(
-        allowed_border=-1,
-        assigner=dict(
-            ignore_iof_thr=-1,
-            min_pos_iou=0,
-            neg_iou_thr=0.5,
-            pos_iou_thr=0.5,
-            type='MaxIoUAssigner'),
-        debug=False,
-        pos_weight=-1,
-        sampler=dict(type='PseudoSampler')),
-    type='EfficientDet')
-norm_cfg = dict(eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN')
+        nms=dict(iou_threshold=0.5, type='nms'),
+        score_thr=0.5,
+        use_nms=True),
+    type='DiffusionDet')
 optim_wrapper = dict(
-    _scope_='mmdet',
-    clip_grad=dict(max_norm=10, norm_type=2),
-    optimizer=dict(lr=0.16, momentum=0.9, type='SGD', weight_decay=4e-05),
+    constructor='LearningRateDecayOptimizerConstructor',
+    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
-        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
+        bias_decay_mult=0,
+        bypass_duplicate=True,
+        decay_rate=0.8,
+        decay_type='layer_wise',
+        norm_decay_mult=0,
+        num_layers=12),
     type='OptimWrapper')
 param_scheduler = [
-    dict(begin=0, by_epoch=False, end=917, start_factor=0.1, type='LinearLR'),
     dict(
-        T_max=299,
-        begin=1,
+        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
+        type='LinearLR'),
+    dict(
+        T_max=50,
+        begin=50,
         by_epoch=True,
         convert_to_iter_based=True,
-        end=300,
-        eta_min=0.0,
+        end=100,
+        eta_min=5e-05,
         type='CosineAnnealingLR'),
 ]
 resume = False
@@ -366,13 +352,10 @@ test_pipeline = [
         type='PackDetInputs'),
 ]
 train_cfg = dict(
-    _scope_='mmdet',
-    max_epochs=300,
-    type='EpochBasedTrainLoop',
-    val_interval=1)
+    max_epochs=100, type='EpochBasedTrainLoop', val_interval=75000)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=2,
+    batch_size=32,
     dataset=dict(
         dataset=dict(
             datasets=[
@@ -856,12 +839,14 @@ val_evaluator = dict(
     ],
     metric='mAP',
     type='VOCMetric')
-vis_backends = (dict(type='LocalVisBackend'), )
+vis_backends = [
+    dict(_scope_='mmdet', type='LocalVisBackend'),
+]
 visualizer = dict(
     _scope_='mmdet',
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='TensorboardVisBackend'),
     ])
+work_dir = './configs_to_train/work_dir'

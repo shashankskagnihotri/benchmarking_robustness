@@ -55,27 +55,28 @@ def change_interations(filename, folder_path):
     runner = Runner.from_cfg(cfg)
     print(f"Filename: {filename}")
 
-    print(f"train_dataloader: {runner.train_dataloader}")
+    # print(f"train_dataloader: {runner.train_dataloader}")
 
     # print(f"train_dataloader.dataset: {runner.train_dataloader.dataset}")
 
-    # print(f"len(train_dataloader.dataset): {len(runner.train_dataloader.dataset)}")
+    print(f"len(train_dataloader.dataset): {len(runner.train_dataloader.dataset)}")
+    print(f"len(val_dataloader.dataset): {len(runner.val_dataloader.dataset)}")
+    print(f"len(test_dataloader.dataset): {len(runner.test_dataloader.dataset)}")
 
-    # num_train_images = len(runner.train_dataloader.dataset)
-    # # elif "voc" in filename:
-    # #     num_train_images = len(runner.train_dataloader.datasets)
+    num_train_images = len(runner.train_dataloader.dataset)
 
-    # cfg.train_cfg.type = "IterBasedTrainLoop"
-    # cfg.train_cfg.max_iters = calculate_iterations(
-    #     epochs=cfg.max_epochs,
-    #     batch_size=cfg.train_dataloader.batch_size,
-    #     dataset_size=num_train_images,
-    # )
-
+    cfg.train_cfg.type = "IterBasedTrainLoop"
+    cfg.train_cfg.max_iters = calculate_iterations(
+        epochs=cfg.max_epochs,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset_size=num_train_images,
+    )
+    if hasattr(cfg.train_cfg, "max_epochs"):
+        cfg.train_cfg.pop("max_epochs", "Not found")
     # if hasattr(cfg.train_cfg, "max_epochs"):
     #     del cfg.train_cfg.max_epochs
 
-    # cfg.dump(f"{folder_path}/{filename}")
+    cfg.dump(f"{folder_path}/{filename}")
 
 
 for filename in filenames_to_train:

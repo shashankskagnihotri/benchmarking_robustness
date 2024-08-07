@@ -856,10 +856,7 @@ val_evaluator = dict(
     ],
     metric='mAP',
     type='VOCMetric')
-vis_backends = [
-    dict(type='LocalVisBackend'),
-    dict(type='TensorboardVisBackend'),
-]
+vis_backends = (dict(type='LocalVisBackend'), )
 visualizer = dict(
     _scope_='mmdet',
     name='visualizer',

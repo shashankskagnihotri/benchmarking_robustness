@@ -221,6 +221,17 @@ def process_files(source_folder):
         destination_file = os.path.join(
             destination_folder, f"{neck}_{backbone}_{dataset}.py"
         )
+        if neck == "EfficientDet":
+            print(f"Condition of {neck}, {backbone}, {dataset} met")
+
+            cfg = Config.fromfile(filepath)
+            cfg.vis_backends = (dict(type="LocalVisBackend"),)
+
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
 
         if neck == "atss" and backbone == "r101" and dataset == "voc0712":
             pass

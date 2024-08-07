@@ -88,13 +88,12 @@ def trainer(
         runner = RUNNERS.build(cfg)
 
     # # # start training
-    # runner.train()
+    runner.train()
 
-    # Mixed precision training setup
-
-    # start training
-    with torch.cuda.amp.autocast():
-        runner.train()
+    # # Mixed precision training setup
+    # # start training
+    # with torch.cuda.amp.autocast():
+    #     runner.train()
 
 
 if __name__ == "__main__":
