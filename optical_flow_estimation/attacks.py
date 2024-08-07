@@ -122,6 +122,14 @@ def _init_parser() -> ArgumentParser:
         help="Name of the attack to use.",
     )
     parser.add_argument(
+        "--attack_optim_target",
+        type=str,
+        default="ground_truth",
+        nargs="*",
+        choices=["ground_truth", "initial_flow"],
+        help="Set optimization target for adversarial attacks.",
+    )
+    parser.add_argument(
         "--cc_name",
         type=str,
         default="gaussian_noise",
@@ -669,15 +677,15 @@ def attack_one_dataloader(
                     ) = fgsm(attack_args, inputs, model, targeted_inputs)
                 case "pgd":
                     preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
-                        attack_args, inputs, model, targeted_inputs
+                        attack_args, inputs, model, targeted_inputs, orig_preds
                     )
                 case "cospgd":
                     preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
-                        attack_args, inputs, model, targeted_inputs
+                        attack_args, inputs, model, targeted_inputs, orig_preds
                     )
                 case "bim":
                     preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
-                        attack_args, inputs, model, targeted_inputs
+                        attack_args, inputs, model, targeted_inputs, orig_preds
                     )
                 case "apgd":
                     preds, perturbed_inputs = apgd(

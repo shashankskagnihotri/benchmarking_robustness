@@ -17,6 +17,7 @@ def bim_pgd_cospgd(
     inputs: Dict[str, torch.Tensor],
     model: BaseModel,
     targeted_inputs: Optional[Dict[str, torch.Tensor]],
+    orig_preds: Optional[Dict[str, torch.Tensor]]
 ):
     """Perform bim, pgd or cospgd adversarial attack on input images.
 
@@ -40,8 +41,10 @@ def bim_pgd_cospgd(
 
     if attack_args["attack_targeted"]:
         labels = targeted_inputs["flows"].squeeze(0)
-    else:
-        labels = inputs["flows"].squeeze(0)
+    elif attack_args["attack_optim_target"] == "ground_truth":
+        labels = inputs["flows"].clone().squeeze(0)
+    elif attack_args["attack_optim_target"] == "initial_flow":
+        labels = orig_preds["flows"].clone().squeeze(0)
 
     criterion = LossCriterion(attack_args["attack_loss"])
 

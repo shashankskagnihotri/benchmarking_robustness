@@ -18,6 +18,7 @@ bim_pgd_cospgd_arguments = [
     "attack_target",
     "attack_loss",
     "attack_iterations",
+    "attack_optim_target",
 ]
 apgd_arguments = [
     "attack",
@@ -56,6 +57,7 @@ cc_arguments = [
 ]
 no_attack_arguments = ["attack", "attack_targeted"]
 targeted_arguments = ["attack_target"]
+untargeted_arguments = ["attack_optim_target"]
 
 
 class AttackArgumentParser:
@@ -138,6 +140,9 @@ class AttackArgumentParser:
                     if targeted == False:
                         for targeted_args in targeted_arguments:
                             del to_remove[targeted_args]
+                    else:
+                        for untargeted_args in untargeted_arguments:
+                            del to_remove[untargeted_args]
                 case "pgd" | "cospgd" | "bim":
                     for arg_name in entry.keys():
                         if arg_name not in bim_pgd_cospgd_arguments:
@@ -145,6 +150,9 @@ class AttackArgumentParser:
                     if targeted == False:
                         for targeted_args in targeted_arguments:
                             del to_remove[targeted_args]
+                    else:
+                        for untargeted_args in untargeted_arguments:
+                            del to_remove[untargeted_args]
                 case "apgd":
                     for arg_name in entry.keys():
                         if arg_name not in apgd_arguments:
