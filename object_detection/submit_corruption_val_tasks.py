@@ -27,7 +27,7 @@ WORK_DIR = "slurm/logs/corruptions/%j"
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models"
 CORRUPTIONS = [
-    # "3dcc/bit_error",
+    "3dcc/bit_error",
     "3dcc/color_quant",
     "3dcc/far_focus",
     "3dcc/fog_3d",
@@ -97,7 +97,7 @@ executor.update_parameters(
     nodes=1,
     cpus_per_task=1,
     tasks_per_node=1,
-    slurm_mem=10_000,  # 10GB per task
+    slurm_mem=96_000,
     slurm_mail_type="all",
     slurm_job_name="corruptions",
     slurm_time="30:00",

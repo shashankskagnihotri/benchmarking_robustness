@@ -1,4 +1,5 @@
 [tool.ruff]
 exclude = [
     "mmdetection/**",
+    "3DCommonCorruptions/**",
 ]
