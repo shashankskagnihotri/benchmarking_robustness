@@ -113,7 +113,7 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
         # needs more GPU memory
         slurm_partion = "gpu_4_a100" if not debug else debug_GPU
     else:
-        slurm_partion = "gpu_4, gpu_4_a100, gpu_4_h100" if not debug else debug_GPU
+        slurm_partion = "gpu_4,gpu_4_a100,gpu_4_h100" if not debug else debug_GPU
 
     executor.update_parameters(slurm_partition=slurm_partion)
 
