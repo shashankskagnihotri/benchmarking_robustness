@@ -6,8 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def process_row(row):
-    arch, backbone, boxAP, config, weights = row
-    print(arch, backbone, boxAP, config, weights)
+    arch, backbone, boxAP, config, weights, dataset = row
+    print(arch, backbone, boxAP, config, weights, dataset)
 
     # Read and save the config file to get resolved config
     cfg = Config.fromfile(os.path.join("mmdetection", config))
