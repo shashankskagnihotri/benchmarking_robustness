@@ -43,7 +43,7 @@ model = dict(
             encoder=dict(
                 type='DetrTransformerEncoder',
                 num_layers=6,
-                layer_cfg=dict( #transformerlayers
+                transformerlayers=dict( 
                     type='BaseTransformerLayer',
                     attn_cfgs=dict(
                         type='MultiScaleDeformableAttention',
@@ -72,11 +72,29 @@ model = dict(
         positional_encoding=dict(
             type='SinePositionalEncoding', num_feats=512, normalize=True),
         transformer_decoder=dict(
-            type='DetrTransformerDecoder',
+            # type='DetrTransformerDecoder',
             return_intermediate=True,
             num_layers=9,
             layer_cfg=dict( # transformerlayers
-                type='DetrTransformerDecoderLayer',
+                # type='DetrTransformerDecoderLayer',
+                
+                # copied from mask2former swin b ade20k config
+                self_attn_cfg=dict(
+                    attn_drop=0.0,
+                    batch_first=True,
+                    dropout_layer=None,
+                    embed_dims=256,
+                    num_heads=8,
+                    proj_drop=0.0),
+                cross_attn_cfg=dict(
+                    attn_drop=0.0,
+                    batch_first=True,
+                    dropout_layer=None,
+                    embed_dims=256,
+                    num_heads=8,
+                    proj_drop=0.0),
+                
+
                 attn_cfgs=dict(
                     type='MultiheadAttention',
                     embed_dims=1024,
