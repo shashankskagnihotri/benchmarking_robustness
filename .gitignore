@@ -69,6 +69,8 @@ instance/
 .scrapy
 
 # Sphinx documentation
+docs/en/_build/
+docs/zh_cn/_build/
 docs/_build/
 
 # PyBuilder
@@ -127,7 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+.DS_Store
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -140,6 +142,18 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+data
+.vscode
+.idea
+
+# custom
+*.pkl
+*.pkl.json
+*.log.json
+work_dirs/
+mmseg/.mim
+
 .dmypy.json
 dmypy.json
 
@@ -179,3 +193,6 @@ dataset/
 
 *.pth
 semantic_segmentation/configs/onepeace/one-peace-vision.pkl
+semantic_segmentation/mmsegmentation/data/
+output/
+vis_image/
