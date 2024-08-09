@@ -1,0 +1,13 @@
+python tools/test.py 
+./configs/segformer/segformer_mit-b0_8xb2-160k_ade20k-512x512.py 
+../aa_workdir/ade/MIT-B0/segformer_mit-b0_512x512_160k_ade20k_20210726_101530-8ffa8fda.pth 
+--work-dir ../aa_workdir/ade/MIT-B0 
+--cfg-options 
+model.perform_attack=True 
+model.attack_cfg.name='cospgd' 
+model.attack_cfg.norm='linf' 
+model.attack_cfg.alpha=0.01 
+model.attack_cfg.epsilon=2
+model.attack_cfg.iterations=5
+
+python tools/test.py ./configs/segformer/segformer_mit-b0_8xb2-160k_ade20k-512x512.py ../aa_workdir/ade/MIT-B0/segformer_mit-b0_512x512_160k_ade20k_20210726_101530-8ffa8fda.pth --cfg-options model.perform_attack=True model.attack_cfg.name='cospgd' model.attack_cfg.norm='linf' model.attack_cfg.alpha=0.01 model.attack_cfg.epsilon=2 model.attack_cfg.iterations=5

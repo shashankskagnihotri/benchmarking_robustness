@@ -1,7 +1,7 @@
-checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b0_20220624-7e0fe6dd.pth'
+checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b3_20220624-13b1141c.pth'
 crop_size = (
     512,
-    1024,
+    512,
 )
 data_preprocessor = dict(
     bgr_to_rgb=True,
@@ -14,7 +14,7 @@ data_preprocessor = dict(
     seg_pad_val=255,
     size=(
         512,
-        1024,
+        512,
     ),
     std=[
         58.395,
@@ -22,8 +22,8 @@ data_preprocessor = dict(
         57.375,
     ],
     type='SegDataPreProcessor')
-data_root = 'data/cityscapes/'
-dataset_type = 'CityscapesDataset'
+data_root = 'data/ade/ADEChallengeData2016'
+dataset_type = 'ADE20KDataset'
 default_hooks = dict(
     checkpoint=dict(by_epoch=False, interval=16000, type='CheckpointHook'),
     logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
@@ -45,21 +45,21 @@ img_ratios = [
     1.75,
 ]
 launcher = 'none'
-load_from = '../work_dirs/segformer_mit-b0_8xb1-160k_cityscapes-512x1024/iter_144000.pth'
+load_from = '../aa_workdir/ade/MIT-B3/segformer_mit-b3_512x512_160k_ade20k_20210726_081410-962b98d2.pth'
 log_level = 'INFO'
 log_processor = dict(by_epoch=False)
 model = dict(
     attack_cfg=dict(
-        alpha=0.01, epsilon=4, iterations=5, name='cosgpd', norm='linf'),
+        alpha=3.92157e-05, epsilon=64, iterations=20, name='pgd', norm='l2'),
     backbone=dict(
         attn_drop_rate=0.0,
         drop_path_rate=0.1,
         drop_rate=0.0,
-        embed_dims=32,
+        embed_dims=64,
         in_channels=3,
         init_cfg=dict(
             checkpoint=
-            'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b0_20220624-7e0fe6dd.pth',
+            'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b3_20220624-13b1141c.pth',
             type='Pretrained'),
         mlp_ratio=4,
         num_heads=[
@@ -69,10 +69,10 @@ model = dict(
             8,
         ],
         num_layers=[
-            2,
-            2,
-            2,
-            2,
+            3,
+            4,
+            18,
+            3,
         ],
         num_stages=4,
         out_indices=(
@@ -106,7 +106,7 @@ model = dict(
         seg_pad_val=255,
         size=(
             512,
-            1024,
+            512,
         ),
         std=[
             58.395,
@@ -119,10 +119,10 @@ model = dict(
         channels=256,
         dropout_ratio=0.1,
         in_channels=[
-            32,
             64,
-            160,
-            256,
+            128,
+            320,
+            512,
         ],
         in_index=[
             0,
@@ -133,17 +133,11 @@ model = dict(
         loss_decode=dict(
             loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=19,
+        num_classes=150,
         type='SegformerHead'),
     perform_attack=True,
     pretrained=None,
-    test_cfg=dict(crop_size=(
-        512,
-        1024,
-    ), mode='slide', stride=(
-        768,
-        768,
-    )),
+    test_cfg=dict(mode='whole'),
     train_cfg=dict(),
     type='EncoderDecoder')
 norm_cfg = dict(requires_grad=True, type='SyncBN')
@@ -178,18 +172,19 @@ test_dataloader = dict(
     batch_size=1,
     dataset=dict(
         data_prefix=dict(
-            img_path='leftImg8bit/val', seg_map_path='gtFine/val'),
-        data_root='data/cityscapes/',
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
                 2048,
-                1024,
+                512,
             ), type='Resize'),
-            dict(type='LoadAnnotations'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
             dict(type='PackSegInputs'),
         ],
-        type='CityscapesDataset'),
+        type='ADE20KDataset'),
     num_workers=4,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
@@ -201,22 +196,22 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(keep_ratio=True, scale=(
         2048,
-        1024,
+        512,
     ), type='Resize'),
-    dict(type='LoadAnnotations'),
+    dict(reduce_zero_label=True, type='LoadAnnotations'),
     dict(type='PackSegInputs'),
 ]
 train_cfg = dict(
     max_iters=160000, type='IterBasedTrainLoop', val_interval=16000)
 train_dataloader = dict(
-    batch_size=1,
+    batch_size=2,
     dataset=dict(
         data_prefix=dict(
-            img_path='leftImg8bit/train', seg_map_path='gtFine/train'),
-        data_root='data/cityscapes/',
+            img_path='images/training', seg_map_path='annotations/training'),
+        data_root='data/ade/ADEChallengeData2016',
         pipeline=[
             dict(type='LoadImageFromFile'),
-            dict(type='LoadAnnotations'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
             dict(
                 keep_ratio=True,
                 ratio_range=(
@@ -225,25 +220,25 @@ train_dataloader = dict(
                 ),
                 scale=(
                     2048,
-                    1024,
+                    512,
                 ),
                 type='RandomResize'),
             dict(
                 cat_max_ratio=0.75, crop_size=(
                     512,
-                    1024,
+                    512,
                 ), type='RandomCrop'),
             dict(prob=0.5, type='RandomFlip'),
             dict(type='PhotoMetricDistortion'),
             dict(type='PackSegInputs'),
         ],
-        type='CityscapesDataset'),
-    num_workers=4,
+        type='ADE20KDataset'),
+    num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=True, type='InfiniteSampler'))
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations'),
+    dict(reduce_zero_label=True, type='LoadAnnotations'),
     dict(
         keep_ratio=True,
         ratio_range=(
@@ -252,12 +247,12 @@ train_pipeline = [
         ),
         scale=(
             2048,
-            1024,
+            512,
         ),
         type='RandomResize'),
     dict(cat_max_ratio=0.75, crop_size=(
         512,
-        1024,
+        512,
     ), type='RandomCrop'),
     dict(prob=0.5, type='RandomFlip'),
     dict(type='PhotoMetricDistortion'),
@@ -294,18 +289,19 @@ val_dataloader = dict(
     batch_size=1,
     dataset=dict(
         data_prefix=dict(
-            img_path='leftImg8bit/val', seg_map_path='gtFine/val'),
-        data_root='data/cityscapes/',
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
                 2048,
-                1024,
+                512,
             ), type='Resize'),
-            dict(type='LoadAnnotations'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
             dict(type='PackSegInputs'),
         ],
-        type='CityscapesDataset'),
+        type='ADE20KDataset'),
     num_workers=4,
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
@@ -322,4 +318,4 @@ visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
     ])
-work_dir = '../work_dirs/segformer_mit-b0_8xb1-160k_cityscapes-512x1024'
+work_dir = '../aa_workdir/ade/MIT-B3'
