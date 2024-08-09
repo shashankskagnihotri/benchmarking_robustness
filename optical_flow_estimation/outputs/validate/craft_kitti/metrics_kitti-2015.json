@@ -2613,36 +2613,6 @@
             }
         },
         {
-            "start_time": "2024-07-22 12:37:55",
-            "model": "craft",
-            "checkpoint": "kitti",
-            "attack": "common_corruptions",
-            "name": "gaussian_noise",
-            "severity": 5,
-            "targeted": false,
-            "end_time": "2024-07-22 12:43:18",
-            "duration": "00:05:22",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 16.247284056544302,
-                "px1": 0.2107297293492593,
-                "px3": 0.4590748282521963,
-                "px5": 0.5540448539331555,
-                "outlier": 52.644614005088805,
-                "own_epe": 35.6906513273716,
-                "cosim": 0.1684345640061656,
-                "l2_delta1": 0.287040908485651,
-                "l2_delta2": 0.28707221016287804,
-                "l2_delta12": 0.2870566974580288,
-                "l0_delta1": 1312305.595,
-                "l0_delta2": 1312744.185,
-                "l0_delta12": 2625049.78,
-                "l_inf_delta1": 1.0,
-                "l_inf_delta2": 1.0,
-                "l_inf_delta12": 1.0
-            }
-        },
-        {
             "start_time": "2024-07-29 05:28:19",
             "model": "craft",
             "checkpoint": "kitti",

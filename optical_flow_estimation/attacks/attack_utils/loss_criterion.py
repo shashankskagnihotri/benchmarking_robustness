@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 
 class LossCriterion:
@@ -85,6 +86,55 @@ def avg_epe(flow1, flow2):
             + str(flow1.size())
         )
     return epe
+
+def calc_epe_metrics(model, preds, inputs, iteration, targeted_inputs=None):
+    epe_gt = model.val_metrics(preds, inputs)["val/epe"]
+    if targeted_inputs is None:
+        return {f"val/epe_gt_i{iteration}": epe_gt}
+    else:
+        epe_tgt = model.val_metrics(preds, targeted_inputs)["val/epe"]
+        return {
+            f"val/epe_ground_truth_i{iteration}": epe_gt,
+            f"val/epe_target_i{iteration}": epe_tgt,
+        }
+    
+def calc_delta_metrics(delta1, delta2, iteration=None):
+    l2_delta1 = two_norm_avg(delta1)
+    l2_delta2 = two_norm_avg(delta2)
+    l2_delta12 = two_norm_avg_delta(delta1, delta2)
+
+    l0_delta1 = l0_norm(delta1)
+    l0_delta2 = l0_norm(delta2)
+    l0_delta12 = l0_norm_delta(delta1, delta2)
+
+    l_inf_delta1 = l_infinity_norm(delta1)
+    l_inf_delta2 = l_infinity_norm(delta2)
+    l_inf_delta12 = l_infinity_norm_delta(delta1, delta2)
+
+    if iteration is None:
+        return {
+            "val/l2_delta1": l2_delta1,
+            "val/l2_delta2": l2_delta2,
+            "val/l2_delta12": l2_delta12,
+            "val/l0_delta1": l0_delta1,
+            "val/l0_delta2": l0_delta2,
+            "val/l0_delta12": l0_delta12,
+            "val/l_inf_delta1": l_inf_delta1,
+            "val/l_inf_delta2": l_inf_delta2,
+            "val/l_inf_delta12": l_inf_delta12,
+        }
+    else:
+        return {
+            f"val/l2_delta1_i{iteration}": l2_delta1,
+            f"val/l2_delta2_i{iteration}": l2_delta2,
+            f"val/l2_delta12_i{iteration}": l2_delta12,
+            f"val/l0_delta1_i{iteration}": l0_delta1,
+            f"val/l0_delta2_i{iteration}": l0_delta2,
+            f"val/l0_delta12_i{iteration}": l0_delta12,
+            f"val/l_inf_delta1_i{iteration}": l_inf_delta1,
+            f"val/l_inf_delta2_i{iteration}": l_inf_delta2,
+            f"val/l_inf_delta12_i{iteration}": l_inf_delta12,
+        }
 
 
 def avg_mse(flow1, flow2):
@@ -204,6 +254,56 @@ def two_norm_avg(x):
     sqrt_numels = numels_x**0.5
     two_norm = torch.sqrt(torch.sum(torch.pow(torch.flatten(x), 2)))
     return two_norm / sqrt_numels
+
+def l0_norm(x):
+    """Computes the L0-norm of the input, which is the count of non-zero elements.
+
+    Args:
+        x (tensor): input tensor with variable dimensions
+
+    Returns:
+        float: L0-norm (count of non-zero elements)
+    """
+    return torch.sum(x != 0).float()
+
+
+def l_infinity_norm(x):
+    """Computes the L-infinity norm of the input, which is the maximum absolute value.
+
+    Args:
+        x (tensor): input tensor with variable dimensions
+
+    Returns:
+        float: L-infinity norm (maximum absolute value)
+    """
+    return torch.max(torch.abs(x))
+
+
+def l0_norm_delta(delta1, delta2):
+    """Computes the sum of L0-norms of two perturbations.
+
+    Args:
+        delta1 (tensor): perturbation applied to the first image
+        delta2 (tensor): perturbation applied to the second image
+
+    Returns:
+        float: sum of L0-norms of two perturbations
+    """
+    return l0_norm(delta1) + l0_norm(delta2)
+
+
+def l_infinity_norm_delta(delta1, delta2):
+    """Computes the maximum of the L-infinity norms of two perturbations.
+
+    Args:
+        delta1 (tensor): perturbation applied to the first image
+        delta2 (tensor): perturbation applied to the second image
+
+    Returns:
+        float: maximum of the L-infinity norms of two perturbations
+    """
+    return max(l_infinity_norm(delta1), l_infinity_norm(delta2))
+
 
 
 def get_loss(f_type, pred, target):

@@ -1,10 +1,15 @@
 import torch
 from typing import Dict
+import copy
 
 
-def get_image_tensors(input_dic: Dict[str, torch.Tensor]):
-    image_1 = input_dic["images"][0][0].unsqueeze(0)
-    image_2 = input_dic["images"][0][1].unsqueeze(0)
+def get_image_tensors(input_dic: Dict[str, torch.Tensor], clone=False):
+    if clone:
+        image_1 = copy.deepcopy(input_dic)["images"][0][0].unsqueeze(0)
+        image_2 = copy.deepcopy(input_dic)["images"][0][1].unsqueeze(0)
+    else:
+        image_1 = input_dic["images"][0][0].unsqueeze(0)
+        image_2 = input_dic["images"][0][1].unsqueeze(0)
     return image_1, image_2
 
 
@@ -28,7 +33,7 @@ def replace_images_dic(
 ):
     image_pair_tensor = torch.torch.cat((image_1, image_2)).unsqueeze(0)
     if clone:
-        output_dic = input_dic.copy()
+        output_dic = copy.deepcopy(input_dic)
         output_dic["images"] = image_pair_tensor
         return output_dic
     else:

@@ -331,36 +331,6 @@
             }
         },
         {
-            "start_time": "2024-08-05 19:11:40",
-            "model": "liteflownet2_pseudoreg",
-            "checkpoint": "kitti",
-            "attack": "common_corruptions",
-            "name": "contrast",
-            "severity": 3,
-            "targeted": false,
-            "end_time": "2024-08-05 19:13:27",
-            "duration": "00:01:47",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 1.4569498532265426,
-                "px1": 0.7938448512554168,
-                "px3": 0.9226249739527702,
-                "px5": 0.9515602353215218,
-                "outlier": 4.977791393436491,
-                "own_epe": 23.63844425059855,
-                "cosim": 0.1824202285055071,
-                "l2_delta1": 0.24660699255764484,
-                "l2_delta2": 0.24625357469543815,
-                "l2_delta12": 0.24643764363601803,
-                "l0_delta1": 1389606.195,
-                "l0_delta2": 1389489.165,
-                "l0_delta12": 2779095.36,
-                "l_inf_delta1": 0.518745095282793,
-                "l_inf_delta2": 0.5189215618371964,
-                "l_inf_delta12": 0.5212156820297241
-            }
-        },
-        {
             "start_time": "2024-08-05 19:13:57",
             "model": "liteflownet2_pseudoreg",
             "checkpoint": "kitti",

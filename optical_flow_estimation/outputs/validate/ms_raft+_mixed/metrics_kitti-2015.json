@@ -151,36 +151,6 @@
             }
         },
         {
-            "start_time": "2024-08-05 21:50:47",
-            "model": "ms_raft+",
-            "checkpoint": "mixed",
-            "attack": "common_corruptions",
-            "name": "motion_blur",
-            "severity": 3,
-            "targeted": false,
-            "end_time": "2024-08-05 22:02:05",
-            "duration": "00:11:18",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 3.6378370494395496,
-                "px1": 0.21502849100367258,
-                "px3": 0.6790936276264256,
-                "px5": 0.895064989309758,
-                "outlier": 27.10250958710909,
-                "own_epe": 24.148099334686993,
-                "cosim": 0.17520080206915736,
-                "l2_delta1": 0.10667077261954545,
-                "l2_delta2": 0.10663981566205621,
-                "l2_delta12": 0.10674419356510043,
-                "l0_delta1": 1226940.9,
-                "l0_delta2": 1228289.835,
-                "l0_delta12": 2455230.735,
-                "l_inf_delta1": 0.8661372628808022,
-                "l_inf_delta2": 0.8653725570440293,
-                "l_inf_delta12": 0.8741960859298706
-            }
-        },
-        {
             "start_time": "2024-08-05 21:59:01",
             "model": "ms_raft+",
             "checkpoint": "mixed",

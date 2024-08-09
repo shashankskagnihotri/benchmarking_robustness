@@ -27,7 +27,6 @@ from datetime import datetime
 import json
 
 import os
-os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 
 import cv2 as cv
 import numpy as np
@@ -63,6 +62,8 @@ from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
     attack_arg_string,
 )
+import attacks.attack_utils.loss_criterion as losses
+
 from attacks.attack_utils.loss_criterion import LossCriterion
 from ptlflow_attacked.validate import (
     validate_one_dataloader,
@@ -73,7 +74,7 @@ from ptlflow_attacked.validate import (
 # Import cosPGD functions
 import torch.nn as nn
 from torch.nn.functional import cosine_similarity
-from attacks.attack_utils.utils import get_flow_tensors
+from attacks.attack_utils.utils import get_flow_tensors, get_image_tensors
 
 
 # Default Attack parameters
@@ -89,7 +90,6 @@ delta_bound = 0.005
 
 
 config_logging()
-
 
 def _init_parser() -> ArgumentParser:
     parser = ArgumentParser()
@@ -652,10 +652,15 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     }
     overwrite_flag = args.overwrite_output
     output_data = []
+    iteration_data = []
+
     start_time = datetime.now()
     output_data.append(("start_time", start_time.strftime("%Y-%m-%d %H:%M:%S")))
     output_data.append(("model", args.model))
     output_data.append(("checkpoint", args.pretrained_ckpt))
+    iteration_data.append(("start_time", start_time.strftime("%Y-%m-%d %H:%M:%S")))
+    iteration_data.append(("model", args.model))
+    iteration_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
     for attack_args in attack_args_parser:
         for key, value in attack_args.items():
@@ -664,39 +669,33 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             if isinstance(value, float):
                 value = round(value, 4)
             output_data.append((key, value))
+            iteration_data.append((key, value))
         print(attack_args)
         for dataset_name, dl in dataloaders.items():
-            metrics_mean = attack_one_dataloader(
+            metrics_mean, iteration_metrics_mean = attack_one_dataloader(
                 args, attack_args, model, dl, dataset_name
             )
 
             end_time = datetime.now()
             output_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
+            iteration_data.append(("end_time", end_time.strftime("%Y-%m-%d %H:%M:%S")))
             time_difference = end_time - start_time
             hours = time_difference.seconds // 3600
             minutes = (time_difference.seconds % 3600) // 60
             seconds = time_difference.seconds % 60
             time_difference_str = "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
             output_data.append(("duration", time_difference_str))
+            iteration_data.append(("duration", time_difference_str))
 
             output_data.append(("dataset", dataset_name))
+            iteration_data.append(("dataset", dataset_name))
             for k in metrics_mean.keys():
                 output_data.append((k, metrics_mean[k]))
+            for k in iteration_metrics_mean.keys():
+                iteration_data.append((k, iteration_metrics_mean[k]))
 
             args.output_path.mkdir(parents=True, exist_ok=True)
-            # metrics_df = pd.DataFrame(output_data, columns=["Type", "Value"])
-            # if os.path.exists(args.output_path / f"metrics_{args.val_dataset}.csv") and not overwrite_flag:
-            #     metrics_df_old = pd.read_csv(
-            #         args.output_path / f"metrics_{args.val_dataset}.csv",
-            #         header=None,
-            #         names=["Type", "Value"],
-            #     )
-            #     metrics_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
-            # metrics_df.to_csv(
-            #     args.output_path / f"metrics_{args.val_dataset}.csv",
-            #     header=False,
-            #     index=False,
-            # )
+         
             output_dict = {}
             for key, value in output_data:
                 if "val" in key:
@@ -716,6 +715,30 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
             with open(output_filename, "w") as json_file:
                 json.dump(metrics, json_file, indent=4)
     # return metrics_df
+
+            if iteration_metrics_mean:
+                iteration_output_dict = {}
+                for key, value in iteration_data:
+                    if "val" in key:
+                         iteration_output_dict.setdefault("metrics", {})[
+                            key.split("/")[1]
+                        ] = value
+                    else:
+                        iteration_output_dict[key] = value
+                output_filename = (
+                    args.output_path / f"iteration_metrics_{args.val_dataset}.json"
+                )
+
+                if os.path.exists(output_filename) and not overwrite_flag:
+                    with open(output_filename, "r") as json_file:
+                        metrics = json.load(json_file)
+                else:
+                    metrics = {"experiments": []}
+
+                metrics["experiments"].append(iteration_output_dict)
+
+                with open(output_filename, "w") as json_file:
+                    json.dump(metrics, json_file, indent=4)
 
 
 def attack_list_of_models(args: Namespace) -> None:
@@ -803,6 +826,7 @@ def attack_one_dataloader(
     """
 
     metrics_sum = {}
+    iteration_metrics_sum = {}
     # if attack_args["attack"] == "3dcc":
     #     dataloader = get_dataset_3DCC(
     #         model,
@@ -817,7 +841,6 @@ def attack_one_dataloader(
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
 
-    losses = torch.zeros(len(dataloader))
     with tqdm(dataloader) as tdl:
         prev_preds = None
         for i, inputs in enumerate(tdl):
@@ -842,6 +865,7 @@ def attack_one_dataloader(
 
             if inputs["images"].max() > 1.0:
                 attack_args["attack_epsilon"] = attack_args["attack_epsilon"] * 255
+                attack_args["attack_alpha"] = attack_args["attack_alpha"] * 255
             has_ground_truth = True
             targeted_inputs = None
 
@@ -865,6 +889,12 @@ def attack_one_dataloader(
                 targeted_inputs = inputs.copy()
                 targeted_inputs["flows"] = targeted_flow_tensor
 
+             # for logging
+            if attack_args["attack"] == "none":
+                targeted_inputs = inputs.copy()
+
+            iteration_metrics = {}
+
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
                     preds = fgsm(attack_args, inputs, model, targeted_inputs)
@@ -885,7 +915,7 @@ def attack_one_dataloader(
                         attack_args, model, targeted_inputs, i, args.output_path
                     )
                 case "common_corruptions":
-                    preds = common_corrupt(attack_args, inputs, model)
+                    preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
                     # from torch.cuda.amp import GradScaler, autocast
                     # with autocast():
@@ -894,7 +924,19 @@ def attack_one_dataloader(
                 #     preds = model(inputs)
 
             for key in preds:
-                preds[key] = preds[key].detach()
+                 if torch.is_tensor(preds[key]):
+                    preds[key] = preds[key].detach()
+            for key in inputs:
+                if torch.is_tensor(inputs[key]):
+                    inputs[key] = inputs[key].detach()
+            if attack_args["attack"] != "none":
+                for key in perturbed_inputs:
+                    if torch.is_tensor(perturbed_inputs[key]):
+                        perturbed_inputs[key] = perturbed_inputs[key].detach()
+            for key in iteration_metrics:
+                if torch.is_tensor(iteration_metrics[key]):
+                    iteration_metrics[key] = iteration_metrics[key].detach()
+
 
             if args.warm_start:
                 if (
@@ -913,6 +955,10 @@ def attack_one_dataloader(
 
             if attack_args["attack"] != "none":
                 perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
+                if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+                    targeted_inputs = io_adapter.unscale(
+                        targeted_inputs, image_only=True
+                    )
 
             if inputs["flows"].shape[1] > 1 and args.seq_val_mode != "all":
                 if args.seq_val_mode == "first":
@@ -994,10 +1040,74 @@ def attack_one_dataloader(
                     cosine_similarity(get_flow_tensors(preds), get_flow_tensors(inputs))
                 )
 
+                if attack_args["attack"] == "none":
+                    targeted_flow_tensor_negative = -orig_preds["flows"].clone()
+                    targeted_flow_tensor_zero = torch.zeros_like(orig_preds["flows"])
+                    loss_initial_neg = criterion.loss(
+                        preds["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_negative.squeeze(0).float(),
+                    )
+                    loss_initial_neg = loss_initial_neg.mean()
+                    loss_initial_zero = criterion.loss(
+                        preds["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_zero.squeeze(0).float(),
+                    )
+                    loss_initial_zero = loss_initial_zero.mean()
+                    metrics["val/epe_initial_to_negative"] = loss_initial_neg
+                    metrics["val/epe_initial_to_zero"] = loss_initial_zero
+
+                    loss_ground_truth_neg = criterion.loss(
+                        inputs["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_negative.squeeze(0).float(),
+                    )
+                    loss_ground_truth_neg = loss_ground_truth_neg.mean()
+                    loss_ground_truth_zero = criterion.loss(
+                        inputs["flows"].squeeze(0).float(),
+                        targeted_flow_tensor_zero.squeeze(0).float(),
+                    )
+                    loss_ground_truth_zero = loss_ground_truth_zero.mean()
+                    metrics["val/own_epe_ground_truth_to_negative"] = (
+                        loss_ground_truth_neg
+                    )
+                    metrics["val/own_epe_ground_truth_to_zero"] = loss_ground_truth_zero
+
+                    targeted_inputs["flows"] = targeted_flow_tensor_negative.float()
+
+                    metrics_ground_truth_negative = model.val_metrics(
+                        targeted_inputs, inputs
+                    )
+                    metrics["val/epe_ground_truth_to_negative"] = (
+                        metrics_ground_truth_negative["val/epe"]
+                    )
+
+                    targeted_inputs["flows"] = targeted_flow_tensor_zero.float()
+                    metrics_ground_truth_zero = model.val_metrics(
+                        targeted_inputs, inputs
+                    )
+                    metrics["val/epe_ground_truth_to_zero"] = metrics_ground_truth_zero[
+                        "val/epe"
+                    ]
+
+            if attack_args["attack"] != "none":
+                adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
+                image1, image2 = get_image_tensors(inputs)
+                delta1 = adv_image1 - image1
+                delta2 = adv_image2 - image2
+                delta_dic = losses.calc_delta_metrics(delta1, delta2)
+                for k, v in delta_dic.items():
+                    metrics[k] = v
+
+
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
                     metrics_sum[k] = 0.0
                 metrics_sum[k] += metrics[k].item()
+
+            for k in iteration_metrics.keys():
+                if iteration_metrics_sum.get(k) is None:
+                    iteration_metrics_sum[k] = 0.0
+                iteration_metrics_sum[k] += iteration_metrics[k].item()
+
 
             free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
@@ -1032,6 +1142,13 @@ def attack_one_dataloader(
             if args.max_samples is not None and i >= (args.max_samples - 1):
                 break
 
+            del preds
+            del inputs
+            del iteration_metrics
+            if attack_args["attack"] != "none":
+                del perturbed_inputs
+            torch.cuda.empty_cache()
+
     if args.write_individual_metrics:
         ind_df = pd.DataFrame(metrics_individual)
         args.output_path.mkdir(parents=True, exist_ok=True)
@@ -1043,7 +1160,11 @@ def attack_one_dataloader(
     for k, v in metrics_sum.items():
         metrics_mean[k] = v / len(dataloader)
 
-    return metrics_mean
+    iteration_metrics_mean = {}
+    for k, v in iteration_metrics_sum.items():
+        iteration_metrics_mean[k] = v / len(dataloader)
+
+    return metrics_mean, iteration_metrics_mean
 
 
 def generate_outputs(
@@ -1107,13 +1228,25 @@ def _write_to_npy_file(
     extra_dirs = ""
     if metadata is not None:
         img_path = Path(metadata["image_paths"][0][0])
+        img2_path = Path(metadata["image_paths"][1][0])
         image_name = img_path.stem
+        image2_name = img2_path.stem
         if "sintel" in dataloader_name:
             seq_name = img_path.parts[-2]
             extra_dirs = seq_name
     else:
         image_name = f"{batch_idx:08d}"
+        image2_name = f"{batch_idx:08d}_2"
 
+    if args.flow_format != "original":
+            flow_ext = args.flow_format
+    else:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name:
+            flow_ext = "png"
+        else:
+            flow_ext = "flo"
+
+    out_dir_flows = None  # 初始化为 None 以避免 UnboundLocalError
     for k, v in preds.items():
         if isinstance(v, np.ndarray):
             out_dir = out_root_dir
@@ -1121,23 +1254,41 @@ def _write_to_npy_file(
                 for arg, val in attack_args.items():
                     out_dir = out_dir / f"{arg}={val}"
 
-            if k == "flows":
+        if flow_ext == "png":
+            if k == "flows_viz":
                 out_dir_flows = out_dir / k / extra_dirs
                 out_dir_flows.mkdir(parents=True, exist_ok=True)
-                np.savez_compressed(
-                    str(out_dir_flows / f"{image_name}"), v.astype(np.uint8)
-                )
+
+                cv.imwrite(str(out_dir_flows / f"{image_name}.{flow_ext}"), v.astype(np.uint8))
+        elif k == "flows":
+                # flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
+                if out_dir_flows is None:  # 确保 out_dir_flows 已经设置
+                    out_dir_flows = out_dir / k / extra_dirs
+                    out_dir_flows.mkdir(parents=True, exist_ok=True)
+                flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
 
     if perturbed_inputs is not None:
         for k, v in perturbed_inputs.items():
-            if isinstance(v, np.ndarray):
-                if k == "images":
-                    out_dir_imgs = out_dir / k / extra_dirs
-                    out_dir_imgs.mkdir(parents=True, exist_ok=True)
-                    np.savez_compressed(
-                        str(out_dir_imgs / f"{image_name}"), v.astype(np.uint8)
-                    )
+            if k == "images":
+                out_dir_imgs = out_dir / k / extra_dirs
+                out_dir_imgs.mkdir(parents=True, exist_ok=True)
+                if v.max() <= 1:
+                    v = v * 255
+                
+                if isinstance(v, np.ndarray):
+                    # 如果 v 是 numpy 数组，将其转换为 PyTorch 张量
+                    v = torch.tensor(v)
 
+                image = v[0, 0].detach().cpu()
+                image2 = v[0, 1].detach().cpu()
+                # Convert from (C, H, W) to (H, W, C)
+                image = image.permute(1, 2, 0).numpy()
+                image2 = image2.permute(1, 2, 0).numpy()
+                output_filepath = out_dir_imgs / f"{image_name}.png"
+                output_filepath2 = out_dir_imgs / f"{image2_name}.png"
+
+                cv.imwrite(str(output_filepath), image.astype(np.uint8))
+                cv.imwrite(str(output_filepath2), image2.astype(np.uint8))
 
 def _write_to_file(
     args: Namespace,

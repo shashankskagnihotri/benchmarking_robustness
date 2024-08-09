@@ -18,11 +18,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 from functools import partial
 
-from ...timm0412.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+
+#from ...timm0412.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from ...timm0412.models.layers import Mlp, DropPath, to_2tuple, trunc_normal_
 from ...timm0412.models.vision_transformer import Attention
 from .attention import LinearPositionEmbeddingSine
 from ...utils import coords_grid
+
+DEFAULT_CROP_PCT = 0.875
+IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
+IMAGENET_INCEPTION_MEAN = (0.5, 0.5, 0.5)
+IMAGENET_INCEPTION_STD = (0.5, 0.5, 0.5)
+IMAGENET_DPN_MEAN = (124 / 255, 117 / 255, 104 / 255)
+IMAGENET_DPN_STD = tuple([1 / (0.0167 * 255)] * 3)
+
 
 
 def _cfg(url="", **kwargs):
