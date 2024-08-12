@@ -13,7 +13,7 @@ mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fs
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', required=True, help='Specify an model', choices=['cfnet', 'gwcnet', 'psmnet', 'sttr', 'sttr-light'])
 parser.add_argument('--scenario', required=True, help='Specify whether to train or test the model', choices=['train', 'test', 'attack', 'commoncorruption'])
-parser.add_argument('--dataset', required=True, help='Specify the dataset to use', choices=['sceneflow', 'sintel', 'kitti', 'kitti2015', 'eth3d', 'mpisintel'])
+parser.add_argument('--dataset', required=True, help='Specify the dataset to use', choices=['sceneflow', 'mpisintel', 'kitti', 'kitti2015', 'eth3d', 'mpisintel'])
 parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
 parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
 parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test')

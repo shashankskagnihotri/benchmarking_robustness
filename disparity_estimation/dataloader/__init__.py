@@ -29,18 +29,25 @@ def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
 
 ### START - Get data loaders for CFNet and GWCNet
 
+import random
+import numpy as np
 from torch.utils.data import DataLoader, random_split, Subset
 from dataloader import get_dataset
 
+
+
 def get_data_loader_1(args, architeture_name):
+    
     train_dataset = get_dataset(
         args.dataset, args.datapath, architeture_name=architeture_name, split="train"
     )
+
     test_dataset = get_dataset(
         args.dataset, args.datapath, architeture_name=architeture_name, split="test"
     )
-
-
+    print("Length of train_dataset: ", len(train_dataset))
+    np.random.seed(42)
+    random.seed(42)
     if "kitti" in args.dataset.lower():  # Define split sizes
         val_size = int(0.2 * len(train_dataset))  # 20% for validation
         test_size = int(0.1 * len(train_dataset))  # 10% for testing
@@ -48,8 +55,7 @@ def get_data_loader_1(args, architeture_name):
 
         # Split the dataset, because kitti has no test split
         train_subset, val_subset, test_dataset = random_split(
-            train_dataset, [train_size, val_size, test_size],
-            random_state=42
+            train_dataset, [train_size, val_size, test_size]
         )
     else:
         val_size = int(0.2 * len(train_dataset))  # 20% for validation
