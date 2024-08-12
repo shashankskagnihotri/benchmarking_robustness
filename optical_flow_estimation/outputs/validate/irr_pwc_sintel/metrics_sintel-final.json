@@ -575,6 +575,31 @@
                 "l_inf_delta2": 0.03137257695198059,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-08-06 04:31:27",
+            "model": "irr_pwc",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-06 04:42:46",
+            "duration": "00:11:19",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.422438025642741,
+                "px1": 0.8514399167097028,
+                "px3": 0.9176056668749231,
+                "px5": 0.9376404808116692,
+                "outlier": 7.868655209993913,
+                "own_epe": 2.422437910573856,
+                "cosim": 0.904018081223644,
+                "epe_initial_to_negative": 25.49149488667017,
+                "epe_initial_to_zero": 12.745747443335086,
+                "own_epe_ground_truth_to_negative": 25.851634307164165,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 25.851635318954443,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
         }
     ]
 }

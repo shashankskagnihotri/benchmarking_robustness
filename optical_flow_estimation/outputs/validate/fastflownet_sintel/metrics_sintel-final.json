@@ -637,6 +637,31 @@
                 "l_inf_delta2": 0.03137257695198059,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-08-06 04:10:52",
+            "model": "fastflownet",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-06 04:12:42",
+            "duration": "00:01:50",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.7346059756566423,
+                "px1": 0.7990151446201507,
+                "px3": 0.8919646530121379,
+                "px5": 0.9191218605882324,
+                "outlier": 10.410619547846006,
+                "own_epe": 2.734605872078542,
+                "cosim": 0.8763270099270699,
+                "epe_initial_to_negative": 26.01656680440353,
+                "epe_initial_to_zero": 13.008283405579935,
+                "own_epe_ground_truth_to_negative": 26.104826339154606,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.1048274270682,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
         }
     ]
 }

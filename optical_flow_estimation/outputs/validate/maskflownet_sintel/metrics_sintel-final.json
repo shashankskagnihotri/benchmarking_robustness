@@ -575,6 +575,31 @@
                 "l_inf_delta2": 0.03137257695198059,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-08-06 04:14:59",
+            "model": "maskflownet",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-06 04:18:06",
+            "duration": "00:03:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.9224027492263418,
+                "px1": 0.8689003992364112,
+                "px3": 0.9267273756830195,
+                "px5": 0.9449106611733706,
+                "outlier": 6.916201241816277,
+                "own_epe": 1.9224026739654578,
+                "cosim": 0.916315966721456,
+                "epe_initial_to_negative": 25.9872683078251,
+                "epe_initial_to_zero": 12.993634401792866,
+                "own_epe_ground_truth_to_negative": 26.214445209726478,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.214446330419765,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
         }
     ]
 }
