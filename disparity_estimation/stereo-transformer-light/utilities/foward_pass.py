@@ -3,6 +3,7 @@
 #  Copyright (c) 2020. Johns Hopkins University - All rights reserved.
 
 import torch
+import mlflow
 
 from utilities.misc import NestedTensor
 
@@ -11,13 +12,13 @@ def write_summary(stats, summary, epoch, mode):
     """
     write the current epoch result to tensorboard
     """
-    summary.writer.add_scalar(mode + '/rr', stats['rr'], epoch)
-    summary.writer.add_scalar(mode + '/l1', stats['l1'], epoch)
-    summary.writer.add_scalar(mode + '/l1_raw', stats['l1_raw'], epoch)
-    summary.writer.add_scalar(mode + '/occ_be', stats['occ_be'], epoch)
-    summary.writer.add_scalar(mode + '/epe', stats['epe'], epoch)
-    summary.writer.add_scalar(mode + '/iou', stats['iou'], epoch)
-    summary.writer.add_scalar(mode + '/3px_error', stats['px_error_rate'], epoch)
+    mlflow.log_metric(mode + '/rr', stats['rr'], epoch)
+    mlflow.log_metric(mode + '/l1', stats['l1'], epoch)
+    mlflow.log_metric(mode + '/l1_raw', stats['l1_raw'], epoch)
+    mlflow.log_metric(mode + '/occ_be', stats['occ_be'], epoch)
+    mlflow.log_metric(mode + '/epe', stats['epe'], epoch)
+    mlflow.log_metric(mode + '/iou', stats['iou'], epoch)
+    mlflow.log_metric(mode + '/3px_error', stats['px_error_rate'], epoch)
 
 
 def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):

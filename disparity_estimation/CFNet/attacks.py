@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+from typing import Dict, Optional, List
 
 
 
@@ -293,6 +294,10 @@ class CosPGDAttack:
         # Initialize perturbations for both left and right images
         perturbed_left = Attack.init_linf(left_image, self.epsilon)
         perturbed_right = Attack.init_linf(right_image, self.epsilon)
+
+        # save perturbed
+        perturbed_results = {}
+        attack_iterations = [1,3,4,5] # TODO: check number of iterations
         
         for iteration in range(self.num_iterations):
             perturbed_left.requires_grad = True
@@ -340,4 +345,83 @@ class CosPGDAttack:
                 clamp_max=1
             )
         
-        return perturbed_left, perturbed_right
+            # check if current iteration matches number in iteration list
+            if iteration in attack_iterations:
+                perturbed_results[iteration]=(perturbed_left, perturbed_right)
+
+
+        return perturbed_results
+
+
+class FGSMAttack:
+    def __init__(self, model, epsilon, num_iterations,alpha, targeted=False):
+        self.model = model
+        self.epsilon = epsilon
+        self.targeted = targeted
+        self.num_iterations = num_iterations
+        self.aplha = alpha
+
+    @torch.enable_grad()
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, labels: torch.Tensor):
+        # Clone original images
+        orig_left_image = left_image.clone().detach()
+        orig_right_image = right_image.clone().detach()
+
+        # Initialize perturbations for both left and right images
+        perturbed_left = left_image.clone().detach()
+        perturbed_right = right_image.clone().detach()
+
+        # save perturbed
+        perturbed_results = {}
+        attack_iterations = [1,3,4,5] # TODO: check number of iterations
+
+        for iteration in range(self.num_iterations):
+            # Set the images to require gradient
+            perturbed_left.requires_grad = True
+            perturbed_right.requires_grad = True
+
+            # Forward pass the perturbed images through the model
+            inputs = {"images": [[perturbed_left, perturbed_right]]}
+            outputs = self.model(inputs)["disparities"].squeeze(0)
+
+            # Compute the loss
+            loss = F.mse_loss(outputs.float(), labels.float())
+            if self.targeted:
+                loss = -loss
+
+            # Zero all existing gradients
+            self.model.zero_grad()
+
+            # Backward pass to compute gradients of the loss w.r.t the perturbed images
+            loss.backward()
+
+            # Collect the gradient data
+            left_grad = perturbed_left.grad.data
+            right_grad = perturbed_right.grad.data
+
+            # Perform the attack step for both left and right images
+            perturbed_left = self.fgsm_attack(perturbed_left, left_grad, orig_left_image)
+            perturbed_right = self.fgsm_attack(perturbed_right, right_grad, orig_right_image)
+
+            # Detach the perturbed images to avoid accumulating gradients
+            perturbed_left = perturbed_left.detach()
+            perturbed_right = perturbed_right.detach()
+
+            # check if current iteration matches number in iteration list
+            if iteration in attack_iterations:
+                perturbed_results[iteration]=(perturbed_left, perturbed_right)
+            
+
+        return perturbed_results
+
+    def fgsm_attack(self, perturbed_image: torch.Tensor, data_grad: torch.Tensor, orig_image: torch.Tensor):
+        sign_data_grad = data_grad.sign()
+        if self.targeted:
+            sign_data_grad *= -1
+
+        perturbed_image = perturbed_image.detach() + self.alpha * sign_data_grad
+
+        delta = torch.clamp(perturbed_image - orig_image, min=-self.epsilon, max=self.epsilon)
+        perturbed_image = torch.clamp(orig_image + delta, 0, 1)
+
+        return perturbed_image

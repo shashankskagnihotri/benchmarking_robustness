@@ -5,7 +5,7 @@
 import logging
 import os
 
-from tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 class TensorboardSummary(object):

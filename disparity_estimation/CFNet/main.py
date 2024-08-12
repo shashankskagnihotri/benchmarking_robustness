@@ -377,7 +377,7 @@ def test_sample(sample, compute_metrics=True):
 
 def attack(attack_type: str):
 
-    from attacks import CosPGDAttack
+    from attacks import CosPGDAttack, FGSMAttack
 
     epsilon = 0.03
     alpha = 0.01
@@ -387,14 +387,18 @@ def attack(attack_type: str):
         attacker = CosPGDAttack(
             model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
         )
+    elif attack_type == "fgsm":
+        attacker = FGSMAttack( model, epsilon, num_iterations,alpha, targeted=False)
     else:
         raise ValueError("Attack type not recognized")
 
     for batch_idx, sample in enumerate(TestImgLoader):
-        attacker.attack(sample["left"], sample["right"], sample["disparity"])
-        perturbed_left_image, perturbed_right_image = attacker.attack(
-            sample["left"], sample["right"], sample["disparity"]
-        )
+        perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
+        for iteration in perturbed_results.keys():
+            perturbed_left, perturbed_right = perturbed_results[iteration]
+            loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
+            save_scalars(logger, "test", scalar_outputs, batch_idx)
+
 
         print("batch", batch_idx)
 
