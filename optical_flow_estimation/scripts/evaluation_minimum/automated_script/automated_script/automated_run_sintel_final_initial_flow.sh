@@ -8,7 +8,7 @@ cd /pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_ro
 declare -A scripts_and_amounts=(
   ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/liteflownet3/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2
   ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/raft/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/msraft+/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2
+  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/ms_raft+/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2
   ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/maskflownet/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2
   ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer++/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2
   ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flow1d/sintel-final/pgd_cospgd_i20_inf_initial_flow.sh"]=2

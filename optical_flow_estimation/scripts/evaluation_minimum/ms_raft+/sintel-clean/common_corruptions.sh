@@ -13,7 +13,7 @@
 
 model="ms_raft+"
 dataset="sintel-clean"
-checkpoint="sintel"
+checkpoint="mixed"
 attack="common_corruptions"
 cc_names="gaussian_noise shot_noise impulse_noise defocus_blur glass_blur motion_blur zoom_blur snow frost fog brightness contrast elastic_transform pixelate jpeg_compression"
 cc_severitys="3"

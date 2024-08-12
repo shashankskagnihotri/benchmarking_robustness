@@ -48,7 +48,7 @@ do
                         --attack_alpha $alpha \
                         --attack_epsilon $epsilon \
                         --attack_targeted $targeted \
-                        --attack_optim_target "initial_flow"
+                        --attack_optim_target "initial_flow" \
                         --write_outputs 
                     #SLURM_ARRAY_TASK_ID=$((SLURM_ARRAY_TASK_ID + 1))
                 fi

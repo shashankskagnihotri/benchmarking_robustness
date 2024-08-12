@@ -13,7 +13,7 @@
 
 model="ms_raft+"
 dataset="sintel-final"
-checkpoint="sintel"
+checkpoint="mixed"
 targeteds="True False"
 targets="negative zero"
 norm="inf"
