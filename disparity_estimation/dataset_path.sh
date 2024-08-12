@@ -16,7 +16,7 @@ get_dataset_path() {
             ;;
         
         "mpisintel")
-            echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/mpisintel/Common_corruptions/brightness/severity_$severity_level"
+            echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/mpisintel/Common_corruptions/$corruption_type/severity_$severity_level"
             ;;
         
         "kitti2015")

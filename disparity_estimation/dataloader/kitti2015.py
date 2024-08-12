@@ -68,12 +68,15 @@ class KITTIBaseDataset(data.Dataset):
         
         # Finde den Index des Verzeichnisses 'FlyingThings3D'
         try:
-            index = parts.index('image_2')
+            index = parts.index('KITTI_2015') + 2
         except ValueError:
             raise ValueError("Der Pfad enthält kein 'KITTI_2015'-Verzeichnis.")
 
         # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
-        parts[index] = self.disp_fold
+        parts[index] = "no_corruption"
+        parts[index+1] = "severity_0"
+        parts[index+2] = "training"
+        parts[index+3] = "disp_occ_0"
 
         # Erstelle den neuen Pfad
         new_path = "/" + os.path.join(*parts)

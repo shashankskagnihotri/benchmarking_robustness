@@ -55,17 +55,20 @@ class MPISintelDataset(data.Dataset):
         if not os.path.isdir(self.datadir):
             raise ValueError(f"Could not find the directory {self.datadir}")
         
-        directory = os.path.join(self.datadir, self.split, 'final_left')
+        directory = os.path.join(self.datadir, "train", 'final_left')
         print(directory, os.path.isdir(directory))
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
-
+        print("sub_folders: ", sub_folders[:3])
         self.left_data = []
         for sub_folder in sub_folders:
             self.left_data += [os.path.join(sub_folder, img) for img in
                                os.listdir(os.path.join(sub_folder))] 
 
         self.left_data = natsorted(self.left_data)
+
+
+        print("DONNNNNNNNEEEEEEEEEEEEEEEEEEEEEEEEEEE")
 
     def _augmentation(self):
         self.transformation = None
@@ -100,24 +103,26 @@ class MPISintelDataset(data.Dataset):
             return (input_data_processed['left'], input_data_processed['right'], input_data_processed['disp'])
     
 
-    def generate_disparity_path(original_path:str) -> str:
+    def generate_disparity_path(self, original_path:str) -> str:
 
         # Zerlege den originalen Pfad in seine Teile
         parts = original_path.split('/')
 
         # Finde den Index des Verzeichnisses 'FlyingThings3D'
         try:
-            mpi_sintel_index = parts.index('mpi_sintel')
+            mpi_sintel_index = parts.index('mpisintel')
         except ValueError:
-            raise ValueError("Der Pfad enthält kein 'mpi_sintel'-Verzeichnis.")
+            raise ValueError("Der Pfad enthält kein 'mpisintel'-Verzeichnis.")
 
-        print(parts)
+        
         # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
-        new_parts = parts[:mpi_sintel_index + 1] + ['disparities'] + parts[mpi_sintel_index + 5:]
+        parts[mpi_sintel_index+2] = "no_corruption"
+        parts[mpi_sintel_index+3] = "severity_0"
+        parts[mpi_sintel_index+5] = "disparities"
 
         # Erstelle den neuen Pfad
-        new_path = "/" + os.path.join(*new_parts)
-        print(new_path)
+        new_path = "/" + os.path.join(*parts)
+        
         return new_path
     
     def __load_element_from_disk__(self, idx):
@@ -128,13 +133,12 @@ class MPISintelDataset(data.Dataset):
 
         right_fname = left_fname.replace('final_left', 'final_right')
         input_data['right'] = np.array(Image.open(right_fname)).astype(np.uint8)[..., :3]
-        print(left_fname)
         disp_left_fname = self.generate_disparity_path(left_fname)
         disp_left = disparity_read(disp_left_fname)
 
-        occ_left_fname = left_fname.replace('final_left', 'occlusions')
+        occ_left_fname = disp_left_fname.replace('disparities', 'occlusions')
         occ_left_occ = np.array(Image.open(occ_left_fname))
-        occ_left_fname = left_fname.replace('final_left', 'outofframe')
+        occ_left_fname = disp_left_fname.replace('disparities', 'outofframe')
         occ_left_oof = np.array(Image.open(occ_left_fname))
         occ_left = np.logical_or(occ_left_occ, occ_left_oof)
 

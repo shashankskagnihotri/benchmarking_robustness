@@ -1,7 +1,7 @@
 def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
 
     dataset_name = dataset_name.lower()
-
+    
     print(f'Loading {dataset_name} dataset')
     if dataset_name == 'sceneflow':
         from .sceneflow import SceneFlowFlyingThings3DDataset
@@ -37,7 +37,6 @@ from dataloader import get_dataset
 
 
 def get_data_loader_1(args, architeture_name):
-    
     train_dataset = get_dataset(
         args.dataset, args.datapath, architeture_name=architeture_name, split="train"
     )
@@ -47,7 +46,7 @@ def get_data_loader_1(args, architeture_name):
     )
 
     # TODO: Change for inferance, add if that checks if only inference is performed, then only test data is loaded 
-    if "kitti" in args.dataset.lower():  # Define split sizes
+    if "kitti" in args.dataset.lower() or "mpisintel" in args.dataset.lower():  # Define split sizes
         val_size = int(0.2 * len(train_dataset))  # 20% for validation
         test_size = int(0.1 * len(train_dataset))  # 10% for testing
         train_size = len(train_dataset) - val_size - test_size
