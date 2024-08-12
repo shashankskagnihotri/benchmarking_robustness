@@ -54,12 +54,12 @@ class MPISintelDataset(data.Dataset):
     def _read_data(self):
         directory = os.path.join(self.datadir, self.split, 'final_left')
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
-                       os.path.isdir(os.path.join(directory, subset))]
+                       os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
 
         self.left_data = []
         for sub_folder in sub_folders:
             self.left_data += [os.path.join(sub_folder, img) for img in
-                               os.listdir(os.path.join(sub_folder))]
+                               os.listdir(os.path.join(sub_folder))] 
 
         self.left_data = natsorted(self.left_data)
 
@@ -104,7 +104,7 @@ class MPISintelDataset(data.Dataset):
 
         right_fname = left_fname.replace('final_left', 'final_right')
         input_data['right'] = np.array(Image.open(right_fname)).astype(np.uint8)[..., :3]
-
+        print(left_fname)
         disp_left_fname = left_fname.replace('final_left', 'disparities')
         disp_left = disparity_read(disp_left_fname)
 
