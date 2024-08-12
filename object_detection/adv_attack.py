@@ -1,7 +1,7 @@
 import argparse
 import logging
 from time import sleep
-import pandas as pd
+from mmdet.structures.det_data_sample import DetDataSample
 import torch
 from mmengine.config import Config
 from mmengine.runner import Runner
@@ -18,13 +18,179 @@ from torch.utils.data import DataLoader
 from mmengine.evaluator import Evaluator
 import wandb
 from copy import deepcopy
-from mmengine.optim import OptimWrapper
+import cospgd
+import numpy as np
+import torch.nn.functional as F
 
 load_dotenv()
 WAND_PROJECT = os.getenv("WANDB_PROJECT")
 WAND_ENTITY = os.getenv("WANDB_ENTITY")
 assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
 assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
+
+
+def cospgd_scale(
+    predictions: torch.Tensor,
+    loss: torch.Tensor,
+    labels: torch.Tensor,
+    num_classes: int,
+    targeted: bool,
+):
+    """
+    Scale the loss based on the pixel-wise predictions.
+
+    Args:
+        predictions (torch.Tensor): The pixel-wise predictions. Shape (batch_size, num_classes, height, width).
+        loss (torch.Tensor): The loss tensor.
+        labels (torch.Tensor): The target labels. Shape (batch_size, num_classes, height, width)
+        num_classes (int): The number of classes.
+        targeted (bool): Whether the attack is targeted or not.
+
+    Returns:
+        torch.Tensor: The scaled loss tensor.
+    """
+    cossim = torch.nn.functional.cosine_similarity(predictions, labels, dim=1)
+    if targeted:
+        cossim = 1 - cossim
+    return cossim * loss
+
+
+def pixel_wise_pred(image: torch.Tensor, bboxes, labels, num_classes: int, scores=None):
+    _, img_h, img_w = image.shape
+
+    result_image = torch.zeros((num_classes, img_h, img_w)).to("cuda")
+
+    for i, (bbox, label) in enumerate(zip(bboxes, labels)):
+        x_min, y_min, x_max, y_max = map(int, bbox)
+
+        # Deal with out of bound boxes
+        x_min = max(0, x_min)
+        y_min = max(0, y_min)
+        x_max = min(img_w - 1, x_max)
+        y_max = min(img_h - 1, y_max)
+
+        # Draw the bounding box
+        if scores is not None:
+            result_image[label, y_min : y_max + 1, x_min : x_max + 1] = scores[i]
+        else:
+            result_image[label, y_min : y_max + 1, x_min : x_max + 1] = 1
+
+    return result_image.reshape(1, num_classes, img_h, img_w)
+
+
+def preprocess_data(data_batch: dict, runner):
+    data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
+    images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
+    mean = runner.model.data_preprocessor.mean
+    std = runner.model.data_preprocessor.std
+    images = denorm(images, mean, std)
+    adv_images = images.clone().float().detach().to("cuda")
+    adv_images.requires_grad = True
+    return data_batch_prepro, images, adv_images
+
+
+def cospgd_attack(
+    data_batch: dict,
+    runner,
+    steps: int,
+    epsilon: float,
+    alpha: float,
+    targeted: bool,
+    random_start: bool,
+    evaluators: List[Evaluator],
+):
+    # Preprocess the data
+    data_batch_prepro, images, adv_images = preprocess_data(data_batch, runner)
+
+    # perform evaluation on the original image
+    evaluator_process(evaluators[0], data_batch_prepro, runner)
+
+    # setup for pixel-wise loss
+    # runner.model.loss_cl.reduction = "none"
+    # cfg.model.bbox_head.loss_bbox
+    # cfg.model.bbox_head.loss_cls
+
+    for step in range(steps):
+        data_batch_prepro["inputs"][0] = adv_images  # update with latest adv image
+        runner.model.training = True  # avoid missing arguments error in some models
+
+        runner.model.zero_grad()
+        adv_images.grad = None
+
+        # norm == inf
+        images = cospgd.functions.init_linf(
+            images, epsilon=epsilon, clamp_min=0, clamp_max=255
+        )
+
+        # assumes batchsize=1
+        assert len(data_batch_prepro["data_samples"]) == 1
+        target_labels = data_batch_prepro["data_samples"][0].gt_instances.labels
+        target_bboxes = data_batch_prepro["data_samples"][0].gt_instances.bboxes
+
+        if targeted:
+            target_labels = torch.ones_like(target_labels)
+
+        target_pixelwise = pixel_wise_pred(
+            adv_images[0],
+            labels=target_labels,
+            bboxes=target_bboxes,
+            num_classes=runner.model.bbox_head.num_classes,
+        )
+
+        output = runner.model(**data_batch_prepro, mode="predict")
+
+        pred_labels = output[0].pred_instances.labels
+        pred_bboxes = output[0].pred_instances.bboxes
+        pred_scores = output[0].pred_instances.scores
+
+        pred_pixelwise = pixel_wise_pred(
+            adv_images[0],
+            labels=pred_labels,
+            bboxes=pred_bboxes,
+            num_classes=runner.model.bbox_head.num_classes,
+            scores=pred_scores,
+        )
+
+        # TODO: get loss from output, avoid one forward pass
+        # TODO: pixel-wise loss
+        # losses = runner.model(**data_batch_prepro, mode="loss")
+        # loss, _ = runner.model.parse_losses(losses)
+
+        loss = F.cross_entropy(pred_pixelwise, target_pixelwise, reduction="none")
+
+        assert isinstance(loss, torch.Tensor)
+
+        scaled_loss = cospgd_scale(
+            predictions=pred_pixelwise,
+            loss=loss,
+            labels=target_pixelwise,
+            num_classes=runner.model.bbox_head.num_classes,
+            targeted=targeted,
+        )
+
+        # assert scaled_loss.shape == adv_images[0].shape
+        scaled_loss = scaled_loss.mean()
+        scaled_loss.backward(retain_graph=True)
+
+        adv_images = cospgd.functions.step_inf(
+            perturbed_image=adv_images,
+            orig_image=images,
+            epsilon=epsilon,
+            data_grad=adv_images.grad,
+            alpha=alpha,
+            targeted=targeted,
+            clamp_max=255,
+        )
+
+        # TODO: log loss and scaled loss
+
+        mean = runner.model.data_preprocessor.mean
+        std = runner.model.data_preprocessor.std
+        data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        runner.model.training = False  # avoid missing arguments error in some models
+        evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
+
+    return data_batch_prepro
 
 
 def pgd_attack(
@@ -63,6 +229,7 @@ def pgd_attack(
         cost, _ = runner.model.parse_losses(losses)
 
         runner.model.zero_grad()
+        adv_images.grad = None
         cost.backward(retain_graph=True)
         grad = adv_images.grad
         assert grad is not None
@@ -360,10 +527,14 @@ def run_attack_val(
                 },
                 "name": model_name,
                 "group": model_name,
-                # "tags": ["debug"],
+                "tags": ["debug"],
             },
         )
     )
+
+    if "cospgd" in attack_name:
+        cfg.model.bbox_head.loss_bbox.reduction = "none"
+        cfg.model.bbox_head.loss_cls.reduction = "none"
 
     # Register the attack loop if an attack is provided
     if attack is not None:
@@ -444,8 +615,14 @@ if __name__ == "__main__":
             "random_start": args.random_start,
         }
     elif args.attack == "cospgd":
-        attack_kwargs = {}
-        raise NotImplementedError
+        attack = cospgd_attack
+        attack_kwargs = {
+            "steps": args.steps,
+            "epsilon": args.epsilon,
+            "alpha": args.alpha,
+            "targeted": args.targeted,
+            "random_start": args.random_start,
+        }
     elif args.attack == "fgsm":
         attack = fgsm_attack
         attack_kwargs = {
