@@ -40,9 +40,12 @@ class KITTIBaseDataset(data.Dataset):
         self.split = split
         self.architecture_name = architecture_name.lower()
 
-        if split == 'train' or split == 'validation' or split == 'validation_all' or split=='test':
+        if 'no_corruption' in self.datadir: #:
             # Note: Kitty has no test set with disp_occ, please create your own test set from the training set
             self.sub_folder = 'training/'
+        else:
+            self.sub_folder = 'testing'
+
         # elif split == 'test':
         #     raise NotImplementedError("Note: Kitty has no test set with disp_occ, please create your own test set from the training set")
 

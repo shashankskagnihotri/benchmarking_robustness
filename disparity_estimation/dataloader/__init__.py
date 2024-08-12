@@ -40,7 +40,7 @@ def get_data_loader_1(args, architeture_name):
         args.dataset, args.datapath, architeture_name=architeture_name, split="test"
     )
 
-
+    # TODO: Change for inferance, add if that checks if only inference is performed, then only test data is loaded 
     if "kitti" in args.dataset.lower():  # Define split sizes
         val_size = int(0.2 * len(train_dataset))  # 20% for validation
         test_size = int(0.1 * len(train_dataset))  # 10% for testing
