@@ -28,6 +28,8 @@ WAND_ENTITY = os.getenv("WANDB_ENTITY")
 assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
 assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
+MEAN = torch.tensor([123.675, 116.28, 103.53]).to("cuda")
+STD = torch.tensor([58.395, 57.12, 57.375]).to("cuda")
 
 def cospgd_scale(
     predictions: torch.Tensor,
@@ -40,25 +42,35 @@ def cospgd_scale(
     Scale the loss based on the pixel-wise predictions.
 
     Args:
-        predictions (torch.Tensor): The pixel-wise predictions. Shape (batch_size, num_classes, height, width).
+        predictions (torch.Tensor): The pixel-wise predictions. Shape (num_classes, height, width).
         loss (torch.Tensor): The loss tensor.
-        labels (torch.Tensor): The target labels. Shape (batch_size, num_classes, height, width)
+        labels (torch.Tensor): The target labels. Shape (num_classes, height, width)
         num_classes (int): The number of classes.
         targeted (bool): Whether the attack is targeted or not.
 
     Returns:
         torch.Tensor: The scaled loss tensor.
     """
-    cossim = torch.nn.functional.cosine_similarity(predictions, labels, dim=1)
+    cossim = F.cosine_similarity(
+        F.softmax(predictions, dim=0), F.softmax(labels, dim=0), dim=0)            
+    
     if targeted:
         cossim = 1 - cossim
     return cossim * loss
 
 
-def pixel_wise_pred(image: torch.Tensor, bboxes, labels, num_classes: int, scores=None):
-    _, img_h, img_w = image.shape
+def pixel_wise_pred(data_batch_prepro, runner, adv_images):
+    datasamples = data_batch_prepro["data_samples"]
+    with torch.enable_grad():
+        output = runner.model(inputs=adv_images, data_samples=datasamples, mode="predict")
+    labels = output[0].pred_instances.labels
+    bboxes = output[0].pred_instances.bboxes
+    scores = output[0].pred_instances.scores
+    
+    _, img_h, img_w = data_batch_prepro.get("inputs")[0].shape
 
-    result_image = torch.zeros((num_classes, img_h, img_w)).to("cuda")
+    num_classes = runner.model.bbox_head.num_classes
+    result = torch.zeros((num_classes+1, img_h, img_w)).to("cuda")
 
     for i, (bbox, label) in enumerate(zip(bboxes, labels)):
         x_min, y_min, x_max, y_max = map(int, bbox)
@@ -70,24 +82,47 @@ def pixel_wise_pred(image: torch.Tensor, bboxes, labels, num_classes: int, score
         y_max = min(img_h - 1, y_max)
 
         # Draw the bounding box
-        if scores is not None:
-            result_image[label, y_min : y_max + 1, x_min : x_max + 1] = scores[i]
-        else:
-            result_image[label, y_min : y_max + 1, x_min : x_max + 1] = 1
+        result[label+1, y_min : y_max + 1, x_min : x_max + 1] = scores[i]
+    
+    # create gradient for background class
+    non_zero_mask = result.sum(dim=0) != 0
+    result[0, :, :][non_zero_mask] = scores.mean() # TODO: what should the score be?
+    
+    return result.unsqueeze(0)
 
-    return result_image.reshape(1, num_classes, img_h, img_w)
+def pixel_wise_target(data_batch_prepro, num_classes: int):
+    labels = data_batch_prepro["data_samples"][0].gt_instances.labels
+    bboxes = data_batch_prepro["data_samples"][0].gt_instances.bboxes
+    
+    _, img_h, img_w = data_batch_prepro.get("inputs")[0].shape
 
+    result = torch.zeros((num_classes+1, img_h, img_w)).to("cuda")
+
+    for i, (bbox, label) in enumerate(zip(bboxes, labels)):
+        x_min, y_min, x_max, y_max = map(int, bbox)
+
+        # Deal with out of bound boxes
+        x_min = max(0, x_min)
+        y_min = max(0, y_min)
+        x_max = min(img_w - 1, x_max)
+        y_max = min(img_h - 1, y_max)
+
+        # Draw the bounding box
+        result[label+1, y_min : y_max + 1, x_min : x_max + 1] = 1
+
+    # background class
+    non_zero_mask = result.sum(dim=0) != 0
+    result[0, :, :][non_zero_mask] = 1
+    return result.unsqueeze(0)
 
 def preprocess_data(data_batch: dict, runner):
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
     images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    mean = runner.model.data_preprocessor.mean
-    std = runner.model.data_preprocessor.std
-    images = denorm(images, mean, std)
-    adv_images = images.clone().float().detach().to("cuda")
-    adv_images.requires_grad = True
-    return data_batch_prepro, images, adv_images
-
+    # mean = runner.model.data_preprocessor.mean
+    # std = runner.model.data_preprocessor.std
+    images = denorm(images, MEAN, STD)
+    return data_batch_prepro, images
+    
 
 def cospgd_attack(
     data_batch: dict,
@@ -100,96 +135,54 @@ def cospgd_attack(
     evaluators: List[Evaluator],
 ):
     # Preprocess the data
-    data_batch_prepro, images, adv_images = preprocess_data(data_batch, runner)
+    data_batch_prepro, orig_images = preprocess_data(data_batch, runner)
+    adv_images = orig_images.clone().float().detach().to("cuda")
 
-    # perform evaluation on the original image
+    # Perform evaluation on the original image
     evaluator_process(evaluators[0], data_batch_prepro, runner)
-
-    # setup for pixel-wise loss
-    # runner.model.loss_cl.reduction = "none"
-    # cfg.model.bbox_head.loss_bbox
-    # cfg.model.bbox_head.loss_cls
-
+    
+    labels = pixel_wise_target(data_batch_prepro, num_classes=runner.model.bbox_head.num_classes)
+    
+    if targeted:
+        labels = torch.ones_like(labels)
+        
+    # Assume norm == inf for now
+    adv_images = cospgd.functions.init_linf(adv_images, epsilon=epsilon, clamp_min=0, clamp_max=255).requires_grad_()
+    
     for step in range(steps):
-        data_batch_prepro["inputs"][0] = adv_images  # update with latest adv image
-        runner.model.training = True  # avoid missing arguments error in some models
-
-        runner.model.zero_grad()
-        adv_images.grad = None
-
-        # norm == inf
-        images = cospgd.functions.init_linf(
-            images, epsilon=epsilon, clamp_min=0, clamp_max=255
-        )
-
-        # assumes batchsize=1
-        assert len(data_batch_prepro["data_samples"]) == 1
-        target_labels = data_batch_prepro["data_samples"][0].gt_instances.labels
-        target_bboxes = data_batch_prepro["data_samples"][0].gt_instances.bboxes
-
-        if targeted:
-            target_labels = torch.ones_like(target_labels)
-
-        target_pixelwise = pixel_wise_pred(
-            adv_images[0],
-            labels=target_labels,
-            bboxes=target_bboxes,
-            num_classes=runner.model.bbox_head.num_classes,
-        )
-
-        output = runner.model(**data_batch_prepro, mode="predict")
-
-        pred_labels = output[0].pred_instances.labels
-        pred_bboxes = output[0].pred_instances.bboxes
-        pred_scores = output[0].pred_instances.scores
-
-        pred_pixelwise = pixel_wise_pred(
-            adv_images[0],
-            labels=pred_labels,
-            bboxes=pred_bboxes,
-            num_classes=runner.model.bbox_head.num_classes,
-            scores=pred_scores,
-        )
-
-        # TODO: get loss from output, avoid one forward pass
-        # TODO: pixel-wise loss
-        # losses = runner.model(**data_batch_prepro, mode="loss")
-        # loss, _ = runner.model.parse_losses(losses)
-
-        loss = F.cross_entropy(pred_pixelwise, target_pixelwise, reduction="none")
-
-        assert isinstance(loss, torch.Tensor)
-
-        scaled_loss = cospgd_scale(
-            predictions=pred_pixelwise,
+        preds = pixel_wise_pred(data_batch_prepro, runner, adv_images).requires_grad_()
+        loss = F.cross_entropy(preds, labels, reduction="none")
+        loss = cospgd_scale(
+            predictions=preds,
+            labels=labels,
             loss=loss,
-            labels=target_pixelwise,
             num_classes=runner.model.bbox_head.num_classes,
             targeted=targeted,
         )
+        loss = loss.mean()
+        loss.backward()
 
-        # assert scaled_loss.shape == adv_images[0].shape
-        scaled_loss = scaled_loss.mean()
-        scaled_loss.backward(retain_graph=True)
-
-        adv_images = cospgd.functions.step_inf(
+        # Assume norm == inf for now
+        perturbed_image = cospgd.functions.step_inf(
             perturbed_image=adv_images,
-            orig_image=images,
             epsilon=epsilon,
             data_grad=adv_images.grad,
+            orig_image=orig_images,
             alpha=alpha,
             targeted=targeted,
+            clamp_min=0,
             clamp_max=255,
         )
-
-        # TODO: log loss and scaled loss
-
-        mean = runner.model.data_preprocessor.mean
-        std = runner.model.data_preprocessor.std
-        data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
-        runner.model.training = False  # avoid missing arguments error in some models
+        
+        # Detach the tensor and then set requires_grad_() for the next iteration
+        data_batch_prepro["inputs"][0] = perturbed_image
+        adv_images = perturbed_image.detach().requires_grad_()
+        
         evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
-
+    
+    # mean = [123.675, 116.28, 103.53]
+    # std = [58.395, 57.12, 57.375]
+    data_batch_prepro["inputs"][0] = transforms.Normalize(MEAN, STD)(perturbed_image)
     return data_batch_prepro
 
 
@@ -244,10 +237,17 @@ def pgd_attack(
 
     return data_batch_prepro
 
-
 def evaluator_process(evaluator, data_batch_prepro, runner):
+    # mean = runner.model.data_preprocessor.mean
+    # std = runner.model.data_preprocessor.std
+    # mean = [123.675, 116.28, 103.53]
+    # std = [58.395, 57.12, 57.375]
+    
     with torch.no_grad():
+        data_batch_prepro["inputs"][0] = transforms.Normalize(MEAN, STD)(data_batch_prepro["inputs"][0])
+        runner.model.training = False  # avoid missing arguments error in some models
         outputs = runner.model(**data_batch_prepro, mode="predict")
+        data_batch_prepro["inputs"][0] = denorm(data_batch_prepro["inputs"][0], MEAN, STD)
 
     evaluator.process(data_samples=outputs, data_batch=data_batch_prepro)
 
