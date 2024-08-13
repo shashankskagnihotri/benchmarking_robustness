@@ -5,10 +5,6 @@ source ./dataset_path.sh
 COMMON_CORRUPTION="$1"
 SEVERITY_LEVEL="$2"
 
-DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/Common_corruptions/$CORRUPTION_TYPE/severity_$SEVERITY_LEVEL"
-CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
-
-
 DATAPATH=$(get_dataset_path "sceneflow" "$COMMON_CORRUPTION" "$SEVERITY_LEVEL")
 CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
 

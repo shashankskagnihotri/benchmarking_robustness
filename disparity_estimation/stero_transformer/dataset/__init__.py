@@ -7,7 +7,7 @@ def build_data_loader(args):
     
     
     dataset_train      = get_dataset(args.dataset, args.dataset_directory, "train", "STTR")
-    dataset_validation = get_dataset(args.dataset, args.dataset_directory, args.validation, "STTR")
+    dataset_validation = get_dataset(args.dataset, args.dataset_directory, "train", "STTR") #TODO create val split in get_dataset_method
     dataset_test       = get_dataset(args.dataset, args.dataset_directory, "test", "STTR")
 
 

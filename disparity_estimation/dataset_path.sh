@@ -14,6 +14,15 @@ get_dataset_path() {
         "sceneflow")
             echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/Common_corruptions/$corruption_type/severity_$severity_level"
             ;;
+        
+        "mpisintel")
+            echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/mpisintel/Common_corruptions/$corruption_type/severity_$severity_level"
+            ;;
+        
+        "kitti2015")
+            echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/KITTI_2015/Common_corruptions/$corruption_type/severity_$severity_level"
+            ;;
+        
         *)
             echo "Unknown dataset: $dataset" >&2
             exit 1
