@@ -4,9 +4,14 @@ source ./dataset_path.sh
 source ./checkpoint_path.sh
 
 DATASET="$1"
-COMMON_CORRUPTION="$2"
-SEVERITY_LEVEL="$3"
-CHECKPOINTPATH="$4"
+ATTACK_TYPE="$2"
+SEVERITY_LEVEL="0"
+CHECKPOINTPATH="$3"
+
+if [[ -z "$DATASET" ]]; then
+    echo "Error: Dataset must be provided."
+    exit 1
+fi
 
 if [[ -z "$CHECKPOINTPATH" ]]; then    # Check if the checkpoint path is provided. If not, get the default checkpoint path.
     CHECKPOINTPATH=$(get_checkpoint_path "$DATASET")
@@ -17,8 +22,8 @@ if [[ -z "$CHECKPOINTPATH" ]]; then    # Check if the checkpoint path is provide
 fi
 
 
-if [[ -z "$COMMON_CORRUPTION" || -z "$SEVERITY_LEVEL" ]]; then
-    echo "Error: Corruption type and severity level must be provided."
+if [[ -z "$ATTACK_TYPE" ]]; then
+    echo "Error: Attack type must be provided."
     exit 1
 fi
 
@@ -30,9 +35,8 @@ if [[ -z "$DATAPATH" ]]; then
 fi
 
 python wrapper.py \
-    --scenario commoncorruption \
-    --commoncorruption $COMMON_CORRUPTION \
-    --severity $SEVERITY_LEVEL \
+    --scenario attack \
+    --attack_type $ATTACK_TYPE \
     --dataset $DATASET \
     --datapath $DATAPATH \
     --loadckpt $CHECKPOINTPATH \
