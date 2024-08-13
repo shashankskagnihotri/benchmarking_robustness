@@ -9,7 +9,7 @@ def get_files_with_size(directory):
             filepath = os.path.join(root, file)
             filesize = os.path.getsize(filepath)
             relative_path = os.path.relpath(filepath, directory)  # Relative path from the directory
-            files_list.append((relative_path, filesize))
+            files_list.append((relative_path, filesize, filepath))
     return files_list
 
 def compare_file_lists(list1, list2):
@@ -43,20 +43,20 @@ def write_list_to_file(file_list, output_file):
 # /pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/FlyingThings3D/tmp
 
 current_files = "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/FlyingThings3D/Common_corruptions/no_corruption/severity_0/frames_finalpass"
-new_files = "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/FlyingThings3D/tmp/frames_finalpass"
+#new_files = "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/FlyingThings3D/tmp/frames_finalpass"
 
 files_list1 = get_files_with_size(current_files)
-files_list2 = get_files_with_size(new_files)
+#files_list2 = get_files_with_size(new_files)
 
 # Save the file lists to disk
 write_list_to_file(files_list1, 'files_list1.json')
-write_list_to_file(files_list2, 'files_list2.json')
+#write_list_to_file(files_list2, 'files_list2.json')
 
-differences = compare_file_lists(files_list1, files_list2)
-print_differences(differences)
+# differences = compare_file_lists(files_list1, files_list2)
+# print_differences(differences)
 
 print(f"Length: files_list1: {len(files_list1)}")
-print(f"Length: files_list2: {len(files_list2)}")
+#print(f"Length: files_list2: {len(files_list2)}")
 
 # ### DIFF
 
