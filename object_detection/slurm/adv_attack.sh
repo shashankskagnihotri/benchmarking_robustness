@@ -17,13 +17,17 @@
 # CHECKPOINT_FILE="models/DINO_Swin-L/latest.pth"
 # CONFIG_FILE="models/TOOD_R-101-dcnv2/TOOD_R-101-dcnv2.py"
 # CHECKPOINT_FILE="models/TOOD_R-101-dcnv2/latest.pth"
-CONFIG_FILE="models/VarifocalNet_R-101-FPN/VarifocalNet_R-101-FPN.py"
-CHECKPOINT_FILE="models/VarifocalNet_R-101-FPN/latest.pth"
+# CONFIG_FILE="models/VarifocalNet_R-101-FPN/VarifocalNet_R-101-FPN.py"
+# CHECKPOINT_FILE="models/VarifocalNet_R-101-FPN/latest.pth"
+# CONFIG_FILE="mmdetection/projects/EfficientDet/configs/efficientdet_effb0_bifpn_8xb16-crop512-300e_coco.py"
+# CHECKPOINT_FILE="mmdetection/checkpoints/efficientnet-b0_3rdparty_8xb32-aa-advprop_in1k_20220119-26434485.pth"
+CONFIG_FILE="mmdetection/configs/yolox/yolox_tiny_8xb8-300e_coco.py"
+CHECKPOINT_FILE="mmdetection/checkpoints/yolox_tiny_8x8_300e_coco_20211124_171234-b4047906.pth"
 
 ALPHA=2.55
-STEPS=2
+STEPS=1
 EPSILON=8
-ATTACK="pgd"  # "pgd", "fgsm", "cospgd", "none"
+ATTACK="cospgd"  # "pgd", "fgsm", "cospgd", "none"
 
 cd .. # expects object_detection/slurm to be the working directory
 
