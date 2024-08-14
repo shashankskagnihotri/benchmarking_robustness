@@ -1,0 +1,2 @@
+{"base_lr": 9.018918918918918e-06, "lr": 9.91640622132031e-07, "data_time": 0.031131172180175783, "loss": 2.9216840982437136, "loss_cls": 1.0932740449905396, "loss_bbox": 1.1383220076560974, "loss_centerness": 0.690088027715683, "time": 8.447079253196716, "iter": 10, "memory": 14574, "step": 10}
+{"pascal_voc/mAP": 0.00016443788191130201, "pascal_voc/AP25": 0.001, "pascal_voc/AP30": 0.0, "pascal_voc/AP40": 0.0, "pascal_voc/AP50": 0.0, "pascal_voc/AP70": 0.0, "pascal_voc/AP75": 0.0, "data_time": 0.0014818825898917697, "time": 0.0496429990200696, "step": 10}

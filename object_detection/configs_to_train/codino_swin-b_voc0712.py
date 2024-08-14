@@ -13,6 +13,7 @@ custom_hooks = [
         priority=49,
         type='EMAHook',
         update_buffers=True),
+    dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
     allow_failed_imports=False, imports=[
@@ -41,7 +42,6 @@ image_size = (
     1024,
     1024,
 )
-load_from = None
 load_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
@@ -83,7 +83,7 @@ log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
 loss_lambda = 2.0
-max_epochs = 12
+max_epochs = 100
 max_iters = 270000
 model = dict(
     backbone=dict(
@@ -443,17 +443,19 @@ optim_wrapper = dict(
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
         bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='OptimWrapper')
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
-        begin=0,
+        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
+        type='LinearLR'),
+    dict(
+        T_max=50,
+        begin=50,
         by_epoch=True,
-        end=12,
-        gamma=0.1,
-        milestones=[
-            10,
-        ],
-        type='MultiStepLR'),
+        convert_to_iter_based=True,
+        end=100,
+        eta_min=5e-05,
+        type='CosineAnnealingLR'),
 ]
 resume = False
 test_cfg = dict(_scope_='mmdet', type='TestLoop')
@@ -641,7 +643,7 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=1)
+train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
     batch_size=16,

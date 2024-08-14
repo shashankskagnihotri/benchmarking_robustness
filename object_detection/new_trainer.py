@@ -120,4 +120,15 @@ if __name__ == "__main__":
 # resnet and swin have same output siz
 
 
-# python -m pudb new_trainer.py configs_erroneous/verification/rtmdet_r50_voc0712.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+# python -m pudb new_trainer.py cfg_experiments/0custom_early_stop_atss_convnext-b_voc0712.py cfg_experiments/slum_experiments
+
+# python -m pudb new_trainer.py cfg_experiments/0custom_early_stop_atss_convnext-b_coco.py cfg_experiments/slum_experiments
+
+# python -m pudb new_trainer.py configs_rpn_verified/iter_to_get_fast_pro_rpn_convnext-b_coco.py cfg_experiments/slum_experiments
+
+# python -m pudb new_trainer.py configs_rpn_verified/rpn_r50_fpn_1x_coco.py cfg_experiments/slum_experiments
+
+# python -m pudb new_trainer.py configs_rpn_verified/iter_rpn_r50_fpn_1x_coco.py cfg_experiments/slum_experiments
+
+
+# python -m pudb new_trainer.py configs_rpn_verified/rpn_convnext-b_coco.py cfg_experiments/slum_experiments

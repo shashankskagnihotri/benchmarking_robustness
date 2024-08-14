@@ -10,6 +10,7 @@ custom_hooks = [
         priority=49,
         type='EMAHook',
         update_buffers=True),
+    dict(monitor='coco/bbox_mAP', type='EarlyStoppingHook'),
 ]
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'
@@ -137,7 +138,7 @@ optim_wrapper = dict(
         decay_type='layer_wise',
         norm_decay_mult=0,
         num_layers=12),
-    type='OptimWrapper')
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,

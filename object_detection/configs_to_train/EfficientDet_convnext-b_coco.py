@@ -14,6 +14,7 @@ custom_hooks = [
         priority=49,
         type='EMAHook',
         update_buffers=True),
+    dict(monitor='coco/bbox_mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
     allow_failed_imports=False,
@@ -172,7 +173,7 @@ optim_wrapper = dict(
         decay_type='layer_wise',
         norm_decay_mult=0,
         num_layers=12),
-    type='OptimWrapper')
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,
@@ -247,7 +248,7 @@ train_cfg = dict(
     _scope_='mmdet',
     max_epochs=100,
     type='EpochBasedTrainLoop',
-    val_interval=1)
+    val_interval=10)
 train_dataloader = dict(
     batch_sampler=dict(_scope_='mmdet', type='AspectRatioBatchSampler'),
     batch_size=32,
@@ -343,12 +344,13 @@ val_evaluator = dict(
     format_only=False,
     metric='bbox',
     type='CocoMetric')
-vis_backends = (dict(type='LocalVisBackend'), )
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
 visualizer = dict(
     _scope_='mmdet',
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='TensorboardVisBackend'),
     ])

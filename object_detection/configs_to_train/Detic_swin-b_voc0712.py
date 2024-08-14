@@ -15,6 +15,7 @@ custom_hooks = [
         priority=49,
         type='EMAHook',
         update_buffers=True),
+    dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
     allow_failed_imports=False, imports=[
@@ -121,7 +122,6 @@ image_size_det = (
     896,
     896,
 )
-load_from = './first_stage/detic_centernet2_swin-b_fpn_4x_lvis_boxsup.pth'
 log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
@@ -465,7 +465,7 @@ optim_wrapper = dict(
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
         bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='OptimWrapper')
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,
@@ -670,11 +670,10 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(
-    max_epochs=100, type='EpochBasedTrainLoop', val_interval=180000)
+train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=2,
+    batch_size=16,
     dataset=dict(
         dataset=dict(
             datasets=[

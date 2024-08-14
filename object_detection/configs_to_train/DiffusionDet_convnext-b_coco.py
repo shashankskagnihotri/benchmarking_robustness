@@ -8,6 +8,7 @@ custom_hooks = [
         priority=49,
         type='EMAHook',
         update_buffers=True),
+    dict(monitor='coco/bbox_mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
     allow_failed_imports=False,
@@ -151,7 +152,7 @@ optim_wrapper = dict(
         decay_type='layer_wise',
         norm_decay_mult=0,
         num_layers=12),
-    type='OptimWrapper')
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,
@@ -233,7 +234,7 @@ test_pipeline = [
         type='PackDetInputs'),
 ]
 train_cfg = dict(
-    max_iters=369646, type='IterBasedTrainLoop', val_interval=75000)
+    max_iters=369646, type='IterBasedTrainLoop', val_interval=36964)
 train_dataloader = dict(
     batch_sampler=dict(_scope_='mmdet', type='AspectRatioBatchSampler'),
     batch_size=32,

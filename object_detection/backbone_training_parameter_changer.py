@@ -29,28 +29,44 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
     print(f"Processing file: {filename} from {folder_path}")
     cfg = Config.fromfile(f"{folder_path}/{filename}")
 
-    if (
-        hasattr(cfg, "optim_wrapper")
-        and hasattr(cfg, "param_scheduler")
-        and cfg.train_cfg == backbone_cfg.train_cfg
-        and not hasattr(cfg.train_cfg, "max_iters")
-        and hasattr(cfg, "custom_hooks")
-    ):
-        if (
-            cfg.optim_wrapper == backbone_cfg.optim_wrapper
-            and cfg.param_scheduler == backbone_cfg.param_scheduler
-            and cfg.custom_hooks[0] == backbone_cfg.custom_hooks[0]
-        ):
-            print(
-                "The relevant parts of the configuration have not changed. No file alteration needed."
-            )
-            return
+    # new_optim_wrapper = backbone_cfg.optim_wrapper
+    # new_expema_hook = backbone_cfg.custom_hooks[0]
+    # if "coco" in filename:
+    #     new_early_stopping_hook = dict(
+    #         type="EarlyStoppingHook",
+    #         monitor="coco/bbox_mAP",
+    #     )
+    # elif "voc" in filename:
+    #     new_early_stopping_hook = dict(
+    #         type="EarlyStoppingHook",
+    #         monitor="pascal_voc/mAP",
+    #     )
+
+    # if (
+    #     hasattr(cfg, "optim_wrapper")
+    #     and hasattr(cfg, "param_scheduler")
+    #     and cfg.train_cfg == backbone_cfg.train_cfg
+    #     and not hasattr(cfg.train_cfg, "max_iters")
+    #     and hasattr(cfg, "custom_hooks")
+    # ):
+    #     if (
+    #         cfg.optim_wrapper == new_optim_wrapper
+    #         and cfg.param_scheduler == backbone_cfg.param_scheduler
+    #         and cfg.custom_hooks[0] == backbone_cfg.custom_hooks[0]
+    #     ):
+    #         print(
+    #             "The relevant parts of the configuration have not changed. No file alteration needed."
+    #         )
+    #         return
 
     cfg.optim_wrapper = backbone_cfg.optim_wrapper
+    cfg.optim_wrapper.type = "AmpOptimWrapper"  #! mixed precision training
     cfg.param_scheduler = backbone_cfg.param_scheduler
+
     cfg.max_epochs = backbone_cfg.max_epochs
     cfg.train_cfg.type = backbone_cfg.train_cfg.type
     cfg.train_cfg.max_epochs = backbone_cfg.train_cfg.max_epochs
+    cfg.train_cfg.val_interval = backbone_cfg.train_cfg.val_interval
 
     if hasattr(cfg.train_cfg, "max_iters"):
         del cfg.train_cfg.max_iters
@@ -67,6 +83,37 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
             cfg.custom_hooks.append(backbone_cfg.custom_hooks[0])
     else:
         cfg.custom_hooks = [backbone_cfg.custom_hooks[0]]
+
+    coco_early_stopping_hook = dict(
+        type="EarlyStoppingHook",
+        monitor="coco/bbox_mAP",
+    )
+    voc_early_stopping_hook = dict(
+        type="EarlyStoppingHook",
+        monitor="pascal_voc/mAP",
+    )
+
+    if hasattr(cfg, "custom_hooks") and cfg.custom_hooks:
+        num_hooks = len(cfg.custom_hooks)
+        found_early_stopping = False
+        for h in range(num_hooks):
+            if cfg.custom_hooks[h].type == "EarlyStoppingHook":
+                if "coco" in filename:
+                    cfg.custom_hooks[h] = coco_early_stopping_hook
+                elif "voc" in filename:
+                    cfg.custom_hooks[h] = voc_early_stopping_hook
+                found_early_stopping = True
+                break
+        if not found_early_stopping:
+            if "coco" in filename:
+                cfg.custom_hooks.append(coco_early_stopping_hook)
+            elif "voc" in filename:
+                cfg.custom_hooks.append(voc_early_stopping_hook)
+    else:
+        if "coco" in filename:
+            cfg.custom_hooks = [coco_early_stopping_hook]
+        elif "voc" in filename:
+            cfg.custom_hooks = [voc_early_stopping_hook]
 
     cfg.default_hooks.param_scheduler = backbone_cfg.default_hooks.param_scheduler
     cfg.train_dataloader.batch_size = backbone_cfg.train_dataloader.batch_size

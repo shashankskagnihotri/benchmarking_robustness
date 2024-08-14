@@ -336,12 +336,13 @@ val_evaluator = dict(
     format_only=False,
     metric='bbox',
     type='CocoMetric')
-vis_backends = (dict(type='LocalVisBackend'), )
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
 visualizer = dict(
     _scope_='mmdet',
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='TensorboardVisBackend'),
     ])

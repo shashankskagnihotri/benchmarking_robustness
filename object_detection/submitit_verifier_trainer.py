@@ -39,7 +39,7 @@ slurm_partition = "gpu_4"
 # configs_erroneous/verification/EfficientDet_r101_coco.py -> 23909211
 # configs_erroneous/verification/EfficientDet_swin-b_coco.py -> 23909245
 
-config_file = "configs_verified/centernet_r50_voc0712_vocmetric.py"
+config_file = "cfg_experiments/0custom_early_stop_atss_convnext-b_voc0712.py"
 
 slurm_log_folder_path = (
     "slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer"
@@ -54,6 +54,7 @@ specific_slurm_work_dir = f"{slurm_log_folder_path}/{os.path.splitext(config_fil
 # vocmetric 3x job: 23892625,
 # cocometric 3x job: 23892618,
 
+
 executor = submitit.AutoExecutor(folder=specific_slurm_work_dir)
 
 #! works with this setup
@@ -61,7 +62,7 @@ executor.update_parameters(
     # timeout_min=5, might cause conflicts with slurm_time
     slurm_partition=f"{slurm_partition}",
     slurm_gres=f"gpu:{GPU_NUM}",
-    slurm_time="15:00:00",
+    slurm_time="04:00:00",
 )
 
 #! WORKS WITH WALLTIME ERROR

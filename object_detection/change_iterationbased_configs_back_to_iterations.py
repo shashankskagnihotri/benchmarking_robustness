@@ -73,6 +73,13 @@ def change_interations(filename, folder_path):
     )
     if hasattr(cfg.train_cfg, "max_epochs"):
         cfg.train_cfg.pop("max_epochs", "Not found")
+
+    cfg.train_cfg.val_interval = calculate_iterations(
+        epochs=cfg.train_cfg.val_interval,
+        batch_size=cfg.train_dataloader.batch_size,
+        dataset_size=num_train_images,
+    )
+
     # if hasattr(cfg.train_cfg, "max_epochs"):
     #     del cfg.train_cfg.max_epochs
 
