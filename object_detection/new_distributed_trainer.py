@@ -6,6 +6,7 @@ def train_with_multiple_gpus(
     config,
     work_dir,
     gpus,
+    resume=None,
     nnodes=1,
     node_rank=0,
     port=29500,
@@ -20,7 +21,7 @@ def train_with_multiple_gpus(
         "--master_addr=" + master_addr,
         "--nproc_per_node=" + str(gpus),
         "--master_port=" + str(port),
-        trainer(config=config, work_dir=work_dir),
+        trainer(config=config, work_dir=work_dir, resume=resume),
         "--launcher",
         "pytorch",
     ]
@@ -32,6 +33,7 @@ if __name__ == "__main__":
         config="configs_verified/centernet_r50_voc0712.py",
         work_dir="slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer",
         gpus=3,
+        resume=None,
     )
 
 

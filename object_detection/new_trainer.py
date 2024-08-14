@@ -99,8 +99,8 @@ def trainer(
 if __name__ == "__main__":
     args = parse_args()
     trainer(
-        config=args.config,  #! configs_verified/EfficientDet_swin-b_voc0712.py
-        work_dir=args.work_dirs,  #! slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
+        config=args.config,
+        work_dir=args.work_dirs,
         auto_scale_lr=False,
         amp=False,
         resume=None,

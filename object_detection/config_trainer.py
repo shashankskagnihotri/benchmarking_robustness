@@ -218,6 +218,7 @@ for config_file in folder_entry_list_configs_to_train:
                                             config_path,
                                             specific_slurm_result_dir,
                                             GPU_NUM,
+                                            resume="auto",
                                         )
                                     else:
                                         # elif "Error" in logfile_content:
@@ -261,4 +262,5 @@ for config_file in folder_entry_list_configs_to_train:
                 config_path,
                 specific_slurm_result_dir,
                 GPU_NUM,
+                resume="auto",
             )

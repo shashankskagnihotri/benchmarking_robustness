@@ -83,6 +83,9 @@ def change_interations(filename, folder_path):
     # if hasattr(cfg.train_cfg, "max_epochs"):
     #     del cfg.train_cfg.max_epochs
 
+    if hasattr(cfg, "work_dir"):
+        cfg.pop("work_dir", "Not found")
+
     cfg.dump(f"{folder_path}/{filename}")
 
 
