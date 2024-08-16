@@ -13,3 +13,6 @@
 [submodule "object_detection/3DCommonCorruptions"]
 	path = object_detection/3DCommonCorruptions
 	url = https://github.com/EPFL-VILAB/3DCommonCorruptions.git
+[submodule "object_detection/imagecorruptions"]
+	path = object_detection/imagecorruptions
+	url = https://github.com/bethgelab/imagecorruptions.git
