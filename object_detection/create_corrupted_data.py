@@ -45,7 +45,7 @@ def common_corruptions(dataset_type, input_dir, output_dir):
 
     elif dataset_type == "voc":
         # Load the VOC image set file
-        img_set_file = os.path.join(input_dir, "ImageSets", "Main", "val.txt")
+        img_set_file = os.path.join(input_dir, "ImageSets", "Main", "test.txt")
         with open(img_set_file, "r") as f:
             img_ids = [line.strip() for line in f.readlines()]
         img_dir = os.path.join(input_dir, "JPEGImages")
