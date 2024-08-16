@@ -45,9 +45,16 @@ def run_corruption_val(
             },
         )
     )
-    if "3dcc" in corruption_name:
+
+    if "3dcc" in corruption_name and "voc" in model_name:
+        cfg.val_dataloader.dataset.img_subdir = f"{corruption_name}/{severity}/"
+    elif "3dcc" in corruption_name:  # coco
         cfg.val_dataloader.dataset.data_prefix.img = f"{corruption_name}/{severity}/"
-    elif "cc" in corruption_name:
+    elif "cc" in corruption_name and "voc" in model_name:
+        cfg.val_dataloader.dataset.img_subdir = (
+            f"{corruption_name}/severity_{severity}/"
+        )
+    elif "cc" in corruption_name:  # coco
         cfg.val_dataloader.dataset.data_prefix.img = (
             f"{corruption_name}/severity_{severity}/"
         )
@@ -70,13 +77,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config_file",
         type=str,
-        default="mmdetection/configs/retinanet/retinanet_x101-64x4d_fpn_1x_coco.py",
+        default="models_tmp/atss_r50_voc0712/atss_r50_voc0712.py",
         help="Path to the config file",
     )
     parser.add_argument(
         "--checkpoint_file",
         type=str,
-        default="mmdetection/checkpoints/retinanet_x101_64x4d_fpn_1x_coco_20200130-366f5af1.pth",
+        default="models_tmp/atss_r50_voc0712/epoch_4.pth",
         help="Path to the checkpoint file",
     )
     parser.add_argument(
