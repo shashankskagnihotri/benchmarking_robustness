@@ -54,33 +54,6 @@ print(f"folder_entry_list_configs_to_train : {folder_entry_list_configs_to_train
 print(f"path_configs_to_test : {path_configs_to_test}")
 
 
-def namefinder(filename):
-    def neck(filename):
-        return filename.split("_")[0]
-
-    def backbone(filename):
-        if "swin-b" in filename:
-            return "swin-b"
-        elif "convnext-b" in filename:
-            return "convnext-b"
-        elif "r50" in filename:
-            return "r50"
-        elif "r101" in filename:
-            return "r101"
-        else:
-            return "unknown-backbone"
-
-    def dataset(filename):
-        if "coco" in filename:
-            return "coco"
-        elif "voc" in filename:
-            return "voc0712"
-        else:
-            return "unknown-dataset"
-
-    return neck(filename), backbone(filename), dataset(filename)
-
-
 def highest_job_number(model_log_folder_path):
     model_logfiles = os.listdir(model_log_folder_path)
     job_numbers = set()
@@ -204,13 +177,11 @@ for config_file in folder_entry_list_configs_to_train:
                                         cfg.visualizer.vis_backends[
                                             0
                                         ].type = "WandbVisBackend"
-                                        neck, backbone, dataset = namefinder(
-                                            config_file
-                                        )
+
                                         cfg.visualizer.vis_backends[
                                             0
                                         ].init_kwargs = dict(
-                                            project=f"{neck}_{backbone}_{dataset}_train"
+                                            project=f"{config_file}_train"
                                         )
 
                                         executor.submit(
@@ -252,9 +223,9 @@ for config_file in folder_entry_list_configs_to_train:
 
             cfg = Config.fromfile(config_path)
             cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-            neck, backbone, dataset = namefinder(config_file)
+
             cfg.visualizer.vis_backends[0].init_kwargs = dict(
-                project=f"{neck}_{backbone}_{dataset}_train"
+                project=f"{config_file}_train"
             )
 
             executor.submit(

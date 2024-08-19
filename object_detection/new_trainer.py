@@ -103,32 +103,14 @@ if __name__ == "__main__":
         work_dir=args.work_dirs,
         auto_scale_lr=False,
         amp=False,
-        resume=None,
+        resume="auto",
         cfg_options=None,
         launcher="none",
         local_rank=0,
     )
 
 
-# python -m pudb new_trainer.py configs_to_train/codino_convnext-b_coco.py slurm/work_dir/0_verification_submitit_verifier_trainer_tester/trainer
-
-# testing yolox_convnext-b_coco.py -> ran successfully
-# testing yolox_swin-b_coco.py -> error
-# testing yolox_r50_coco.py -> ran successfully
+# python -m pudb new_trainer.py configs_erroneous/verification/glip_r50_voc0712.py cfg_experiments/slum_experiments
 
 
-# resnet and swin have same output siz
-
-
-# python -m pudb new_trainer.py cfg_experiments/0custom_early_stop_atss_convnext-b_voc0712.py cfg_experiments/slum_experiments
-
-# python -m pudb new_trainer.py cfg_experiments/0custom_early_stop_atss_convnext-b_coco.py cfg_experiments/slum_experiments
-
-# python -m pudb new_trainer.py configs_rpn_verified/iter_to_get_fast_pro_rpn_convnext-b_coco.py cfg_experiments/slum_experiments
-
-# python -m pudb new_trainer.py configs_rpn_verified/rpn_r50_fpn_1x_coco.py cfg_experiments/slum_experiments
-
-# python -m pudb new_trainer.py configs_rpn_verified/iter_rpn_r50_fpn_1x_coco.py cfg_experiments/slum_experiments
-
-
-# python -m pudb new_trainer.py configs_rpn_verified/rpn_convnext-b_coco.py cfg_experiments/slum_experiments
+# python -m pudb new_trainer.py cfg_experiments/glip_r50_voc0712_captions.py cfg_experiments/slum_experiments

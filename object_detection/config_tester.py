@@ -195,9 +195,9 @@ for config_file in folder_entry_list_configs_to_test:
                                     cfg.visualizer.vis_backends[
                                         0
                                     ].type = "WandbVisBackend"
-                                    neck, backbone, dataset = namefinder(config_file)
+
                                     cfg.visualizer.vis_backends[0].init_kwargs = dict(
-                                        project=f"{neck}_{backbone}_{dataset}_test"
+                                        project=f"{config_file}_test"
                                     )
 
                                     executor.submit(
@@ -239,10 +239,7 @@ for config_file in folder_entry_list_configs_to_test:
 
         cfg = Config.fromfile(config_path)
         cfg.visualizer.vis_backends[0].type = "WandbVisBackend"
-        neck, backbone, dataset = namefinder(config_file)
-        cfg.visualizer.vis_backends[0].init_kwargs = dict(
-            project=f"{neck}_{backbone}_{dataset}_test"
-        )
+        cfg.visualizer.vis_backends[0].init_kwargs = dict(project=f"{config_file}_test")
 
         executor.submit(
             test_with_multiple_gpus,

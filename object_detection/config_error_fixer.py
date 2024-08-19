@@ -4,6 +4,7 @@
 
 import os
 from mmengine.config import Config
+from pudb import set_trace
 
 
 from voc0712_cocofmt_reference import (
@@ -202,39 +203,20 @@ def config_keybased_value_changer(
 #! check how to proceed with configs that where fixed by voc implementation
 
 
-path_folder_to_train = "./configs_to_train"
-path_folder_erroneous = "./configs_erroneous/verification"
-path_folder_to_test = "./configs_to_test"
-
-filenames_to_train = os.listdir(path_folder_to_train)
-filenames_erroneous = os.listdir(path_folder_erroneous)
-filenames_to_test = os.listdir(path_folder_to_test)
-
-
 def process_files(source_folder):
     filenames = os.listdir(source_folder)
+    filenames.sort()
     destination_folder = "./configs_to_train"
     for filename in filenames:
         print(f"Processing file: {filename} in {source_folder}")
         filepath = os.path.join(source_folder, filename)
         neck, backbone, dataset = namefinder(filename)
         destination_file = os.path.join(
-            destination_folder, f"{neck}_{backbone}_{dataset}.py"
+            destination_folder,
+            filename,  #! use whole filename instead, sort the folders first, use if ... in filename
         )
-        if neck == "atss" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "atss" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "cascade_rcnn" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "centernet" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "centernet" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "centernet" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif neck == "codino" and backbone == "swin-b" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        if "codino_swin-b_voc0712" in filename:
+            print(f"Condition of {filename} met")
 
             cfg = Config.fromfile(filepath)
             cfg.max_epochs = 12
@@ -273,14 +255,37 @@ def process_files(source_folder):
                 ],
                 type="DetDataPreprocessor",
             )
+            cfg.optim_wrapper.type = "OptimWrapper"
 
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)
             else:
                 cfg.dump(destination_file)
-        elif neck == "codino" and backbone == "swin-b" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "codino_swin-b_coco" in filename:
+            print(f"Condition of {filename} met")
+
+            cfg = Config.fromfile(filepath)
+            cfg.max_epochs = 36
+            cfg.param_scheduler = [
+                dict(
+                    type="MultiStepLR",
+                    begin=0,
+                    end=36,
+                    by_epoch=True,
+                    milestones=[10],
+                    gamma=0.1,
+                )
+            ]
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+
+        elif "codino_r50_coco" in filename:
+            print(f"Condition of {filename} met")
 
             cfg = Config.fromfile(filepath)
             cfg.max_epochs = 36
@@ -300,75 +305,8 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "codino" and backbone == "r50" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
-
-            cfg = Config.fromfile(filepath)
-            cfg.max_epochs = 36
-            cfg.param_scheduler = [
-                dict(
-                    type="MultiStepLR",
-                    begin=0,
-                    end=36,
-                    by_epoch=True,
-                    milestones=[10],
-                    gamma=0.1,
-                )
-            ]
-            if source_folder != destination_folder:
-                cfg.dump(destination_file)
-                os.remove(filepath)
-            else:
-                cfg.dump(destination_file)
-
-        elif neck == "codino" and backbone == "r50" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
-
-            cfg = Config.fromfile(filepath)
-            cfg.max_epochs = 12
-            cfg.param_scheduler = [
-                dict(
-                    type="MultiStepLR",
-                    begin=0,
-                    end=12,
-                    by_epoch=True,
-                    milestones=[10],
-                    gamma=0.1,
-                )
-            ]
-            cfg.model.data_preprocessor = dict(
-                batch_augments=[
-                    # dict(
-                    #     pad_mask=True,
-                    #     size=(
-                    #         1024,
-                    #         1024,
-                    #     ),
-                    #     type="BatchFixedSizePad",
-                    # ),
-                ],
-                bgr_to_rgb=True,
-                mean=[
-                    123.675,
-                    116.28,
-                    103.53,
-                ],
-                pad_mask=True,
-                std=[
-                    58.395,
-                    57.12,
-                    57.375,
-                ],
-                type="DetDataPreprocessor",
-            )
-            if source_folder != destination_folder:
-                cfg.dump(destination_file)
-                os.remove(filepath)
-            else:
-                cfg.dump(destination_file)
-
-        elif neck == "codino" and backbone == "convnext-b" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "codino_r50_voc0712" in filename:
+            print(f"Condition of {filename} met")
 
             cfg = Config.fromfile(filepath)
             cfg.max_epochs = 12
@@ -413,49 +351,9 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "codino" and backbone == "convnext-b" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "codino_convnext-b_voc0712" in filename:
+            print(f"Condition of {filename} met")
 
-            cfg = Config.fromfile(filepath)
-            cfg.max_epochs = 36
-            cfg.param_scheduler = [
-                dict(
-                    type="MultiStepLR",
-                    begin=0,
-                    end=36,
-                    by_epoch=True,
-                    milestones=[10],
-                    gamma=0.1,
-                )
-            ]
-            if source_folder != destination_folder:
-                cfg.dump(destination_file)
-                os.remove(filepath)
-            else:
-                cfg.dump(destination_file)
-
-        elif neck == "codino" and backbone == "r101" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
-            cfg = Config.fromfile(filepath)
-            cfg.max_epochs = 36
-            cfg.param_scheduler = [
-                dict(
-                    type="MultiStepLR",
-                    begin=0,
-                    end=36,
-                    by_epoch=True,
-                    milestones=[10],
-                    gamma=0.1,
-                )
-            ]
-            if source_folder != destination_folder:
-                cfg.dump(destination_file)
-                os.remove(filepath)
-            else:
-                cfg.dump(destination_file)
-
-        elif neck == "codino" and backbone == "r101" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)
             cfg.max_epochs = 12
             cfg.param_scheduler = [
@@ -499,24 +397,102 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "ddod" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "Detic" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "Detic" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "Detic" and backbone == "r101" and dataset == "coco":
-            pass
-        elif neck == "Detic" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "Detic" and backbone == "r50" and dataset == "coco":
-            pass
-        elif neck == "Detic" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "Detic" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "Detic" and backbone == "swin-b" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "codino_convnext-b_coco" in filename:
+            print(f"Condition of {filename} met")
+
+            cfg = Config.fromfile(filepath)
+            cfg.max_epochs = 36
+            cfg.param_scheduler = [
+                dict(
+                    type="MultiStepLR",
+                    begin=0,
+                    end=36,
+                    by_epoch=True,
+                    milestones=[10],
+                    gamma=0.1,
+                )
+            ]
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+
+        elif "codino_r101_coco" in filename:
+            print(f"Condition of {filename} met")
+            cfg = Config.fromfile(filepath)
+            cfg.max_epochs = 36
+            cfg.param_scheduler = [
+                dict(
+                    type="MultiStepLR",
+                    begin=0,
+                    end=36,
+                    by_epoch=True,
+                    milestones=[10],
+                    gamma=0.1,
+                )
+            ]
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+
+        elif "codino_r101_voc0712" in filename:
+            print(f"Condition of {filename} met")
+            cfg = Config.fromfile(filepath)
+            cfg.max_epochs = 12
+            cfg.param_scheduler = [
+                dict(
+                    type="MultiStepLR",
+                    begin=0,
+                    end=12,
+                    by_epoch=True,
+                    milestones=[10],
+                    gamma=0.1,
+                )
+            ]
+            cfg.model.data_preprocessor = dict(
+                batch_augments=[
+                    # dict(
+                    #     pad_mask=True,
+                    #     size=(
+                    #         1024,
+                    #         1024,
+                    #     ),
+                    #     type="BatchFixedSizePad",
+                    # ),
+                ],
+                bgr_to_rgb=True,
+                mean=[
+                    123.675,
+                    116.28,
+                    103.53,
+                ],
+                pad_mask=True,
+                std=[
+                    58.395,
+                    57.12,
+                    57.375,
+                ],
+                type="DetDataPreprocessor",
+            )
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "ddq_swin-b" in filename:
+            print(f"Condition of {filename} met")
+            cfg = Config.fromfile(filepath)
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "Detic_swin-b_voc0712" in filename:
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
 
             config_keybased_value_changer(
@@ -545,24 +521,9 @@ def process_files(source_folder):
             else:
                 os.remove(filepath)
                 cfg.dump(destination_file)
-        elif (
-            neck == "double_heads" and backbone == "convnext-b" and dataset == "voc0712"
-        ):
-            pass
-        elif neck == "dynamic_rcnn" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif (
-            neck == "dynamic_rcnn" and backbone == "convnext-b" and dataset == "voc0712"
-        ):
-            pass
-        elif neck == "dynamic_rcnn" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "dynamic_rcnn" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "dynamic_rcnn" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        if neck == "EfficientDet":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+
+        if "EfficientDet" in filename:
+            print(f"Condition of {filename} met")
 
             cfg = Config.fromfile(filepath)
             cfg.vis_backends = [
@@ -576,39 +537,26 @@ def process_files(source_folder):
                 os.remove(filepath)
             else:
                 cfg.dump(destination_file)
-        elif neck == "EfficientDet" and backbone == "r101" and dataset == "coco":
-            pass
-        elif neck == "EfficientDet" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "EfficientDet" and backbone == "r50" and dataset == "coco":
-            pass
-        elif neck == "EfficientDet" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "EfficientDet" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "EfficientDet" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif (
-            neck == "EfficientDet" and backbone == "convnext-b" and dataset == "voc0712"
-        ):
-            pass
-        elif neck == "fast_rcnn" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "fast_rcnn" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "fast_rcnn" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "fast_rcnn" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "fast_rcnn" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "fast_rcnn" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif neck == "faster_rcnn" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "foveabox" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "glip" and backbone == "convnext-b" or backbone == "swin-b":
+        elif "free_anchor_convnext-b" in filename:
+            print(f"Condition of {filename} met")
+            cfg = Config.fromfile(filepath)
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "free_anchor_swin-b" in filename:
+            print(f"Condition of {filename} met")
+            cfg = Config.fromfile(filepath)
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+
+        elif "glip_convnext-b" in filename or "glip_swin-b" in filename:
             print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)
 
@@ -621,66 +569,44 @@ def process_files(source_folder):
             else:
                 os.remove(filepath)
                 cfg.dump(destination_file)
-        elif neck == "glip" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "glip" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "glip" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "glip" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "glip" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "glip" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif neck == "grid_rcnn" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "grid_rcnn" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "guided_anchoring" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "libra_rcnn" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "paa" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif neck == "reppoints" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "reppoints" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "reppoints" and backbone == "r101" and dataset == "coco":
-            pass
-        elif neck == "reppoints" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "reppoints" and backbone == "r50" and dataset == "coco":
-            pass
-        elif neck == "reppoints" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "reppoints" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "reppoints" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif neck == "rtmdet" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "rtmdet" and backbone == "r50" and dataset == "coco":
-            pass
-        elif neck == "rtmdet" and backbone == "r50" and dataset == "voc0712":
-            pass
-        elif neck == "rtmdet" and backbone == "r101" and dataset == "coco":
-            pass
-        elif neck == "rtmdet" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "rtmdet" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "rtmdet" and backbone == "swin-b" and dataset == "voc0712":
-            pass
-        elif neck == "tood" and backbone == "convnext-b" and dataset == "coco":
-            pass
-        elif neck == "tood" and backbone == "convnext-b" and dataset == "voc0712":
-            pass
-        elif neck == "tood" and backbone == "r101" and dataset == "voc0712":
-            pass
-        elif neck == "yolo" and backbone == "convnext-b" and dataset == "coco":
+        # elif "paa_convnext-b_voc0712" in filename:
+        #     print(f"Condition of {filename} met")
+        #     cfg = Config.fromfile(filepath)
+        #     cfg.optim_wrapper.type = "OptimWrapper"
+        #     if source_folder != destination_folder:
+        #         cfg.dump(destination_file)
+        #         os.remove(filepath)
+        #     else:
+        #         cfg.dump(destination_file)
+        elif "sparse_rcnn_convnext-b" in filename or "sparse_rcnn_swin-b" in filename:
             print(f"Condition of {neck}, {backbone}, {dataset} met")
+            cfg = Config.fromfile(filepath)
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "tood_convnext-b" in filename or "tood_swin-b" in filename:
+            print(f"Condition of {neck}, {backbone}, {dataset} met")
+            cfg = Config.fromfile(filepath)
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "vfnet_swin-b" in filename or "vfnet_convnext-b" in filename:
+            print(f"Condition of {filename} met")
+            cfg = Config.fromfile(filepath)
+            cfg.optim_wrapper.type = "OptimWrapper"
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "yolo_convnext-b_coco" in filename:
+            print(f"Condition of {filename} met")
 
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
@@ -699,8 +625,8 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "convnext-b" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_convnext-b_voc0712" in filename:
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 3,
@@ -718,8 +644,8 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "r50" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_r50_coco" in filename:
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 2,
@@ -737,8 +663,8 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "r50" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_r50_voc0712" in filename:
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 2,
@@ -756,8 +682,8 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "r101" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_r101_coco" in filename:
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 2,
@@ -775,8 +701,8 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "r101" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_r101_voc0712" in filename:
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 2,
@@ -794,8 +720,10 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "swin-b" and dataset == "coco":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_swin-b_coco" in filename:
+            # set_trace()
+
+            print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 3,
@@ -819,8 +747,10 @@ def process_files(source_folder):
             else:
                 cfg.dump(destination_file)
 
-        elif neck == "yolo" and backbone == "swin-b" and dataset == "voc0712":
-            print(f"Condition of {neck}, {backbone}, {dataset} met")
+        elif "yolo_swin-b_voc0712" in filename:
+            print(f"Condition of {filename} met")
+
+            # set_trace()
             cfg = Config.fromfile(filepath)
             cfg.model.backbone.out_indices = [
                 3,
@@ -843,12 +773,11 @@ def process_files(source_folder):
                 os.remove(filepath)
             else:
                 cfg.dump(destination_file)
-        elif neck == "yolox" and backbone == "r101" and dataset == "coco":
-            pass
-        elif neck == "yolox" and backbone == "swin-b" and dataset == "coco":
-            pass
-        elif neck == "yolox" and backbone == "swin-b" and dataset == "voc0712":
-            pass
+
+
+path_folder_to_train = "./configs_to_train"
+path_folder_erroneous = "./configs_erroneous/verification"
+path_folder_to_test = "./configs_to_test"
 
 
 process_files(path_folder_to_train)
