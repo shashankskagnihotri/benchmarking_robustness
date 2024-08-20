@@ -377,7 +377,7 @@ def test_sample(sample, compute_metrics=True):
 
 def attack(attack_type: str):
 
-    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, AutoPGDAttack,BIMAttack
+    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
     epsilon = 0.03
     alpha = 0.01
@@ -388,16 +388,18 @@ def attack(attack_type: str):
             model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
         )
     elif attack_type == "fgsm":
-        attacker = FGSMAttack( model, epsilon, num_iterations,alpha, targeted=False)
+        attacker = FGSMAttack( model, epsilon, targeted=False)
 
     elif attack_type == "pgd":
         attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
 
+    # TODO: norm anpassen - parameter dafür finden 
     elif attack_type =='bim':
-        attacker = BIMAttack() # or corporate into other attack with flag ?? 
-
-    elif attack_type == 'autopgd':
-        attacker = AutoPGDAttack()
+        attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) # or corporate into other attack with flag ?? 
+        # model, epsilon: float, num_iterations: int, alpha: float, targeted: bool, norm: str
+        # add norm parameter 
+    elif attack_type == 'apgd':
+        attacker = APGDAttack()
     
     else:
         raise ValueError("Attack type not recognized")
