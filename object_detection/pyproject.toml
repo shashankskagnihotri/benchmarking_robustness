@@ -2,4 +2,13 @@
 exclude = [
     "mmdetection/**",
     "3DCommonCorruptions/**",
+    "imagecorruptions/**",
 ]
+
+[tool.ruff.lint]
+# Enable the isort rules.
+extend-select = ["I"]
+
+[tool.pyright]
+exclude = ["slurm/logs/**"]
+include = ["."]

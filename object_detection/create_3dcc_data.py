@@ -1,22 +1,23 @@
+import argparse
+import logging
 import os
 import subprocess
-import argparse
+
 import submitit
-import logging
-from rich.logging import RichHandler
 from dotenv import load_dotenv
+from rich.logging import RichHandler
 
 load_dotenv()  # needed to add 3DCommonCorruptions to the path and to get the email
 os.chdir("3DCommonCorruptions/create_3dcc")  # deal with relative imports
 
 from create_3dcc import (  # noqa: E402
     create_dof_data,
-    create_fog_data,
-    create_non3d_data,
     create_flash_data,
-    create_shadow_data,
-    create_multi_illumination_data,
+    create_fog_data,
     create_motion_data,
+    create_multi_illumination_data,
+    create_non3d_data,
+    create_shadow_data,
     create_video_data,
 )
 

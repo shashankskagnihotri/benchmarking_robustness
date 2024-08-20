@@ -1,13 +1,15 @@
-from dataclasses import dataclass
-import os
-from tqdm import tqdm
-from pycocotools.coco import COCO
-from imagecorruptions.imagecorruptions import get_corruption_names, corrupt
-import mmcv
 import logging
-from rich.logging import RichHandler
+import os
+from dataclasses import dataclass
+
+import mmcv
 import submitit
 from dotenv import load_dotenv
+from pycocotools.coco import COCO
+from rich.logging import RichHandler
+from tqdm import tqdm
+
+from imagecorruptions import corrupt, get_corruption_names
 
 load_dotenv()  # Load environment variables from .env file
 my_email = os.getenv("MY_EMAIL")

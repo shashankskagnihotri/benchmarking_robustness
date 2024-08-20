@@ -1,8 +1,10 @@
-import wandb
-import pandas as pd
-from dotenv import load_dotenv
 import os
 from concurrent.futures import ThreadPoolExecutor
+
+import pandas as pd
+from dotenv import load_dotenv
+
+import wandb
 
 
 def fetch_run_data(run):

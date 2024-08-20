@@ -1,5 +1,5 @@
-from fractions import Fraction
 import re
+from fractions import Fraction
 from pathlib import Path
 
 

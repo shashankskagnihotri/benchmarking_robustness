@@ -1,10 +1,9 @@
 import argparse
-import torch
-from mmengine.config import Config
-from mmengine.runner import Runner
-from dotenv import load_dotenv
 import os
 
+from dotenv import load_dotenv
+from mmengine.config import Config
+from mmengine.runner import Runner
 
 # move this?
 load_dotenv()
@@ -40,7 +39,6 @@ def run_corruption_val(
                     "config_file": config_file,
                     "checkpoint_file": checkpoint_file,
                 },
-                "name": model_name,
                 "group": model_name,
             },
         )

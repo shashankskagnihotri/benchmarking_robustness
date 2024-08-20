@@ -1,12 +1,14 @@
-from pathlib import Path
-import submitit
-from corruption_val import run_corruption_val
-from tqdm import tqdm
-import logging
-from rich.logging import RichHandler
-import os
 import itertools
+import logging
+import os
+from pathlib import Path
+
+import submitit
 from dotenv import load_dotenv
+from rich.logging import RichHandler
+from tqdm import tqdm
+
+from corruption_val import run_corruption_val
 from misc import find_latest_epoch_file, find_python_files
 
 load_dotenv()  # Load environment variables from .env file

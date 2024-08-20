@@ -1,11 +1,19 @@
-from pathlib import Path
-import submitit
-from adv_attack import run_attack_val, pgd_attack, fgsm_attack, bim_attack
-from tqdm import tqdm
-import logging
-from rich.logging import RichHandler
-import os
 import itertools
+import logging
+import os
+from pathlib import Path
+
+import submitit
+from rich.logging import RichHandler
+from tqdm import tqdm
+
+from adv_attack import (
+    bim_attack,
+    cospgd_attack,
+    fgsm_attack,
+    pgd_attack,
+    run_attack_val,
+)
 from misc import find_latest_epoch_file, find_python_files, format_value
 
 # Set up the logging configuration to use RichHandler
@@ -24,30 +32,35 @@ RANDOM_START = False
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models"
 ATTACKS = {
-    "PGD": pgd_attack,
-    "FGSM": fgsm_attack,
-    "BIM": bim_attack,
+    # "PGD": pgd_attack,
+    # "FGSM": fgsm_attack,
+    # "BIM": bim_attack,
+    "COSPGD": cospgd_attack,
     #    "none": None
 }
 STEPS_ATTACK = {
     "PGD": [20],
+    "COSPGD": [20],
     "FGSM": [None],
     "BIM": [20],
     "none": [1],
 }
 EPSILONS = {
     "PGD": [8],  # [1, 2, 4, 8]
+    "COSPGD": [8],  # [1, 2, 4, 8]
     "FGSM": [8],
     "BIM": [8],
     "none": [0],
 }
 ALPHAS = {
+    "COSPGD": [0.01 * 255],
     "PGD": [0.01 * 255],
     "FGSM": [0.01 * 255],
     "BIM": [0.01 * 255],
     "none": [1],
 }
 NORMS = {
+    "COSPGD": [None],
     "PGD": [None],
     "FGSM": ["inf"],
     "BIM": ["inf"],
@@ -89,7 +102,7 @@ config_files, checkpoint_files = get_configs_and_checkpoints(MODEL_DIR)
 
 logger.info(f"found {len(config_files)} config and checkpoint files")
 
-debug = False
+debug = True
 debug_time = "00:30:00"
 debug_GPU = "dev_gpu_4_a100"
 
@@ -103,7 +116,6 @@ executor.update_parameters(
     slurm_mem=20_000,
     slurm_mail_type="all",
     slurm_job_name="attacks",
-    slurm_time="24:00:00" if not debug else debug_time,
 )
 jobs = []
 
@@ -111,7 +123,7 @@ jobs = []
 for config_file, checkpoint_file in zip(config_files, checkpoint_files):
     if "DINO_Swin" in config_file or "RTMDet-l_Swin" in config_file:
         # needs more GPU memory
-        slurm_partion = "gpu_4_a100" if not debug else debug_GPU
+        slurm_partion = "gpu_4_a100,gpu_4_h100" if not debug else debug_GPU
     else:
         slurm_partion = "gpu_4,gpu_4_a100,gpu_4_h100" if not debug else debug_GPU
 
@@ -120,6 +132,8 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
     if "DDQ" in config_file and "Swin" in config_file:
         # needs more time
         executor.update_parameters(slurm_time="48:00:00" if not debug else debug_time)
+    else:
+        executor.update_parameters(slurm_time="10:00:00" if not debug else debug_time)
 
     with executor.batch():
         for attack_name, attack in ATTACKS.items():
@@ -147,6 +161,8 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                     del attack_kwargs["norm"]
                 elif attack == bim_attack:
                     del attack_kwargs["random_start"]
+                elif attack == cospgd_attack:
+                    del attack_kwargs["norm"]
                 elif attack is None:
                     attack_kwargs = {
                         "epsilon": 0,
@@ -179,6 +195,9 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                         result_dir,
                     )
                     jobs.append(job)
+
+    if debug and len(jobs) > 3:
+        break
 logger.info(
     "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
 )

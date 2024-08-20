@@ -1,8 +1,9 @@
 import os
-from mmengine import Config, DictAction
-import pandas as pd
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+
+import pandas as pd
+from mmengine import Config
 
 
 def process_row(row):
