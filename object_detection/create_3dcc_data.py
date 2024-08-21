@@ -59,8 +59,13 @@ def create_depth_info(path_rgb, path_depth):
     logger.info("Starting depth information creation...")
     logger.info("Moving images to DPT input directory...")
     os.makedirs("DPT/input", exist_ok=True)
+
+    depth_images_done = os.listdir(path_depth)
     for jpg_file in os.listdir(path_rgb):
         if jpg_file.endswith(".jpg"):
+            png_file = jpg_file.replace(".jpg", ".png")
+            if png_file in depth_images_done:
+                continue
             os.rename(
                 os.path.join(path_rgb, jpg_file), os.path.join("DPT/input", jpg_file)
             )
