@@ -38,7 +38,7 @@ class CommonCorruptionConfig:
 def get_corruptions_todo(
     dataset_type,
     severities=[1, 2, 3, 4, 5],
-    corruptions=get_corruption_names("all"),
+    corruptions=get_corruption_names("common"),
     input_dir="data/coco/",
 ):
     # Load the dataset
