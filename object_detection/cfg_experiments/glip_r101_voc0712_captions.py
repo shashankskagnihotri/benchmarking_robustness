@@ -1,7 +1,14 @@
+#
+#!
+custom_imports = dict(
+    imports=["mmdetection.mmdet.datasets.transforms.load_voc_captions"],
+    allow_failed_imports=False,
+)
+
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 data_root = "data/VOCdevkit/"
-dataset_type = "VOCDataset"
+dataset_type = "VOCDatasetWithCaptions"  #!
 default_hooks = dict(
     checkpoint=dict(interval=1, type="CheckpointHook"),
     logger=dict(interval=50, type="LoggerHook"),
@@ -22,9 +29,9 @@ log_level = "INFO"
 log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
 model = dict(
     backbone=dict(
-        depth=50,
+        depth=101,
         frozen_stages=1,
-        init_cfg=dict(checkpoint="torchvision://resnet50", type="Pretrained"),
+        init_cfg=dict(checkpoint="torchvision://resnet101", type="Pretrained"),
         norm_cfg=dict(requires_grad=True, type="BN"),
         norm_eval=True,
         num_stages=4,
@@ -172,6 +179,132 @@ test_dataloader = dict(
         backend_args=None,
         data_prefix=dict(sub_data_root="VOC2007/"),
         data_root="data/VOCdevkit/",
+        metainfo=dict(
+            classes=(
+                "aeroplane",
+                "bicycle",
+                "bird",
+                "boat",
+                "bottle",
+                "bus",
+                "car",
+                "cat",
+                "chair",
+                "cow",
+                "diningtable",
+                "dog",
+                "horse",
+                "motorbike",
+                "person",
+                "pottedplant",
+                "sheep",
+                "sofa",
+                "train",
+                "tvmonitor",
+            ),
+            palette=[
+                (
+                    106,
+                    0,
+                    228,
+                ),
+                (
+                    119,
+                    11,
+                    32,
+                ),
+                (
+                    165,
+                    42,
+                    42,
+                ),
+                (
+                    0,
+                    0,
+                    192,
+                ),
+                (
+                    197,
+                    226,
+                    255,
+                ),
+                (
+                    0,
+                    60,
+                    100,
+                ),
+                (
+                    0,
+                    0,
+                    142,
+                ),
+                (
+                    255,
+                    77,
+                    255,
+                ),
+                (
+                    153,
+                    69,
+                    1,
+                ),
+                (
+                    120,
+                    166,
+                    157,
+                ),
+                (
+                    0,
+                    182,
+                    199,
+                ),
+                (
+                    0,
+                    226,
+                    252,
+                ),
+                (
+                    182,
+                    182,
+                    255,
+                ),
+                (
+                    0,
+                    0,
+                    230,
+                ),
+                (
+                    220,
+                    20,
+                    60,
+                ),
+                (
+                    163,
+                    255,
+                    0,
+                ),
+                (
+                    0,
+                    82,
+                    0,
+                ),
+                (
+                    3,
+                    95,
+                    161,
+                ),
+                (
+                    0,
+                    80,
+                    100,
+                ),
+                (
+                    183,
+                    130,
+                    88,
+                ),
+            ],
+        ),
         pipeline=[
             dict(backend_args=None, type="LoadImageFromFile"),
             dict(
@@ -184,18 +317,22 @@ test_dataloader = dict(
             ),
             dict(type="LoadAnnotations", with_bbox=True),
             dict(
+                type="LoadCaptions", caption_file="voc2007_image_caption_pairs.json"
+            ),  #!
+            dict(
                 meta_keys=(
                     "img_id",
                     "img_path",
                     "ori_shape",
                     "img_shape",
                     "scale_factor",
+                    "text",  #!
                 ),
                 type="PackDetInputs",
             ),
         ],
         test_mode=True,
-        type="VOCDataset",
+        type="VOCDatasetWithCaptions",  #!
     ),
     drop_last=False,
     num_workers=2,
@@ -226,6 +363,7 @@ test_pipeline = [
         type="Resize",
     ),
     dict(type="LoadAnnotations", with_bbox=True),
+    dict(type="LoadCaptions", caption_file="voc2007_image_caption_pairs.json"),  #!
     dict(
         meta_keys=(
             "img_id",
@@ -233,6 +371,7 @@ test_pipeline = [
             "ori_shape",
             "img_shape",
             "scale_factor",
+            "text",  #!
         ),
         type="PackDetInputs",
     ),
@@ -252,9 +391,139 @@ train_dataloader = dict(
                     filter_cfg=dict(
                         bbox_min_size=32, filter_empty_gt=True, min_size=32
                     ),
+                    metainfo=dict(
+                        classes=(
+                            "aeroplane",
+                            "bicycle",
+                            "bird",
+                            "boat",
+                            "bottle",
+                            "bus",
+                            "car",
+                            "cat",
+                            "chair",
+                            "cow",
+                            "diningtable",
+                            "dog",
+                            "horse",
+                            "motorbike",
+                            "person",
+                            "pottedplant",
+                            "sheep",
+                            "sofa",
+                            "train",
+                            "tvmonitor",
+                        ),
+                        palette=[
+                            (
+                                106,
+                                0,
+                                228,
+                            ),
+                            (
+                                119,
+                                11,
+                                32,
+                            ),
+                            (
+                                165,
+                                42,
+                                42,
+                            ),
+                            (
+                                0,
+                                0,
+                                192,
+                            ),
+                            (
+                                197,
+                                226,
+                                255,
+                            ),
+                            (
+                                0,
+                                60,
+                                100,
+                            ),
+                            (
+                                0,
+                                0,
+                                142,
+                            ),
+                            (
+                                255,
+                                77,
+                                255,
+                            ),
+                            (
+                                153,
+                                69,
+                                1,
+                            ),
+                            (
+                                120,
+                                166,
+                                157,
+                            ),
+                            (
+                                0,
+                                182,
+                                199,
+                            ),
+                            (
+                                0,
+                                226,
+                                252,
+                            ),
+                            (
+                                182,
+                                182,
+                                255,
+                            ),
+                            (
+                                0,
+                                0,
+                                230,
+                            ),
+                            (
+                                220,
+                                20,
+                                60,
+                            ),
+                            (
+                                163,
+                                255,
+                                0,
+                            ),
+                            (
+                                0,
+                                82,
+                                0,
+                            ),
+                            (
+                                3,
+                                95,
+                                161,
+                            ),
+                            (
+                                0,
+                                80,
+                                100,
+                            ),
+                            (
+                                183,
+                                130,
+                                88,
+                            ),
+                        ],
+                    ),
                     pipeline=[
                         dict(backend_args=None, type="LoadImageFromFile"),
                         dict(type="LoadAnnotations", with_bbox=True),
+                        dict(
+                            type="LoadCaptions",
+                            caption_file="voc2007_image_caption_pairs.json",  #!
+                        ),
                         dict(
                             keep_ratio=True,
                             scale=(
@@ -266,7 +535,7 @@ train_dataloader = dict(
                         dict(prob=0.5, type="RandomFlip"),
                         dict(type="PackDetInputs"),
                     ],
-                    type="VOCDataset",
+                    type="VOCDatasetWithCaptions",  #!
                 ),
                 dict(
                     ann_file="VOC2012/ImageSets/Main/trainval.txt",
@@ -404,6 +673,10 @@ train_dataloader = dict(
                     ),
                     pipeline=[
                         dict(backend_args=None, type="LoadImageFromFile"),
+                        dict(
+                            type="LoadCaptions",
+                            caption_file="voc2012_image_caption_pairs.json",  #!
+                        ),
                         dict(type="LoadAnnotations", with_bbox=True),
                         dict(
                             keep_ratio=True,
@@ -416,7 +689,7 @@ train_dataloader = dict(
                         dict(prob=0.5, type="RandomFlip"),
                         dict(type="PackDetInputs"),
                     ],
-                    type="VOCDataset",
+                    type="VOCDatasetWithCaptions",  #!
                 ),
             ],
             ignore_keys=[
@@ -431,9 +704,25 @@ train_dataloader = dict(
     persistent_workers=True,
     sampler=dict(shuffle=True, type="DefaultSampler"),
 )
-train_pipeline = [
+train_pipeline07 = [
     dict(backend_args=None, type="LoadImageFromFile"),
     dict(type="LoadAnnotations", with_bbox=True),
+    dict(type="LoadCaptions", caption_file="voc2007_image_caption_pairs.json"),  #!
+    dict(
+        keep_ratio=True,
+        scale=(
+            1000,
+            600,
+        ),
+        type="Resize",
+    ),
+    dict(prob=0.5, type="RandomFlip"),
+    dict(type="PackDetInputs"),
+]
+train_pipeline12 = [
+    dict(backend_args=None, type="LoadImageFromFile"),
+    dict(type="LoadAnnotations", with_bbox=True),
+    dict(type="LoadCaptions", caption_file="voc2012_image_caption_pairs.json"),  #!
     dict(
         keep_ratio=True,
         scale=(
@@ -597,12 +886,13 @@ val_dataloader = dict(
                     "ori_shape",
                     "img_shape",
                     "scale_factor",
+                    "text",  #!
                 ),
                 type="PackDetInputs",
             ),
         ],
         test_mode=True,
-        type="VOCDataset",
+        type="VOCDatasetWithCaptions",  #!
     ),
     drop_last=False,
     num_workers=2,

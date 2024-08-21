@@ -1,8 +1,14 @@
+# import sys
+# sys.path.insert(
+#     0,
+#     "/pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/mmdetection/mmdet/datasets/transforms/",
+# )
+# from mmdetection.mmdet.datasets.transforms.load_voc_captions import LoadCaptions
+
+
 import argparse
 import os
 import os.path as osp
-
-import argparse
 
 from mmengine.config import Config, DictAction
 from mmengine.registry import RUNNERS
@@ -114,3 +120,5 @@ if __name__ == "__main__":
 
 
 # python -m pudb new_trainer.py cfg_experiments/glip_r50_voc0712_captions.py cfg_experiments/slum_experiments
+
+# python -m pudb new_trainer.py cfg_experiments/glip_r101_voc0712_captions.py cfg_experiments/slum_experiments
