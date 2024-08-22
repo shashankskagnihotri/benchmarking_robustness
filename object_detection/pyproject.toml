@@ -10,5 +10,5 @@ exclude = [
 extend-select = ["I"]
 
 [tool.pyright]
-exclude = ["slurm/logs/**"]
+exclude = ["slurm/logs/**", "data/**", "artifacts/**", "wandb/**", "work_dirs/**", "model**"]
 include = ["."]
