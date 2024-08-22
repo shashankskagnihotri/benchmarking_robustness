@@ -24,13 +24,17 @@ logging.basicConfig(
     handlers=[RichHandler(rich_tracebacks=True)],
 )
 
+DEBUG = True
+debug_time = "00:30:00"
+debug_GPU = "gpu_4,gpu_4_a100,gpu_4_h100"  # "dev_gpu_4,dev_gpu_4_a100"
+
 # Create a logger
 logger = logging.getLogger("rich")
 WORK_DIR = "slurm/logs/attacks/%j"
 TARGETED = False
 RANDOM_START = False
 RESULT_DIR = "slurm/results"
-MODEL_DIR = "models"
+MODEL_DIR = "models_debug" if DEBUG else "models"
 ATTACKS = {
     # "PGD": pgd_attack,
     # "FGSM": fgsm_attack,
@@ -102,9 +106,6 @@ config_files, checkpoint_files = get_configs_and_checkpoints(MODEL_DIR)
 
 logger.info(f"found {len(config_files)} config and checkpoint files")
 
-debug = True
-debug_time = "00:30:00"
-debug_GPU = "dev_gpu_4_a100"
 
 # Set up executor for slurm
 executor = submitit.AutoExecutor(folder=WORK_DIR)
@@ -119,21 +120,24 @@ executor.update_parameters(
 )
 jobs = []
 
+
 # Submit every new parameter combination
 for config_file, checkpoint_file in zip(config_files, checkpoint_files):
     if "DINO_Swin" in config_file or "RTMDet-l_Swin" in config_file:
         # needs more GPU memory
-        slurm_partion = "gpu_4_a100,gpu_4_h100" if not debug else debug_GPU
+        slurm_partion = "gpu_4_a100,gpu_4_h100" if not DEBUG else "dev_gpu_4_a100"
     else:
-        slurm_partion = "gpu_4,gpu_4_a100,gpu_4_h100" if not debug else debug_GPU
+        slurm_partion = "gpu_4,gpu_4_a100,gpu_4_h100" if not DEBUG else debug_GPU
 
     executor.update_parameters(slurm_partition=slurm_partion)
 
-    if "DDQ" in config_file and "Swin" in config_file:
+    if "DDQ" in config_file and "Swin" in config_file and not DEBUG:
         # needs more time
-        executor.update_parameters(slurm_time="48:00:00" if not debug else debug_time)
+        executor.update_parameters(slurm_time="48:00:00")
+    elif DEBUG:
+        executor.update_parameters(slurm_time=debug_time)
     else:
-        executor.update_parameters(slurm_time="10:00:00" if not debug else debug_time)
+        executor.update_parameters(slurm_time="10:00:00")
 
     with executor.batch():
         for attack_name, attack in ATTACKS.items():
@@ -181,7 +185,10 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                     + "_".join([k + format_value(v) for k, v in attack_kwargs.items()])
                 )
 
-                if os.path.exists(result_dir):
+                if DEBUG:
+                    result_dir = result_dir.replace("results", "debug")
+
+                if os.path.exists(result_dir) and not DEBUG:
                     logger.info(f"skipping {result_dir} as it already exists")
                 else:
                     logger.info(f"running attack {attack_name} with {attack_kwargs}")
@@ -196,8 +203,8 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                     )
                     jobs.append(job)
 
-    if debug and len(jobs) > 3:
-        break
+    # if DEBUG and len(jobs) > 3:
+    #     break
 logger.info(
     "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
 )
