@@ -9,3 +9,6 @@ slurm/train_work_dir_voc/*
 configs_to_test_voc/*
 slurm/train_results_voc/*
 models_debug
+configs_to_train
+configs_to_test
+3DCommonCorruptions/create_3dcc/motion_video/tmp
