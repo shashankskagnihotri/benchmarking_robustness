@@ -116,9 +116,4 @@ if __name__ == "__main__":
     )
 
 
-# python -m pudb new_trainer.py configs_erroneous/verification/glip_r50_voc0712.py cfg_experiments/slum_experiments
-
-
-# python -m pudb new_trainer.py cfg_experiments/glip_r50_voc0712_captions.py cfg_experiments/slum_experiments
-
-# python -m pudb new_trainer.py cfg_experiments/glip_r101_voc0712_captions.py cfg_experiments/slum_experiments
+# python -m pudb new_trainer.py configs_erroneous/verification/Detic_new_r50_coco.py cfg_experiments/slum_experiments

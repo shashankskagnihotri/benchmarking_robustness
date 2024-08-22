@@ -49,12 +49,11 @@ model = dict(
         norm_cfg=dict(requires_grad=True, type='BN'),
         norm_eval=True,
         num_stages=4,
-        out_indices=[
+        out_indices=([
             0,
             1,
             2,
-            3,
-        ],
+        ], ),
         style='pytorch',
         type='ResNet'),
     bbox_head=dict(
@@ -125,12 +124,11 @@ model = dict(
         ],
         type='DetDataPreprocessor'),
     neck=dict(
-        in_channels=[
+        in_channels=([
             256,
             512,
             1024,
-            2048,
-        ],
+        ], ),
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
         num_stages=6,

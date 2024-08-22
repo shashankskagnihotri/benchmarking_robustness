@@ -526,6 +526,47 @@ def process_files(source_folder):
             print(f"Condition of {filename} met")
 
             cfg = Config.fromfile(filepath)
+            if "r50" in filename or "r101" in filename:
+                cfg.model.backbone.out_indices = [
+                    0,
+                    1,
+                    2,
+                    # 3,
+                ]
+                cfg.model.neck.in_channels = [
+                    256,
+                    512,
+                    1024,
+                    # 2048,
+                ]
+            elif "swin-b" in filename:
+                cfg.model.backbone.depths = [
+                    2,
+                    2,
+                    18,
+                    2,
+                    # 1,
+                ]
+
+                cfg.model.backbone.out_indices = [
+                    1,
+                    2,
+                    3,
+                    # 4,
+                ]
+                cfg.model.backbone.strides = [
+                    4,
+                    2,
+                    2,
+                    2,
+                    # 2,
+                ]
+                cfg.model.neck.in_channels = [
+                    256,
+                    512,
+                    1024,
+                    # 2048,
+                ]
             cfg.vis_backends = [
                 dict(type="LocalVisBackend"),
             ]
@@ -537,7 +578,7 @@ def process_files(source_folder):
                 os.remove(filepath)
             else:
                 cfg.dump(destination_file)
-        elif "free_anchor_convnext-b" in filename:
+        elif "free_anchor_convnext-b" in filename or "free_anchor_swin-b" in filename:
             print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
             cfg.optim_wrapper.type = "OptimWrapper"
@@ -546,16 +587,6 @@ def process_files(source_folder):
                 os.remove(filepath)
             else:
                 cfg.dump(destination_file)
-        elif "free_anchor_swin-b" in filename:
-            print(f"Condition of {filename} met")
-            cfg = Config.fromfile(filepath)
-            cfg.optim_wrapper.type = "OptimWrapper"
-            if source_folder != destination_folder:
-                cfg.dump(destination_file)
-                os.remove(filepath)
-            else:
-                cfg.dump(destination_file)
-
         elif "glip_convnext-b" in filename or "glip_swin-b" in filename:
             print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)
@@ -736,6 +767,13 @@ def process_files(source_folder):
                 18,
                 2,
             ]
+            cfg.model.backbone.strides = [
+                4,
+                2,
+                2,
+                2,
+                # 2,
+            ]
             cfg.model.neck.in_channels = [
                 1024,
                 512,
@@ -762,6 +800,13 @@ def process_files(source_folder):
                 2,
                 18,
                 2,
+            ]
+            cfg.model.backbone.strides = [
+                4,
+                2,
+                2,
+                2,
+                # 2,
             ]
             cfg.model.neck.in_channels = [
                 1024,
