@@ -946,6 +946,31 @@
                 "l_inf_delta2": 0.03137257695198059,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-08-17 17:36:42",
+            "model": "gma",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-17 17:47:56",
+            "duration": "00:11:14",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 0.63225430754925,
+                "px1": 0.9295225609648583,
+                "px3": 0.9716808770449544,
+                "px5": 0.9813051569015218,
+                "outlier": 2.5415286725285853,
+                "own_epe": 0.632254282662092,
+                "cosim": 0.9330713380482424,
+                "epe_initial_to_negative": 26.73319529691187,
+                "epe_initial_to_zero": 13.366597648455935,
+                "own_epe_ground_truth_to_negative": 26.822821615551895,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.822822869253432,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
         }
     ]
 }

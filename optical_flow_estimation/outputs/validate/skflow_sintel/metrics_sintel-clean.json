@@ -1,0 +1,29 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-08-18 11:15:27",
+            "model": "skflow",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-18 11:36:55",
+            "duration": "00:21:27",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 0.5236921693895309,
+                "px1": 0.9323173627386175,
+                "px3": 0.9743557733257268,
+                "px5": 0.9840126416639682,
+                "outlier": 2.2601508416808747,
+                "own_epe": 0.5236921456564615,
+                "cosim": 0.9352563895592887,
+                "epe_initial_to_negative": 26.857745457336836,
+                "epe_initial_to_zero": 13.428872728668418,
+                "own_epe_ground_truth_to_negative": 26.894363494330477,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.89436459005967,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
+        }
+    ]
+}

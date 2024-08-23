@@ -137,6 +137,31 @@
                 "l_inf_delta2": 0.03137257695198059,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-08-18 10:53:21",
+            "model": "liteflownet",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-18 10:57:19",
+            "duration": "00:03:57",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 1.4983424065593454,
+                "px1": 0.9042492449627142,
+                "px3": 0.9472703967640654,
+                "px5": 0.9593783410894081,
+                "outlier": 5.041601492220954,
+                "own_epe": 1.498342340434548,
+                "cosim": 0.9153467668408276,
+                "epe_initial_to_negative": 26.33908637215837,
+                "epe_initial_to_zero": 13.169596388864472,
+                "own_epe_ground_truth_to_negative": 26.475139678870107,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.4751408983319,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
         }
     ]
 }
