@@ -368,29 +368,51 @@ def test_sample(sample, compute_metrics=True):
 
     return tensor2float(loss), tensor2float(scalar_outputs), image_outputs
 
-# TODO: Check if attack is correct 
+
 def attack(attack_type: str):
 
-    from attacks import CosPGDAttack
+    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
     epsilon = 0.03
     alpha = 0.01
-    num_iterations = 10
+    num_iterations = 20
+    norm =  # TODO : NORM ? 
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(
             model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
         )
+    elif attack_type == "fgsm":
+        attacker = FGSMAttack( model, epsilon, targeted=False)
+
+    elif attack_type == "pgd":
+        attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
+
+    # TODO: norm anpassen - parameter dafür finden 
+    elif attack_type =='bim':
+        attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
+        
+    elif attack_type == 'apgd':
+        attacker = APGDAttack(model, n_iter=100, norm='Linf', n_restarts=1, eps=None, seed=0, loss='ce', eot_iter=1, rho=.75, topk=None, verbose=False, device=None, use_largereps=False, is_tf_model=False, logger=None)
+    
     else:
         raise ValueError("Attack type not recognized")
 
     for batch_idx, sample in enumerate(TestImgLoader):
-        attacker.attack(sample["left"], sample["right"], sample["disparity"])
-        perturbed_left_image, perturbed_right_image = attacker.attack(
-            sample["left"], sample["right"], sample["disparity"]
-        )
+        perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
+        for iteration in perturbed_results.keys():
+            model.eval()
+            perturbed_left, perturbed_right = perturbed_results[iteration]
+            loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
+            save_scalars(logger, "test", scalar_outputs, batch_idx)
+
 
         print("batch", batch_idx)
+
+
+
+
+
 
 if __name__ == "__main__":
     print("GwcNet main")

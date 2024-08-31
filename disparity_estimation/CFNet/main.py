@@ -395,11 +395,10 @@ def attack(attack_type: str):
 
     # TODO: norm anpassen - parameter dafür finden 
     elif attack_type =='bim':
-        attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) # or corporate into other attack with flag ?? 
-        # model, epsilon: float, num_iterations: int, alpha: float, targeted: bool, norm: str
-        # add norm parameter 
+        attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
+        
     elif attack_type == 'apgd':
-        attacker = APGDAttack()
+        attacker = APGDAttack(model, n_iter=100, norm='Linf', n_restarts=1, eps=None, seed=0, loss='ce', eot_iter=1, rho=.75, topk=None, verbose=False, device=None, use_largereps=False, is_tf_model=False, logger=None)
     
     else:
         raise ValueError("Attack type not recognized")
@@ -407,6 +406,7 @@ def attack(attack_type: str):
     for batch_idx, sample in enumerate(TestImgLoader):
         perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
         for iteration in perturbed_results.keys():
+            model.eval()
             perturbed_left, perturbed_right = perturbed_results[iteration]
             loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
             save_scalars(logger, "test", scalar_outputs, batch_idx)
