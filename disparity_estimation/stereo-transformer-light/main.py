@@ -18,6 +18,8 @@ from utilities.summary_logger import TensorboardSummary
 from utilities.train import train_one_epoch
 from module.loss import build_criterion
 
+import mlflow
+
 
 def get_args_parser():
     """
@@ -267,6 +269,8 @@ def attack(attack_type: str, args):
     num_iterations = 20
     norm =  # TODO : NORM ? 
 
+    data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
+
     if attack_type == "cospgd":
         attacker = CosPGDAttack(
             model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
@@ -282,12 +286,12 @@ def attack(attack_type: str, args):
         attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
         
     elif attack_type == 'apgd':
-        attacker = APGDAttack(self, predict, n_iter=100, norm='Linf', n_restarts=1, eps=None, seed=0, loss='ce', eot_iter=1, rho=.75, topk=None, verbose=False, device=None, use_largereps=False, is_tf_model=False, logger=None)
+        attacker = APGDAttack(model, num_iterations)
     
     else:
         raise ValueError("Attack type not recognized")
 
-    for batch_idx, sample in enumerate(TestImgLoader):
+    for batch_idx, sample in enumerate(data_loader_test):
         perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
         for iteration in perturbed_results.keys():
             model.eval()

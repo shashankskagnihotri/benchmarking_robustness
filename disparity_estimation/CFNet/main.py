@@ -388,7 +388,7 @@ def attack(attack_type: str):
             model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
         )
     elif attack_type == "fgsm":
-        attacker = FGSMAttack( model, epsilon, targeted=False)
+        attacker = FGSMAttack( model, epsilon, targeted=False) # num_iteration = 1 -> das es witklich eins ist 
 
     elif attack_type == "pgd":
         attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
@@ -398,7 +398,7 @@ def attack(attack_type: str):
         attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
         
     elif attack_type == 'apgd':
-        attacker = APGDAttack(model, n_iter=100, norm='Linf', n_restarts=1, eps=None, seed=0, loss='ce', eot_iter=1, rho=.75, topk=None, verbose=False, device=None, use_largereps=False, is_tf_model=False, logger=None)
+        attacker = APGDAttack(model, num_iterations)
     
     else:
         raise ValueError("Attack type not recognized")

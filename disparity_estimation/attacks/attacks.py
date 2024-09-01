@@ -824,8 +824,12 @@ import math
 #         self.eps = epsilon
 
 import torch.nn as nn
+
+
+
+
 class APGDAttack():
-    def __init__(self, model, n_iter=100, norm='L2', eps=1.0, seed=0, loss='l2', eot_iter=1, rho=.75, verbose=False, device=None):
+    def __init__(self, model, n_iter=100, norm='L2', eps=1.0, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None):
         self.model = model
         self.n_iter = n_iter
         self.eps = eps
@@ -851,7 +855,7 @@ class APGDAttack():
     def init_hyperparam(self, x):
         if self.device is None:
             self.device = x.device
-        self.orig_dim = list(x.shape[1:])
+        self.orig_dim = list(x.shape[2:])  # Assuming x is [B, C, H, W] for each image
         self.ndims = len(self.orig_dim)
         if self.seed is None:
             self.seed = time.time()
@@ -863,32 +867,50 @@ class APGDAttack():
             t = (x ** 2).view(x.shape[0], -1).sum(-1).sqrt()
         elif self.norm == 'L1':
             t = x.abs().view(x.shape[0], -1).sum(dim=-1)
-        return x / (t.view(-1, *([1] * self.ndims)) + 1e-12)
+        return x / (t.view(-1, *([1] * (self.ndims + 1))) + 1e-12)
 
-    def attack_single_run(self, x, x_init=None):
-        x = x.unsqueeze(0) if len(x.shape) < self.ndims else x
+    def L1_projection(self, x, delta, eps):
+        delta_flat = delta.view(delta.size(0), -1)
+        abs_delta = delta_flat.abs()
+        abs_delta_sum = abs_delta.sum(dim=1, keepdim=True)
+        factor = torch.clamp(abs_delta_sum - eps, min=0) / abs_delta_sum
+        delta_flat *= (1 - factor).view(-1, 1)
+        return delta_flat.view_as(delta)
+
+    def attack_single_run(self, x_left, x_right, disparity_target=None):
+        x_left = x_left.unsqueeze(0) if len(x_left.shape) < self.ndims + 1 else x_left
+        x_right = x_right.unsqueeze(0) if len(x_right.shape) < self.ndims + 1 else x_right
+
+        if disparity_target is None:
+            disparity_target = self.model(x_left, x_right).detach()
+
+        # Stack the left and right images to create a unified tensor
+        x_left_right = torch.stack((x_left, x_right), dim=1)  # [B, 2, C, H, W]
 
         if self.norm == 'Linf':
-            t = 2 * torch.rand(x.shape).to(self.device).detach() - 1
-            x_adv = x + self.eps * self.normalize(t)
+            t = 2 * torch.rand(x_left_right.shape).to(self.device).detach() - 1
+            x_adv = x_left_right + self.eps * self.normalize(t)
         elif self.norm == 'L2':
-            t = torch.randn(x.shape).to(self.device).detach()
-            x_adv = x + self.eps * self.normalize(t)
+            t = torch.randn(x_left_right.shape).to(self.device).detach()
+            x_adv = x_left_right + self.eps * self.normalize(t)
         elif self.norm == 'L1':
-            t = torch.randn(x.shape).to(self.device).detach()
-            delta = self.L1_projection(x, t, self.eps)
-            x_adv = x + t + delta
+            t = torch.randn(x_left_right.shape).to(self.device).detach()
+            delta = self.L1_projection(x_left_right, t, self.eps)
+            x_adv = x_left_right + t + delta
 
         x_adv = x_adv.clamp(0., 1.)
         x_best = x_adv.clone()
-        loss_best = self.criterion(self.model(x_best), self.model(x)).mean().item()
+        loss_best = self.criterion(self.model(x_best[:, 0], x_best[:, 1]), disparity_target).mean().item()
 
         step_size = 2. * self.eps / self.n_iter
 
+        # Initialize a dictionary to store perturbed results for each iteration
+        perturbed_results = {}
+
         for i in range(self.n_iter):
             x_adv.requires_grad_()
-            logits = self.model(x_adv)
-            loss_indiv = self.criterion(logits, self.model(x)).sum()
+            disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])
+            loss_indiv = self.criterion(disparity_pred, disparity_target).sum()
 
             grad = torch.autograd.grad(loss_indiv, [x_adv])[0]
             grad_norm = self.normalize(grad)
@@ -898,24 +920,122 @@ class APGDAttack():
             elif self.norm == 'L2':
                 x_adv = x_adv.detach() + step_size * grad_norm
             elif self.norm == 'L1':
-                grad_topk = grad.abs().view(x.shape[0], -1).sort(-1)[0]
+                grad_topk = grad.abs().view(x_left_right.shape[0], -1).sort(-1)[0]
                 sparsegrad = grad * (grad.abs() >= grad_topk).float()
                 x_adv = x_adv.detach() + step_size * sparsegrad.sign() / (grad_norm.sum() + 1e-10)
-            
+
             x_adv = x_adv.clamp(0., 1.)
 
             # Update best adversarial example if the loss improved
-            loss_curr = self.criterion(self.model(x_adv), self.model(x)).mean().item()
+            loss_curr = self.criterion(self.model(x_adv[:, 0], x_adv[:, 1]), disparity_target).mean().item()
             if loss_curr < loss_best:
                 loss_best = loss_curr
                 x_best = x_adv.clone()
 
-        return x_best
+            # Store the perturbed images for the current iteration
+            perturbed_results[i] = (x_adv[:, 0].clone(), x_adv[:, 1].clone())
 
-    def perturb(self, x):
-        self.init_hyperparam(x)
-        adv = self.attack_single_run(x)
-        return adv
+        return perturbed_results
+
+    def attack(self, x_left, x_right, disparity_target=None):
+        self.init_hyperparam(x_left)
+        perturbed_results = self.attack_single_run(x_left, x_right, disparity_target)
+        return perturbed_results
+
+
+
+# class APGDAttack():
+#     def __init__(self, model, n_iter=100, norm='L2', eps=1.0, seed=0, loss='l2', eot_iter=1, rho=.75, verbose=False, device=None):
+#         self.model = model
+#         self.n_iter = n_iter
+#         self.eps = eps
+#         self.norm = norm
+#         self.seed = seed
+#         self.loss = loss
+#         self.eot_iter = eot_iter
+#         self.thr_decr = rho
+#         self.verbose = verbose
+#         self.device = device
+#         self.use_rs = True
+#         self.n_iter_orig = n_iter
+#         self.eps_orig = eps
+
+#         if self.norm not in ['Linf', 'L2', 'L1']:
+#             raise ValueError(f"Unsupported norm: {self.norm}")
+
+#         if self.loss not in ['l1', 'l2']:
+#             raise ValueError(f"Unsupported loss: {self.loss}")
+
+#         self.criterion = nn.L1Loss(reduction='none') if self.loss == 'l1' else nn.MSELoss(reduction='none')
+
+#     def init_hyperparam(self, x):
+#         if self.device is None:
+#             self.device = x.device
+#         self.orig_dim = list(x.shape[1:])
+#         self.ndims = len(self.orig_dim)
+#         if self.seed is None:
+#             self.seed = time.time()
+
+#     def normalize(self, x):
+#         if self.norm == 'Linf':
+#             t = x.abs().view(x.shape[0], -1).max(1)[0]
+#         elif self.norm == 'L2':
+#             t = (x ** 2).view(x.shape[0], -1).sum(-1).sqrt()
+#         elif self.norm == 'L1':
+#             t = x.abs().view(x.shape[0], -1).sum(dim=-1)
+#         return x / (t.view(-1, *([1] * self.ndims)) + 1e-12)
+
+#     def attack_single_run(self, x, x_init=None):
+#         x = x.unsqueeze(0) if len(x.shape) < self.ndims else x
+
+#         if self.norm == 'Linf':
+#             t = 2 * torch.rand(x.shape).to(self.device).detach() - 1
+#             x_adv = x + self.eps * self.normalize(t)
+#         elif self.norm == 'L2':
+#             t = torch.randn(x.shape).to(self.device).detach()
+#             x_adv = x + self.eps * self.normalize(t)
+#         elif self.norm == 'L1':
+#             t = torch.randn(x.shape).to(self.device).detach()
+#             delta = self.L1_projection(x, t, self.eps)
+#             x_adv = x + t + delta
+
+#         x_adv = x_adv.clamp(0., 1.)
+#         x_best = x_adv.clone()
+#         loss_best = self.criterion(self.model(x_best), self.model(x)).mean().item()
+
+#         step_size = 2. * self.eps / self.n_iter
+
+#         for i in range(self.n_iter):
+#             x_adv.requires_grad_()
+#             logits = self.model(x_adv)
+#             loss_indiv = self.criterion(logits, self.model(x)).sum()
+
+#             grad = torch.autograd.grad(loss_indiv, [x_adv])[0]
+#             grad_norm = self.normalize(grad)
+
+#             if self.norm == 'Linf':
+#                 x_adv = x_adv.detach() + step_size * torch.sign(grad_norm)
+#             elif self.norm == 'L2':
+#                 x_adv = x_adv.detach() + step_size * grad_norm
+#             elif self.norm == 'L1':
+#                 grad_topk = grad.abs().view(x.shape[0], -1).sort(-1)[0]
+#                 sparsegrad = grad * (grad.abs() >= grad_topk).float()
+#                 x_adv = x_adv.detach() + step_size * sparsegrad.sign() / (grad_norm.sum() + 1e-10)
+            
+#             x_adv = x_adv.clamp(0., 1.)
+
+#             # Update best adversarial example if the loss improved
+#             loss_curr = self.criterion(self.model(x_adv), self.model(x)).mean().item()
+#             if loss_curr < loss_best:
+#                 loss_best = loss_curr
+#                 x_best = x_adv.clone()
+
+#         return x_best
+
+#     def perturb(self, x):
+#         self.init_hyperparam(x)
+#         adv = self.attack_single_run(x)
+#         return adv
 
 import torch
 import torch.nn.functional as F
