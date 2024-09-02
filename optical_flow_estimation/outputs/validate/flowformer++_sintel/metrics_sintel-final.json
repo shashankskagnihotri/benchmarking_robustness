@@ -1,0 +1,72 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-08-13 05:25:08",
+            "model": "flowformer++",
+            "checkpoint": "sintel",
+            "attack": "pgd",
+            "optim": "initial_flow",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-08-13 21:41:55",
+            "duration": "16:16:46",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 247.79480988674732,
+                "px1": 0.013964080349438827,
+                "px3": 0.058070382569564906,
+                "px5": 0.08123461960836217,
+                "outlier": 94.18934644562596,
+                "own_epe": 247.79480014697046,
+                "cosim": 0.14559754671963507,
+                "l2_delta1": 0.02087980553357505,
+                "l2_delta2": 0.0208950927454216,
+                "l2_delta12": 0.020887511262561012,
+                "l0_delta1": 1328338.7531219982,
+                "l0_delta2": 1328457.2411143132,
+                "l0_delta12": 2656795.9942363114,
+                "l_inf_delta1": 0.03137257695198059,
+                "l_inf_delta2": 0.03137257695198059,
+                "l_inf_delta12": 0.03137257695198059
+            }
+        },
+        {
+            "start_time": "2024-08-13 07:06:02",
+            "model": "flowformer++",
+            "checkpoint": "sintel",
+            "attack": "cospgd",
+            "optim": "initial_flow",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-08-13 23:19:35",
+            "duration": "16:13:32",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 210.7997627711777,
+                "px1": 0.013132529627851143,
+                "px3": 0.06298552078133193,
+                "px5": 0.09160181678782471,
+                "outlier": 93.68065129931905,
+                "own_epe": 210.79975320614952,
+                "cosim": 0.3940760468960939,
+                "l2_delta1": 0.0208768416410822,
+                "l2_delta2": 0.020889482329403634,
+                "l2_delta12": 0.0208832223440711,
+                "l0_delta1": 1328320.382324688,
+                "l0_delta2": 1328444.3986551394,
+                "l0_delta12": 2656764.780979827,
+                "l_inf_delta1": 0.03137257695198059,
+                "l_inf_delta2": 0.03137257695198059,
+                "l_inf_delta12": 0.03137257695198059
+            }
+        }
+    ]
+}

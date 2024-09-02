@@ -162,6 +162,73 @@
                 "epe_ground_truth_to_negative": 26.273183292488316,
                 "epe_ground_truth_to_zero": 13.495708393346336
             }
+        },        {
+            "start_time": "2024-08-20 23:20:23",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "pgd",
+            "optim": "initial_flow",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-08-21 00:32:36",
+            "duration": "01:12:12",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 4.144176564459384,
+                "px1": 0.39300221722308226,
+                "px3": 0.7358790885274166,
+                "px5": 0.8555144134490222,
+                "outlier": 25.833266595942142,
+                "own_epe": 4.144176369899746,
+                "cosim": 0.749885306749976,
+                "l2_delta1": 0.02202919653395869,
+                "l2_delta2": 0.020899943076968765,
+                "l2_delta12": 0.02147260358902437,
+                "l0_delta1": 1334466.9048991355,
+                "l0_delta2": 1335092.432276657,
+                "l0_delta12": 2669559.3371757925,
+                "l_inf_delta1": 0.03137257695198059,
+                "l_inf_delta2": 0.03137257695198059,
+                "l_inf_delta12": 0.03137257695198059
+            }
+        },
+        {
+            "start_time": "2024-08-20 23:24:28",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "cospgd",
+            "optim": "initial_flow",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "iterations": 20,
+            "alpha": 0.01,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-08-21 00:39:18",
+            "duration": "01:14:49",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 4.136682347651289,
+                "px1": 0.3901770267855666,
+                "px3": 0.735335463763543,
+                "px5": 0.8569595368290955,
+                "outlier": 25.911928224517794,
+                "own_epe": 4.136682167692212,
+                "cosim": 0.7460801210021824,
+                "l2_delta1": 0.022027929305429073,
+                "l2_delta2": 0.02091299549396455,
+                "l2_delta12": 0.021478319350955694,
+                "l0_delta1": 1334470.6887608068,
+                "l0_delta2": 1335080.2391930835,
+                "l0_delta12": 2669550.9279538905,
+                "l_inf_delta1": 0.03137257695198059,
+                "l_inf_delta2": 0.03137257695198059,
+                "l_inf_delta12": 0.03137257695198059
+            }
         }
     ]
 }

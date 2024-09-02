@@ -13,7 +13,7 @@
 
 model="ms_raft+"
 dataset="kitti-2015"
-checkpoint="kitti"
+checkpoint="mixed"
 targeteds="True False"
 targets="negative zero"
 norms="inf two"
