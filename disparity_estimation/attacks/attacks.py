@@ -281,23 +281,35 @@ class Attack:
         loss = cossim.detach() * loss
         return loss
 
+import torch
+import torch.nn.functional as F
+
 class CosPGDAttack:
-    def __init__(self, model, epsilon, alpha, num_iterations, num_classes=None, targeted=False):
+    def __init__(self, model, epsilon, alpha, num_iterations, norm='Linf', num_classes=None, targeted=False):
+        """
+        :param norm: 'Linf' für L∞-Norm oder 'L2' für L2-Norm
+        """
         self.model = model
         self.epsilon = epsilon
         self.alpha = alpha
         self.num_iterations = num_iterations
+        self.norm = norm
         self.num_classes = num_classes
         self.targeted = targeted
     
     def attack(self, left_image, right_image, labels):
-        # Initialize perturbations for both left and right images
-        perturbed_left = Attack.init_linf(left_image, self.epsilon)
-        perturbed_right = Attack.init_linf(right_image, self.epsilon)
-
+         # Initialize perturbations for both left and right images and the norm
+        if self.norm == 'Linf':
+            perturbed_left = Attack.init_linf(left_image, self.epsilon)
+            perturbed_right = Attack.init_linf(right_image, self.epsilon)
+        elif self.norm == 'L2':
+            perturbed_left = Attack.init_l2(left_image, self.epsilon)
+            perturbed_right = Attack.init_l2(right_image, self.epsilon)
+        else:
+            raise ValueError("Unsupported norm type. Use 'Linf' or 'L2' instead.")
+        
         # save perturbed
         perturbed_results = {}
-      
         
         for iteration in range(self.num_iterations):
             perturbed_left.requires_grad = True
@@ -305,12 +317,21 @@ class CosPGDAttack:
             
             # Forward pass the perturbed images through the model
             outputs = self.model(perturbed_left, perturbed_right)
-            print(len(outputs))
-            outputs = outputs[-1].cuda()
+            outputs = outputs[-1].cuda()  
             labels = labels.cuda()
             
             # Compute the loss
             loss = F.mse_loss(outputs, labels)
+            
+            # Scale the loss with Cosine Similarity
+            loss = Attack.cospgd_scale(
+                predictions=outputs,
+                labels=labels,
+                loss=loss,
+                num_classes=self.num_classes,
+                targeted=self.targeted,
+                one_hot=False  # to doregression
+            )
             
             # Zero all existing gradients
             self.model.zero_grad()
@@ -322,34 +343,139 @@ class CosPGDAttack:
             left_grad = perturbed_left.grad.data
             right_grad = perturbed_right.grad.data
             
-            # Perform the attack step
-            perturbed_left = Attack.step_inf(
-                perturbed_image=perturbed_left,
-                epsilon=self.epsilon,
-                data_grad=left_grad,
-                orig_image=left_image,
-                alpha=self.alpha,
-                targeted=self.targeted,
-                clamp_min=0,
-                clamp_max=1
-            )
+            # Perform the attack step based on selected norm
+            if self.norm == 'Linf':
+                perturbed_left = Attack.step_inf(
+                    perturbed_image=perturbed_left,
+                    epsilon=self.epsilon,
+                    data_grad=left_grad,
+                    orig_image=left_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+                
+                perturbed_right = Attack.step_inf(
+                    perturbed_image=perturbed_right,
+                    epsilon=self.epsilon,
+                    data_grad=right_grad,
+                    orig_image=right_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+            elif self.norm == 'L2':
+                perturbed_left = Attack.step_l2(
+                    perturbed_image=perturbed_left,
+                    epsilon=self.epsilon,
+                    data_grad=left_grad,
+                    orig_image=left_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+                
+                perturbed_right = Attack.step_l2(
+                    perturbed_image=perturbed_right,
+                    epsilon=self.epsilon,
+                    data_grad=right_grad,
+                    orig_image=right_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
             
-            perturbed_right = Attack.step_inf(
-                perturbed_image=perturbed_right,
-                epsilon=self.epsilon,
-                data_grad=right_grad,
-                orig_image=right_image,
-                alpha=self.alpha,
-                targeted=self.targeted,
-                clamp_min=0,
-                clamp_max=1
-            )
-        
             # save results after every iteration
-            perturbed_results[iteration]=(perturbed_left, perturbed_right)
-
-
+            perturbed_results[iteration] = (perturbed_left, perturbed_right)
+        
         return perturbed_results
+
+
+
+
+
+
+# class CosPGDAttack:
+#     def __init__(self, model, epsilon, alpha, num_iterations,norm='Linf', num_classes=None, targeted=False):
+#         self.model = model
+#         self.epsilon = epsilon
+#         self.alpha = alpha
+#         self.num_iterations = num_iterations
+#         self.norm = norm
+#         self.num_classes = num_classes
+#         self.targeted = targeted
+    
+#     def attack(self, left_image, right_image, labels):
+#         # Initialize perturbations for both left and right images
+#         if self.norm == 'Linf':
+#             perturbed_left = Attack.init_linf(left_image, self.epsilon)
+#             perturbed_right = Attack.init_linf(right_image, self.epsilon)
+#         elif self.norm == 'L2':
+#             perturbed_left = Attack.init_l2(left_image, self.epsilon)
+#             perturbed_right = Attack.init_l2(right_image, self.epsilon)
+#         else:
+#             raise ValueError("Unsupported norm type. Use 'Linf' or 'L2' instead.")
+        
+
+#         # save perturbed
+#         perturbed_results = {}
+      
+        
+#         for iteration in range(self.num_iterations):
+#             perturbed_left.requires_grad = True
+#             perturbed_right.requires_grad = True
+            
+#             # Forward pass the perturbed images through the model
+#             outputs = self.model(perturbed_left, perturbed_right)
+#             print(len(outputs))
+#             outputs = outputs[-1].cuda()
+#             labels = labels.cuda()
+            
+#             # Compute the loss
+#             loss = F.mse_loss(outputs, labels)
+            
+#             # Zero all existing gradients
+#             self.model.zero_grad()
+            
+#             # Backward pass to compute gradients of the loss w.r.t the perturbed images
+#             loss.backward()
+            
+#             # Collect the gradient data
+#             left_grad = perturbed_left.grad.data
+#             right_grad = perturbed_right.grad.data
+            
+#             # Perform the attack step
+#             perturbed_left = Attack.step_inf(
+#                 perturbed_image=perturbed_left,
+#                 epsilon=self.epsilon,
+#                 data_grad=left_grad,
+#                 orig_image=left_image,
+#                 alpha=self.alpha,
+#                 targeted=self.targeted,
+#                 clamp_min=0,
+#                 clamp_max=1
+#             )
+            
+#             perturbed_right = Attack.step_inf(
+#                 perturbed_image=perturbed_right,
+#                 epsilon=self.epsilon,
+#                 data_grad=right_grad,
+#                 orig_image=right_image,
+#                 alpha=self.alpha,
+#                 targeted=self.targeted,
+#                 clamp_min=0,
+#                 clamp_max=1
+#             )
+        
+#             # save results after every iteration
+#             perturbed_results[iteration]=(perturbed_left, perturbed_right)
+
+
+#         return perturbed_results
 
 
 from typing import Dict, List, Optional
@@ -423,7 +549,7 @@ import torch
 import torch.nn.functional as F
 
 class PGDAttack:
-    def __init__(self, model, epsilon, num_iterations, alpha, norm='inf', random_start=True, targeted=False):
+    def __init__(self, model, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False):
         self.model = model
         self.epsilon = epsilon
         self.alpha = alpha
@@ -433,9 +559,9 @@ class PGDAttack:
         self.targeted = targeted
 
     def _random_init(self, x):
-        if self.norm == 'inf':
+        if self.norm == 'Linf':
             x = x + (torch.rand(x.size(), dtype=x.dtype, device=x.device) - 0.5) * 2 * self.epsilon
-        elif self.norm == 'two':
+        elif self.norm == 'L2':
             x = x + torch.randn_like(x) * self.epsilon
         x = torch.clamp(x, 0, 1)
         return x
@@ -477,10 +603,10 @@ class PGDAttack:
             left_grad = perturbed_left.grad.detach()
             right_grad = perturbed_right.grad.detach()
 
-            if self.norm == 'inf':
+            if self.norm == 'Linf':
                 perturbed_left = self.pgd_attack_step_inf(perturbed_left, left_grad, orig_left_image)
                 perturbed_right = self.pgd_attack_step_inf(perturbed_right, right_grad, orig_right_image)
-            elif self.norm == 'two':
+            elif self.norm == 'L2':
                 perturbed_left = self.pgd_attack_step_l2(perturbed_left, left_grad, orig_left_image)
                 perturbed_right = self.pgd_attack_step_l2(perturbed_right, right_grad, orig_right_image)
 
@@ -745,9 +871,9 @@ class BIMAttack:
 
     def _clip_perturbation(self, adv_images, images):
         """Clip perturbation to be within bounds"""
-        if self.norm == "inf":
+        if self.norm == 'Linf':
             delta = torch.clamp(adv_images - images, min=-self.epsilon, max=self.epsilon)
-        elif self.norm == "two":
+        elif self.norm == 'L2':
             delta = adv_images - images
             delta_norms = torch.norm(delta.view(delta.size(0), -1), p=2, dim=1)
             factor = self.epsilon / delta_norms
