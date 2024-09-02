@@ -376,12 +376,10 @@ def attack(attack_type: str):
     epsilon = 0.03
     alpha = 0.01
     num_iterations = 20
-    norm = .... # which value ??
+    norm = "Linf" 
 
     if attack_type == "cospgd":
-        attacker = CosPGDAttack(
-            model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
-        )
+        attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, norm,num_classes=None, targeted=False )
     elif attack_type == "fgsm":
         attacker = FGSMAttack( model, epsilon, targeted=False)
 
