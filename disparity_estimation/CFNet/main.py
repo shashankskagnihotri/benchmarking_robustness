@@ -382,23 +382,23 @@ def attack(attack_type: str):
     epsilon = 0.03
     alpha = 0.01
     num_iterations = 20
+    norm = .... # which value ??
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(
             model, epsilon, alpha, num_iterations, num_classes=None, targeted=False
         )
     elif attack_type == "fgsm":
-        attacker = FGSMAttack( model, epsilon, targeted=False) # num_iteration = 1 -> das es witklich eins ist 
+        attacker = FGSMAttack( model, epsilon, targeted=False) 
 
     elif attack_type == "pgd":
-        attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
+        attacker = PGDAttack(model,epsilon,num_iterations,alpha,norm,random_start=True,targeted=False)
 
-    # TODO: norm anpassen - parameter dafür finden 
     elif attack_type =='bim':
         attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
         
     elif attack_type == 'apgd':
-        attacker = APGDAttack(model, num_iterations)
+        attacker = APGDAttack(model, num_iterations,norm, epsilon)
     
     else:
         raise ValueError("Attack type not recognized")

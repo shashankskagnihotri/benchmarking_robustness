@@ -376,7 +376,7 @@ def attack(attack_type: str):
     epsilon = 0.03
     alpha = 0.01
     num_iterations = 20
-    norm =  # TODO : NORM ? 
+    norm = .... # which value ??
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(
@@ -388,12 +388,11 @@ def attack(attack_type: str):
     elif attack_type == "pgd":
         attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
 
-    # TODO: norm anpassen - parameter dafür finden 
     elif attack_type =='bim':
         attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
         
     elif attack_type == 'apgd':
-        attacker = APGDAttack(model, num_iterations)
+        attacker = APGDAttack(model, num_iterations,norm, epsilon)
     
     else:
         raise ValueError("Attack type not recognized")
