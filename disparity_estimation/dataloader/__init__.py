@@ -30,27 +30,20 @@ def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
 ### START - Get data loaders for CFNet and GWCNet
 
 from torch.utils.data import DataLoader, random_split, Subset
+from torch import Generator
 from dataloader import get_dataset
 
-def get_data_loader_1(args, architeture_name):
+def get_data_loader_1(args, architecture_name):
     train_dataset = get_dataset(
-        args.dataset, args.datapath, architeture_name=architeture_name, split="train"
+        args.dataset, args.datapath, architeture_name=architecture_name, split="train"
     )
     test_dataset = get_dataset(
-        args.dataset, args.datapath, architeture_name=architeture_name, split="test"
+        args.dataset, args.datapath, architeture_name=architecture_name, split="test"
     )
 
-    # TODO: Change for inferance, add if that checks if only inference is performed, then only test data is loaded 
+    # TODO: Change for inference, add if that checks if only inference is performed, then only test data is loaded
     if "kitti" in args.dataset.lower():  # Define split sizes
-        val_size = int(0.2 * len(train_dataset))  # 20% for validation
-        test_size = int(0.1 * len(train_dataset))  # 10% for testing
-        train_size = len(train_dataset) - val_size - test_size
-
-        # Split the dataset, because kitti has no test split
-        train_subset, val_subset, test_dataset = random_split(
-            train_dataset, [train_size, val_size, test_size],
-            random_state=42
-        )
+        test_dataset, train_subset, val_subset = perform_data_split(train_dataset)
     else:
         val_size = int(0.2 * len(train_dataset))  # 20% for validation
         train_size = len(train_dataset) - val_size
@@ -62,7 +55,15 @@ def get_data_loader_1(args, architeture_name):
 
 
     fast_dev_run = False
-    if fast_dev_run == True:
+    test_img_loader, train_img_loader, val_img_loader = check_dev_run_and_create_data_loaders(args, fast_dev_run,
+                                                                                              test_dataset, train_subset,
+                                                                                              val_subset)
+
+    return train_img_loader, val_img_loader, test_img_loader
+
+
+def check_dev_run_and_create_data_loaders(args, fast_dev_run, test_dataset, train_subset, val_subset):
+    if fast_dev_run:
         # Create small subsets for fast_dev_run
         fast_dev_run_size = 10  # Number of data points to use in fast_dev_run
 
@@ -74,15 +75,28 @@ def get_data_loader_1(args, architeture_name):
         train_subset = Subset(train_subset, train_indices)
         val_subset = Subset(val_subset, val_indices)
         test_dataset = Subset(test_dataset, test_indices)
-
-    ValImgLoader = DataLoader(
+    val_img_loader = DataLoader(
         val_subset, args.batch_size, shuffle=False, num_workers=8, drop_last=True
     )
-    TrainImgLoader = DataLoader(
+    train_img_loader = DataLoader(
         train_subset, args.batch_size, shuffle=False, num_workers=8, drop_last=True
     )
-    TestImgLoader = DataLoader(
+    test_img_loader = DataLoader(
         test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False
     )
+    return test_img_loader, train_img_loader, val_img_loader
 
-    return TrainImgLoader, ValImgLoader, TestImgLoader
+
+def perform_data_split(train_dataset):
+    val_size = int(0.2 * len(train_dataset))  # 20% for validation
+    test_size = int(0.1 * len(train_dataset))  # 10% for testing
+    train_size = len(train_dataset) - val_size - test_size
+    # Split the dataset, because kitti has no test split
+    generator = Generator()
+    generator.manual_seed(seed=42)
+    train_subset, val_subset, test_dataset = random_split(
+        train_dataset,
+        [train_size, val_size, test_size],
+        generator
+    )
+    return test_dataset, train_subset, val_subset

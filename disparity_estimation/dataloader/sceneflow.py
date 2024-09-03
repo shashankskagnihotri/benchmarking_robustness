@@ -166,7 +166,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         if self.training:
             # horizontal flip
             result['left'], result['right'], result['occ_mask'], result['occ_mask_right'], disp, disp_right \
-                = sttr.stereo_albumentation.horizontal_flip(result['left'], result['right'], left_occ, right_occ, left_disp, disp_right,
+                = sttr.stereo_albumentation.horizontal_flip(result['left'], result['right'], left_occ, right_occ, left_disp, right_disp,
                                   self.split_folder)
             result['disp'] = np.nan_to_num(disp, nan=0.0)
             result['disp_right'] = np.nan_to_num(disp_right, nan=0.0)
