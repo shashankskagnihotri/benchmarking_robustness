@@ -14,15 +14,13 @@ import numpy as np
 import time
 from torch.utils.tensorboard import SummaryWriter
 
+from dataloader import get_default_loader
 # from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
 from torch.utils.data import DataLoader, random_split, Subset
 import gc
 import mlflow
-
-
-from dataloader import get_dataset, get_data_loader_1
 
 cudnn.benchmark = True
 
@@ -82,8 +80,8 @@ logger = SummaryWriter(args.logdir)
 
 ### START - Prepare Data
 
-TrainImgLoader, ValImgLoader, TestImgLoader = get_data_loader_1(args, "gwcnet-g") # TODO: Refine args here with architecture and model
-
+#TODO: Refine args here with architecture and model
+TrainImgLoader, ValImgLoader, TestImgLoader = get_default_loader(args, "gwcnet-g", debug=args.debug, random_seed=args.seed)
 ### END - Prepare Data
 
 # model, optimizer

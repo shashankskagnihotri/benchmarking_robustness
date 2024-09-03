@@ -112,6 +112,8 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             return self.get_item_gwcnet(img_left, img_right, disp_left)
         elif self.model_name == 'sttr':
             # This might give an error here because there are less oclusion files then others
+            print(index)
+            print(self.occ_left_filenames) # List is empty
             occ_left = self.load_occ(self.occ_left_filenames[index])
             occ_right = self.load_occ(self.occ_right_filenames[index])
             return self.get_item_sttr(img_left, img_right, disp_left, disp_right, occ_left, occ_right)

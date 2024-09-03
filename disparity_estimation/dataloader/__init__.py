@@ -1,10 +1,7 @@
-from torch.utils.data import DataLoader, random_split, Subset, Dataset
-from torch import Generator
-from dataloader import get_dataset
 from typing import Literal
-from torch.utils.data import random_split, Dataset
-from torch import Generator
 
+from torch.utils.data import DataLoader, Subset, random_split, Dataset
+from torch import Generator
 
 # TODO: fix MPISintel corruption and other split loading
 
@@ -127,7 +124,7 @@ def perform_train_test_split(
     subset2_size = len(dataset) - subset1_size  # remainder for the second subset
 
     generator = Generator()
-    generator.manual_seed(seed=random_seed)
+    generator.manual_seed(random_seed)
     subset1, subset2 = random_split(dataset, [subset1_size, subset2_size], generator)
     return subset1, subset2
 
