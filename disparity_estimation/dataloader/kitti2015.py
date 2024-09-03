@@ -12,6 +12,7 @@ import torchvision.transforms.functional as F
 import torch
 from torchvision import transforms
 import torchvision
+from typing import Literal
 
 from .kitti import flow_transforms
 
@@ -33,7 +34,7 @@ from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastS
 # test
 
 class KITTIBaseDataset(data.Dataset):
-    def __init__(self, datadir, architecture_name, split='train'): #['train', 'test', 'validation', 'validation_all', 'corrupted']
+    def __init__(self, datadir, architecture_name, split: Literal['train', 'validation'] = 'train' ):
         super(KITTIBaseDataset, self).__init__()
 
         self.datadir = datadir
@@ -135,13 +136,13 @@ class KITTIBaseDataset(data.Dataset):
             return self.get_item_CFNET(img_left, img_right, disp_left)
 
         elif self.architecture_name == 'hsmnet':
-            raise NotImplemented(f"No dataloder for {self.architecture_name} implemented") 
+            raise NotImplemented(f"No data loader for {self.architecture_name} implemented")
         
         elif self.architecture_name == 'psmnet':
             return self.get_item_PSMNet(img_left, img_right, disp_left)
         else:
-            print(f"No dataloder for {self.architecture_name} implemented")
-            raise NotImplemented(f"No dataloder for {self.architecture_name} implemented")
+            print(f"No data loader for {self.architecture_name} implemented")
+            raise NotImplemented(f"No data loader for {self.architecture_name} implemented")
 
    
     def get_item_PSMNet(self, left_img, right_img, dataL) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:

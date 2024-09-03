@@ -1,102 +1,147 @@
-def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
+from torch.utils.data import DataLoader, random_split, Subset, Dataset
+from torch import Generator
+from dataloader import get_dataset
+from typing import Literal
+from torch.utils.data import random_split, Dataset
+from torch import Generator
+
+
+# TODO: fix MPISintel corruption and other split loading
+
+
+def get_dataset(
+    dataset_name: str,
+    data_path: str,
+    architecture_name: str,
+    split: Literal["train", "validation", "test", "corrupted"],
+    debug: bool = False,
+    random_seed: int = 42,
+):
+    """
+    Load and return the dataset object based on the provided dataset name.
+
+    Args:
+        random_seed:
+        debug:
+        dataset_name (str): The name of the dataset to load. Supported options are
+                            'sceneflow', 'sintel', 'kitti', 'kitti2015', 'eth3d',
+                            and 'mpisintel'.
+        data_path (str): The directory where the dataset is located.
+        split (str): The data split to load. Common values include 'train', 'test', etc.
+        architecture_name (str): The name of the architecture for which the dataset
+                                will be used.
+
+    Returns:
+        An instance of the dataset class corresponding to the dataset_name provided.
+    """
 
     dataset_name = dataset_name.lower()
+    dataset: Dataset
 
-    print(f'Loading {dataset_name} dataset')
-    if dataset_name == 'sceneflow':
+    print(f"Loading {dataset_name} dataset")
+    if dataset_name == "sceneflow":
         from .sceneflow import SceneFlowFlyingThings3DDataset
-        return SceneFlowFlyingThings3DDataset(datadir, architeture_name, split)
-    
-    elif dataset_name == 'sintel':
+
+        if split == "validation":
+            dataset = SceneFlowFlyingThings3DDataset(
+                data_path, architecture_name, split="train"
+            )
+            _, dataset = perform_train_test_split(dataset, 0.8, random_seed)
+        else:
+            # Note: train / test / corruption split inside SceneFlowFlyingThings3DDataset
+            dataset = SceneFlowFlyingThings3DDataset(data_path, architecture_name, split)
+    elif dataset_name == "sintel":
         from .mpisintel import MPISintelDataset
-        return MPISintelDataset(datadir, architeture_name, split)
-    
-    elif dataset_name == 'kitti' or dataset_name == 'kitti2015':
+
+        return MPISintelDataset(data_path, architecture_name, split)
+
+    elif dataset_name == "kitti" or dataset_name == "kitti2015":
         from .kitti2015 import KITTIBaseDataset
-        if split == 'test':
-            return None
-        return KITTIBaseDataset(datadir, architeture_name, split)
-    elif dataset_name == 'eth3d':
-        from .eth3d     import ETH3DDataset
-        #isTrain = True if split == 'train' else False
-        return ETH3DDataset(datadir, architeture_name, split)
-    elif dataset_name == 'mpisintel':
+
+        if split == "test":
+            dataset = KITTIBaseDataset(data_path, architecture_name, split="train")
+            _, dataset = perform_train_test_split(dataset, 0.85, random_seed)
+        else:
+            # Note: train / val split inside KITTIBaseDataset
+            dataset = KITTIBaseDataset(data_path, architecture_name, split)
+
+    elif dataset_name == "eth3d":
+        from .eth3d import ETH3DDataset
+
+        return ETH3DDataset(data_path, architecture_name, split)
+    elif dataset_name == "mpisintel":
         from .mpisintel import MPISintelDataset
-        return MPISintelDataset(datadir, architeture_name, split)
+
+        return MPISintelDataset(data_path, architecture_name, split)
     else:
-        raise NotImplementedError(f'Dataset {dataset_name} not implemented')
+        raise NotImplementedError(f"Dataset {dataset_name} not implemented")
+
+    # Return less entries if in debug mode
+    if debug:
+        dataset = Subset(dataset, list(range(10)))
+
+    return dataset
 
 
 ### START - Get data loaders for CFNet and GWCNet
-
-from torch.utils.data import DataLoader, random_split, Subset
-from torch import Generator
-from dataloader import get_dataset
-
-def get_data_loader_1(args, architecture_name):
-    train_dataset = get_dataset(
-        args.dataset, args.datapath, architeture_name=architecture_name, split="train"
-    )
-    test_dataset = get_dataset(
-        args.dataset, args.datapath, architeture_name=architecture_name, split="test"
-    )
-
-    # TODO: Change for inference, add if that checks if only inference is performed, then only test data is loaded
-    if "kitti" in args.dataset.lower():  # Define split sizes
-        test_dataset, train_subset, val_subset = perform_data_split(train_dataset)
-    else:
-        val_size = int(0.2 * len(train_dataset))  # 20% for validation
-        train_size = len(train_dataset) - val_size
-
-        # Split the dataset
-        train_subset, val_subset = random_split(train_dataset, [train_size, val_size])
-
-    del train_dataset
-
-
-    fast_dev_run = False
-    test_img_loader, train_img_loader, val_img_loader = check_dev_run_and_create_data_loaders(args, fast_dev_run,
-                                                                                              test_dataset, train_subset,
-                                                                                              val_subset)
-
-    return train_img_loader, val_img_loader, test_img_loader
-
-
-def check_dev_run_and_create_data_loaders(args, fast_dev_run, test_dataset, train_subset, val_subset):
-    if fast_dev_run:
-        # Create small subsets for fast_dev_run
-        fast_dev_run_size = 10  # Number of data points to use in fast_dev_run
-
-        # Create subsets for training, validation, and testing
-        train_indices = list(range(fast_dev_run_size))
-        val_indices = list(range(fast_dev_run_size, 2 * fast_dev_run_size))
-        test_indices = list(range(fast_dev_run_size))
-
-        train_subset = Subset(train_subset, train_indices)
-        val_subset = Subset(val_subset, val_indices)
-        test_dataset = Subset(test_dataset, test_indices)
-    val_img_loader = DataLoader(
-        val_subset, args.batch_size, shuffle=False, num_workers=8, drop_last=True
-    )
+def get_default_loader(args, architecture_name: str, debug: bool, random_seed: int):
     train_img_loader = DataLoader(
-        train_subset, args.batch_size, shuffle=False, num_workers=8, drop_last=True
+        get_dataset(
+            args.dataset, args.datapath, architecture_name, "train", debug, random_seed
+        ),
+        args.batch_size,
+        shuffle=False,
+        num_workers=8,
+        drop_last=True,
+    )
+    val_img_loader = DataLoader(
+        get_dataset(
+            args.dataset,
+            args.datapath,
+            architecture_name,
+            "validation",
+            debug,
+            random_seed,
+        ),
+        args.batch_size,
+        shuffle=False,
+        num_workers=8,
+        drop_last=True,
     )
     test_img_loader = DataLoader(
-        test_dataset, args.test_batch_size, shuffle=False, num_workers=4, drop_last=False
+        get_dataset(
+            args.dataset, args.datapath, architecture_name, "test", debug, random_seed
+        ),
+        args.test_batch_size,
+        shuffle=False,
+        num_workers=4,
+        drop_last=False,
     )
     return test_img_loader, train_img_loader, val_img_loader
 
 
-def perform_data_split(train_dataset):
-    val_size = int(0.2 * len(train_dataset))  # 20% for validation
-    test_size = int(0.1 * len(train_dataset))  # 10% for testing
-    train_size = len(train_dataset) - val_size - test_size
-    # Split the dataset, because kitti has no test split
+def perform_train_test_split(
+    dataset: Dataset, fraction: float, random_seed: int
+) -> tuple[Dataset, Dataset]:
+    subset1_size = int(fraction * len(dataset))  # fraction for the first subset
+    subset2_size = len(dataset) - subset1_size  # remainder for the second subset
+
     generator = Generator()
-    generator.manual_seed(seed=42)
-    train_subset, val_subset, test_dataset = random_split(
-        train_dataset,
-        [train_size, val_size, test_size],
-        generator
-    )
-    return test_dataset, train_subset, val_subset
+    generator.manual_seed(seed=random_seed)
+    subset1, subset2 = random_split(dataset, [subset1_size, subset2_size], generator)
+    return subset1, subset2
+
+
+# def perform_train_test_val_split(dataset: Dataset, random_seed: int) -> tuple[Dataset, Dataset, Dataset]:
+#     val_size = int(0.2 * len(dataset))  # 20% for validation
+#     test_size = int(0.1 * len(dataset))  # 10% for testing
+#     train_size = len(dataset) - val_size - test_size
+#
+#     generator = Generator()
+#     generator.manual_seed(seed=random_seed)
+#     train_subset, val_subset, test_dataset = random_split(
+#         dataset,
+#         [train_size, val_size, test_size],
+#         generator
+#     )
+#     return test_dataset, train_subset, val_subset

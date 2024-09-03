@@ -7,7 +7,7 @@ def build_data_loader(args):
     
     
     dataset_train      = get_dataset(args.dataset, args.dataset_directory, "train", "STTR")
-    dataset_validation = get_dataset(args.dataset, args.dataset_directory, args.validation, "STTR")
+    dataset_validation = get_dataset(args.dataset, args.dataset_directory, 'validation', "STTR")
     dataset_test       = get_dataset(args.dataset, args.dataset_directory, "test", "STTR")
 
 
