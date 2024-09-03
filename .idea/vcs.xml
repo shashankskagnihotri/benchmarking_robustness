@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/object_detection/mmdetection" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/optical_flow_estimation/mmflow" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/semantic_segmentation/mmsegmentation" vcs="Git" />
+  </component>
+</project>
