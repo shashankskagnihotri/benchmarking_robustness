@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-20%4
-#SBATCH --job-name=seperableflow_kitti-2015_bim_pgd_cospgd_i20
-#SBATCH --output=slurm/seperableflow_kitti-2015_bim_pgd_cospgd_i20_%A_%a.out
-#SBATCH --error=slurm/seperableflow_kitti-2015_bim_pgd_cospgd_i20_err_%A_%a.out
+#SBATCH --job-name=separableflow_kitti-2015_bim_pgd_cospgd_i20
+#SBATCH --output=slurm/separableflow_kitti-2015_bim_pgd_cospgd_i20_%A_%a.out
+#SBATCH --error=slurm/separableflow_kitti-2015_bim_pgd_cospgd_i20_err_%A_%a.out
 
-model="seperableflow"
+model="separableflow"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"

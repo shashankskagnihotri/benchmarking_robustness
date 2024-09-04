@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-2%4
-#SBATCH --job-name=seperableflow_sintel-clean_fgsm_two
-#SBATCH --output=slurm/seperableflow_sintel-clean_fgsm_two_%A_%a.out
-#SBATCH --error=slurm/seperableflow_sintel-clean_fgsm_two_err_%A_%a.out
+#SBATCH --job-name=separableflow_sintel-clean_fgsm_two
+#SBATCH --output=slurm/separableflow_sintel-clean_fgsm_two_%A_%a.out
+#SBATCH --error=slurm/separableflow_sintel-clean_fgsm_two_err_%A_%a.out
 
-model="seperableflow"
+model="separableflow"
 dataset="sintel-clean"
 checkpoint="sintel"
 targeteds="True False"
