@@ -1,0 +1,8 @@
+model,dataset,targeted,target,attack,epsilon,alpha,iterations,norm,loss,optim,model_is_missing
+gma,kitti-2015,False,,cospgd,0.0314,0.01,20,inf,epe,ground_truth,0
+raft,kitti-2015,False,,pgd,0.0157,0.01,20,inf,epe,ground_truth,0
+raft,kitti-2015,False,,pgd,0.0314,0.01,20,inf,epe,ground_truth,0
+raft,kitti-2015,False,,cospgd,0.0157,0.01,20,inf,epe,ground_truth,0
+raft,kitti-2015,False,,cospgd,0.0314,0.01,20,inf,epe,ground_truth,0
+raft,kitti-2015,False,,bim,0.0157,0.01,20,inf,epe,ground_truth,0
+raft,kitti-2015,False,,bim,0.0314,0.01,20,inf,epe,ground_truth,0

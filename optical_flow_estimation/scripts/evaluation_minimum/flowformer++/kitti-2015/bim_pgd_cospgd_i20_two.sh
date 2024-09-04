@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=00:59:59
+#SBATCH --time=03:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4_a100
@@ -27,8 +27,8 @@ cd ../../../../
 
 for targeted in $targeteds
 do
-    epsilons="12.75"
-    alphas="0.0001"
+    epsilons="64"
+    alphas="0.1"
     for epsilon in $epsilons
     do
         epsilon=$(echo "scale=10; $epsilon/255" | bc)
