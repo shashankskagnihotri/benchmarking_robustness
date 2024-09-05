@@ -1,0 +1,23 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-06-24 18:43:18",
+            "model": "raft",
+            "checkpoint": "chairs",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-24 18:47:38",
+            "duration": "00:04:20",
+            "dataset": "kitti",
+            "metrics": {
+                "epe": 7.319831524176646,
+                "px1": 0.3171404427494192,
+                "px3": 0.6575667268128564,
+                "px5": 0.7641593975766661,
+                "outlier": 33.31873804716592,
+                "own_epe": 23.092882889346573,
+                "cosim": 0.22629943016921242
+            }
+        }
+    ]
+}
