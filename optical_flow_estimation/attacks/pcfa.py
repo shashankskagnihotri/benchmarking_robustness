@@ -24,6 +24,12 @@ def pcfa(
     """
 
     optim_mu = 2500.0 / attack_args["attack_epsilon"]
+
+    if attack_args["attack_epsilon"] == 0.01:
+        optim_mu = 100000
+    elif attack_args["attack_epsilon"] == 0.001:
+        optim_mu = 1000000
+
     if attack_args["attack_target"] not in ["zero"]:
         optim_mu = 1.5 * optim_mu
 
@@ -112,6 +118,10 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
     target = target.to(device)
     target.requires_grad = False
 
+    # save nw_inputs, images, flow_pred, target
+    #import pdb
+    #pdb.set_trace()
+
     # Zero all existing gradients
     model.zero_grad()
     optimizer.zero_grad()
@@ -139,7 +149,8 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
         )
         # Update the optimization parameters
         loss.backward()
-
+        # save deltas and loss
+        #pdb.set_trace()
         def closure():
             optimizer.zero_grad()
 
@@ -187,6 +198,9 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
         preds = model(inputs, nw_input1, nw_input2)
         flow_pred = preds["flows"].squeeze(0)
         flow_pred = flow_pred.to(device)
+
+        #pdb.set_trace()
+        # save nw_inputs and deltas and flow_pred
 
         iteration_metrics = iteration_metrics | losses.calc_delta_metrics(
             delta1, delta2, steps + 1

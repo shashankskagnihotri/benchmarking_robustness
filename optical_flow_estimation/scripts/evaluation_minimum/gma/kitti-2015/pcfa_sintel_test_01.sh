@@ -6,11 +6,11 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
-#SBATCH --job-name=raft_kitti-2015_pcfa_i20
-#SBATCH --output=slurm/raft_kitti-2015_pcfa_sintel_test_005_%A.out
-#SBATCH --error=slurm/raft_kitti-2015_pcfa_sintel_test_005_err_%A.out
+#SBATCH --job-name=gma_kitti-2015_pcfa_i20
+#SBATCH --output=slurm/gma_kitti-2015_pcfa_sintel_test_01_%A.out
+#SBATCH --error=slurm/gma_kitti-2015_pcfa_sintel_test_01_err_%A.out
 
-model="raft"
+model="gma"
 dataset="kitti-2015"
 checkpoint="sintel"
 targeteds="True"
