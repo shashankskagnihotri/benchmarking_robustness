@@ -8592,6 +8592,31 @@
             }
         },
         {
+            "start_time": "2024-08-17 17:27:38",
+            "model": "raft",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-08-17 17:37:04",
+            "duration": "00:09:25",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 0.7541646840449827,
+                "px1": 0.9233418952004481,
+                "px3": 0.9686941876649627,
+                "px5": 0.9792648599081378,
+                "outlier": 2.8558689011240737,
+                "own_epe": 0.7541646531064646,
+                "cosim": 0.9315724901847835,
+                "epe_initial_to_negative": 26.671909332332646,
+                "epe_initial_to_zero": 13.335954666166323,
+                "own_epe_ground_truth_to_negative": 26.767300794750994,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.767301947966317,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
+        },
+        {
             "start_time": "2024-08-19 22:21:21",
             "model": "raft",
             "checkpoint": "sintel",

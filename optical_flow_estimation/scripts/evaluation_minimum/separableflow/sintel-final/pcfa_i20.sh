@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-1%2
-#SBATCH --job-name=seperableflow_sintel-final_pcfa_i20
-#SBATCH --output=slurm/seperableflow_sintel-final_pcfa_i20.out
-#SBATCH --error=slurm/seperableflow_sintel-final_pcfa_i20_err_%A_%a.out
+#SBATCH --job-name=separableflow_sintel-final_pcfa_i20
+#SBATCH --output=slurm/separableflow_sintel-final_pcfa_i20.out
+#SBATCH --error=slurm/separableflow_sintel-final_pcfa_i20_err_%A_%a.out
 
-model="seperableflow"
+model="separableflow"
 dataset="sintel-final"
 checkpoint="sintel"
 targeteds="True"
