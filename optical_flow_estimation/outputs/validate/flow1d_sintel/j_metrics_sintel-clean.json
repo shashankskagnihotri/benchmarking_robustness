@@ -837,6 +837,46 @@
                 "l_inf_delta2": 0.0002168715000152588,
                 "l_inf_delta12": 0.0002168715000152588
             }
+        },
+        {
+            "start_time": "2024-09-06 02:26:15",
+            "model": "flow1d",
+            "checkpoint": "sintel",
+            "attack": "bim",
+            "norm": "two",
+            "epsilon": 0.251,
+            "iterations": 20,
+            "alpha": 0.1,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-06 05:09:55",
+            "duration": "02:43:39",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 25.532854395436335,
+                "px1": 0.1573055954086411,
+                "px3": 0.31654166359394753,
+                "px5": 0.4191061974503147,
+                "outlier": 68.34579042344569,
+                "own_epe": 25.532853303156887,
+                "epe_orig_preds": 1.2319462378791155,
+                "own_epe_orig_preds": 1.2319461831771101,
+                "cosim_target": -0.9083167263821097,
+                "cosim_orig_preds": 0.9083167263821097,
+                "epe_ground_truth": 1.6551948827006975,
+                "own_epe_ground_truth": 1.6551948178999705,
+                "cosim_ground_truth": 0.874961280962676,
+                "l2_delta1": 0.0002166537096636463,
+                "l2_delta2": 0.0002166660779668421,
+                "l2_delta12": 0.00021665990686444003,
+                "l0_delta1": 1329472.8213256483,
+                "l0_delta2": 1329347.074927954,
+                "l0_delta12": 2658819.896253602,
+                "l_inf_delta1": 0.0053067966288279506,
+                "l_inf_delta2": 0.005165305699192267,
+                "l_inf_delta12": 0.0057612527868603994
+            }
         }
     ]
 }
