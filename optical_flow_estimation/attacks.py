@@ -56,7 +56,7 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
-from attacks.tdcc import get_dataset_3DCC
+# from attacks.tdcc import get_dataset_3DCC
 from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
@@ -609,13 +609,13 @@ def attack_one_dataloader(
     """
     metrics_sum = {}
     iteration_metrics_sum = {}
-    if attack_args["attack"] == "3dcc":
-        dataloader = get_dataset_3DCC(
-            model,
-            dataloader_name,
-            attack_args["3dcc_corruption"],
-            attack_args["3dcc_intensity"],
-        )
+    # if attack_args["attack"] == "3dcc":
+    #     dataloader = get_dataset_3DCC(
+    #         model,
+    #         dataloader_name,
+    #         attack_args["3dcc_corruption"],
+    #         attack_args["3dcc_intensity"],
+    #     )
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -702,7 +702,7 @@ def attack_one_dataloader(
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
-                    preds = model(inputs)
+                    preds = orig_preds
 
             for key in preds:
                 if torch.is_tensor(preds[key]):
@@ -1012,6 +1012,9 @@ def _write_to_npy_file(
         if "sintel" in dataloader_name:
             seq_name = img_path.parts[-2]
             extra_dirs = seq_name
+        elif "spring" in dataloader_name:
+            seq_name = img_path.parts[-3]
+            extra_dirs = seq_name
     else:
         image_name = f"{batch_idx:08d}"
         image2_name = f"{batch_idx:08d}_2"
@@ -1019,7 +1022,7 @@ def _write_to_npy_file(
     if args.flow_format != "original":
         flow_ext = args.flow_format
     else:
-        if "kitti" in dataloader_name or "hd1k" in dataloader_name or "sintel" in dataloader_name:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name or "sintel" in dataloader_name or "spring" in dataloader_name:
             flow_ext = "png"
         else:
             flow_ext = "flo"
