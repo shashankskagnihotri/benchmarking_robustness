@@ -256,30 +256,62 @@ class Attack:
     one_hot: boolean: To use one-hot encoding, SHOULD BE TRUE FOR SEMANTIC SEGMENTATION and FALSE FOR pixel-wise regression tasks
     """
     @staticmethod
-    def cospgd_scale(
-            predictions,
-            labels,
-            loss,
-            num_classes=None,
-            targeted=False,
-            one_hot=True,
-        ):
+    def cospgd_scale(predictions,labels,loss,num_classes=None,targeted=False,one_hot=True):
         if one_hot:
             transformed_target = torch.nn.functional.one_hot(
-                torch.clamp(labels, labels.min(), num_classes-1),
-                num_classes = num_classes
-            ).permute(0,3,1,2)
+                torch.clamp(labels, labels.min(), num_classes - 1),
+                num_classes=num_classes
+            ).permute(0, 3, 1, 2)
         else:
-            transformed_target = torch.nn.functional.softmax(labels, dim=1)
+            # Adjusting softmax dim based on the shape of labels
+            if labels.dim() > 1:
+                transformed_target = torch.nn.functional.softmax(labels, dim=1)
+            else:
+                transformed_target = torch.nn.functional.softmax(labels, dim=-1)
+
+        # Adjusting softmax dim based on the shape of predictions
+        if predictions.dim() > 1:
+            softmax_predictions = torch.nn.functional.softmax(predictions, dim=1)
+        else:
+            softmax_predictions = torch.nn.functional.softmax(predictions, dim=-1)
+
+        # Cosine similarity
         cossim = torch.nn.functional.cosine_similarity(
-            torch.nn.functional.softmax(predictions, dim=1),
+            softmax_predictions,
             transformed_target,
-            dim = 1
+            dim=1
         )
+        
         if targeted:
-            cossim = 1 - cossim # if performing targeted attacks, we want to punish for dissimilarity to the target
+            cossim = 1 - cossim  # For targeted attacks, we maximize similarity
+
         loss = cossim.detach() * loss
         return loss
+
+    # def cospgd_scale(
+    #         predictions,
+    #         labels,
+    #         loss,
+    #         num_classes=None,
+    #         targeted=False,
+    #         one_hot=True,
+    #     ):
+    #     if one_hot:
+    #         transformed_target = torch.nn.functional.one_hot(
+    #             torch.clamp(labels, labels.min(), num_classes-1),
+    #             num_classes = num_classes
+    #         ).permute(0,3,1,2)
+    #     else:
+    #         transformed_target = torch.nn.functional.softmax(labels, dim=1)
+    #     cossim = torch.nn.functional.cosine_similarity(
+    #         torch.nn.functional.softmax(predictions, dim=1),
+    #         transformed_target,
+    #         dim = 1
+    #     )
+    #     if targeted:
+    #         cossim = 1 - cossim # if performing targeted attacks, we want to punish for dissimilarity to the target
+    #     loss = cossim.detach() * loss
+    #     return loss
 
 import torch
 import torch.nn.functional as F
@@ -317,7 +349,13 @@ class CosPGDAttack:
             perturbed_right.requires_grad = True
             
             # Forward pass the perturbed images through the model
-            outputs = self.model(perturbed_left, perturbed_right)
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
+                outputs = self.model(perturbed_left, perturbed_right)[0][0].cuda()
+
+
+            else:
+                outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).cuda()
+            
             outputs = outputs[-1].cuda()  
             labels = labels.cuda()
             
@@ -587,6 +625,7 @@ class PGDAttack:
         # Save the original images
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
+        ground_truth_disparity =  ground_truth_disparity.cuda()
 
         # Start perturbation
         perturbed_left = left_image.clone().detach()
@@ -604,7 +643,12 @@ class PGDAttack:
 
             # Prepare the input for the model
             inputs = {"images": [[perturbed_left, perturbed_right]]}
-            predicted_disparity = self.model(inputs)["disparities"].squeeze(0)
+
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
+                predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
+
+            else:
+                predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
 
             # Calculate the loss between predicted disparity and ground truth
             loss = F.mse_loss(predicted_disparity.float(), ground_truth_disparity.float())
