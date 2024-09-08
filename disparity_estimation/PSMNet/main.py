@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import numpy as np
 import time
 import math
+import mlflow
 
 # from dataloader import listflowfile as lt
 from dataloader import get_dataset
@@ -251,16 +252,16 @@ def attack(attack_type: str):
     alpha = 0.01
     num_iterations = 20
     norm = "Linf" 
+    
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, norm,num_classes=None, targeted=False )
     elif attack_type == "fgsm":
-        attacker = FGSMAttack( model, epsilon, targeted=False)
+        attacker = FGSMAttack( model, epsilon, targeted=False) 
 
     elif attack_type == "pgd":
-        attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
+        attacker = PGDAttack(model,epsilon,num_iterations,alpha,norm,random_start=True,targeted=False)
 
-    
     elif attack_type =='bim':
         attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
         
