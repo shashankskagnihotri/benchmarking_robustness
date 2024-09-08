@@ -1,17 +1,17 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=01:29:59
+#SBATCH --time=06:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated
-#SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i20_inf
-#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_inf_%A_%a.out
-#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_inf_err_%A_%a.out
+#SBATCH --job-name=skflow_sintel-final_bim_pgd_cospgd_i20_inf
+#SBATCH --output=slurm/skflow_sintel-final_bim_pgd_cospgd_i20_inf_%A_%a.out
+#SBATCH --error=slurm/skflow_sintel-final_bim_pgd_cospgd_i20_inf_err_%A_%a.out
 #SBATCH --array=0-2%3
 
-model="raft"
-dataset="kitti-2015"
-checkpoint="kitti"
+model="skflow"
+dataset="sintel-final"
+checkpoint="sintel"
 targeteds="True False"
 targets="negative zero"
 norm="inf"

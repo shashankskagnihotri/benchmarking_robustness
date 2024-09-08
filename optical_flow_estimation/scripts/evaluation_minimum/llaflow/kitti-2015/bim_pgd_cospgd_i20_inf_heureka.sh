@@ -4,12 +4,12 @@
 #SBATCH --time=01:29:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated
-#SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i20_inf
-#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_inf_%A_%a.out
-#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_inf_err_%A_%a.out
+#SBATCH --job-name=llaflow_kitti-2015_bim_pgd_cospgd_i20_inf
+#SBATCH --output=slurm/llaflow_kitti-2015_bim_pgd_cospgd_i20_inf_%A_%a.out
+#SBATCH --error=slurm/llaflow_kitti-2015_bim_pgd_cospgd_i20_inf_err_%A_%a.out
 #SBATCH --array=0-2%3
 
-model="raft"
+model="llaflow"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="True False"

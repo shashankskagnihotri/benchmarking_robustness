@@ -1,20 +1,20 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=01:29:59
+#SBATCH --time=06:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated
-#SBATCH --job-name=raft_kitti-2015_bim_pgd_cospgd_i20_inf
-#SBATCH --output=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_inf_%A_%a.out
-#SBATCH --error=slurm/raft_kitti-2015_bim_pgd_cospgd_i20_inf_err_%A_%a.out
-#SBATCH --array=0-2%3
+#SBATCH --job-name=maskflownet_s_sintel-final_bim_pgd_cospgd_i20_two
+#SBATCH --output=slurm/maskflownet_s_sintel-final_bim_pgd_cospgd_i20_two_%A_%a.out
+#SBATCH --error=slurm/maskflownet_s_sintel-final_bim_pgd_cospgd_i20_two_err_%A_%a.out
+#SBATCH --array=0-1%4
 
-model="raft"
-dataset="kitti-2015"
-checkpoint="kitti"
+model="maskflownet_s"
+dataset="sintel-final"
+checkpoint="sintel"
 targeteds="True False"
 targets="negative zero"
-norm="inf"
+norm="two"
 attacks="bim pgd cospgd"
 iterations="20"
 combinations=()
@@ -25,15 +25,8 @@ cd ../../../../
 # Step 1: Create a list of all variable combinations
 for targeted in $targeteds
 do
-    if [[ $targeted = "False" ]]
-    then
-        epsilons="4 8"
-        alphas="0.01"          
-    elif [[ $targeted = "True" ]]
-    then
-        epsilons="8"
-        alphas="0.01"
-    fi
+    epsilons="64"
+    alphas="0.1"
     for epsilon in $epsilons
     do
         epsilon=$(echo "scale=10; $epsilon/255" | bc)
