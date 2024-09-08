@@ -246,6 +246,21 @@ def train():
 def test():
     # testing
     avg_test_scalars = AverageMeterDict()
+
+    print(len(TestImgLoader))
+    
+    # for img_path_left, img_path_right in zip(TestImgLoader.dataset.img_left_filenames, TestImgLoader.dataset.img_right_filenames):
+    #     try:
+    #         TestImgLoader.dataset.load_image(img_path_left)
+    #         TestImgLoader.dataset.load_image(img_path_right)
+
+    #     except:
+    #         print(img_path_left)
+    #         print(img_path_right)
+    #         print()
+
+    # return 
+
     for batch_idx, sample in enumerate(TestImgLoader):
         global_step = len(TestImgLoader) * batch_idx
         start_time = time.time()

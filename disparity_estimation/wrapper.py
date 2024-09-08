@@ -11,12 +11,13 @@ import mlflow
 
 mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/mlflow/")
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', required=True, help='Specify an model', choices=['cfnet', 'gwcnet', 'psmnet', 'sttr', 'sttr-light'])
+parser.add_argument('--model', required=True, help='Specify an model', choices=['cfnet', 'gwcnet', 'gwcnet-g', 'gwcnet-gc', 'psmnet', 'sttr', 'sttr-light'])
 parser.add_argument('--scenario', required=True, help='Specify whether to train or test the model', choices=['train', 'test', 'attack', 'commoncorruption'])
-parser.add_argument('--dataset', required=True, help='Specify the dataset to use', choices=['sceneflow', 'sintel', 'kitti', 'kitti2015', 'eth3d', 'mpisintel'])
+parser.add_argument('--dataset', required=True, help='Specify the dataset to use', choices=['sceneflow', 'mpisintel', 'kitti', 'kitti2015', 'eth3d', 'mpisintel'])
 parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
 parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
 parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test')
+parser.add_argument('--experiment', required=False, default='debug', type=str, choices=['debug', 'Common_Corruptions'], help='Specify the experiment to log to')
 
 args, unknown = parser.parse_known_args()
 args.scenario = args.scenario.lower()
@@ -29,13 +30,24 @@ if args.scenario == "attack" and args.attack_type is None:
     raise ValueError("If --scenario is attack, --attack must be specified")
 
 # https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.start_run
-with mlflow.start_run(experiment_id='128987742873377588'):
+
+# Get experiment_id dynamically from args.experiment
+experiment_name = args.experiment
+experiment = mlflow.get_experiment_by_name(experiment_name)
+if experiment is None:
+    raise ValueError(f"Experiment '{experiment_name}' does not exist")
+
+experiment_id = experiment.experiment_id
+
+# Rest of the code...
+
+with mlflow.start_run(experiment_id=experiment_id):
     mlflow.log_params(vars(args))
 
     if args.model == "cfnet":
         from CFNet import main
         print("Loaded cfnet")
-    elif args.model == "gwcnet-g":
+    elif args.model in "gwcnet-gc":
         from GwcNet import main
         print("Loaded gwcnet")
     elif args.model == "sttr":

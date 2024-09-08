@@ -38,7 +38,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
         import os
 
-        def generate_disparity_path(original_path):
+        def generate_disparity_path(original_path:str) -> str:
             # Zerlege den originalen Pfad in seine Teile
             parts = original_path.split('/')
 

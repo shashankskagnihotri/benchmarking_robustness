@@ -118,7 +118,7 @@ def train():
     best_val_loss = -1
     bestepoch = 0
     error = 100
-    print("Batch size: ", TestImgLoader.batch_size)
+    print("Batch size: ", TrainImgLoader.batch_size)
     for epoch_idx in range(start_epoch, args.epochs):
         adjust_learning_rate(optimizer, epoch_idx, args.lr, args.lrepochs)
 

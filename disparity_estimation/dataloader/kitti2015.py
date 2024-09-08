@@ -62,14 +62,41 @@ class KITTIBaseDataset(data.Dataset):
         self._read_data()
         self._augmentation()
 
+    def generate_disparity_path(self, original_path:str) -> str:
+        # Zerlege den originalen Pfad in seine Teile
+        parts = original_path.split('/')
+        print("Parts: ", parts)
+        
+        # Finde den Index des Verzeichnisses 'FlyingThings3D'
+        try:
+            index = parts.index('KITTI_2015') + 2
+        except ValueError:
+            raise ValueError("Der Pfad enthält kein 'KITTI_2015'-Verzeichnis.")
+
+        # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
+        parts[index] = "no_corruption"
+        parts[index+1] = "severity_0"
+        parts[index+2] = "training"
+        parts[index+3] = "disp_occ_0"
+
+        # Erstelle den neuen Pfad
+        new_path = "/" + os.path.join(*parts)
+        return new_path
+
     def _read_data(self):
+        
         assert self.left_fold is not None
 
-        self.left_data = natsorted([os.path.join(self.datadir, self.sub_folder, self.left_fold, img) for img in
-                                    os.listdir(os.path.join(self.datadir, self.sub_folder, self.left_fold)) if
-                                    img.find('_10') > -1])
+        if not os.path.isdir(self.datadir):
+            raise Exception(f"Data directory {self.datadir} not found")
+
+        directory = os.path.join(self.datadir, self.sub_folder, self.left_fold)
+        print("Directory: ", directory, "Subfolder: ", self.sub_folder, "Left fold: ", self.left_fold)
+        self.left_data = [os.path.join(self.datadir, self.sub_folder, self.left_fold, img) for img in
+                                    os.listdir(directory) if img.find('_10') > -1] if os.path.isdir(directory) else []
+        print("Left data: ", len(self.left_data))
         self.right_data = [img.replace(self.left_fold, self.right_fold) for img in self.left_data]
-        self.disp_data = [img.replace(self.left_fold, self.disp_fold) for img in self.left_data]
+        self.disp_data = [self.generate_disparity_path(img) for img in self.left_data]
 
         self._split_data()
 
