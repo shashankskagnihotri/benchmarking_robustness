@@ -34,7 +34,7 @@ from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastS
 # test
 
 class KITTIBaseDataset(data.Dataset):
-    def __init__(self, datadir, architecture_name, split: Literal['train', 'validation'] = 'train' ):
+    def __init__(self, datadir, architecture_name, split: Literal['train', 'validation', 'test'] = 'train'):
         super(KITTIBaseDataset, self).__init__()
 
         self.datadir = datadir
@@ -101,17 +101,31 @@ class KITTIBaseDataset(data.Dataset):
         self._split_data()
 
     def _split_data(self):
-        train_val_frac = 0.95
+        # Define fractions for splits
+        train_frac = 0.90
+        val_frac = 0.05
+        test_frac = 0.05
+
+        # Ensure the fractions sum up to 1
+        assert train_frac + val_frac + test_frac == 1, "The fractions must sum up to 1."
+
         # split data
         if len(self.left_data) > 1:
             if self.split == 'train':
-                self.left_data = self.left_data[:int(len(self.left_data) * train_val_frac)]
-                self.right_data = self.right_data[:int(len(self.right_data) * train_val_frac)]
-                self.disp_data = self.disp_data[:int(len(self.disp_data) * train_val_frac)]
+                self.left_data = self.left_data[:int(len(self.left_data) * train_frac)]
+                self.right_data = self.right_data[:int(len(self.right_data) * train_frac)]
+                self.disp_data = self.disp_data[:int(len(self.disp_data) * train_frac)]
             elif self.split == 'validation':
-                self.left_data = self.left_data[int(len(self.left_data) * train_val_frac):]
-                self.right_data = self.right_data[int(len(self.right_data) * train_val_frac):]
-                self.disp_data = self.disp_data[int(len(self.disp_data) * train_val_frac):]
+                start_idx = int(len(self.left_data) * train_frac)
+                end_idx = start_idx + int(len(self.left_data) * val_frac)
+                self.left_data = self.left_data[start_idx:end_idx]
+                self.right_data = self.right_data[start_idx:end_idx]
+                self.disp_data = self.disp_data[start_idx:end_idx]
+            elif self.split == 'test':
+                start_idx = int(len(self.left_data) * (train_frac + val_frac))
+                self.left_data = self.left_data[start_idx:]
+                self.right_data = self.right_data[start_idx:]
+                self.disp_data = self.disp_data[start_idx:]
 
     def _augmentation(self):
         if self.architecture_name == 'sttr' or self.architecture_name == 'sttr-light':

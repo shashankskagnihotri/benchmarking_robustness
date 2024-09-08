@@ -1,5 +1,7 @@
 import os
 import random
+from typing import Literal
+
 from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
@@ -16,18 +18,17 @@ from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
 
 # SceneFlow dataloader from CFNet
 class SceneFlowFlyingThings3DDataset(Dataset):
-    def __init__(self, datadir, architecture_name, split='train'):
+    def __init__(self, datadir, architecture_name, split: Literal['train', 'validation', 'test', 'corrupted']='train'):
         super().__init__()
 
         self.datadir = datadir
         self.model_name = architecture_name.lower()
+        self.split = split
 
-        if split.upper() == 'TRAIN':
+        if split == 'train' or 'test' or 'corrupted':
+            self.split_folder = split.upper()
+        elif split == 'validation':
             self.split_folder = 'TRAIN'
-        elif split.upper() == 'TEST':
-            self.split_folder = 'TEST'
-        elif split.upper() == 'CORRUPTED':
-            self.split_folder = 'CORRUPTED'
         else:
             raise ValueError(f"Invalid split value: {split}")
 
@@ -85,6 +86,21 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             directory) else []
         self.occ_left_filenames = natsorted(self.occ_left_filenames)
         self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
+
+    # noinspection DuplicatedCode
+    def _split_data(self):
+        train_val_frac = 0.95
+        # split data
+        if self.split == 'train':
+            self.img_left_filenames = self.img_left_filenames[:int(len(self.img_left_filenames) * train_val_frac)]
+            self.img_right_filenames = self.img_right_filenames[:int(len(self.img_right_filenames) * train_val_frac)]
+            self.disp_left_filenames = self.disp_left_filenames[:int(len(self.disp_left_filenames) * train_val_frac)]
+            self.disp_right_filenames = self.disp_right_filenames[:int(len(self.disp_right_filenames) * train_val_frac)]
+        elif self.split == 'validation':
+            self.img_left_filenames = self.img_left_filenames[int(len(self.img_left_filenames) * train_val_frac):]
+            self.img_right_filenames = self.img_right_filenames[int(len(self.img_right_filenames) * train_val_frac):]
+            self.disp_left_filenames = self.disp_left_filenames[int(len(self.disp_left_filenames) * train_val_frac):]
+            self.disp_right_filenames = self.disp_right_filenames[int(len(self.disp_right_filenames) * train_val_frac):]
 
     def load_image(self, filename) -> Image:
         return Image.open(filename).convert('RGB')

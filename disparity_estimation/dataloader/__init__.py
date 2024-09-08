@@ -39,14 +39,8 @@ def get_dataset(
     if dataset_name == "sceneflow":
         from .sceneflow import SceneFlowFlyingThings3DDataset
 
-        if split == "validation":
-            dataset = SceneFlowFlyingThings3DDataset(
-                data_path, architecture_name, split="train"
-            )
-            _, dataset = perform_train_test_split(dataset, 0.8, random_seed)
-        else:
-            # Note: train / test / corruption split inside SceneFlowFlyingThings3DDataset
-            dataset = SceneFlowFlyingThings3DDataset(data_path, architecture_name, split)
+        # Note: train / test / corruption split inside SceneFlowFlyingThings3DDataset
+        dataset = SceneFlowFlyingThings3DDataset(data_path, architecture_name, split)
     elif dataset_name == "sintel":
         from .mpisintel import MPISintelDataset
 
@@ -55,13 +49,9 @@ def get_dataset(
     elif dataset_name == "kitti" or dataset_name == "kitti2015":
         from .kitti2015 import KITTIBaseDataset
 
-        if split == "test":
-            dataset = KITTIBaseDataset(data_path, architecture_name, split="train")
-            _, dataset = perform_train_test_split(dataset, 0.85, random_seed)
-        else:
-            # Note: train / val split inside KITTIBaseDataset
-            dataset = KITTIBaseDataset(data_path, architecture_name, split)
-
+        split: Literal["train", "validation", "test"] = 'corrupted' if split == 'test' else split
+        # Note: train / val / test split inside KITTIBaseDataset --> because different transformation applied
+        dataset = KITTIBaseDataset(data_path, architecture_name, split)
     elif dataset_name == "eth3d":
         from .eth3d import ETH3DDataset
 
