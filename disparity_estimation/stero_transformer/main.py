@@ -274,34 +274,34 @@ def train():
     # main(args_)
 
 
-def attack(attack_type: str, args):
+def attack(attack_type: str, epsilon = 0.03, alpha = 0.01, num_iterations = 20, norm = "Linf", args):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
     device = torch.device(args.device)
     model = STTR(args).to(device) 
 
-    epsilon = 0.03
-    alpha = 0.01
+    # epsilon = 0.03
+    # alpha = 0.01
     num_iterations = 20
-    norm = "Linf" 
+    # norm = "Linf" 
 
     data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
 
 
     if attack_type == "cospgd":
-        attacker = CosPGDAttack(model, epsilon, alpha, num_iterations, norm,num_classes=None, targeted=False )
+        attacker = CosPGDAttack(model,architecture=args.model, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
     elif attack_type == "fgsm":
-        attacker = FGSMAttack( model, epsilon, targeted=False)
+        attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
 
     elif attack_type == "pgd":
-        attacker = PGDAttack(model,epsilon,num_iterations,alpha,random_start=True,targeted=False)
+        attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
 
     elif attack_type =='bim':
-        attacker = BIMAttack(model,epsilon,num_iterations,alpha,norm, targeted=False) 
+        attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
         
     elif attack_type == 'apgd':
-        attacker = APGDAttack(model, num_iterations,norm, epsilon)
+        attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, epsilon=epsilon)
     
     else:
         raise ValueError("Attack type not recognized")
@@ -312,7 +312,7 @@ def attack(attack_type: str, args):
             model.eval()
             perturbed_left, perturbed_right = perturbed_results[iteration]
             loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
-            save_scalars(logger, "test", scalar_outputs, batch_idx)
+            save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
 
 
         print("batch", batch_idx) 

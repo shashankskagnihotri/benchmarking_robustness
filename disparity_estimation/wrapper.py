@@ -17,6 +17,10 @@ parser.add_argument('--dataset', required=True, help='Specify the dataset to use
 parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
 parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
 parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test')
+parser.add_argument('--norm', required=False, help='Specify the normalization to use', choices=['Linf', 'L2'],default='Linf')
+parser.add_argument('--epsilon', required=False, help='Specify the epsilon value to use in the attack',default=0.03)
+parser.add_argument('--alpha', required=False, help='Specify the alpha value to use in the attack', default=0.01)
+parser.add_argument('--num_iteration', required=False, help='Specify the number of iterations of the attack', default=20)
 
 args, unknown = parser.parse_known_args()
 args.scenario = args.scenario.lower()

@@ -285,7 +285,7 @@ import torch
 import torch.nn.functional as F
 
 class CosPGDAttack:
-    def __init__(self, model, epsilon, alpha, num_iterations, norm='Linf', num_classes=None, targeted=False):
+    def __init__(self, model, architecture:str, epsilon, alpha, num_iterations, norm='Linf', num_classes=None, targeted=False):
         """
         :param norm: 'Linf' für L∞-Norm oder 'L2' für L2-Norm
         """
@@ -296,6 +296,7 @@ class CosPGDAttack:
         self.norm = norm
         self.num_classes = num_classes
         self.targeted = targeted
+        self.architecture = architecture
     
     def attack(self, left_image, right_image, labels):
          # Initialize perturbations for both left and right images and the norm
@@ -481,10 +482,11 @@ class CosPGDAttack:
 from typing import Dict, List, Optional
 
 class FGSMAttack:
-    def __init__(self, model, epsilon, targeted=False):
+    def __init__(self, model,  architecture:str, epsilon, targeted=False):
         self.model = model
         self.epsilon = epsilon
         self.targeted = targeted
+        self.architecture = architecture
 
     @torch.enable_grad()
     def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor):
@@ -495,10 +497,19 @@ class FGSMAttack:
         # Initialisierung der Perturbationen für beide Bilder
         perturbed_left = left_image.clone().detach().requires_grad_(True)
         perturbed_right = right_image.clone().detach().requires_grad_(True)
+        ground_truth_disparity =  ground_truth_disparity.cuda()
+
 
         # Forward Pass: Die perturbierten Bilder durch das Modell leiten
         inputs = {"images": [[perturbed_left, perturbed_right]]}
-        predicted_disparity = self.model(inputs)["disparities"].squeeze(0)
+
+        if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
+            predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
+            
+        else:
+            predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
+
+        # predicted_disparity = self.model(inputs)["disparities"].squeeze(0)
 
         # Berechnung des Verlusts
         loss = F.mse_loss(predicted_disparity.float(), ground_truth_disparity.float())
@@ -522,9 +533,13 @@ class FGSMAttack:
         # Die perturbierten Bilder vom Rechenpfad loslösen, um die Akkumulation von Gradienten zu vermeiden
         perturbed_left = perturbed_left.detach()
         perturbed_right = perturbed_right.detach()
+        iteration = 0
+        perturbed_results = dict()
+
+        perturbed_results[iteration] = (perturbed_left,perturbed_right)
 
         # Rückgabe der perturbierten Bilder
-        return perturbed_left, perturbed_right
+        return perturbed_results
 
     def fgsm_attack_step(self, perturbed_image: torch.Tensor, data_grad: torch.Tensor, orig_image: torch.Tensor):
         # Vorzeichen des Gradienten bestimmen
@@ -549,7 +564,7 @@ import torch
 import torch.nn.functional as F
 
 class PGDAttack:
-    def __init__(self, model, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False):
+    def __init__(self, model,architecture:str, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False):
         self.model = model
         self.epsilon = epsilon
         self.alpha = alpha
@@ -557,6 +572,7 @@ class PGDAttack:
         self.norm = norm
         self.random_start = random_start
         self.targeted = targeted
+        self.architecture = architecture
 
     def _random_init(self, x):
         if self.norm == 'Linf':
@@ -645,81 +661,6 @@ class PGDAttack:
         return perturbed_image
 
 
-
-
-# class PGDAttack:
-#     def __init__(self, model, epsilon, num_iterations, alpha, random_start=True, targeted=False):
-#         self.model = model
-#         self.epsilon = epsilon
-#         self.alpha = alpha
-#         self.num_iterations = num_iterations
-#         self.random_start = random_start
-#         self.targeted = targeted
-
-#     def _random_init(self, x):
-#         x = x + (torch.rand(x.size(), dtype=x.dtype, device=x.device) - 0.5) * 2 * self.epsilon
-#         x = torch.clamp(x, 0, 1)
-#         return x
-
-#     @torch.enable_grad()
-#     def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor):
-#         # Save the original images
-#         orig_left_image = left_image.clone().detach()
-#         orig_right_image = right_image.clone().detach()
-
-#         # Start perturbation
-#         perturbed_left = left_image.clone().detach()
-#         perturbed_right = right_image.clone().detach()
-
-#         if self.random_start:
-#             perturbed_left = self._random_init(perturbed_left)
-#             perturbed_right = self._random_init(perturbed_right)
-
-#         perturbed_results = {}
-
-#         for iteration in range(self.num_iterations):
-#             perturbed_left.requires_grad = True
-#             perturbed_right.requires_grad = True
-
-#             # Prepare the input for the model
-#             inputs = {"images": [[perturbed_left, perturbed_right]]}
-#             predicted_disparity = self.model(inputs)["disparities"].squeeze(0)
-
-#             # Calculate the loss between predicted disparity and ground truth
-#             loss = F.mse_loss(predicted_disparity.float(), ground_truth_disparity.float())
-#             if self.targeted:
-#                 loss = -loss
-
-#             # Backpropagate to obtain gradients
-#             self.model.zero_grad()
-#             loss.backward()
-
-#             # Update the perturbed images with gradients
-#             left_grad = perturbed_left.grad.detach()
-#             right_grad = perturbed_right.grad.detach()
-
-#             perturbed_left = self.pgd_attack_step(perturbed_left, left_grad, orig_left_image)
-#             perturbed_right = self.pgd_attack_step(perturbed_right, right_grad, orig_right_image)
-
-#             perturbed_left = perturbed_left.detach()
-#             perturbed_right = perturbed_right.detach()
-
-#             # Save the perturbed images after every iteration
-#             perturbed_results[iteration] = (perturbed_left, perturbed_right)
-
-#         return perturbed_results
-
-#     def pgd_attack_step(self, perturbed_image: torch.Tensor, grad: torch.Tensor, orig_image: torch.Tensor):
-#         grad_sign = grad.sign()
-#         if self.targeted:
-#             grad_sign *= -1
-
-#         # Apply the perturbation step
-#         perturbed_image = perturbed_image + self.alpha * grad_sign
-#         delta = torch.clamp(perturbed_image - orig_image, min=-self.epsilon, max=self.epsilon)
-#         perturbed_image = torch.clamp(orig_image + delta, 0, 1)
-#         return perturbed_image
-
 ''' Based on the implementation of Francesco Croce, Matthias Hein
 "Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks"
 ICML 2020
@@ -734,7 +675,7 @@ import torch.nn as nn
 
 
 class APGDAttack():
-    def __init__(self, model, num_iterations, norm='Linf', eps=1.0, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None):
+    def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=1.0, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None):
         self.model = model
         self.num_iterations = num_iterations
         self.eps = eps
@@ -748,6 +689,7 @@ class APGDAttack():
         self.use_rs = True
         self.n_iter_orig =  num_iterations
         self.eps_orig = eps
+        self.architecture = architecture
 
         if self.norm not in ['Linf', 'L2', 'L1']:
             raise ValueError(f"Unsupported norm: {self.norm}")
@@ -854,7 +796,7 @@ from typing import List
 
 class BIMAttack:
   
-    def __init__(self, model, epsilon: float, num_iterations: int, alpha: float, norm: str, targeted: bool):
+    def __init__(self, model, epsilon: float, num_iterations: int, alpha: float, norm: str, targeted: bool, architecture:str):
         """see https://arxiv.org/pdf/1607.02533.pdf"""
         self.model = model
         self.epsilon = epsilon
@@ -862,6 +804,7 @@ class BIMAttack:
         self.alpha = alpha
         self.targeted = targeted
         self.norm = norm
+        self.architecture = architecture 
 
     def _denorm(self, images, mean, std):
         """Denormalize the images"""
@@ -886,9 +829,11 @@ class BIMAttack:
     def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, labels: torch.Tensor, mean: List[float], std: List[float]):
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
+        labels = labels.cuda()
 
         perturbed_left = left_image.clone().detach()
         perturbed_right = right_image.clone().detach()
+
 
         perturbed_results = {}
 
@@ -897,7 +842,11 @@ class BIMAttack:
             perturbed_right.requires_grad = True
 
             inputs = {"images": [[perturbed_left, perturbed_right]]}
-            outputs = self.model(inputs)["disparities"].squeeze(0)
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
+                outputs = self.model(left=perturbed_left,right=perturbed_right)[0].squeeze(0)
+                
+            else:
+                outputs = self.model(inputs)["disparities"].squeeze(0)
             loss = F.mse_loss(outputs.float(), labels.float())
             if self.targeted:
                 loss = -loss

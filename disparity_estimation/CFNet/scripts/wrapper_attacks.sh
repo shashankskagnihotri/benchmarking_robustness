@@ -7,6 +7,7 @@ DATASET="$1"
 ATTACK_TYPE="$2"
 SEVERITY_LEVEL="0"
 CHECKPOINTPATH="$3"
+COMMONCORRUPTION="no_corruption"
 
 if [[ -z "$DATASET" ]]; then
     echo "Error: Dataset must be provided."
