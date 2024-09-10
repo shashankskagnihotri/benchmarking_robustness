@@ -271,7 +271,7 @@ def train():
 
 
 
-def train():
+def test():
     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
     args, unknown = ap.parse_known_args()
     args.eval = True
