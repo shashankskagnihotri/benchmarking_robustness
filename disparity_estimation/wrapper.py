@@ -53,7 +53,7 @@ with mlflow.start_run(experiment_id=experiment_id):
     elif args.model == "sttr":
         # import importlib  
         # from importlib.import_module("foo-bar") import main
-        from stero_transformer import main # type: ignore
+        from sttr import main # type: ignore
         print("Loaded sttr")
         
     else:
