@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=01:29:59
+#SBATCH --time=07:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated
 #SBATCH --job-name=csflow_kitti-2015_bim_pgd_cospgd_i20_two

@@ -3,7 +3,7 @@
 #SBATCH --mem=100G
 #SBATCH --time=01:29:59
 #SBATCH --gres=gpu:4
-#SBATCH --partition=accelerated
+#SBATCH --partition=accelerated-h100
 #SBATCH --job-name=flowformer++_sintel-final_cc
 #SBATCH --output=slurm/flowformer++_sintel-final_cc_%A_%a.out
 #SBATCH --error=slurm/flowformer++_sintel-final_cc_%A_%a.out
