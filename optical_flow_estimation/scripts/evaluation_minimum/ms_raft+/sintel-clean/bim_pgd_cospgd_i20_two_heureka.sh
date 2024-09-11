@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=06:59:59
+#SBATCH --time=19:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated-h100
 #SBATCH --job-name=ms_raft+_sintel-clean_bim_pgd_cospgd_i20_two
@@ -11,7 +11,7 @@
 
 model="ms_raft+"
 dataset="sintel-clean"
-checkpoint="sintel"
+checkpoint="mixed"
 targeteds="True False"
 targets="negative zero"
 norm="two"

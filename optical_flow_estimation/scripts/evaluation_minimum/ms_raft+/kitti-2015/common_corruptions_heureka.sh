@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=07:59:59
+#SBATCH --time=09:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated-h100
 #SBATCH --job-name=ms_raft+_kitti-2015_cc
@@ -11,7 +11,7 @@
 
 model="ms_raft+"
 dataset="kitti-2015"
-checkpoint="kitti"
+checkpoint="mixed"
 attack="common_corruptions"
 cc_names="gaussian_noise shot_noise impulse_noise defocus_blur glass_blur motion_blur zoom_blur snow frost fog brightness contrast elastic_transform pixelate jpeg_compression"
 cc_severitys="3"

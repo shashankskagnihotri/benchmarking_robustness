@@ -52,6 +52,8 @@ for folder in folders:
                 data = data.replace("model_name", folder)
                 if folder in gpu_a100_models:
                     data = data.replace("accelerated", "accelerated-h100")
+                if folder == "ms_raft+":
+                    data = data.replace('checkpoint="kitti"', 'checkpoint="mixed"')
 
                 with open(dst_file, "w") as file:
                     file.write(data)
@@ -84,6 +86,8 @@ for folder in folders:
                 data = data.replace("model_name", folder)
                 if folder in gpu_a100_models:
                     data = data.replace("accelerated", "accelerated-h100")
+                if folder == "ms_raft+":
+                    data = data.replace('checkpoint="sintel"', 'checkpoint="mixed"')
                 with open(dst_file, "w") as file:
                     file.write(data)
 
@@ -110,6 +114,8 @@ for folder in folders:
                     data = data.replace("accelerated", "accelerated-h100")
                 with open(dst_file, "w") as file:
                     file.write(data)
+                if folder == "ms_raft+":
+                    data = data.replace('checkpoint="sintel"', 'checkpoint="mixed"')
 
                 print(f"File created: {dst_file}")
 

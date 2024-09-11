@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=07:59:59
+#SBATCH --time=09:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated-h100
 #SBATCH --job-name=ms_raft+_kitti-2015_bim_pgd_cospgd_i20_inf
@@ -11,7 +11,7 @@
 
 model="ms_raft+"
 dataset="kitti-2015"
-checkpoint="kitti"
+checkpoint="mixed"
 targeteds="True False"
 targets="negative zero"
 norm="inf"
