@@ -19,7 +19,7 @@ sintel_model_names = [
     "rapidflow", "scopeflow", "scv4", "separableflow", "skflow", "starflow", 
     "videoflow_bof"
 ]
-
+gpu_a100_models = ["ccmr", "flowformer", "flowformer++", "dip", "ms_raft+"]
 # Change directory to 2 levels below the current one
 os.chdir(os.path.join(os.getcwd(), "..", ".."))
 
@@ -50,6 +50,8 @@ for folder in folders:
                 with open(dst_file, "r") as file:
                     data = file.read()
                 data = data.replace("model_name", folder)
+                if folder in gpu_a100_models:
+                    data = data.replace("accelerated", "accelerated-h100")
 
                 with open(dst_file, "w") as file:
                     file.write(data)
@@ -80,6 +82,8 @@ for folder in folders:
                 with open(dst_file, "r") as file:
                     data = file.read()
                 data = data.replace("model_name", folder)
+                if folder in gpu_a100_models:
+                    data = data.replace("accelerated", "accelerated-h100")
                 with open(dst_file, "w") as file:
                     file.write(data)
 
@@ -102,6 +106,8 @@ for folder in folders:
                 with open(dst_file, "r") as file:
                     data = file.read()
                 data = data.replace("model_name", folder)
+                if folder in gpu_a100_models:
+                    data = data.replace("accelerated", "accelerated-h100")
                 with open(dst_file, "w") as file:
                     file.write(data)
 
