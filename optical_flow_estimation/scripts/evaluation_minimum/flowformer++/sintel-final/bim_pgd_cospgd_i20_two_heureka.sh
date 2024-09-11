@@ -3,7 +3,7 @@
 #SBATCH --mem=100G
 #SBATCH --time=06:59:59
 #SBATCH --gres=gpu:4
-#SBATCH --partition=accelerated
+#SBATCH --partition=accelerated-h100
 #SBATCH --job-name=flowformer++_sintel-final_bim_pgd_cospgd_i20_two
 #SBATCH --output=slurm/flowformer++_sintel-final_bim_pgd_cospgd_i20_two_%A_%a.out
 #SBATCH --error=slurm/flowformer++_sintel-final_bim_pgd_cospgd_i20_two_err_%A_%a.out

@@ -9,41 +9,41 @@
 
 
 # User whose jobs you want to monitor
-USER="ma_lucschwa"
-LOGFILE="/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/automated_script/automated_run_sintel_final_two_2.log"
-cd /pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/automated_script
+USER="ma_jcaspary"
+LOGFILE="/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/automated_script/automated_run_sintel_final_two_2.log"
+cd /hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/automated_script
 # List of shell script names and their corresponding job amounts
 declare -A scripts_and_amounts=(
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer++/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer++/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflow/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflow/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflownet/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflownet/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/hd3/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/hd3/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/irr_pwc/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/irr_pwc/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/liteflownet/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/liteflownet/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/rapidflow/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/rapidflow/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scopeflow/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scopeflow/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scv4/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scv4/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/seperableflow/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/seperableflow/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/skflow/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/skflow/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/starflow/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/starflow/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/videoflow_bof/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/videoflow_bof/sintel-final/fgsm_two.sh"]=4
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/maskflownet_s/sintel-final/bim_pgd_cospgd_i20_two.sh"]=12
-  ["/pfs/work7/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/maskflownet_s/sintel-final/fgsm_two.sh"]=4
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer++/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/flowformer++/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflow/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflow/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflownet/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/gmflownet/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/hd3/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/hd3/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/irr_pwc/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/irr_pwc/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/liteflownet/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/liteflownet/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/rapidflow/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/rapidflow/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scopeflow/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scopeflow/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scv4/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/scv4/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/seperableflow/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/seperableflow/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/skflow/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/skflow/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/starflow/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/starflow/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/videoflow_bof/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/videoflow_bof/sintel-final/fgsm_two_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/maskflownet_s/sintel-final/bim_pgd_cospgd_i20_two_heureka.sh"]=3
+  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/maskflownet_s/sintel-final/fgsm_two_heureka.sh"]=1
 )
 
 # Function to check the number of running and pending jobs

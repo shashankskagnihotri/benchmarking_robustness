@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=01:29:59
+#SBATCH --time=07:59:59
 #SBATCH --gres=gpu:4
-#SBATCH --partition=accelerated
+#SBATCH --partition=accelerated-h100
 #SBATCH --job-name=ccmr_kitti-2015_fgsm_i20_inf
 #SBATCH --output=slurm/ccmr_kitti-2015_fgsm_i20_inf_%A_%a.out
 #SBATCH --error=slurm/ccmr_kitti-2015_fgsm_i20_inf_err_%A_%a.out

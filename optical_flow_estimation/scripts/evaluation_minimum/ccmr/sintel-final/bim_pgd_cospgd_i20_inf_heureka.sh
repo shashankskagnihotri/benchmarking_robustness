@@ -3,7 +3,7 @@
 #SBATCH --mem=100G
 #SBATCH --time=06:59:59
 #SBATCH --gres=gpu:4
-#SBATCH --partition=accelerated
+#SBATCH --partition=accelerated-h100
 #SBATCH --job-name=ccmr_sintel-final_bim_pgd_cospgd_i20_inf
 #SBATCH --output=slurm/ccmr_sintel-final_bim_pgd_cospgd_i20_inf_%A_%a.out
 #SBATCH --error=slurm/ccmr_sintel-final_bim_pgd_cospgd_i20_inf_err_%A_%a.out
