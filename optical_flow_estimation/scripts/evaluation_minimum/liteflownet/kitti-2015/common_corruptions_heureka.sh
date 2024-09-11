@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=07:59:59
+#SBATCH --time=09:59:59
 #SBATCH --gres=gpu:4
 #SBATCH --partition=accelerated
 #SBATCH --job-name=liteflownet_kitti-2015_cc
