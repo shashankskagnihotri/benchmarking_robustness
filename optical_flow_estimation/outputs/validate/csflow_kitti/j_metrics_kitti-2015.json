@@ -7801,6 +7801,174 @@
                 "epe_ground_truth_to_negative": 73.4307771575451,
                 "epe_ground_truth_to_zero": 36.74364090204239
             }
+        },
+        {
+            "start_time": "2024-09-11 18:53:05",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-11 18:55:04",
+            "duration": "00:01:58",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.7516802197881043,
+                "px1": 0.8557377648353577,
+                "px3": 0.9607407695055008,
+                "px5": 0.9802761802077293,
+                "outlier": 2.067518488075584,
+                "own_epe": 23.680469400621952,
+                "cosim": 0.18290453793946654
+            }
+        },
+        {
+            "start_time": "2024-09-11 18:57:14",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-11 18:59:10",
+            "duration": "00:01:56",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 33.98170884370804,
+                "px1": 0.1378741977190293,
+                "px3": 0.2215382146558113,
+                "px5": 0.2784605177422054,
+                "outlier": 77.84561459541321,
+                "own_epe": 14.048996365815402,
+                "cosim": 0.11879236194072292
+            }
+        },
+        {
+            "start_time": "2024-09-11 18:57:13",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-11 18:59:23",
+            "duration": "00:02:09",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 3.0006123856455087,
+                "px1": 0.7013913606479764,
+                "px3": 0.8730024176836014,
+                "px5": 0.9145837661623955,
+                "outlier": 9.822852415591479,
+                "own_epe": 23.376957793794574,
+                "cosim": 0.17982813515234738
+            }
+        },
+        {
+            "start_time": "2024-09-11 19:01:20",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-11 19:03:28",
+            "duration": "00:02:08",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.069837125595659,
+                "px1": 0.8166019222140313,
+                "px3": 0.9408368757367134,
+                "px5": 0.9665899983048439,
+                "outlier": 3.7139794766157865,
+                "own_epe": 23.622917743381112,
+                "cosim": 0.182823013109155
+            }
+        },
+        {
+            "start_time": "2024-09-11 19:01:21",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-11 19:03:30",
+            "duration": "00:02:09",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 3.599878653436899,
+                "px1": 0.5777966153621673,
+                "px3": 0.8081187300384045,
+                "px5": 0.8716650196909904,
+                "outlier": 16.152955191135405,
+                "own_epe": 25.328400262594222,
+                "cosim": 0.179883347786963
+            }
+        },
+        {
+            "start_time": "2024-09-11 19:05:27",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-11 19:07:21",
+            "duration": "00:01:54",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 41.288282989263536,
+                "px1": 0.01669918915637936,
+                "px3": 0.06287378367112524,
+                "px5": 0.11966608191296019,
+                "outlier": 93.64033035278321,
+                "own_epe": 49.51537326812744,
+                "cosim": 0.10140871685944149
+            }
+        },
+        {
+            "start_time": "2024-09-11 19:05:26",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-11 19:07:24",
+            "duration": "00:01:57",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 37.02454615354538,
+                "px1": 0.024959442822873826,
+                "px3": 0.0879700340708132,
+                "px5": 0.14600234630435807,
+                "outlier": 91.13949491977692,
+                "own_epe": 44.14134333252907,
+                "cosim": 0.10772745014557586
+            }
+        },
+        {
+            "start_time": "2024-09-11 19:06:29",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-11 19:09:15",
+            "duration": "00:02:46",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.7462882106006146,
+                "px1": 0.6788965294603259,
+                "px3": 0.8624223728850484,
+                "px5": 0.9069889741390944,
+                "outlier": 11.03073460124433,
+                "own_epe": 24.342971430532636,
+                "cosim": 0.18090528699569405
+            }
         }
     ]
 }

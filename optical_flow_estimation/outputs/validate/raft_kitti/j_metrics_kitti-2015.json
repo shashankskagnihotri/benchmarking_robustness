@@ -11941,6 +11941,48 @@
                 "epe_ground_truth_to_negative": 73.47137809514999,
                 "epe_ground_truth_to_zero": 36.74364090204239
             }
+        },
+        {
+            "start_time": "2024-09-10 23:51:16",
+            "model": "raft",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-10 23:53:25",
+            "duration": "00:02:08",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.6855710246413946,
+                "px1": 0.8661427634954453,
+                "px3": 0.9663489228487014,
+                "px5": 0.9835648941993713,
+                "outlier": 1.779480569595471,
+                "own_epe": 23.963783494904636,
+                "cosim": 0.18293724021408708
+            }
+        },
+        {
+            "start_time": "2024-09-10 23:54:33",
+            "model": "raft",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 5,
+            "corruption": "far_focus",
+            "end_time": "2024-09-10 23:56:37",
+            "duration": "00:02:04",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.7036007116176188,
+                "px1": 0.8631693053245545,
+                "px3": 0.9653530260920524,
+                "px5": 0.983084863126278,
+                "outlier": 1.876883550491184,
+                "own_epe": 24.031027212161572,
+                "cosim": 0.18284513419959694
+            }
         }
     ]
 }
