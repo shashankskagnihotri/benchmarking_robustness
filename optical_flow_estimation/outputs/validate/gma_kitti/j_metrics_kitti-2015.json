@@ -13587,6 +13587,56 @@
                 "l_inf_delta2": 0.005754485940560699,
                 "l_inf_delta12": 0.006621330846101046
             }
+        },
+        {
+            "start_time": "2024-09-11 19:08:40",
+            "model": "gma",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 19:10:06",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.594155936203897,
+                "px1": 0.8831939908862114,
+                "px3": 0.9712991601228714,
+                "px5": 0.9861820691823959,
+                "outlier": 1.3996954862074926,
+                "own_epe": 23.75490771087818,
+                "cosim": 0.18319019073154777,
+                "epe_initial_to_negative": 62.195090251863,
+                "epe_initial_to_zero": 31.0975451259315,
+                "own_epe_ground_truth_to_negative": 38.56867368817329,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 73.41874195694923,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
+        },
+        {
+            "start_time": "2024-09-11 21:24:46",
+            "model": "gma",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 21:26:12",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.594155936203897,
+                "px1": 0.8831939908862114,
+                "px3": 0.9712991601228714,
+                "px5": 0.9861820691823959,
+                "outlier": 1.3996954862074926,
+                "own_epe": 23.75490771087818,
+                "cosim": 0.18319019073154777,
+                "epe_initial_to_negative": 62.195090251863,
+                "epe_initial_to_zero": 31.0975451259315,
+                "own_epe_ground_truth_to_negative": 38.56867368817329,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 73.41874195694923,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
         }
     ]
 }
