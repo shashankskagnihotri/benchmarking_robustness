@@ -1,0 +1,38 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-09-11 16:45:52",
+            "model": "maskflownet",
+            "checkpoint": "kitti",
+            "attack": "cospgd",
+            "optim": "ground_truth",
+            "norm": "two",
+            "epsilon": 0.251,
+            "iterations": 20,
+            "alpha": 0.1,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-09-11 17:01:31",
+            "duration": "00:15:38",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.4300407971441746,
+                "px1": 0.7239005484431982,
+                "px3": 0.8869278645515442,
+                "px5": 0.9250687709450722,
+                "outlier": 8.002385425958783,
+                "own_epe": 26.157874577865005,
+                "cosim": 0.18210663070436567,
+                "l2_delta1": 0.0002117736401123693,
+                "l2_delta2": 0.0002117148275283398,
+                "l2_delta12": 0.00021174451772822068,
+                "l0_delta1": 1331581.57,
+                "l0_delta2": 1332899.36,
+                "l0_delta12": 2664480.93,
+                "l_inf_delta1": 0.009325278764590621,
+                "l_inf_delta2": 0.00901112098712474,
+                "l_inf_delta12": 0.01001393883023411
+            }
+        }
+    ]
+}

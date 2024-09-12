@@ -1,0 +1,38 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-09-11 17:30:52",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "cospgd",
+            "optim": "ground_truth",
+            "norm": "two",
+            "epsilon": 0.251,
+            "iterations": 20,
+            "alpha": 0.1,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-09-11 18:58:58",
+            "duration": "01:28:05",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 6.401227666288614,
+                "px1": 0.5978547419607639,
+                "px3": 0.7774296629801393,
+                "px5": 0.8331410295516253,
+                "outlier": 20.58637916499749,
+                "own_epe": 19.94010056167841,
+                "cosim": 0.179802953931503,
+                "l2_delta1": 0.00021216399822151288,
+                "l2_delta2": 0.0002121263145818375,
+                "l2_delta12": 0.00021214521198999138,
+                "l0_delta1": 1329949.03,
+                "l0_delta2": 1328787.675,
+                "l0_delta12": 2658736.705,
+                "l_inf_delta1": 0.010403857296332718,
+                "l_inf_delta2": 0.00906171836424619,
+                "l_inf_delta12": 0.011465870137326419
+            }
+        }
+    ]
+}

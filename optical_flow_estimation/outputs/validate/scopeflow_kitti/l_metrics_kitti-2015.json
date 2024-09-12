@@ -1,0 +1,38 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-09-11 17:20:32",
+            "model": "scopeflow",
+            "checkpoint": "kitti",
+            "attack": "cospgd",
+            "optim": "ground_truth",
+            "norm": "two",
+            "epsilon": 0.251,
+            "iterations": 20,
+            "alpha": 0.1,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-09-11 17:38:41",
+            "duration": "00:18:09",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.3275712309405208,
+                "px1": 0.8139513160288334,
+                "px3": 0.9345590406656266,
+                "px5": 0.9591258406639099,
+                "outlier": 4.357426806073636,
+                "own_epe": 24.044038397818802,
+                "cosim": 0.1822509615588933,
+                "l2_delta1": 0.00021210996521404013,
+                "l2_delta2": 0.00021204699733061715,
+                "l2_delta12": 0.00021207874713581986,
+                "l0_delta1": 1333496.37,
+                "l0_delta2": 1344361.42,
+                "l0_delta12": 2677857.79,
+                "l_inf_delta1": 0.0113740552123636,
+                "l_inf_delta2": 0.014533869903534651,
+                "l_inf_delta12": 0.015526548787020146
+            }
+        }
+    ]
+}

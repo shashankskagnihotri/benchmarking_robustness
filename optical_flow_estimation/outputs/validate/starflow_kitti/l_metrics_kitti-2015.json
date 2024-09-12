@@ -1,0 +1,38 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-09-11 17:30:48",
+            "model": "starflow",
+            "checkpoint": "kitti",
+            "attack": "cospgd",
+            "optim": "ground_truth",
+            "norm": "two",
+            "epsilon": 0.251,
+            "iterations": 20,
+            "alpha": 0.1,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-09-11 17:48:35",
+            "duration": "00:17:46",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.960036906823516,
+                "px1": 0.6625844463892281,
+                "px3": 0.8489882519841194,
+                "px5": 0.8950655862689019,
+                "outlier": 12.188207836486399,
+                "own_epe": 22.617724762260913,
+                "cosim": 0.18138975178357214,
+                "l2_delta1": 0.0002122209560184274,
+                "l2_delta2": 0.0002121326910855714,
+                "l2_delta12": 0.00021217690991761628,
+                "l0_delta1": 1335855.7,
+                "l0_delta2": 1356987.13,
+                "l0_delta12": 2692842.83,
+                "l_inf_delta1": 0.012372279874980449,
+                "l_inf_delta2": 0.018542762245051563,
+                "l_inf_delta12": 0.019113695845007897
+            }
+        }
+    ]
+}
