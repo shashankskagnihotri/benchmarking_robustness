@@ -5,14 +5,14 @@
 #SBATCH --time=00:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4_a100
+#SBATCH --partition=gpu_8
 #SBATCH --array=0-7%4
-#SBATCH --job-name=ccmr_sintel-clean_3dcc
-#SBATCH --output=slurm/ccmr_sintel-clean_3dcc_%A_%a.out
-#SBATCH --error=slurm/ccmr_sintel-clean_3dcc_err_%A_%a.out
+#SBATCH --job-name=liteflownet3_sintel-final_3dcc
+#SBATCH --output=slurm/liteflownet3_sintel-final_3dcc_%A_%a.out
+#SBATCH --error=slurm/liteflownet3_sintel-final_3dcc_err_%A_%a.out
 
-model="ccmr"
-dataset="sintel-clean"
+model="liteflownet3"
+dataset="sintel-final"
 checkpoint="sintel"
 attack="3dcc"
 tdcc_corruptions="far_focus near_focus fog_3d color_quant iso_noise low_light xy_motion_blur z_motion_blur"
