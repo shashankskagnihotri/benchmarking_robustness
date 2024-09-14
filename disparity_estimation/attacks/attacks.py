@@ -772,12 +772,21 @@ class APGDAttack():
         x_left = x_left.unsqueeze(0) if len(x_left.shape) < self.ndims + 1 else x_left
         x_right = x_right.unsqueeze(0) if len(x_right.shape) < self.ndims + 1 else x_right
 
-        if disparity_target is None:
-            disparity_target = self.model(x_left, x_right).detach()
+        # Move inputs to the correct device
+        x_left = x_left.to(self.device)
+        x_right = x_right.to(self.device)
 
-        # Stack the left and right images to create a unified tensor
+        # Handle model output based on architecture
+        if disparity_target is None:
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                disparity_target = self.model(left=x_left, right=x_right)[0][0].detach().to(self.device)
+            else:
+                inputs = {"images": [[x_left, x_right]]}
+                disparity_target = self.model(inputs)["disparities"].squeeze(0).detach().to(self.device)
+
         x_left_right = torch.stack((x_left, x_right), dim=1)  # [B, 2, C, H, W]
 
+        # Generate the initial perturbation
         if self.norm == 'Linf':
             t = 2 * torch.rand(x_left_right.shape).to(self.device).detach() - 1
             x_adv = x_left_right + self.eps * self.normalize(t)
@@ -791,16 +800,28 @@ class APGDAttack():
 
         x_adv = x_adv.clamp(0., 1.)
         x_best = x_adv.clone()
-        loss_best = self.criterion(self.model(x_best[:, 0], x_best[:, 1]), disparity_target).mean().item()
+
+        # Compute the initial loss based on architecture
+        if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+            disparity_pred = self.model(x_best[:, 0], x_best[:, 1])[0][0].to(self.device)
+        else:
+            inputs = {"images": [[x_best[:, 0], x_best[:, 1]]]}
+            disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+        loss_best = self.criterion(disparity_pred, disparity_target).mean().item()
 
         step_size = 2. * self.eps / self.num_iterations
-
-        # Initialize a dictionary to store perturbed results for each iteration
         perturbed_results = {}
 
         for i in range(self.num_iterations):
             x_adv.requires_grad_()
-            disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])
+
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                disparity_pred = self.model(left=x_adv[:, 0], right=x_adv[:, 1])[0][0].to(self.device)
+            else:
+                inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
+                disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
             loss_indiv = self.criterion(disparity_pred, disparity_target).sum()
 
             grad = torch.autograd.grad(loss_indiv, [x_adv])[0]
@@ -817,16 +838,22 @@ class APGDAttack():
 
             x_adv = x_adv.clamp(0., 1.)
 
-            # Update best adversarial example if the loss improved
-            loss_curr = self.criterion(self.model(x_adv[:, 0], x_adv[:, 1]), disparity_target).mean().item()
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])[0][0].to(self.device)
+            else:
+                inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
+                disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+            loss_curr = self.criterion(disparity_pred, disparity_target).mean().item()
+
             if loss_curr < loss_best:
                 loss_best = loss_curr
                 x_best = x_adv.clone()
 
-            # Store the perturbed images for the current iteration
             perturbed_results[i] = (x_adv[:, 0].clone(), x_adv[:, 1].clone())
 
         return perturbed_results
+
 
     def attack(self, x_left, x_right, disparity_target=None):
         self.init_hyperparam(x_left)
