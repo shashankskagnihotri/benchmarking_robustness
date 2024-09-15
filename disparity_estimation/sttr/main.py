@@ -41,7 +41,7 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--seed', default=42, type=int)
-    parser.add_argument('--resume', default='', help='resume from checkpoint')
+    parser.add_argument('--loadckpt', default='', help='resume from checkpoint')
     parser.add_argument('--ft', action='store_true', help='load model from checkpoint, but discard optimizer state')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
@@ -169,10 +169,10 @@ def main(args):
 
     # load checkpoint if provided
     prev_best = np.inf
-    if args.resume != '':
-        if not os.path.isfile(args.resume):
-            raise RuntimeError(f"=> no checkpoint found at '{args.resume}'")
-        checkpoint = torch.load(args.resume)
+    if args.loadckpt != '':
+        if not os.path.isfile(args.loadckpt):
+            raise RuntimeError(f"=> no checkpoint found at '{args.loadckpt}'")
+        checkpoint = torch.load(args.loadckpt)
 
         pretrained_dict = checkpoint['state_dict']
         missing, unexpected = model.load_state_dict(pretrained_dict, strict=False)
