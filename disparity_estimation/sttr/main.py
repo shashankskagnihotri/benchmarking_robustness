@@ -87,6 +87,9 @@ def get_args_parser():
                         help='Weight for losses')
     parser.add_argument('--validation_max_disp', type=int, default=-1)
 
+    # attack 
+    parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test', default=False)
+
     return parser
 
 
@@ -188,7 +191,7 @@ def main(args):
         print("Pre-trained model successfully loaded.")
 
         # if not ft/inference/eval, load states for optimizer, lr_scheduler, amp and prev best
-        if not (args.ft or args.inference or args.eval):
+        if not (args.ft or args.inference or args.eval or args.attack_type):
             if len(unexpected) > 0:  # loaded checkpoint has bn parameters, legacy resume, skip loading
                 raise Exception("Resuming legacy model with BN parameters. Not possible due to BN param change. " +
                                 "Do you want to finetune or inference? If so, check your arguments.")
@@ -231,6 +234,45 @@ def main(args):
         print("Start evaluation")
         evaluate(model, criterion, data_loader_test, device, 0, summary_writer, save_output=False)
         return
+    if args.attack_type:
+        attack_type = args.attack_type
+        epsilon = 8/255
+        alpha = 0.01
+        num_iterations = 20
+        norm = "Linf"
+        num_iterations = 20 
+
+        data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
+        from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
+
+        if attack_type == "cospgd":
+            attacker = CosPGDAttack(model,architecture='sttr', epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
+        elif attack_type == "fgsm":
+            attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
+
+        elif attack_type == "pgd":
+            attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
+
+        elif attack_type =='bim':
+            attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
+            
+        elif attack_type == 'apgd':
+            attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, eps=epsilon)
+        
+        else:
+            raise ValueError("Attack type not recognized")
+
+        for batch_idx, sample in enumerate(data_loader_test):
+            perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disp"])
+            for iteration in perturbed_results.keys():
+                model.eval()
+                perturbed_left, perturbed_right = perturbed_results[iteration]
+                loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
+                save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
+
+
+            print("batch", batch_idx)
+
 
     # train
     print("Start training")
@@ -282,45 +324,14 @@ def test():
     main(args)
     
 
-def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf", args):
+def attack( attack_type: str,epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
-
-    device = torch.device(args.device)
-    model = STTR(args).to(device)  
-    model.eval()
-    num_iterations = 20 
-
-    data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
-
-    if attack_type == "cospgd":
-        attacker = CosPGDAttack(model,architecture=args.model, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
-    elif attack_type == "fgsm":
-        attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
-
-    elif attack_type == "pgd":
-        attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
-
-    elif attack_type =='bim':
-        attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
-        
-    elif attack_type == 'apgd':
-        attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, eps=epsilon)
-    
-    else:
-        raise ValueError("Attack type not recognized")
-
-    for batch_idx, sample in enumerate(data_loader_test):
-        perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
-        for iteration in perturbed_results.keys():
-            model.eval()
-            perturbed_left, perturbed_right = perturbed_results[iteration]
-            loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
-            save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
-
-
-        print("batch", batch_idx)    
+    ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+    args, unknown = ap.parse_known_args()
+    #args.attack_type = True
+    main(args) 
 
 # if __name__ == '__main__':
 #     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])

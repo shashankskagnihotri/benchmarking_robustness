@@ -256,13 +256,16 @@ def main(args):
     return
 
 
-def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf", args):
+def attack(attack_type: str, args, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
 
+    parser = get_args_parser()
+    args = parser.parse_args()
+
     device = torch.device(args.device)
-    model = STTR(args).to(device)  
+    model = STTR(args).to(device)
     model.eval()
     num_iterations = 20 
 

@@ -356,6 +356,10 @@ class CosPGDAttack:
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
                 outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
 
+            elif self.architecture == 'sttr' in self.architecture :
+                from ..sttr.utilities import forward_pass
+                
+                
 
             else:
                 outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)
