@@ -2,6 +2,7 @@ import os
 import random
 from typing import Literal
 
+import pudb
 from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
@@ -34,6 +35,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
         self.training = split.lower() == "train"
         self._read_data()
+        self._split_data()
 
     def _read_data(self):
 
@@ -67,6 +69,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
                             os.path.isdir(os.path.join(sub_folder, seq))]
 
         self.img_left_filenames = []
+        if self.split == 'validation': pudb.set_trace()
         for seq_folder in seq_folders:
             self.img_left_filenames += [os.path.join(seq_folder, 'left', img) for img in
                                         os.listdir(os.path.join(seq_folder, 'left'))]
@@ -87,6 +90,9 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         self.occ_left_filenames = natsorted(self.occ_left_filenames)
         self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
 
+        # TESTING
+        assert len(self.img_right_filenames) > 0
+
     # noinspection DuplicatedCode
     def _split_data(self):
         train_val_frac = 0.95
@@ -97,10 +103,12 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             self.disp_left_filenames = self.disp_left_filenames[:int(len(self.disp_left_filenames) * train_val_frac)]
             self.disp_right_filenames = self.disp_right_filenames[:int(len(self.disp_right_filenames) * train_val_frac)]
         elif self.split == 'validation':
+            pudb.set_trace()
             self.img_left_filenames = self.img_left_filenames[int(len(self.img_left_filenames) * train_val_frac):]
             self.img_right_filenames = self.img_right_filenames[int(len(self.img_right_filenames) * train_val_frac):]
             self.disp_left_filenames = self.disp_left_filenames[int(len(self.disp_left_filenames) * train_val_frac):]
             self.disp_right_filenames = self.disp_right_filenames[int(len(self.disp_right_filenames) * train_val_frac):]
+            pudb.set_trace()
 
     def load_image(self, filename) -> Image:
         return Image.open(filename).convert('RGB')
@@ -115,6 +123,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         return len(self.img_left_filenames)
 
     def __getitem__(self, index):
+        #print(f"__getitem__ at index {index}")
         img_left = self.load_image(self.img_left_filenames[index])
         img_right = self.load_image(self.img_right_filenames[index])
         disp_left = self.load_disp(self.disp_left_filenames[index])

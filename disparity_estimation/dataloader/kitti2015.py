@@ -15,7 +15,7 @@ import torchvision
 from typing import Literal
 
 from .kitti import flow_transforms
-
+import pudb
 
 # Imports
 from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
@@ -36,6 +36,8 @@ from .sttr.stereo_albumentation import RGBShiftStereo, RandomBrightnessContrastS
 class KITTIBaseDataset(data.Dataset):
     def __init__(self, datadir, architecture_name, split: Literal['train', 'validation', 'test'] = 'train'):
         super(KITTIBaseDataset, self).__init__()
+
+        assert split in ['train', 'validation', 'test']
 
         self.datadir = datadir
         self.split = split
@@ -58,14 +60,14 @@ class KITTIBaseDataset(data.Dataset):
         # else:
         #     self.disp_fold = None
 
-
+        #pudb.set_trace()
         self._read_data()
         self._augmentation()
 
     def generate_disparity_path(self, original_path:str) -> str:
         # Zerlege den originalen Pfad in seine Teile
         parts = original_path.split('/')
-        print("Parts: ", parts)
+        #print("Parts: ", parts)
         
         # Finde den Index des Verzeichnisses 'FlyingThings3D'
         try:
@@ -91,10 +93,10 @@ class KITTIBaseDataset(data.Dataset):
             raise Exception(f"Data directory {self.datadir} not found")
 
         directory = os.path.join(self.datadir, self.sub_folder, self.left_fold)
-        print("Directory: ", directory, "Subfolder: ", self.sub_folder, "Left fold: ", self.left_fold)
+        #print("Directory: ", directory, "Subfolder: ", self.sub_folder, "Left fold: ", self.left_fold)
         self.left_data = [os.path.join(self.datadir, self.sub_folder, self.left_fold, img) for img in
                                     os.listdir(directory) if img.find('_10') > -1] if os.path.isdir(directory) else []
-        print("Left data: ", len(self.left_data))
+        #print("Left data: ", len(self.left_data))
         self.right_data = [img.replace(self.left_fold, self.right_fold) for img in self.left_data]
         self.disp_data = [self.generate_disparity_path(img) for img in self.left_data]
 
@@ -126,6 +128,8 @@ class KITTIBaseDataset(data.Dataset):
                 self.left_data = self.left_data[start_idx:]
                 self.right_data = self.right_data[start_idx:]
                 self.disp_data = self.disp_data[start_idx:]
+
+        #pudb.set_trace()
 
     def _augmentation(self):
         if self.architecture_name == 'sttr' or self.architecture_name == 'sttr-light':
@@ -224,18 +228,17 @@ class KITTIBaseDataset(data.Dataset):
 
 
     def get_item_STTR(self, img_left:Image, img_right:Image, disp_left:np.ndarray) -> dict:
+        self.split = 'train' # bc we have disparity and all img needs to be cropped to be able to pass through model
         input_data = {}
 
         # left
         # left_fname = self.left_data[idx]
         # left = np.array(Image.open(left_fname)).astype(np.uint8)
-        # input_data['left'] = left
         input_data['left'] = np.array(img_left).astype(np.uint8)
 
         # right
         # right_fname = self.right_data[idx]
         # right = np.array(Image.open(right_fname)).astype(np.uint8)
-        # input_data['right'] = right
         input_data['right'] = np.array(img_right).astype(np.uint8)
 
         # disp
@@ -246,44 +249,74 @@ class KITTIBaseDataset(data.Dataset):
             input_data['disp'] = np.array(disp_left).astype(float) / 256.
             input_data['occ_mask'] = np.zeros_like(disp_left).astype(bool)
 
+            crop_w, crop_h = 512, 256
             if self.split == 'train':
-                input_data = random_crop(200, 640, input_data, self.split)
+                input_data = random_crop(crop_h, crop_w, input_data, self.split)
 
             input_data = sttr.preprocess.augment(input_data, self.transformation)
         else:
             input_data = sttr.preprocess.normalization(**input_data)
 
+        pudb.set_trace()
         return input_data
+
+        # input_data = {}
+        #
+        # # left
+        # # left_fname = self.left_data[idx]
+        # # left = np.array(Image.open(left_fname)).astype(np.uint8)
+        # # input_data['left'] = left
+        # input_data['left'] = np.array(img_left).astype(np.uint8)
+        #
+        # # right
+        # # right_fname = self.right_data[idx]
+        # # right = np.array(Image.open(right_fname)).astype(np.uint8)
+        # # input_data['right'] = right
+        # input_data['right'] = np.array(img_right).astype(np.uint8)
+        #
+        # # disp
+        # # Or test has disp files for test files
+        # # disp_fname = self.disp_data[idx]
+        #
+        # # disp = np.array(Image.open(disp_fname)).astype(float) / 256.
+        # input_data['disp'] = np.array(disp_left).astype(float) / 256.
+        # input_data['occ_mask'] = np.zeros_like(disp_left).astype(bool)
+        #
+        # input_data = random_crop(200, 640, input_data, self.split)
+        #
+        # input_data = sttr.preprocess.augment(input_data, self.transformation)
+        #
+        # return input_data
     
-    def get_item_sttr_light(self, img_left:Image, img_right:Image, disp_left:np.ndarray) -> dict:
-        input_data = {}
-
-        # left
-        # left_fname = self.left_data[idx]
-        # left = np.array(Image.open(left_fname)).astype(np.uint8)
-        input_data['left'] = np.array(img_left).astype(np.uint8)
-
-        # right
-        # right_fname = self.right_data[idx]
-        # right = np.array(Image.open(right_fname)).astype(np.uint8)
-        input_data['right'] = np.array(img_right).astype(np.uint8)
-
-        # disp
-        if not self.split == 'test':  # no disp for test files
-            # disp_fname = self.disp_data[idx]
-
-            # disp = np.array(Image.open(disp_fname)).astype(float) / 256.
-            input_data['disp'] = np.array(disp_left).astype(float) / 256.
-            input_data['occ_mask'] = np.zeros_like(disp_left).astype(bool)
-
-            if self.split == 'train':
-                input_data = random_crop(200, 640, input_data, self.split)
-
-            input_data = sttr.preprocess.augment(input_data, self.transformation)
-        else:
-            input_data = sttr.preprocess.normalization(**input_data)
-
-        return input_data
+    # def get_item_sttr_light(self, img_left:Image, img_right:Image, disp_left:np.ndarray) -> dict:
+    #     input_data = {}
+    #
+    #     # left
+    #     # left_fname = self.left_data[idx]
+    #     # left = np.array(Image.open(left_fname)).astype(np.uint8)
+    #     input_data['left'] = np.array(img_left).astype(np.uint8)
+    #
+    #     # right
+    #     # right_fname = self.right_data[idx]
+    #     # right = np.array(Image.open(right_fname)).astype(np.uint8)
+    #     input_data['right'] = np.array(img_right).astype(np.uint8)
+    #
+    #     # disp
+    #     if not self.split == 'test':  # no disp for test files
+    #         # disp_fname = self.disp_data[idx]
+    #
+    #         # disp = np.array(Image.open(disp_fname)).astype(float) / 256.
+    #         input_data['disp'] = np.array(disp_left).astype(float) / 256.
+    #         input_data['occ_mask'] = np.zeros_like(disp_left).astype(bool)
+    #
+    #         if self.split == 'train':
+    #             input_data = random_crop(200, 640, input_data, self.split)
+    #
+    #         input_data = sttr.preprocess.augment(input_data, self.transformation)
+    #     else:
+    #         input_data = sttr.preprocess.normalization(**input_data)
+    #
+    #     return input_data
         
 
     
@@ -338,31 +371,32 @@ class KITTIBaseDataset(data.Dataset):
                     "right": right_img,
                     "disparity": torch.from_numpy(disparity)}
         
-        # WE DO NOT USE TESTING
-        # else:
-        #     # Apply the same preprocessing steps as in data_io.py
-        #     transform = transforms.Compose([
-        #         transforms.Resize((384, 1248)),  # Resize to the target size
-        #         transforms.ToTensor(),           # Convert PIL image to tensor
-        #     ])
 
-        #     left_img = transform(left_img)
-        #     right_img = transform(right_img)
+        else:
+            # Apply the same preprocessing steps as in data_io.py
+            transform = transforms.Compose([
+                transforms.Resize((384, 1248)),  # Resize to the target size
+                transforms.ToTensor(),           # Convert PIL image to tensor
+            ])
 
-        #     # Pad disparity gt if not None
-        #     if disparity is not None:
-        #         # Resize the disparity map
-        #         disparity = Image.fromarray(disparity)
-        #         disparity = disparity.resize((1248, 384), Image.NEAREST)
-        #         disparity = np.array(disparity, dtype=np.float32) / 256.
+            left_img = transform(left_img)
+            right_img = transform(right_img)
 
-        #     if disparity is not None:
-        #         return {"left": left_img,
-        #                 "right": right_img,
-        #                 "disparity": disparity}
-        #     else:
-        #         return {"left": left_img,
-        #                 "right": right_img}
+            # Pad disparity gt if not None
+            if disparity is not None:
+                # Resize the disparity map
+                disparity = Image.fromarray(disparity)
+                disparity = disparity.resize((1248, 384), Image.NEAREST)
+                disparity = np.array(disparity, dtype=np.float32) / 256.
+
+            if disparity is not None:
+                return {"left": left_img,
+                        "right": right_img,
+                        "disparity": disparity}
+            else:
+                raise NotImplementedError()
+                # return {"left": left_img,
+                #         "right": right_img}
 
             # if disparity is not None:
             #     return {"left": left_img,
@@ -458,26 +492,33 @@ class KITTIBaseDataset(data.Dataset):
                     "disparity": disparity}
         
         # WE DO NOT USE TESTING
-        # else:
-        #     w, h = left_img.size
+        else:
+            w, h = left_img.size
 
-        #     # normalize
-        #     processed = cfnet.data_io.get_transform()
-        #     left_img = processed(left_img).numpy()
-        #     right_img = processed(right_img).numpy()
+            # normalize
+            processed = cfnet.data_io.get_transform()
+            left_img = processed(left_img).numpy()
+            right_img = processed(right_img).numpy()
 
-        #     # pad to size 1248x384
-        #     top_pad = 384 - h
-        #     right_pad = 1248 - w
-        #     assert top_pad > 0 and right_pad > 0
-        #     # pad images
-        #     left_img = np.lib.pad(left_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
-        #     right_img = np.lib.pad(right_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant',
-        #                            constant_values=0)
-        #     # pad disparity gt
-        #     if disparity is not None:
-        #         assert len(disparity.shape) == 2
-        #         disparity = np.lib.pad(disparity, ((top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
+            # pad to size 1248x384
+            top_pad = 384 - h
+            right_pad = 1248 - w
+            assert top_pad > 0 and right_pad > 0
+            # pad images
+            left_img = np.lib.pad(left_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
+            right_img = np.lib.pad(right_img, ((0, 0), (top_pad, 0), (0, right_pad)), mode='constant',
+                                   constant_values=0)
+            # pad disparity gt
+            if disparity is not None:
+                assert len(disparity.shape) == 2
+                disparity = np.lib.pad(disparity, ((top_pad, 0), (0, right_pad)), mode='constant', constant_values=0)
+
+            if disparity is not None:
+                return {"left": left_img,
+                        "right": right_img,
+                        "disparity": disparity}
+            else:
+                raise NotImplementedError()
 
         #     if disparity is not None:
         #         return {"left": left_img,

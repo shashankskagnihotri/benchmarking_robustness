@@ -17,6 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 from dataloader import get_default_loader
 # from datasets import __datasets__
 from models import __models__, model_loss
+# from object_detection.mmdetection.mmdet.structures.bbox.box_type import box_types
 from utils import *
 from torch.utils.data import DataLoader, random_split, Subset
 import gc
@@ -67,6 +68,13 @@ parser.add_argument(
     "--save_freq", type=int, default=1, help="the frequency of saving checkpoint"
 )
 
+parser.add_argument(
+    "--debug",
+    default=False,
+    type=bool,
+    help="Use for debugging"
+)
+
 # parse arguments, set seeds
 args, _ = parser.parse_known_args()
 mlflow.log_params(vars(args))
@@ -81,7 +89,6 @@ logger = SummaryWriter(args.logdir)
 ### START - Prepare Data
 
 TrainImgLoader, ValImgLoader, TestImgLoader = get_default_loader(args, "CFNet", debug=args.debug, random_seed=args.seed)
-
 ### END - Prepare Data
 
 # model, optimizer

@@ -2,6 +2,7 @@ from typing import Literal
 
 from torch.utils.data import DataLoader, Subset, random_split, Dataset
 from torch import Generator
+import pudb
 
 # TODO: fix MPISintel corruption and other split loading
 
@@ -13,7 +14,7 @@ def get_dataset(
     split: Literal["train", "validation", "test", "corrupted"],
     debug: bool = False,
     random_seed: int = 42,
-):
+) -> Dataset:
     """
     Load and return the dataset object based on the provided dataset name.
 
@@ -31,7 +32,7 @@ def get_dataset(
     Returns:
         An instance of the dataset class corresponding to the dataset_name provided.
     """
-
+    if debug: print("YOU ARE IN DEBUG MODE!!")
     dataset_name = dataset_name.lower()
     dataset: Dataset
 
@@ -49,7 +50,7 @@ def get_dataset(
     elif dataset_name == "kitti" or dataset_name == "kitti2015":
         from .kitti2015 import KITTIBaseDataset
 
-        split: Literal["train", "validation", "test"] = 'corrupted' if split == 'test' else split
+        split: Literal["train", "validation", "test"] = 'test' if split == 'corrupted' else split
         # Note: train / val / test split inside KITTIBaseDataset --> because different transformation applied
         dataset = KITTIBaseDataset(data_path, architecture_name, split)
     elif dataset_name == "eth3d":
@@ -66,19 +67,28 @@ def get_dataset(
     # Return less entries if in debug mode
     if debug:
         dataset = Subset(dataset, list(range(10)))
-
+    
+    #pudb.set_trace()
+    print(f"Dataset {split}: {len(dataset)} examples")
     return dataset
 
 
 ### START - Get data loaders for CFNet and GWCNet
 def get_default_loader(args, architecture_name: str, debug: bool, random_seed: int):
+    num_workers = 8
+    if debug:
+        print("set DEBUG batch size to 5 and num_workers to 0")
+        args.batch_size = 5
+        args.test_batch_size = 5
+        num_workers = 0
+        
     train_img_loader = DataLoader(
         get_dataset(
             args.dataset, args.datapath, architecture_name, "train", debug, random_seed
         ),
         args.batch_size,
         shuffle=False,
-        num_workers=8,
+        num_workers=num_workers,
         drop_last=True,
     )
     val_img_loader = DataLoader(
@@ -92,7 +102,7 @@ def get_default_loader(args, architecture_name: str, debug: bool, random_seed: i
         ),
         args.batch_size,
         shuffle=False,
-        num_workers=8,
+        num_workers=num_workers,
         drop_last=True,
     )
     test_img_loader = DataLoader(
@@ -101,10 +111,16 @@ def get_default_loader(args, architecture_name: str, debug: bool, random_seed: i
         ),
         args.test_batch_size,
         shuffle=False,
-        num_workers=4,
+        num_workers=num_workers,
         drop_last=False,
     )
-    return test_img_loader, train_img_loader, val_img_loader
+
+    # TESTING
+    assert len(train_img_loader) != 0
+    assert len(val_img_loader) != 0
+    assert len(test_img_loader) != 0
+
+    return train_img_loader, val_img_loader, test_img_loader
 
 
 def perform_train_test_split(

@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/disparity_estimation" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/disparity_estimation/stereo-transformer-light" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="unified_env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

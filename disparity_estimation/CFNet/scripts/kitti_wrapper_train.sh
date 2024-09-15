@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-DATAPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/KITTI_2015/"
+DATAPATH="/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/dataset/KITTI_2015/Common_corruptions/no_corruption/severity_0"
 # CHECKPOINTPATH="/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/CFNet/checkpoints/sceneflow_pretraining.ckpt"
 
-python wrapper.py --model cfnet \
+python -m pudb wrapper.py --model cfnet \
     --scenario train \
     --dataset kitti2015 \
     --datapath $DATAPATH \
@@ -15,5 +15,6 @@ python wrapper.py --model cfnet \
     --model cfnet \
     --logdir ./checkpoints/kitti/  \
     --test_batch_size 1 \
+    #--debug True \
     # --loadckpt $CHECKPOINTPATH \
     

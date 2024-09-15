@@ -7,6 +7,7 @@ import random
 import albumentations.augmentations.functional as F
 import cv2
 import numpy as np
+import pudb
 import torch
 from albumentations import GaussNoise, RGBShift, RandomBrightnessContrast, ToGray
 from albumentations.core.transforms_interface import BasicTransform
@@ -87,44 +88,32 @@ def horizontal_flip(img_left, img_right, occ_left, occ_right, disp_left, disp_ri
     return img_left, img_right, occ, occ_right, disp, disp_right
 
 
-def random_crop(min_crop_height, min_crop_width, input_data, split):
-    """
-    Crop center part of the input with a random width and height.
-
-    :param min_crop_height: min height of the crop, int
-    :param min_crop_width: min width of the crop, int
-    :param input_data: input data, dictionary
-    :param split: train/validation split, string
-    :return: updated input data, dictionary
-    """
-
+def random_crop(fixed_crop_height, fixed_crop_width, input_data, split):
     if split != 'train':
-        return input_data
+        return input_data  # Do not apply random cropping during validation or test
 
     height, width = input_data['left'].shape[:2]
 
-    if min_crop_height >= height or min_crop_width > width:
-        x1 = 0
-        x2 = width - 1
-        y1 = 0
-        y2 = height - 1
-    else:
-        crop_height = random.randint(min_crop_height, height)
-        crop_width = random.randint(min_crop_width, width)
+    if fixed_crop_height > height or fixed_crop_width > width:
+        raise ValueError("Crop size is larger than the image size.")
 
-        x1, y1, x2, y2 = get_random_crop_coords(height, width, crop_height, crop_width)
+    x1 = random.randint(0, width - fixed_crop_width)
+    y1 = random.randint(0, height - fixed_crop_height)
+    x2 = x1 + fixed_crop_width
+    y2 = y1 + fixed_crop_height
 
     input_data['left'] = crop(input_data['left'], x1, y1, x2, y2)
     input_data['right'] = crop(input_data['right'], x1, y1, x2, y2)
     input_data['disp'] = crop(input_data['disp'], x1, y1, x2, y2)
     input_data['occ_mask'] = crop(input_data['occ_mask'], x1, y1, x2, y2)
-    try:
-        input_data['disp_right'] = crop(input_data['disp_right'], x1, y1, x2, y2)
-        input_data['occ_mask_right'] = crop(input_data['occ_mask_right'], x1, y1, x2, y2)
-    except KeyError:
-        pass
+
+    # If these keys exist, crop them as well
+    for key in ['disp_right', 'occ_mask_right']:
+        if key in input_data:
+            input_data[key] = crop(input_data[key], x1, y1, x2, y2)
 
     return input_data
+
 
 
 """
