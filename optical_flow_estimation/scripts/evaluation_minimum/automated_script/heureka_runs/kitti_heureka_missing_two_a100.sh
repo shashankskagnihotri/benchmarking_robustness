@@ -9,7 +9,7 @@
 #SBATCH --error=slurm/kitti_missing_iterations_two_err_%A_%a.out
 #SBATCH --array=0-1%4
 
-models="ccmr flowformer flowformer++ dip ms_raft+"
+models="ccmr flowformer flowformer++ dip ms_raft+ craft"
 dataset="kitti-2015"
 checkpoint="kitti"
 targeteds="False"
