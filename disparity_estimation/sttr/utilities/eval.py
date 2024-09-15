@@ -58,7 +58,7 @@ def evaluate(model: torch.nn.Module, criterion: torch.nn.Module, data_loader: It
                 output_idx = save_and_clear(output_idx, output_file)
         if reset_on_batch:
             eval_stats['px_error_rate'] = eval_stats['error_px'] / eval_stats['total_px']
-            write_summary(eval_stats, summary, epoch, 'eval')
+            write_summary(eval_stats, summary, idx, 'eval')
  
     # save to file
     if save_output:
