@@ -9,7 +9,7 @@ SEVERITY_LEVEL="0"
 COMMON_CORRUPTION="no_corruption"
 CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
-MODEL="cfnet"
+MODEL="psmnet"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
