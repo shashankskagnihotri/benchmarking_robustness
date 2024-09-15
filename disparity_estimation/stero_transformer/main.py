@@ -281,10 +281,8 @@ def attack(attack_type: str, epsilon = 0.03, alpha = 0.01, num_iterations = 20, 
     device = torch.device(args.device)
     model = STTR(args).to(device) 
 
-    # epsilon = 0.03
-    # alpha = 0.01
+    model.eval()
     num_iterations = 20
-    # norm = "Linf" 
 
     data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
 

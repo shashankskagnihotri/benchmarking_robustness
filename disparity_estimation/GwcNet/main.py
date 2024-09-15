@@ -372,11 +372,8 @@ def test_sample(sample, compute_metrics=True):
 def attack(attack_type: str, epsilon = 0.03, alpha = 0.01, num_iterations = 20, norm = "Linf"):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
-
-    # epsilon = 0.03
-    # alpha = 0.01
+    model.eval()
     num_iterations = 20
-    # norm = "Linf" 
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(model,architecture=args.model, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
