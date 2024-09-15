@@ -331,6 +331,10 @@ class CosPGDAttack:
         self.architecture = architecture
     
     def attack(self, left_image, right_image, labels):
+        device = next(self.model.parameters()).device
+        left_image = left_image.to(device)
+        right_image = right_image.to(device)
+        labels = labels.to(device)
          # Initialize perturbations for both left and right images and the norm
         if self.norm == 'Linf':
             perturbed_left = Attack.init_linf(left_image, self.epsilon)
@@ -350,17 +354,22 @@ class CosPGDAttack:
             
             # Forward pass the perturbed images through the model
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
-                outputs = self.model(perturbed_left, perturbed_right)[0][0].cuda()
+                outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
 
 
             else:
-                outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).cuda()
+                outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)
             
-            outputs = outputs[-1].cuda()  
-            labels = labels.cuda()
-            
+            # Ensure outputs and labels have the same shape
+            if outputs.shape != labels.shape:
+                outputs = outputs.view_as(labels)
+
             # Compute the loss
             loss = F.mse_loss(outputs, labels)
+
+            # Ensure loss is scalar
+            if loss.dim() > 0:
+                loss = loss.mean()
             
             # Scale the loss with Cosine Similarity
             loss = Attack.cospgd_scale(
@@ -371,6 +380,8 @@ class CosPGDAttack:
                 targeted=self.targeted,
                 one_hot=False  # to doregression
             )
+            if loss.dim() > 0:
+                loss = loss.mean()
             
             # Zero all existing gradients
             self.model.zero_grad()
@@ -877,12 +888,6 @@ class BIMAttack:
         self.norm = norm
         self.architecture = architecture 
 
-    def _denorm(self, images, mean, std):
-        """Denormalize the images"""
-        mean = torch.tensor(mean).view(1, 3, 1, 1).to(images.device)
-        std = torch.tensor(std).view(1, 3, 1, 1).to(images.device)
-        return images * std + mean
-
     def _clip_perturbation(self, adv_images, images):
         """Clip perturbation to be within bounds"""
         if self.norm == 'Linf':
@@ -893,55 +898,57 @@ class BIMAttack:
             factor = self.epsilon / delta_norms
             factor = torch.min(factor, torch.ones_like(delta_norms))
             delta = delta * factor.view(-1, 1, 1, 1)
-        adv_images = torch.clamp(images + delta, 0, 255)
+        adv_images = torch.clamp(images + delta, 0, 1)  # Assuming images are in [0, 1] range
         return adv_images
 
     @torch.enable_grad()
-    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, labels: torch.Tensor, mean: List[float], std: List[float]):
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, labels: torch.Tensor):
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
         labels = labels.cuda()
 
-        perturbed_left = left_image.clone().detach()
-        perturbed_right = right_image.clone().detach()
-
+        perturbed_left = left_image.clone().detach().requires_grad_(True)
+        perturbed_right = right_image.clone().detach().requires_grad_(True)
 
         perturbed_results = {}
 
         for iteration in range(self.num_iterations):
-            perturbed_left.requires_grad = True
-            perturbed_right.requires_grad = True
-
+            # Forward Pass
             inputs = {"images": [[perturbed_left, perturbed_right]]}
-            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
-                outputs = self.model(left=perturbed_left,right=perturbed_right)[0].squeeze(0)
-                
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                outputs = self.model(left=perturbed_left, right=perturbed_right)[0][0].squeeze(0)
             else:
                 outputs = self.model(inputs)["disparities"].squeeze(0)
+
+            # Compute loss
             loss = F.mse_loss(outputs.float(), labels.float())
             if self.targeted:
                 loss = -loss
 
+            # Zero gradients, backward pass, and update gradients
             self.model.zero_grad()
             loss.backward()
 
-            left_grad = perturbed_left.grad.detach()
-            right_grad = perturbed_right.grad.detach()
+            left_grad = perturbed_left.grad.data
+            right_grad = perturbed_right.grad.data
 
-            # Update perturbed images
+            # Perform BIM step
             if self.targeted:
                 left_grad *= -1
                 right_grad *= -1
-            
+
             perturbed_left = perturbed_left.detach() + self.alpha * left_grad
             perturbed_right = perturbed_right.detach() + self.alpha * right_grad
 
+            # Clip perturbations to stay within bounds
             perturbed_left = self._clip_perturbation(perturbed_left, orig_left_image)
             perturbed_right = self._clip_perturbation(perturbed_right, orig_right_image)
 
-            perturbed_left = perturbed_left.detach()
-            perturbed_right = perturbed_right.detach()
+            # Prepare for the next iteration
+            perturbed_left.requires_grad_(True)
+            perturbed_right.requires_grad_(True)
 
-            perturbed_results[iteration] = (perturbed_left, perturbed_right)
+            # Store perturbed images for the current iteration
+            perturbed_results[iteration] = (perturbed_left.detach(), perturbed_right.detach())
 
         return perturbed_results
