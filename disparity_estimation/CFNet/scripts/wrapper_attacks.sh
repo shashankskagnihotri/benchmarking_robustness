@@ -4,11 +4,12 @@ source ./dataset_path.sh
 source ./checkpoint_path.sh
 
 # Default-Werte
-DATASET="$1"
-ATTACK_TYPE="$2"
+# DATASET="$1"
+# ATTACK_TYPE="$2"
+DATASET=""
 SEVERITY_LEVEL="0"
 COMMON_CORRUPTION="no_corruption"
-CHECKPOINTPATH="$3"
+CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
 MODEL="cfnet"
 

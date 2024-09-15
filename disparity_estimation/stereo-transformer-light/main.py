@@ -256,7 +256,7 @@ def main(args):
     return
 
 
-def attack(attack_type: str, epsilon = 0.03, alpha = 0.01, num_iterations = 20, norm = "Linf", args):
+def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf", args):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 

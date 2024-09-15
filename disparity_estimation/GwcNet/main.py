@@ -384,7 +384,7 @@ def test_sample(sample, compute_metrics=True):
     return tensor2float(loss), tensor2float(scalar_outputs), image_outputs
 
 
-def attack(attack_type: str, epsilon = 0.03, alpha = 0.01, num_iterations = 20, norm = "Linf"):
+def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
     model.eval()
