@@ -10,7 +10,7 @@ SEVERITY_LEVEL="0"
 CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
 
-MODEL="cfnet"
+MODEL="gwcnet-g"
 
 # Parameter einlesen
 while [[ "$#" -gt 0 ]]; do
