@@ -10,7 +10,7 @@ SEVERITY_LEVEL=""
 CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
 
-MODEL="cfnet"
+MODEL="sttr"
 
 # Parameter einlesen
 while [[ "$#" -gt 0 ]]; do
@@ -69,7 +69,7 @@ python wrapper.py \
     --lrepochs "12,16,18,20:2" \
     --batch_size 1 \
     --maxdisp 256 \
-    --model sttr \
+    --model "$MODEL" \
     --logdir "./checkpoints/$DATASET/uniform_sample_d256" \
     --test_batch_size 1 \
     --experiment "$EXPERIMENT_NAME"
