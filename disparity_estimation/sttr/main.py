@@ -19,6 +19,8 @@ from utilities.train import train_one_epoch
 from utilities.foward_pass import set_downsample
 from module.loss import build_criterion
 
+from dataloader import get_data_loader_1
+
 
 def get_args_parser():
     """
@@ -31,6 +33,7 @@ def get_args_parser():
     parser.add_argument('--lr_regression', default=2e-4, type=float)
     parser.add_argument('--lr_decay_rate', default=0.99, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--test_batch_size', default=1, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
@@ -42,8 +45,8 @@ def get_args_parser():
     parser.add_argument('--ft', action='store_true', help='load model from checkpoint, but discard optimizer state')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
-    #parser.add_argument('--eval', action='store_true')
-    parser.add_argument('--inference', action='store_true')
+    parser.add_argument('--eval', action='store_true', default=False)
+    parser.add_argument('--inference', action='store_true', default=False)
     parser.add_argument('--num_workers', default=1, type=int)
     parser.add_argument('--checkpoint', type=str, default='dev', help='checkpoint name for current experiment')
     parser.add_argument('--pre_train', action='store_true')
@@ -73,7 +76,7 @@ def get_args_parser():
 
     # * Dataset parameters
     parser.add_argument('--dataset', default='sceneflow', type=str, help='dataset to train/eval on')
-    parser.add_argument('--dataset_directory', default='', type=str, help='directory to dataset')
+    parser.add_argument('--datapath', default='', type=str, help='directory to dataset')
     parser.add_argument('--validation', default='validation', type=str, choices={'validation', 'validation_all'},
                         help='If we validate on all provided training images')
 
@@ -201,8 +204,8 @@ def main(args):
     # inference
     if args.inference:
         print("Start inference")
-        _, _, data_loader = build_data_loader(args)
-        inference(model, data_loader, device, args.downsample)
+        data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
+        inference(model, data_loader_test, device, args.downsample)
 
         return
 
@@ -211,7 +214,8 @@ def main(args):
     summary_writer = TensorboardSummary(checkpoint_saver.experiment_dir)
 
     # build dataloader
-    data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
+    # data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
+    data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
     # print("ADEBUG: val SIZE" + str(len(data_loader_val)))
     # print("ADEBUG: train SIZE" + str(len(data_loader_train)))
     # print("ADEBUG: test SIZE" + str(len(data_loader_test)))
@@ -225,7 +229,7 @@ def main(args):
     # eval
     if args.eval:
         print("Start evaluation")
-        evaluate(model, criterion, data_loader_val, device, 0, summary_writer, True)
+        evaluate(model, criterion, data_loader_test, device, 0, summary_writer, save_output=False)
         return
 
     # train
