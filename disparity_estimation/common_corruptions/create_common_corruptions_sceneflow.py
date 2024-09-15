@@ -36,7 +36,7 @@ def process_batch(batch_indices, dataloader, corruption_names):
         image_right = dataloader.load_image(image_right_path)
 
         for corruption in corruption_names:
-            for severity in range(5):
+            for severity in range(1, 6):
                 
                 image_left_path_corrupted = image_left_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
                 image_right_path_corrupted = image_right_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
@@ -44,12 +44,14 @@ def process_batch(batch_indices, dataloader, corruption_names):
                 if os.path.isfile(image_left_path_corrupted) and os.path.isfile(image_right_path_corrupted):
                     logger.info(f'{i} {len(dataloader)} images corrupted {corruption} {severity} alredy exists')
                     continue
+                else:
+                    print(f'{i} {len(dataloader)} images corrupted {corruption} {severity} not exists')
                 
                 image_left_arr = np.array(image_left)
                 image_right_arr = np.array(image_right)
 
-                corrupted_left = corrupt(image_left_arr, corruption_name=corruption, severity=severity+1)
-                corrupted_right = corrupt(image_right_arr, corruption_name=corruption, severity=severity+1)
+                corrupted_left = corrupt(image_left_arr, corruption_name=corruption, severity=severity)
+                corrupted_right = corrupt(image_right_arr, corruption_name=corruption, severity=severity)
 
                 os.makedirs(os.path.dirname(image_left_path_corrupted), exist_ok=True)
                 os.makedirs(os.path.dirname(image_right_path_corrupted), exist_ok=True)
@@ -67,14 +69,19 @@ def parallel_process(dataloader):
     num_images = len(dataloader)
     
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        futures = [executor.submit(process_batch, [i], dataloader, corruption_names) for i in range(start_at, start_at+100)]
+        futures = [executor.submit(process_batch, [i], dataloader, corruption_names) for i in range(0, 4370)]
         for future in concurrent.futures.as_completed(futures):
             future.result()  # Rufe result auf, um mögliche Ausnahmen zu erfassen
 
 # get dataset
 dataloader = get_dataset('sceneflow','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D','test','')
 
-parallel_process(dataloader)
+print(f'len dataloader: {len(dataloader)}')
+
+# parallel_process(dataloader)
+
+for i in range(start_at, len(dataloader)):
+    process_batch([i], dataloader, get_corruption_names())
 
 # created = 0
 # not_created = 0

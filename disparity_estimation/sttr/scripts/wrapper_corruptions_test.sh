@@ -69,7 +69,7 @@ python wrapper.py \
     --lrepochs "12,16,18,20:2" \
     --batch_size 1 \
     --maxdisp 256 \
-    --model cfnet \
+    --model sttr \
     --logdir "./checkpoints/$DATASET/uniform_sample_d256" \
     --test_batch_size 1 \
     --experiment "$EXPERIMENT_NAME"

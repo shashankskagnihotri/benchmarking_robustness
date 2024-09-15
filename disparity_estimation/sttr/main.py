@@ -18,10 +18,6 @@ from utilities.summary_logger import TensorboardSummary
 from utilities.train import train_one_epoch
 from utilities.foward_pass import set_downsample
 from module.loss import build_criterion
-import mlflow
-
-
-
 
 
 def get_args_parser():
@@ -274,47 +270,13 @@ def train():
     # main(args_)
 
 
-def attack(attack_type: str, epsilon = 0.03, alpha = 0.01, num_iterations = 20, norm = "Linf", args):
 
-    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
-
-    device = torch.device(args.device)
-    model = STTR(args).to(device) 
-
-    model.eval()
-    num_iterations = 20
-
-    data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
-
-
-    if attack_type == "cospgd":
-        attacker = CosPGDAttack(model,architecture=args.model, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
-    elif attack_type == "fgsm":
-        attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
-
-    elif attack_type == "pgd":
-        attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
-
-    elif attack_type =='bim':
-        attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
-        
-    elif attack_type == 'apgd':
-        attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, epsilon=epsilon)
+def test():
+    ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+    args, unknown = ap.parse_known_args()
+    args.eval = True
+    main(args)
     
-    else:
-        raise ValueError("Attack type not recognized")
-
-    for batch_idx, sample in enumerate(data_loader_test):
-        perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
-        for iteration in perturbed_results.keys():
-            model.eval()
-            perturbed_left, perturbed_right = perturbed_results[iteration]
-            loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
-            save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
-
-
-        print("batch", batch_idx) 
-
 
 # if __name__ == '__main__':
 #     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])

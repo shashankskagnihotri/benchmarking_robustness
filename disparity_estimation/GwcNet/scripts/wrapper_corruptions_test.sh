@@ -10,7 +10,7 @@ SEVERITY_LEVEL=""
 CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
 
-MODEL="cfnet"
+MODEL="gwcnet-g"
 
 # Parameter einlesen
 while [[ "$#" -gt 0 ]]; do
@@ -64,12 +64,10 @@ python wrapper.py \
     --dataset "$DATASET" \
     --datapath "$DATAPATH" \
     --loadckpt "$CHECKPOINTPATH" \
-    --epochs 20 \
-    --lr 0.001 \
-    --lrepochs "12,16,18,20:2" \
-    --batch_size 1 \
+    --epochs 16 \
+    --lrepochs "10,12,14,16:2" \
     --maxdisp 256 \
-    --model cfnet \
-    --logdir "./checkpoints/$DATASET/uniform_sample_d256" \
+    --model "$MODEL" \
+    --logdir "./checkpoints/sceneflow/gwcnet-gc" \
     --test_batch_size 1 \
     --experiment "$EXPERIMENT_NAME"

@@ -5,18 +5,18 @@ source ./checkpoint_path.sh
 
 # Default-Werte
 DATASET=""
-COMMON_CORRUPTION=""
-SEVERITY_LEVEL=""
+COMMON_CORRUPTION="no_corruption"
+SEVERITY_LEVEL="0"
 CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
 
-MODEL="cfnet"
+MODEL="gwcnet-g"
 
 # Parameter einlesen
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --dataset) DATASET="$2"; shift ;;
-        --common_corruption) COMMON_CORRUPTION="$2"; shift ;;
+        --attack_type) ATTACK_TYPE="$2"; shift ;;
         --severity) SEVERITY_LEVEL="$2"; shift ;;
         --checkpoint) CHECKPOINTPATH="$2"; shift ;;
         --experiment_name) EXPERIMENT_NAME="$2"; shift ;;
@@ -31,12 +31,12 @@ if [[ -z "$DATASET" ]]; then
     exit 1
 fi
 
-if [[ -z "$COMMON_CORRUPTION" || -z "$SEVERITY_LEVEL" ]]; then
-    echo "Error: --common_corruption and --severity must be provided."
+if [[ -z "$ATTACK_TYPE" ]]; then
+    echo "Error: Attack type must be provided."
     exit 1
 fi
 
-if [[ -z "$CHECKPOINTPATH" ]]; then
+if [[ -z "$CHECKPOINTPATH" ]]; then    # Check if the checkpoint path is provided. If not, get the default checkpoint path.
     CHECKPOINTPATH=$(get_checkpoint_path "$DATASET" "$MODEL")
     if [[ -z "$CHECKPOINTPATH" ]]; then
         echo "Error: Default checkpoint path not found."
@@ -56,20 +56,17 @@ if [[ -z "$DATAPATH" ]]; then
     exit 1
 fi
 
-# Python-Skript ausführen
 python wrapper.py \
-    --scenario commoncorruption \
-    --commoncorruption "$COMMON_CORRUPTION" \
-    --severity "$SEVERITY_LEVEL" \
-    --dataset "$DATASET" \
-    --datapath "$DATAPATH" \
-    --loadckpt "$CHECKPOINTPATH" \
+    --scenario attack \
+    --attack_type $ATTACK_TYPE \
+    --dataset $DATASET \
+    --datapath $DATAPATH \
+    --loadckpt $CHECKPOINTPATH \
     --epochs 20 \
     --lr 0.001 \
     --lrepochs "12,16,18,20:2" \
     --batch_size 1 \
     --maxdisp 256 \
-    --model cfnet \
-    --logdir "./checkpoints/$DATASET/uniform_sample_d256" \
-    --test_batch_size 1 \
-    --experiment "$EXPERIMENT_NAME"
+    --model "$MODEL" \
+    --logdir "./checkpoints/$DATASET/uniform_sample_d256"  \
+    --test_batch_size 1
