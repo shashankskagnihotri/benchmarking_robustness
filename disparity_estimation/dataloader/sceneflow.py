@@ -56,10 +56,30 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             new_path = "/" + os.path.join(*new_parts)
             return new_path
 
+        def generate_occlusion_path() -> str:
+
+            # os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
+
+            # Zerlege den originalen Pfad in seine Teile
+            parts = self.datadir.split('/')
+            
+            # Finde den Index des Verzeichnisses 'FlyingThings3D'
+            try:
+                flyingthings3d_index = parts.index('FlyingThings3D')
+            except ValueError:
+                raise ValueError("Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis.")
+
+            # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
+            new_parts = parts[:flyingthings3d_index + 1] + ['Common_corruptions'] + ['no_corruption'] + ['severity_0'] + ['frames_finalpass'] + ['occlusion'] + [self.split_folder] + ['left']
+
+            # Erstelle den neuen Pfad
+            new_path = "/" + os.path.join(*new_parts)
+            return new_path
+
         
 
         directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
-        print("Directory: ", directory)
+        # print("Directory: ", directory)
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
 
@@ -79,8 +99,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         self.disp_left_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_left_filenames]
         self.disp_right_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_right_filenames]
 
-        directory = os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
-        self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)] if os.path.isdir(directory) else []
+        directory = generate_occlusion_path()
         self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)] if os.path.isdir(directory) else []
         self.occ_left_filenames = natsorted(self.occ_left_filenames)
         self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
