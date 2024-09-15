@@ -62,8 +62,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
             # Zerlege den originalen Pfad in seine Teile
             parts = self.datadir.split('/')
-            print(parts)
-
+            
             # Finde den Index des Verzeichnisses 'FlyingThings3D'
             try:
                 flyingthings3d_index = parts.index('FlyingThings3D')
@@ -80,7 +79,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         
 
         directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
-        print("Directory: ", directory)
+        # print("Directory: ", directory)
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
 
