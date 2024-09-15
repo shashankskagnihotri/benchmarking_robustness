@@ -280,7 +280,7 @@ def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20,
         attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
         
     elif attack_type == 'apgd':
-        attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, epsilon=epsilon)
+        attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, eps=epsilon)
     
     else:
         raise ValueError("Attack type not recognized")

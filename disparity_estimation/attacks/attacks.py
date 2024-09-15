@@ -730,7 +730,7 @@ import torch.nn as nn
 
 
 class APGDAttack():
-    def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=1.0, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None):
+    def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=8/255, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None):
         self.model = model
         self.num_iterations = num_iterations
         self.eps = eps
