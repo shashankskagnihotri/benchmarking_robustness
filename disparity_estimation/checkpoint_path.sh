@@ -31,6 +31,9 @@ get_checkpoint_path() {
                 "cfnet")
                     echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt"
                     ;;
+                "sttr")
+                    echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr/sceneflow_pretrained_model.pth.tar"
+                    ;;
                 *)
                     echo "Unknown model: $model" >&2
                     exit 1
