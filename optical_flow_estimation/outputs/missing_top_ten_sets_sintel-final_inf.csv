@@ -1,3 +1,0 @@
-model,dataset,targeted,target,attack,epsilon,alpha,iterations,norm,loss,optim,model_is_missing
-craft,sintel-final,False,,cospgd,0.0314,0.01,20,inf,epe,initial_flow,0
-craft,sintel-final,False,,pgd,0.0314,0.01,20,inf,epe,initial_flow,0

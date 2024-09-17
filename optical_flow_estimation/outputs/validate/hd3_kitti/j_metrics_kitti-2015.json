@@ -4475,6 +4475,392 @@
                 "l_inf_delta2": 0.007946586878970265,
                 "l_inf_delta12": 0.009015648770146071
             }
+        },
+        {
+            "start_time": "2024-09-11 19:16:44",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 19:18:11",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.6516907361894846,
+                "px1": 0.7310575116425753,
+                "px3": 0.9043878550827503,
+                "px5": 0.9401885360479355,
+                "outlier": 6.175646541938185,
+                "own_epe": 25.77930943965912,
+                "cosim": 0.18192978321108966,
+                "epe_initial_to_negative": 65.67309656858444,
+                "epe_initial_to_zero": 32.83654828429222,
+                "own_epe_ground_truth_to_negative": 40.30400273442268,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 73.0812844979763,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
+        },
+        {
+            "start_time": "2024-09-11 21:28:50",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 21:30:16",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.6516912695020438,
+                "px1": 0.7310577476769686,
+                "px3": 0.9043879000842572,
+                "px5": 0.9401884856820106,
+                "outlier": 6.175669339522719,
+                "own_epe": 25.779309420585633,
+                "cosim": 0.18192978275474161,
+                "epe_initial_to_negative": 65.67309620261193,
+                "epe_initial_to_zero": 32.836548101305965,
+                "own_epe_ground_truth_to_negative": 40.30400265216827,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 73.081283878088,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:16:12",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-11 20:18:04",
+            "duration": "00:01:51",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 8.341938065886497,
+                "px1": 0.45404720230959356,
+                "px3": 0.7276705728471279,
+                "px5": 0.7949895292520524,
+                "outlier": 25.79839526221156,
+                "own_epe": 24.214210122823715,
+                "cosim": 0.17486226819688455
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:16:12",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-11 20:18:07",
+            "duration": "00:01:54",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.7606721382588149,
+                "px1": 0.727651870585978,
+                "px3": 0.9008768455684185,
+                "px5": 0.9374948523938655,
+                "outlier": 6.514026327393949,
+                "own_epe": 26.094136562347412,
+                "cosim": 0.1817050704639405
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:18:15",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-11 20:20:04",
+            "duration": "00:01:48",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.8823133300989867,
+                "px1": 0.657552566099912,
+                "px3": 0.8595690097659826,
+                "px5": 0.9040344189107418,
+                "outlier": 11.129483091831208,
+                "own_epe": 26.678663768172264,
+                "cosim": 0.18133293109480292
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:18:15",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-11 20:20:07",
+            "duration": "00:01:52",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 74.98132836818695,
+                "px1": 0.031106566579387616,
+                "px3": 0.09141654731014569,
+                "px5": 0.1392700636743757,
+                "outlier": 90.78111089706421,
+                "own_epe": 72.22770010948182,
+                "cosim": 0.08499898481997661
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:20:21",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-11 20:22:17",
+            "duration": "00:01:56",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 25.414862426519395,
+                "px1": 0.2918569653108716,
+                "px3": 0.5682753403484821,
+                "px5": 0.6546154569089413,
+                "outlier": 41.4504951953888,
+                "own_epe": 52.84446298956871,
+                "cosim": 0.16510713375726482
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:20:21",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-11 20:22:31",
+            "duration": "00:02:10",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 6.161238628327847,
+                "px1": 0.5248173281550408,
+                "px3": 0.7720649141073227,
+                "px5": 0.8367080525681376,
+                "outlier": 20.389308287501336,
+                "own_epe": 26.473411973416805,
+                "cosim": 0.1774090728536248
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:22:22",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-11 20:24:17",
+            "duration": "00:01:54",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 90.73916172504426,
+                "px1": 0.012782233349153103,
+                "px3": 0.0470746557707389,
+                "px5": 0.0886840417378653,
+                "outlier": 95.24847438812256,
+                "own_epe": 115.54704870700836,
+                "cosim": 0.10740019570192089
+            }
+        },
+        {
+            "start_time": "2024-09-11 20:22:22",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-11 20:24:19",
+            "duration": "00:01:57",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 99.41996355772018,
+                "px1": 0.016003691946884828,
+                "px3": 0.05670490012606024,
+                "px5": 0.0954384899942852,
+                "outlier": 94.2765849018097,
+                "own_epe": 114.82242242574692,
+                "cosim": 0.10856354865944012
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:57:32",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-16 23:58:55",
+            "duration": "00:01:23",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 74.2215123462677,
+                "px1": 0.031324233786481276,
+                "px3": 0.09164649137078414,
+                "px5": 0.13996523823607276,
+                "outlier": 90.75292890548707,
+                "own_epe": 71.10384210586548,
+                "cosim": 0.08420029271044768
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:57:32",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-16 23:58:58",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 8.322396188676358,
+                "px1": 0.45540843315422536,
+                "px3": 0.7282638111710549,
+                "px5": 0.795398895740509,
+                "outlier": 25.7216263204813,
+                "own_epe": 24.31059807062149,
+                "cosim": 0.17481121728662402
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:57:32",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-16 23:58:59",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.7622044356167317,
+                "px1": 0.727562396004796,
+                "px3": 0.9007188391685486,
+                "px5": 0.9373798556625843,
+                "outlier": 6.530990305952728,
+                "own_epe": 26.08942994862795,
+                "cosim": 0.1817049740673974
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:31",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-17 00:00:55",
+            "duration": "00:01:24",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.8724780015647413,
+                "px1": 0.6574999714456499,
+                "px3": 0.8596519569307566,
+                "px5": 0.9040824093669653,
+                "outlier": 11.122760800346732,
+                "own_epe": 26.73719874858856,
+                "cosim": 0.18133954018354415
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:31",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-17 00:00:56",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 25.507520592808724,
+                "px1": 0.2913429471105337,
+                "px3": 0.5679865871369839,
+                "px5": 0.6543149407207965,
+                "outlier": 41.48182825565338,
+                "own_epe": 52.929327310323714,
+                "cosim": 0.1651255613505782
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:31",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-17 00:00:57",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 6.1602051886916165,
+                "px1": 0.5247150862077251,
+                "px3": 0.7720796060934663,
+                "px5": 0.8367474149540066,
+                "outlier": 20.377354397773743,
+                "own_epe": 26.496019572019577,
+                "cosim": 0.17738784462679177
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:31",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-17 00:00:57",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 91.08355631113052,
+                "px1": 0.012825787230499373,
+                "px3": 0.047057281067232,
+                "px5": 0.08838832062958318,
+                "outlier": 95.25265186309815,
+                "own_epe": 115.85074701070785,
+                "cosim": 0.1070747575655696
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:46",
+            "model": "hd3",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-17 00:01:12",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 100.24759536981583,
+                "px1": 0.015913508522885422,
+                "px3": 0.05681593946844714,
+                "px5": 0.09538257253836491,
+                "outlier": 94.26814835548402,
+                "own_epe": 115.38469557523727,
+                "cosim": 0.1086737217893824
+            }
         }
     ]
 }
