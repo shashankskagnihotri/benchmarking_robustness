@@ -7969,6 +7969,174 @@
                 "own_epe": 24.342971430532636,
                 "cosim": 0.18090528699569405
             }
+        },
+        {
+            "start_time": "2024-09-16 23:08:26",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-16 23:09:52",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 3.006034419760108,
+                "px1": 0.7013561813533307,
+                "px3": 0.8728539109230041,
+                "px5": 0.9144542470574379,
+                "outlier": 9.837870015650987,
+                "own_epe": 23.372145503386854,
+                "cosim": 0.17978224688209593
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:08:26",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-16 23:09:53",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.7520192327536642,
+                "px1": 0.8557605782151222,
+                "px3": 0.9607305681705475,
+                "px5": 0.9802574515342712,
+                "outlier": 2.070166976042092,
+                "own_epe": 23.678271703459323,
+                "cosim": 0.182903736224398
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:11:22",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-16 23:12:46",
+            "duration": "00:01:23",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 33.933933584690095,
+                "px1": 0.13792056642665557,
+                "px3": 0.22158888182369993,
+                "px5": 0.27891214583301915,
+                "outlier": 77.84007334709167,
+                "own_epe": 13.999419330358505,
+                "cosim": 0.11968976639676839
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:11:22",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-16 23:12:47",
+            "duration": "00:01:24",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.0702857539430262,
+                "px1": 0.8166607356071472,
+                "px3": 0.940858797878027,
+                "px5": 0.9665932640433311,
+                "outlier": 3.713689363542944,
+                "own_epe": 23.613829096481204,
+                "cosim": 0.18282233566511422
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:11:22",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-16 23:12:48",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.7457995301485063,
+                "px1": 0.678896900927648,
+                "px3": 0.8623625948652625,
+                "px5": 0.9069239226356148,
+                "outlier": 11.03766819126904,
+                "own_epe": 24.338650657460093,
+                "cosim": 0.1808920932514593
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:11:22",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-16 23:12:49",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 3.6008815167844297,
+                "px1": 0.5779406546615065,
+                "px3": 0.8081188227236271,
+                "px5": 0.8716804702579976,
+                "outlier": 16.154034231603145,
+                "own_epe": 25.329890481084586,
+                "cosim": 0.1798812925675884
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:14:27",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-16 23:15:54",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 40.9734856235981,
+                "px1": 0.016661574212484993,
+                "px3": 0.06281370966633404,
+                "px5": 0.11936654812257075,
+                "outlier": 93.64782333374023,
+                "own_epe": 49.14748768806457,
+                "cosim": 0.10146666587155778
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:14:27",
+            "model": "csflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-16 23:15:55",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 36.94540801405907,
+                "px1": 0.02494580213106019,
+                "px3": 0.08799430479933562,
+                "px5": 0.14613288196825125,
+                "outlier": 91.13620377063751,
+                "own_epe": 44.066748383045194,
+                "cosim": 0.10773233409636304
+            }
         }
     ]
 }

@@ -4307,6 +4307,174 @@
                 "own_epe": 65.10021149277686,
                 "cosim": 0.10782583744919975
             }
+        },
+        {
+            "start_time": "2024-09-16 23:59:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-17 00:01:09",
+            "duration": "00:01:23",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 30.664855706691743,
+                "px1": 0.03350704879075238,
+                "px3": 0.11330398838676047,
+                "px5": 0.18571977871841228,
+                "outlier": 88.3968376159668,
+                "own_epe": 39.46435170173645,
+                "cosim": 0.14286535697901853
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-17 00:01:12",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 3.5098828485608102,
+                "px1": 0.6805908605456352,
+                "px3": 0.8626947771012783,
+                "px5": 0.9066039833426476,
+                "outlier": 10.638123635798692,
+                "own_epe": 23.862025561258196,
+                "cosim": 0.1776108245854266
+            }
+        },
+        {
+            "start_time": "2024-09-16 23:59:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-17 00:01:13",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.496946664005518,
+                "px1": 0.7987954829633236,
+                "px3": 0.9248601284623146,
+                "px5": 0.951792249083519,
+                "outlier": 5.069756035516039,
+                "own_epe": 24.116923269703985,
+                "cosim": 0.18210603933781386
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:01:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-17 00:03:11",
+            "duration": "00:01:24",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 1.9016229563951492,
+                "px1": 0.7667600865289569,
+                "px3": 0.9028640103340149,
+                "px5": 0.9345731716603041,
+                "outlier": 7.172834542719647,
+                "own_epe": 23.671191612556576,
+                "cosim": 0.1820361404074356
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:01:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-17 00:03:11",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 3.136077269911766,
+                "px1": 0.6338455157692079,
+                "px3": 0.8463202542345971,
+                "px5": 0.8972740553040057,
+                "outlier": 12.532366157248616,
+                "own_epe": 24.972994342297316,
+                "cosim": 0.18077740522567182
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:01:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-17 00:03:12",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.808244925811887,
+                "px1": 0.7050459779321682,
+                "px3": 0.871340798814781,
+                "px5": 0.9120186224207282,
+                "outlier": 10.240183971822262,
+                "own_epe": 24.61753268972039,
+                "cosim": 0.18077042686287315
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:01:46",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-17 00:03:12",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 64.62863714456559,
+                "px1": 0.016573736963364352,
+                "px3": 0.06045873775048676,
+                "px5": 0.11631320404987036,
+                "outlier": 93.90467645645141,
+                "own_epe": 77.53124045848847,
+                "cosim": 0.10402255646531558
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:02:30",
+            "model": "irr_pwc",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-17 00:03:56",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 55.28534065246582,
+                "px1": 0.022343300764214293,
+                "px3": 0.08483107444648795,
+                "px5": 0.1429344434956329,
+                "outlier": 91.47074831962586,
+                "own_epe": 65.10021149277686,
+                "cosim": 0.10782583744919975
+            }
         }
     ]
 }

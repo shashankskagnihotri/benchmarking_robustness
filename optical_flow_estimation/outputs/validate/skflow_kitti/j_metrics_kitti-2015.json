@@ -3217,6 +3217,174 @@
                 "own_epe": 56.12069296121597,
                 "cosim": 0.10308063680495252
             }
+        },
+        {
+            "start_time": "2024-09-17 00:33:31",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-17 00:34:55",
+            "duration": "00:01:23",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 33.21877318024635,
+                "px1": 0.09236354355230106,
+                "px3": 0.15810880322518642,
+                "px5": 0.21501966590672963,
+                "outlier": 84.17241067886353,
+                "own_epe": 31.4494564178586,
+                "cosim": 0.11245269587991061
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:31",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-17 00:34:56",
+            "duration": "00:01:24",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.798794654076919,
+                "px1": 0.8522094784677029,
+                "px3": 0.9556449010968209,
+                "px5": 0.9761744365096092,
+                "outlier": 2.594964852719568,
+                "own_epe": 23.962744830409065,
+                "cosim": 0.18299328482244165
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:31",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-17 00:34:57",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.1580779536068437,
+                "px1": 0.7251833048462868,
+                "px3": 0.8880085101723671,
+                "px5": 0.9270481675863266,
+                "outlier": 8.239132894873618,
+                "own_epe": 24.535813085623086,
+                "cosim": 0.18000643321312965
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:32",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-17 00:34:57",
+            "duration": "00:01:25",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 2.5400034066662194,
+                "px1": 0.7097416604496538,
+                "px3": 0.8677986032143236,
+                "px5": 0.9111930322274566,
+                "outlier": 10.424673144891859,
+                "own_epe": 24.624523013718427,
+                "cosim": 0.18120670108124615
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:32",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-17 00:34:58",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 41.19380723237991,
+                "px1": 0.017038067339135522,
+                "px3": 0.06202995709255901,
+                "px5": 0.11713782590535629,
+                "outlier": 93.74286308288575,
+                "own_epe": 56.18123864412308,
+                "cosim": 0.10308918599417666
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:32",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-17 00:34:58",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 4.8461941549181935,
+                "px1": 0.5293426950555294,
+                "px3": 0.7542231476306915,
+                "px5": 0.8256475007534028,
+                "outlier": 22.018771822601558,
+                "own_epe": 27.463411580249666,
+                "cosim": 0.17981893316842615
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:32",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-17 00:34:58",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 37.55246660113335,
+                "px1": 0.023306883051286604,
+                "px3": 0.08508597801549968,
+                "px5": 0.1410257922046003,
+                "outlier": 91.43775155067443,
+                "own_epe": 52.78429411649704,
+                "cosim": 0.10930297035054537
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:33:31",
+            "model": "skflow",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-17 00:34:58",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 0.5577756715100258,
+                "px1": 0.8866315391659737,
+                "px3": 0.9748286241292954,
+                "px5": 0.9887001889944077,
+                "outlier": 1.1967598060332238,
+                "own_epe": 24.317642013020812,
+                "cosim": 0.18309945662971586
+            }
         }
     ]
 }
