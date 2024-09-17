@@ -67,6 +67,90 @@
                 "l_inf_delta2": 0.03137252487664493,
                 "l_inf_delta12": 0.03137257695198059
             }
+        },
+        {
+            "start_time": "2024-09-17 23:23:47",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-17 23:45:20",
+            "duration": "00:21:32",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.23054184268634,
+                "px1": 0.8399105007893528,
+                "px3": 0.9159995681041714,
+                "px5": 0.9388027462990208,
+                "outlier": 8.000976624584998,
+                "own_epe": 2.230541750445146,
+                "cosim": 0.8973015560110983
+            }
+        },
+        {
+            "start_time": "2024-09-17 23:23:41",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-17 23:45:22",
+            "duration": "00:21:40",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 15.589046476210228,
+                "px1": 0.20896928364765488,
+                "px3": 0.3758128186998378,
+                "px5": 0.4744437746442383,
+                "outlier": 62.41188762039948,
+                "own_epe": 15.589045869370818,
+                "cosim": 0.28006242138973736
+            }
+        },
+        {
+            "start_time": "2024-09-17 23:23:50",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-17 23:45:28",
+            "duration": "00:21:37",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 3.7473261631187857,
+                "px1": 0.773702156100168,
+                "px3": 0.8590115706555324,
+                "px5": 0.8920817684443036,
+                "outlier": 13.667429349135107,
+                "own_epe": 3.7473260060052938,
+                "cosim": 0.8777754418326025
+            }
+        },
+        {
+            "start_time": "2024-09-17 23:23:57",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-17 23:45:30",
+            "duration": "00:21:32",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.1810950010757282,
+                "px1": 0.9048379107551089,
+                "px3": 0.9498829067426159,
+                "px5": 0.9639243642288715,
+                "outlier": 4.581460651551254,
+                "own_epe": 1.1810949456526412,
+                "cosim": 0.92704782156161
+            }
         }
     ]
 }
