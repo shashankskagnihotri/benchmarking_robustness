@@ -1,0 +1,38 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-09-12 12:03:17",
+            "model": "fastflownet",
+            "checkpoint": "sintel",
+            "attack": "cospgd",
+            "optim": "ground_truth",
+            "norm": "two",
+            "epsilon": 0.251,
+            "iterations": 20,
+            "alpha": 0.1,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-09-12 12:50:31",
+            "duration": "00:47:13",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 8.022925453931522,
+                "px1": 0.6535136879114908,
+                "px3": 0.7936914612545375,
+                "px5": 0.8341495759863904,
+                "outlier": 20.380479415200515,
+                "own_epe": 8.022925130543403,
+                "cosim": 0.7882185347600125,
+                "l2_delta1": 0.00021646810851196733,
+                "l2_delta2": 0.0002164475026924707,
+                "l2_delta12": 0.00021645784096854519,
+                "l0_delta1": 1316832.7608069165,
+                "l0_delta2": 1316774.3458213257,
+                "l0_delta12": 2633607.106628242,
+                "l_inf_delta1": 0.004900202688319997,
+                "l_inf_delta2": 0.00498276771006857,
+                "l_inf_delta12": 0.005330287518586309
+            }
+        }
+    ]
+}
