@@ -8,6 +8,7 @@ fgsm_arguments = [
     "attack_targeted",
     "attack_target",
     "attack_loss",
+    "attack_optim_target",
 ]
 bim_pgd_cospgd_arguments = [
     "attack",
