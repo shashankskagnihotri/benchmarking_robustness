@@ -55,6 +55,9 @@ with mlflow.start_run(experiment_id=experiment_id):
         # from importlib.import_module("foo-bar") import main
         from sttr import main # type: ignore
         print("Loaded sttr")
+    elif args.model == "sttr-light":
+        from sttr_light import main
+        print("Loaded sttr-light")
         
     else:
         raise ValueError("Architecture/Model (/ Architecture depricated) not recognized")
