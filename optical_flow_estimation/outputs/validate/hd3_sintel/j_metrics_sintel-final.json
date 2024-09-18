@@ -1448,6 +1448,27 @@
                 "epe_ground_truth_to_negative": 26.573776453647557,
                 "epe_ground_truth_to_zero": 13.495708393346336
             }
+        },
+        {
+            "start_time": "2024-09-17 22:14:05",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-17 22:15:49",
+            "duration": "00:01:43",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.7157883165649332,
+                "px1": 0.8441143855595681,
+                "px3": 0.9257878335076496,
+                "px5": 0.9475359747062843,
+                "outlier": 6.985236178832625,
+                "own_epe": 1.715788249209108,
+                "cosim": 0.9017225790135455
+            }
         }
     ]
 }
