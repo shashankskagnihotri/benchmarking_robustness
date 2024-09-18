@@ -1420,6 +1420,74 @@
                 "l_inf_delta2": 0.0002168715000152588,
                 "l_inf_delta12": 0.0002168715000152588
             }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "liteflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.169596388864472
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "liteflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.33908637215837
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "liteflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.169596388864472
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "liteflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.33908637215837
+            }
         }
     ]
 }

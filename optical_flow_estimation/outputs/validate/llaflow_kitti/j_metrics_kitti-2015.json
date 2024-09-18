@@ -3269,6 +3269,74 @@
                 "own_epe": 58.78194302797318,
                 "cosim": 0.10262722284765914
             }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 31.292883690521123
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 62.585767381042245
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 31.292883690521123
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-18 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 62.585767381042245
+            }
         }
     ]
 }
