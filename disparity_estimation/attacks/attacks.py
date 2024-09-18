@@ -316,9 +316,17 @@ class Attack:
 import torch
 import torch.nn.functional as F
 
+class NestedTensor:
+    def __init__(self, left, right, sampled_cols=None, sampled_rows=None):
+        self.left = left
+        self.right = right
+        self.sampled_cols = sampled_cols
+        self.sampled_rows = sampled_rows
+
+
 ## try example
 class CosPGDAttack:
-    def __init__(self, model, architecture, criterion, epsilon, alpha, num_iterations, norm='Linf', device='cuda', stats=None, logger=None, num_classes=None, targeted=False):
+    def __init__(self, model, architecture, epsilon, alpha, num_iterations, norm='Linf', device='cuda', criterion=None, stats=None, logger=None, num_classes=None, targeted=False):
         """
         Initialize attack parameters.
         """
@@ -335,11 +343,15 @@ class CosPGDAttack:
         self.stats = stats if stats is not None else {}
         self.logger = logger
 
-    def attack(self, left_image, right_image, labels):
+    def attack(self, left_image, right_image, labels,occ_mask=None,occ_mask_right=None):
         device = self.device
         left_image = left_image.to(device)
         right_image = right_image.to(device)
         labels = labels.to(device)
+        if occ_mask_right is not None:
+            occ_mask_right=occ_mask_right.to(device)
+        if occ_mask is not None:
+            occ_mask=occ_mask.to(device)
 
         # Initialize perturbations for both left and right images and the norm
         if self.norm == 'Linf':
@@ -363,8 +375,18 @@ class CosPGDAttack:
 
             elif self.architecture == 'sttr':
                 from sttr.utilities.foward_pass import forward_pass
-                inputs = {'left': perturbed_left, 'right': perturbed_right, 'disp': labels}
-                outputs, losses, disp = forward_pass(self.model, inputs, device, self.criterion, self.stats, logger=self.logger)
+                nested_tensor = NestedTensor(left=perturbed_left,right=perturbed_right,sampled_cols=None)
+         # inputs = {'left': perturbed_left, 'right': perturbed_right, 'disp': labels,'occ_mask': occ_mask,'occ_mask_right': occ_mask_right}
+
+                # Ensure all tensors are moved to the device
+                # inputs = {k: v.to(device) for k, v in inputs.items()}
+
+                # Pass the entire dictionary to the model
+                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
+                #torch.cuda.empty_cache()
+
+                # outputs = self.model(inputs)["disparities"].squeeze(0).to(device)
+                # outputs, losses, disp = forward_pass(self.model, inputs, device, self.criterion, self.stats, logger=self.logger)
 
             else:
                 outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)

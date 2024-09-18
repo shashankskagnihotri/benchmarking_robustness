@@ -246,7 +246,7 @@ def main(args):
         from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
         if attack_type == "cospgd":
-            attacker = CosPGDAttack(model, architecture='sttr', criterion=criterion, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm, device=device)
+            attacker = CosPGDAttack(model, architecture='sttr',  epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm, device=device,criterion=criterion)
             # attacker = CosPGDAttack(model,architecture='sttr', epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
         elif attack_type == "fgsm":
             attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
@@ -264,7 +264,8 @@ def main(args):
             raise ValueError("Attack type not recognized")
 
         for batch_idx, sample in enumerate(data_loader_test):
-            perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disp"])
+            print("Keys in sample:", sample.keys())
+            perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disp"],sample["occ_mask"],sample["occ_mask_right"])
             for iteration in perturbed_results.keys():
                 model.eval()
                 perturbed_left, perturbed_right = perturbed_results[iteration]
