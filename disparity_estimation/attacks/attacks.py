@@ -316,7 +316,152 @@ class Attack:
 import torch
 import torch.nn.functional as F
 
+## try example
 class CosPGDAttack:
+    def __init__(self, model, architecture, criterion, epsilon, alpha, num_iterations, norm='Linf', device='cuda', stats=None, logger=None, num_classes=None, targeted=False):
+        """
+        Initialize attack parameters.
+        """
+        self.model = model
+        self.epsilon = epsilon
+        self.alpha = alpha
+        self.num_iterations = num_iterations
+        self.norm = norm
+        self.device = device
+        self.num_classes = num_classes
+        self.targeted = targeted
+        self.architecture = architecture
+        self.criterion = criterion  # Pass the criterion here
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+
+    def attack(self, left_image, right_image, labels):
+        device = self.device
+        left_image = left_image.to(device)
+        right_image = right_image.to(device)
+        labels = labels.to(device)
+
+        # Initialize perturbations for both left and right images and the norm
+        if self.norm == 'Linf':
+            perturbed_left = Attack.init_linf(left_image, self.epsilon)
+            perturbed_right = Attack.init_linf(right_image, self.epsilon)
+        elif self.norm == 'L2':
+            perturbed_left = Attack.init_l2(left_image, self.epsilon)
+            perturbed_right = Attack.init_l2(right_image, self.epsilon)
+        else:
+            raise ValueError("Unsupported norm type. Use 'Linf' or 'L2' instead.")
+        
+        perturbed_results = {}
+        
+        for iteration in range(self.num_iterations):
+            perturbed_left.requires_grad = True
+            perturbed_right.requires_grad = True
+            
+            # Forward pass for each architecture
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
+
+            elif self.architecture == 'sttr':
+                from sttr.utilities.foward_pass import forward_pass
+                inputs = {'left': perturbed_left, 'right': perturbed_right, 'disp': labels}
+                outputs, losses, disp = forward_pass(self.model, inputs, device, self.criterion, self.stats, logger=self.logger)
+
+            else:
+                outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)
+            
+            # Ensure outputs and labels have the same shape
+            if outputs.shape != labels.shape:
+                outputs = outputs.view_as(labels)
+
+            # Compute the loss
+            loss = F.mse_loss(outputs, labels)
+
+            # Ensure loss is scalar
+            if loss.dim() > 0:
+                loss = loss.mean()
+
+            # Cosine Similarity Scaling (CosPGD)
+            loss = Attack.cospgd_scale(
+                predictions=outputs,
+                labels=labels,
+                loss=loss,
+                num_classes=self.num_classes,
+                targeted=self.targeted,
+                one_hot=False
+            )
+            
+            if loss.dim() > 0:
+                loss = loss.mean()
+
+            # Zero all existing gradients
+            self.model.zero_grad()
+
+            # Backward pass to compute gradients of the loss w.r.t the perturbed images
+            loss.backward()
+
+            # Collect the gradient data
+            left_grad = perturbed_left.grad.data
+            right_grad = perturbed_right.grad.data
+
+            # Perform attack step based on selected norm
+            if self.norm == 'Linf':
+                perturbed_left = Attack.step_inf(
+                    perturbed_image=perturbed_left,
+                    epsilon=self.epsilon,
+                    data_grad=left_grad,
+                    orig_image=left_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+                
+                perturbed_right = Attack.step_inf(
+                    perturbed_image=perturbed_right,
+                    epsilon=self.epsilon,
+                    data_grad=right_grad,
+                    orig_image=right_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+            elif self.norm == 'L2':
+                perturbed_left = Attack.step_l2(
+                    perturbed_image=perturbed_left,
+                    epsilon=self.epsilon,
+                    data_grad=left_grad,
+                    orig_image=left_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+                
+                perturbed_right = Attack.step_l2(
+                    perturbed_image=perturbed_right,
+                    epsilon=self.epsilon,
+                    data_grad=right_grad,
+                    orig_image=right_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+            
+            # Save results after every iteration
+            perturbed_results[iteration] = (perturbed_left, perturbed_right)
+        
+        return perturbed_results
+
+
+
+
+
+
+#### working example 
+
+'''class CosPGDAttack:
     def __init__(self, model, architecture:str, epsilon, alpha, num_iterations, norm='Linf', num_classes=None, targeted=False):
         """
         :param norm: 'Linf' für L∞-Norm oder 'L2' für L2-Norm
@@ -357,7 +502,9 @@ class CosPGDAttack:
                 outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
 
             elif self.architecture == 'sttr' in self.architecture :
-                from ..sttr.utilities import forward_pass
+                from sttr.utilities.foward_pass import forward_pass
+                outputs, losses, disp = forward_pass(self.model, {'left': perturbed_left, 'right': perturbed_right, 'disp': labels}, device, criterion, stats, idx, logger)
+
                 
                 
 
@@ -447,6 +594,8 @@ class CosPGDAttack:
             perturbed_results[iteration] = (perturbed_left, perturbed_right)
         
         return perturbed_results
+
+'''
 
 
 
