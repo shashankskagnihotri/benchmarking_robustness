@@ -34,6 +34,9 @@ get_checkpoint_path() {
                 "sttr")
                     echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr/sceneflow_pretrained_model.pth.tar"
                     ;;
+                "sttr-light")
+                    echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr-light/sttr_light_sceneflow_pretrained_model.pth.tar"
+                    ;;
                 *)
                     echo "Unknown model: $model" >&2
                     exit 1

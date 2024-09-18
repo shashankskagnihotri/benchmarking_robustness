@@ -67,7 +67,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             try:
                 flyingthings3d_index = parts.index('FlyingThings3D')
             except ValueError:
-                raise ValueError("Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis.")
+                raise ValueError(f"Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis: {self.datadir}")
 
             # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
             new_parts = parts[:flyingthings3d_index + 1] + ['Common_corruptions'] + ['no_corruption'] + ['severity_0'] + ['frames_finalpass'] + ['occlusion'] + [self.split_folder] + ['left']
@@ -79,7 +79,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         
 
         directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
-        # print("Directory: ", directory)
+        print("Split-Folder: ", self.split_folder)
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
 
@@ -93,6 +93,33 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             self.img_left_filenames += [os.path.join(seq_folder, 'left', img) for img in
                                os.listdir(os.path.join(seq_folder, 'left'))]
 
+        # Remove unused files (in sttr)
+        if self.model_name == 'sttr':
+            flyingthings3d_index = self.datadir.split('/').index('FlyingThings3D')
+            path_unused_files = os.path.join('/', *(self.datadir.split('/')[:flyingthings3d_index + 1] + ['all_unused_files.txt']))
+            unused_files = [line.strip().rstrip() for line in open(path_unused_files, mode='r').read().splitlines()]
+            
+            number_of_images_before = len(self.img_left_filenames)
+            new_img_left_filenames = []
+            for img in self.img_left_filenames:
+                add_image = True  # Flag, um festzuhalten, ob das Bild hinzugefügt werden soll
+                for unused in unused_files:
+                    if unused in img:  # Wenn ein ungenutztes Bild gefunden wird
+                        add_image = False  # Setze Flag auf False
+                        break  # Breche die Schleife ab, da das Bild nicht hinzugefügt werden soll
+                if add_image:  # Wenn das Bild nicht in unused_files ist
+                    # print(img)  # Optional: Zum Debuggen, drucke das Bild aus
+                    new_img_left_filenames.append(img)  # Füge das Bild zur Liste hinzu
+
+                
+            self.img_left_filenames = new_img_left_filenames
+            number_of_images_after = len(self.img_left_filenames)
+
+            print(f"Inital number of images: {number_of_images_before}")
+            print(f"Removed {number_of_images_before - number_of_images_after} unused files")
+        
+        
+
         self.img_left_filenames = natsorted(self.img_left_filenames)
         self.img_right_filenames = [img_path.replace('left', 'right') for img_path in self.img_left_filenames]
         
@@ -103,6 +130,11 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)] if os.path.isdir(directory) else []
         self.occ_left_filenames = natsorted(self.occ_left_filenames)
         self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
+
+        print("Final number of images: ", number_of_images_after)
+        print("Final number of occlusion files: ", len(self.occ_left_filenames))
+        print("Final number of disparity files: ", len(self.disp_left_filenames))
+        print("")
         
 
     def load_image(self, filename) -> Image:

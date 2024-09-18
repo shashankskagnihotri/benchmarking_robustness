@@ -18,8 +18,7 @@ from utilities.summary_logger import TensorboardSummary
 from utilities.train import train_one_epoch
 from module.loss import build_criterion
 
-import mlflow
-
+from dataloader import get_data_loader_1
 
 def get_args_parser():
     """
@@ -32,6 +31,7 @@ def get_args_parser():
     parser.add_argument('--lr_regression', default=2e-4, type=float)
     parser.add_argument('--lr_decay_rate', default=0.99, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--test_batch_size', default=1, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
@@ -39,7 +39,7 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--seed', default=42, type=int)
-    parser.add_argument('--resume', default='', help='resume from checkpoint')
+    parser.add_argument('--loadckpt', default='', help='resume from checkpoint')
     parser.add_argument('--ft', action='store_true', help='load model from checkpoint, but discard optimizer state')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
@@ -75,7 +75,7 @@ def get_args_parser():
 
     # * Dataset parameters
     parser.add_argument('--dataset', default='sceneflow', type=str, help='dataset to train/eval on')
-    parser.add_argument('--dataset_directory', default='', type=str, help='directory to dataset')
+    parser.add_argument('--datapath', default='', type=str, help='directory to dataset')
     parser.add_argument('--validation', default='validation', type=str, choices={'validation', 'validation_all'},
                         help='If we validate on all provided training images')
 
@@ -168,10 +168,10 @@ def main(args):
 
     # load checkpoint if provided
     prev_best = np.inf
-    if args.resume != '':
-        if not os.path.isfile(args.resume):
-            raise RuntimeError(f"=> no checkpoint found at '{args.resume}'")
-        checkpoint = torch.load(args.resume)
+    if args.loadckpt != '':
+        if not os.path.isfile(args.loadckpt):
+            raise RuntimeError(f"=> no checkpoint found at '{args.loadckpt}'")
+        checkpoint = torch.load(args.loadckpt)
 
         pretrained_dict = checkpoint['state_dict']
         missing, unexpected = model.load_state_dict(pretrained_dict, strict=False)
@@ -203,8 +203,8 @@ def main(args):
     # inference
     if args.inference:
         print("Start inference")
-        _, _, data_loader = build_data_loader(args)
-        inference(model, data_loader, device, args.downsample)
+        data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
+        inference(model, data_loader_test, device, args.downsample)
 
         return
 
@@ -213,7 +213,11 @@ def main(args):
     summary_writer = TensorboardSummary(checkpoint_saver.experiment_dir)
 
     # build dataloader
-    data_loader_train, data_loader_val, _ = build_data_loader(args)
+    # data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
+    data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
+    # print("ADEBUG: val SIZE" + str(len(data_loader_val)))
+    # print("ADEBUG: train SIZE" + str(len(data_loader_train)))
+    # print("ADEBUG: test SIZE" + str(len(data_loader_test)))
 
     # build loss criterion
     criterion = build_criterion(args)
@@ -221,7 +225,7 @@ def main(args):
     # eval
     if args.eval:
         print("Start evaluation")
-        evaluate(model, criterion, data_loader_val, device, 0, summary_writer, True)
+        evaluate(model, criterion, data_loader_test, device, 0, summary_writer, True)
         return
 
     # train
@@ -255,51 +259,11 @@ def main(args):
 
     return
 
-
-def attack(attack_type: str, args, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
-
-    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
-
-
-    parser = get_args_parser()
-    args = parser.parse_args()
-
-    device = torch.device(args.device)
-    model = STTR(args).to(device)
-    model.eval()
-    num_iterations = 20 
-
-    data_loader_train, data_loader_val, data_loader_test = build_data_loader(args)
-
-    if attack_type == "cospgd":
-        attacker = CosPGDAttack(model,architecture=args.model, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
-    elif attack_type == "fgsm":
-        attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
-
-    elif attack_type == "pgd":
-        attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
-
-    elif attack_type =='bim':
-        attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
-        
-    elif attack_type == 'apgd':
-        attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, eps=epsilon)
-    
-    else:
-        raise ValueError("Attack type not recognized")
-
-    for batch_idx, sample in enumerate(data_loader_test):
-        perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
-        for iteration in perturbed_results.keys():
-            model.eval()
-            perturbed_left, perturbed_right = perturbed_results[iteration]
-            loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
-            save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
-
-
-        print("batch", batch_idx)
-
-
+def test():
+    ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+    args, unknown = ap.parse_known_args()
+    args.eval = True
+    main(args)
 
 
 if __name__ == '__main__':
