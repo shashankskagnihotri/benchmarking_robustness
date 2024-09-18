@@ -160,6 +160,48 @@
             "metrics": {
                 "epe": 26.653662626440997
             }
+        },
+        {
+            "start_time": "2024-09-18 20:45:47",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-18 21:09:38",
+            "duration": "00:23:51",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 15.837676912410172,
+                "px1": 0.2127224811287442,
+                "px3": 0.3714826268986517,
+                "px5": 0.47197575220653887,
+                "outlier": 62.84282772474377,
+                "own_epe": 15.837676249387227,
+                "cosim": 0.23338339901647792
+            }
+        },
+        {
+            "start_time": "2024-09-18 20:45:31",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-18 21:09:40",
+            "duration": "00:24:09",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 1.6173918925003863,
+                "px1": 0.9086447494975887,
+                "px3": 0.9509739423462339,
+                "px5": 0.9623973109078567,
+                "outlier": 4.655135759527187,
+                "own_epe": 1.6173918180088946,
+                "cosim": 0.9165334226518841
+            }
         }
     ]
 }

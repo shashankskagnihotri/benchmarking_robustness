@@ -151,6 +151,115 @@
                 "own_epe": 1.1810949456526412,
                 "cosim": 0.92704782156161
             }
+        },
+        {
+            "start_time": "2024-09-17 23:51:12",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-18 00:13:52",
+            "duration": "00:22:39",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 8.54920972149379,
+                "px1": 0.4969945485354925,
+                "px3": 0.6746991987581817,
+                "px5": 0.7432507723751035,
+                "outlier": 32.22422091710813,
+                "own_epe": 8.549209346975076,
+                "cosim": 0.7186278512095104
+            }
+        },
+        {
+            "start_time": "2024-09-17 23:51:15",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-18 00:14:10",
+            "duration": "00:22:54",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.148973313205868,
+                "px1": 0.3369523890585288,
+                "px3": 0.5610326706035172,
+                "px5": 0.6522875137319424,
+                "outlier": 43.69353403624838,
+                "own_epe": 13.148972701213316,
+                "cosim": 0.6827007625125081
+            }
+        },
+        {
+            "start_time": "2024-09-17 23:51:12",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-18 00:14:19",
+            "duration": "00:23:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 56.9939046987081,
+                "px1": 0.01997867441955756,
+                "px3": 0.05822667524895497,
+                "px5": 0.09367036907144655,
+                "outlier": 94.1653463818727,
+                "own_epe": 56.99390197155226,
+                "cosim": 0.19753905618993842
+            }
+        },
+        {
+            "start_time": "2024-09-17 23:51:24",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-18 00:14:20",
+            "duration": "00:22:55",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 65.54519293619737,
+                "px1": 0.01830269141186098,
+                "px3": 0.05121772275186268,
+                "px5": 0.07980729999131632,
+                "outlier": 94.87074682600331,
+                "own_epe": 65.54519014857803,
+                "cosim": 0.17070894079201748
+            }
+        },
+        {
+            "start_time": "2024-09-18 08:32:03",
+            "model": "ms_raft+",
+            "checkpoint": "mixed",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-18 08:53:20",
+            "duration": "00:21:17",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.1066875876653062,
+                "px1": 0.9125783827789236,
+                "px3": 0.9542623945689911,
+                "px5": 0.9666961923771243,
+                "outlier": 4.172397248857624,
+                "own_epe": 1.1066875360185042,
+                "cosim": 0.9342285732628632,
+                "epe_initial_to_negative": 26.536370545282143,
+                "epe_initial_to_zero": 13.268185272641071,
+                "own_epe_ground_truth_to_negative": 26.652814771668712,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.65281596983086,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
         }
     ]
 }
