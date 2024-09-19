@@ -1864,44 +1864,6 @@
             "start_time": "2024-07-21 23:39:46",
             "model": "fastflownet",
             "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-07-21 23:41:32",
-            "duration": "00:01:45",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 72.02974152803421,
-                "px1": 0.09651148748536344,
-                "px3": 0.12737712539440055,
-                "px5": 0.15756250822552828,
-                "outlier": 87.2622875070572,
-                "own_epe": 60.015565813183784,
-                "epe_orig_preds": 5.086219117629298e-06,
-                "own_epe_orig_preds": 5.086219148040527e-06,
-                "cosim_target": -0.9999999955296517,
-                "cosim_orig_preds": 0.9999999955296517,
-                "epe_ground_truth": 2.1687628902494906,
-                "own_epe_ground_truth": 23.133726124092938,
-                "cosim_ground_truth": 0.18147994444705545,
-                "l2_delta1": 0.0,
-                "l2_delta2": 0.0,
-                "l2_delta12": 0.0,
-                "l0_delta1": 0.0,
-                "l0_delta2": 0.0,
-                "l0_delta12": 0.0,
-                "l_inf_delta1": 0.0,
-                "l_inf_delta2": 0.0,
-                "l_inf_delta12": 0.0
-            }
-        },
-        {
-            "start_time": "2024-07-21 23:39:46",
-            "model": "fastflownet",
-            "checkpoint": "kitti",
             "attack": "cospgd",
             "norm": "inf",
             "epsilon": 0.0,
@@ -1927,44 +1889,6 @@
                 "epe_ground_truth": 2.1687629690021275,
                 "own_epe_ground_truth": 23.133726147562264,
                 "cosim_ground_truth": 0.1814799447823316,
-                "l2_delta1": 0.0,
-                "l2_delta2": 0.0,
-                "l2_delta12": 0.0,
-                "l0_delta1": 0.0,
-                "l0_delta2": 0.0,
-                "l0_delta12": 0.0,
-                "l_inf_delta1": 0.0,
-                "l_inf_delta2": 0.0,
-                "l_inf_delta12": 0.0
-            }
-        },
-        {
-            "start_time": "2024-07-21 23:45:47",
-            "model": "fastflownet",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-07-21 23:47:34",
-            "duration": "00:01:46",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 36.01487077772617,
-                "px1": 0.11196042383252461,
-                "px3": 0.1718409018169041,
-                "px5": 0.22106262598070317,
-                "outlier": 82.81590970993042,
-                "own_epe": 30.007782971560957,
-                "epe_orig_preds": 5.005756651712545e-06,
-                "own_epe_orig_preds": 5.005756676581541e-06,
-                "cosim_target": 0.0,
-                "cosim_orig_preds": 0.9999999955296517,
-                "epe_ground_truth": 2.168762855455279,
-                "own_epe_ground_truth": 23.13372611038387,
-                "cosim_ground_truth": 0.18147994487546384,
                 "l2_delta1": 0.0,
                 "l2_delta2": 0.0,
                 "l2_delta12": 0.0,
@@ -3845,7 +3769,7 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "fastflownet",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3854,15 +3778,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 30.00778296738863
+                "epe": 30.00778296738863,
+                "epe_ground_truth": 2.1687628858536483
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "fastflownet",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3871,15 +3796,16 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 60.015565944314005
+                "epe": 60.015565944314005,
+                "epe_ground_truth": 2.1687628858536483
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "fastflownet",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3888,15 +3814,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 30.00778296738863
+                "epe": 30.00778296738863,
+                "epe_ground_truth": 2.1687628858536483
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "fastflownet",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3905,11 +3832,12 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 60.015565944314005
+                "epe": 60.015565944314005,
+                "epe_ground_truth": 2.1687628858536483
             }
         }
     ]

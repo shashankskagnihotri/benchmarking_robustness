@@ -3961,7 +3961,7 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "scopeflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3970,15 +3970,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 31.206386331021786
+                "epe": 31.206386331021786,
+                "epe_ground_truth": 1.3082430559396743
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "scopeflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3987,15 +3988,16 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 62.41277266204357
+                "epe": 62.41277266204357,
+                "epe_ground_truth": 1.3082430559396743
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "scopeflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -4004,15 +4006,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 31.206386331021786
+                "epe": 31.206386331021786,
+                "epe_ground_truth": 1.3082430559396743
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "scopeflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -4021,11 +4024,12 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 62.41277266204357
+                "epe": 62.41277266204357,
+                "epe_ground_truth": 1.3082430559396743
             }
         }
     ]

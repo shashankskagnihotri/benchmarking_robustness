@@ -2264,82 +2264,6 @@
             }
         },
         {
-            "start_time": "2024-07-18 20:53:19",
-            "model": "rapidflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-07-18 20:55:06",
-            "duration": "00:01:46",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 36.67921578705311,
-                "px1": 0.11549513521662902,
-                "px3": 0.16977490475612286,
-                "px5": 0.22032879883685383,
-                "outlier": 83.02250363826752,
-                "own_epe": 31.000895602107047,
-                "epe_orig_preds": 0.0,
-                "own_epe_orig_preds": 0.0,
-                "cosim_target": 0.0,
-                "cosim_orig_preds": 0.9999999955296517,
-                "epe_ground_truth": 1.0691401735693216,
-                "own_epe_ground_truth": 23.754798180013896,
-                "cosim_ground_truth": 0.18255171712953597,
-                "l2_delta1": 0.0,
-                "l2_delta2": 0.0,
-                "l2_delta12": 0.0,
-                "l0_delta1": 0.0,
-                "l0_delta2": 0.0,
-                "l0_delta12": 0.0,
-                "l_inf_delta1": 0.0,
-                "l_inf_delta2": 0.0,
-                "l_inf_delta12": 0.0
-            }
-        },
-        {
-            "start_time": "2024-07-18 20:53:18",
-            "model": "rapidflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-07-18 20:55:08",
-            "duration": "00:01:50",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 73.35843157410622,
-                "px1": 0.10221501338603957,
-                "px3": 0.1290870633202303,
-                "px5": 0.156039340165662,
-                "outlier": 87.09129368782044,
-                "own_epe": 62.00179120421409,
-                "epe_orig_preds": 0.0,
-                "own_epe_orig_preds": 0.0,
-                "cosim_target": -0.9999999955296517,
-                "cosim_orig_preds": 0.9999999955296517,
-                "epe_ground_truth": 1.0691401735693216,
-                "own_epe_ground_truth": 23.754798180013896,
-                "cosim_ground_truth": 0.18255171712953597,
-                "l2_delta1": 0.0,
-                "l2_delta2": 0.0,
-                "l2_delta12": 0.0,
-                "l0_delta1": 0.0,
-                "l0_delta2": 0.0,
-                "l0_delta12": 0.0,
-                "l_inf_delta1": 0.0,
-                "l_inf_delta2": 0.0,
-                "l_inf_delta12": 0.0
-            }
-        },
-        {
             "start_time": "2024-07-26 08:29:28",
             "model": "rapidflow",
             "checkpoint": "kitti",
@@ -4067,82 +3991,6 @@
             }
         },
         {
-            "start_time": "2024-07-18 20:53:19",
-            "model": "rapidflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-07-18 20:55:06",
-            "duration": "00:01:46",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 36.67921578705311,
-                "px1": 0.11549513521662902,
-                "px3": 0.16977490475612286,
-                "px5": 0.22032879883685383,
-                "outlier": 83.02250363826752,
-                "own_epe": 31.000895602107047,
-                "epe_orig_preds": 0.0,
-                "own_epe_orig_preds": 0.0,
-                "cosim_target": 0.0,
-                "cosim_orig_preds": 0.9999999955296517,
-                "epe_ground_truth": 1.0691401735693216,
-                "own_epe_ground_truth": 23.754798180013896,
-                "cosim_ground_truth": 0.18255171712953597,
-                "l2_delta1": 0.0,
-                "l2_delta2": 0.0,
-                "l2_delta12": 0.0,
-                "l0_delta1": 0.0,
-                "l0_delta2": 0.0,
-                "l0_delta12": 0.0,
-                "l_inf_delta1": 0.0,
-                "l_inf_delta2": 0.0,
-                "l_inf_delta12": 0.0
-            }
-        },
-        {
-            "start_time": "2024-07-18 20:53:18",
-            "model": "rapidflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-07-18 20:55:08",
-            "duration": "00:01:50",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 73.35843157410622,
-                "px1": 0.10221501338603957,
-                "px3": 0.1290870633202303,
-                "px5": 0.156039340165662,
-                "outlier": 87.09129368782044,
-                "own_epe": 62.00179120421409,
-                "epe_orig_preds": 0.0,
-                "own_epe_orig_preds": 0.0,
-                "cosim_target": -0.9999999955296517,
-                "cosim_orig_preds": 0.9999999955296517,
-                "epe_ground_truth": 1.0691401735693216,
-                "own_epe_ground_truth": 23.754798180013896,
-                "cosim_ground_truth": 0.18255171712953597,
-                "l2_delta1": 0.0,
-                "l2_delta2": 0.0,
-                "l2_delta12": 0.0,
-                "l0_delta1": 0.0,
-                "l0_delta2": 0.0,
-                "l0_delta12": 0.0,
-                "l_inf_delta1": 0.0,
-                "l_inf_delta2": 0.0,
-                "l_inf_delta12": 0.0
-            }
-        },
-        {
             "start_time": "2024-08-05 13:16:43",
             "model": "rapidflow",
             "checkpoint": "kitti",
@@ -5845,7 +5693,7 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "rapidflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -5854,15 +5702,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 31.000895602107047
+                "epe": 31.000895602107047,
+                "epe_ground_truth": 1.0691401735693216
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "rapidflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -5871,15 +5720,16 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 62.00179120421409
+                "epe": 62.00179120421409,
+                "epe_ground_truth": 1.0691401735693216
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "rapidflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -5888,15 +5738,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 31.000895602107047
+                "epe": 31.000895602107047,
+                "epe_ground_truth": 1.0691401735693216
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "rapidflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -5905,11 +5756,12 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 62.00179120421409
+                "epe": 62.00179120421409,
+                "epe_ground_truth": 1.0691401735693216
             }
         }
     ]

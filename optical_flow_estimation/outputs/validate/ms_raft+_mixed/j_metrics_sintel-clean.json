@@ -94,74 +94,6 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "ms",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 13.326831313220499
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "ms",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 26.653662626440997
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "ms",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 13.326831313220499
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "ms",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 26.653662626440997
-            }
-        },
-        {
             "start_time": "2024-09-18 20:45:47",
             "model": "ms_raft+",
             "checkpoint": "mixed",
@@ -201,6 +133,78 @@
                 "outlier": 4.655135759527187,
                 "own_epe": 1.6173918180088946,
                 "cosim": 0.9165334226518841
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "ms",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.326831313220499,
+                "epe_ground_truth": 0.6469550607117621
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "ms",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.653662626440997,
+                "epe_ground_truth": 0.6469550607117621
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "ms",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.326831313220499,
+                "epe_ground_truth": 0.6469550607117621
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "ms",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.653662626440997,
+                "epe_ground_truth": 0.6469550607117621
             }
         }
     ]

@@ -1000,7 +1000,7 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "liteflownet",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1009,15 +1009,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 12.977129212717502
+                "epe": 12.977129212717502,
+                "epe_ground_truth": 1.889121738293787
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "liteflownet",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1026,15 +1027,16 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 25.953945767066436
+                "epe": 25.953945767066436,
+                "epe_ground_truth": 1.889121738293787
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "liteflownet",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1043,15 +1045,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 12.977129212717502
+                "epe": 12.977129212717502,
+                "epe_ground_truth": 1.889121738293787
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "liteflownet",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1060,11 +1063,12 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 25.953945767066436
+                "epe": 25.953945767066436,
+                "epe_ground_truth": 1.889121738293787
             }
         }
     ]

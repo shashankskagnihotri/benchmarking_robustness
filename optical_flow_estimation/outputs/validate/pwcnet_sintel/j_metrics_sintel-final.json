@@ -2063,74 +2063,6 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "pwcnet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 13.05034097863091
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "pwcnet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 26.100681956717878
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "pwcnet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 13.05034097863091
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "pwcnet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 26.100681956717878
-            }
-        },
-        {
             "start_time": "2024-09-18 00:46:07",
             "model": "pwcnet",
             "checkpoint": "sintel",
@@ -2428,6 +2360,78 @@
                 "l_inf_delta1": 0.7756192279938433,
                 "l_inf_delta2": 0.7778870323091374,
                 "l_inf_delta12": 0.8086078692868166
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "pwcnet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.05034097863091,
+                "epe_ground_truth": 2.337773722262765
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "pwcnet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.100681956717878,
+                "epe_ground_truth": 2.337773722262765
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "pwcnet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.05034097863091,
+                "epe_ground_truth": 2.337773722262765
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "pwcnet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.100681956717878,
+                "epe_ground_truth": 2.337773722262765
             }
         }
     ]
