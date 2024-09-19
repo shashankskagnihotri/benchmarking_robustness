@@ -1630,74 +1630,6 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "scopeflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 13.01776333210505
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "scopeflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 26.0355266642101
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "scopeflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 13.01776333210505
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "scopeflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 26.0355266642101
-            }
-        },
-        {
             "start_time": "2024-09-18 08:12:17",
             "model": "scopeflow",
             "checkpoint": "sintel",
@@ -1911,6 +1843,78 @@
                 "l_inf_delta1": 0.8655177040471124,
                 "l_inf_delta2": 0.8644742126881676,
                 "l_inf_delta12": 0.8853741757120798
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.01776333210505,
+                "epe_ground_truth": 1.6147365615408829
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.0355266642101,
+                "epe_ground_truth": 1.6147365615408829
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.01776333210505,
+                "epe_ground_truth": 1.6147365615408829
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.0355266642101,
+                "epe_ground_truth": 1.6147365615408829
             }
         }
     ]

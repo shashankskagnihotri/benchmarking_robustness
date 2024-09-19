@@ -1037,74 +1037,6 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "llaflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 13.410095201087731
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "llaflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 26.820190402175463
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "llaflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 13.410095201087731
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "llaflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 26.820190402175463
-            }
-        },
-        {
             "start_time": "2024-09-18 18:46:32",
             "model": "llaflow",
             "checkpoint": "sintel",
@@ -1690,6 +1622,78 @@
                 "l_inf_delta1": 0.7752651200342591,
                 "l_inf_delta2": 0.7745229976894075,
                 "l_inf_delta12": 0.8056130120521778
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.410095201087731,
+                "epe_ground_truth": 0.8477205688368232
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.820190402175463,
+                "epe_ground_truth": 0.8477205688368232
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.410095201087731,
+                "epe_ground_truth": 0.8477205688368232
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "llaflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.820190402175463,
+                "epe_ground_truth": 0.8477205688368232
             }
         }
     ]

@@ -1000,74 +1000,6 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "starflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 12.8780016119124
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "starflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 25.7560032238248
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "starflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 12.8780016119124
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "starflow",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-final",
-            "metrics": {
-                "epe": 25.7560032238248
-            }
-        },
-        {
             "start_time": "2024-09-18 03:46:09",
             "model": "starflow",
             "checkpoint": "sintel",
@@ -1653,6 +1585,78 @@
                 "l_inf_delta1": 0.7775743616732351,
                 "l_inf_delta2": 0.7775291563597696,
                 "l_inf_delta12": 0.8076020493659689
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "starflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.8780016119124,
+                "epe_ground_truth": 2.062531829810738
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "starflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 25.7560032238248,
+                "epe_ground_truth": 2.062531829810738
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "starflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.8780016119124,
+                "epe_ground_truth": 2.062531829810738
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "starflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 25.7560032238248,
+                "epe_ground_truth": 2.062531829810738
             }
         }
     ]

@@ -671,82 +671,6 @@
             }
         },
         {
-            "start_time": "2024-07-18 19:48:45",
-            "model": "llaflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-07-18 19:56:18",
-            "duration": "00:07:32",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 73.41465615034103,
-                "px1": 0.10181213490429855,
-                "px3": 0.1288094876616242,
-                "px5": 0.15610026123030366,
-                "outlier": 87.11905117988586,
-                "own_epe": 62.58397693827748,
-                "epe_orig_preds": 0.004773722862591967,
-                "own_epe_orig_preds": 0.004773722903628368,
-                "cosim_target": -0.9996702086925506,
-                "cosim_orig_preds": 0.9996702086925506,
-                "epe_ground_truth": 0.6419547716062516,
-                "own_epe_ground_truth": 23.951685175988825,
-                "cosim_ground_truth": 0.1831361237866804,
-                "l2_delta1": 4.6469737114307463e-07,
-                "l2_delta2": 4.647696641768562e-07,
-                "l2_delta12": 4.647337740948387e-07,
-                "l0_delta1": 1317379.22,
-                "l0_delta2": 1317786.805,
-                "l0_delta12": 2635166.025,
-                "l_inf_delta1": 4.842877388000488e-07,
-                "l_inf_delta2": 4.842877388000488e-07,
-                "l_inf_delta12": 4.842877388000488e-07
-            }
-        },
-        {
-            "start_time": "2024-07-18 19:58:18",
-            "model": "llaflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-07-18 20:04:57",
-            "duration": "00:06:38",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 36.707008893489835,
-                "px1": 0.11449924773307885,
-                "px3": 0.1696456014575142,
-                "px5": 0.22034652360074689,
-                "outlier": 83.03543985843659,
-                "own_epe": 31.291088645905255,
-                "epe_orig_preds": 0.004779009044359555,
-                "own_epe_orig_preds": 0.004779009048288572,
-                "cosim_target": 0.0,
-                "cosim_orig_preds": 0.9996691027283668,
-                "epe_ground_truth": 0.6419545943755657,
-                "own_epe_ground_truth": 23.951669353637843,
-                "cosim_ground_truth": 0.18313611531630158,
-                "l2_delta1": 4.6469737071674897e-07,
-                "l2_delta2": 4.647696609083596e-07,
-                "l2_delta12": 4.6473377153688487e-07,
-                "l0_delta1": 1317379.215,
-                "l0_delta2": 1317786.79,
-                "l0_delta12": 2635166.005,
-                "l_inf_delta1": 4.842877388000488e-07,
-                "l_inf_delta2": 4.842877388000488e-07,
-                "l_inf_delta12": 4.842877388000488e-07
-            }
-        },
-        {
             "start_time": "2024-07-26 06:48:37",
             "model": "llaflow",
             "checkpoint": "kitti",
@@ -1490,82 +1414,6 @@
                 "l_inf_delta1": 4.232413601130247e-05,
                 "l_inf_delta2": 4.232413601130247e-05,
                 "l_inf_delta12": 4.232413601130247e-05
-            }
-        },
-        {
-            "start_time": "2024-07-18 19:48:45",
-            "model": "llaflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-07-18 19:56:18",
-            "duration": "00:07:32",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 73.41465615034103,
-                "px1": 0.10181213490429855,
-                "px3": 0.1288094876616242,
-                "px5": 0.15610026123030366,
-                "outlier": 87.11905117988586,
-                "own_epe": 62.58397693827748,
-                "epe_orig_preds": 0.004773722862591967,
-                "own_epe_orig_preds": 0.004773722903628368,
-                "cosim_target": -0.9996702086925506,
-                "cosim_orig_preds": 0.9996702086925506,
-                "epe_ground_truth": 0.6419547716062516,
-                "own_epe_ground_truth": 23.951685175988825,
-                "cosim_ground_truth": 0.1831361237866804,
-                "l2_delta1": 4.6469737114307463e-07,
-                "l2_delta2": 4.647696641768562e-07,
-                "l2_delta12": 4.647337740948387e-07,
-                "l0_delta1": 1317379.22,
-                "l0_delta2": 1317786.805,
-                "l0_delta12": 2635166.025,
-                "l_inf_delta1": 4.842877388000488e-07,
-                "l_inf_delta2": 4.842877388000488e-07,
-                "l_inf_delta12": 4.842877388000488e-07
-            }
-        },
-        {
-            "start_time": "2024-07-18 19:58:18",
-            "model": "llaflow",
-            "checkpoint": "kitti",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-07-18 20:04:57",
-            "duration": "00:06:38",
-            "dataset": "kitti-2015",
-            "metrics": {
-                "epe": 36.707008893489835,
-                "px1": 0.11449924773307885,
-                "px3": 0.1696456014575142,
-                "px5": 0.22034652360074689,
-                "outlier": 83.03543985843659,
-                "own_epe": 31.291088645905255,
-                "epe_orig_preds": 0.004779009044359555,
-                "own_epe_orig_preds": 0.004779009048288572,
-                "cosim_target": 0.0,
-                "cosim_orig_preds": 0.9996691027283668,
-                "epe_ground_truth": 0.6419545943755657,
-                "own_epe_ground_truth": 23.951669353637843,
-                "cosim_ground_truth": 0.18313611531630158,
-                "l2_delta1": 4.6469737071674897e-07,
-                "l2_delta2": 4.647696609083596e-07,
-                "l2_delta12": 4.6473377153688487e-07,
-                "l0_delta1": 1317379.215,
-                "l0_delta2": 1317786.79,
-                "l0_delta12": 2635166.005,
-                "l_inf_delta1": 4.842877388000488e-07,
-                "l_inf_delta2": 4.842877388000488e-07,
-                "l_inf_delta12": 4.842877388000488e-07
             }
         },
         {
@@ -3271,7 +3119,7 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "llaflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3280,15 +3128,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 31.292883690521123
+                "epe": 31.292883690521123,
+                "epe_ground_truth": 0.6419698145985603
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "llaflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3297,15 +3146,16 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 62.585767381042245
+                "epe": 62.585767381042245,
+                "epe_ground_truth": 0.6419698145985603
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "llaflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3314,15 +3164,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 31.292883690521123
+                "epe": 31.292883690521123,
+                "epe_ground_truth": 0.6419698145985603
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "llaflow",
             "checkpoint": "kitti",
             "attack": "fgsm",
@@ -3331,11 +3182,12 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "kitti-2015",
             "metrics": {
-                "epe": 62.585767381042245
+                "epe": 62.585767381042245,
+                "epe_ground_truth": 0.6419698145985603
             }
         }
     ]

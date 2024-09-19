@@ -1450,7 +1450,7 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "irr",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1459,15 +1459,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 12.745747443335086
+                "epe": 12.745747443335086,
+                "epe_ground_truth": 2.422438025642741
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "irr",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1476,15 +1477,16 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 25.49149488667017
+                "epe": 25.49149488667017,
+                "epe_ground_truth": 2.422438025642741
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "irr",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1493,15 +1495,16 @@
             "targeted": true,
             "target": "zero",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 12.745747443335086
+                "epe": 12.745747443335086,
+                "epe_ground_truth": 2.422438025642741
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
+            "start_time": "2024-09-19 14:15:47",
             "model": "irr",
             "checkpoint": "sintel",
             "attack": "fgsm",
@@ -1510,11 +1513,12 @@
             "targeted": true,
             "target": "negative",
             "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
+            "end_time": "2024-09-19 14:27:20",
             "duration": "00:00:00",
             "dataset": "sintel-final",
             "metrics": {
-                "epe": 25.49149488667017
+                "epe": 25.49149488667017,
+                "epe_ground_truth": 2.422438025642741
             }
         }
     ]

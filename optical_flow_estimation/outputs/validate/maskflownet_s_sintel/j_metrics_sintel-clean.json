@@ -4599,74 +4599,6 @@
             }
         },
         {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "maskflownet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 13.066727945414675
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "maskflownet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "inf",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 26.1334559869354
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "maskflownet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "zero",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 13.066727945414675
-            }
-        },
-        {
-            "start_time": "2024-09-18 14:15:47",
-            "model": "maskflownet",
-            "checkpoint": "sintel",
-            "attack": "fgsm",
-            "norm": "two",
-            "epsilon": 0.0,
-            "targeted": true,
-            "target": "negative",
-            "loss": "epe",
-            "end_time": "2024-09-18 14:27:20",
-            "duration": "00:00:00",
-            "dataset": "sintel-clean",
-            "metrics": {
-                "epe": 26.1334559869354
-            }
-        },
-        {
             "start_time": "2024-09-18 00:13:08",
             "model": "maskflownet_s",
             "checkpoint": "sintel",
@@ -4839,6 +4771,78 @@
                 "l_inf_delta1": 0.7573072760008941,
                 "l_inf_delta2": 0.756787413879728,
                 "l_inf_delta12": 0.7627432258168054
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "maskflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.066727945414675,
+                "epe_ground_truth": 1.5020720121754005
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "maskflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.1334559869354,
+                "epe_ground_truth": 1.5020720121754005
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "maskflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 13.066727945414675,
+                "epe_ground_truth": 1.5020720121754005
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "maskflownet",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 26.1334559869354,
+                "epe_ground_truth": 1.5020720121754005
             }
         }
     ]
