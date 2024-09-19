@@ -1178,6 +1178,174 @@
                 "epe": 26.75867561255935,
                 "epe_ground_truth": 1.0747882746925843
             }
+        },
+        {
+            "start_time": "2024-09-19 02:24:57",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-19 02:33:22",
+            "duration": "00:08:25",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.4334241704805954,
+                "px1": 0.8317000804277536,
+                "px3": 0.9129449150647599,
+                "px5": 0.9367908858027628,
+                "outlier": 8.296708273975424,
+                "own_epe": 2.4334240816605135,
+                "cosim": 0.8935383318652337
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:24:57",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-19 02:33:23",
+            "duration": "00:08:25",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 3.4619787572511793,
+                "px1": 0.770374101631372,
+                "px3": 0.8697943100643117,
+                "px5": 0.903207160113782,
+                "outlier": 12.583513952986834,
+                "own_epe": 3.46197861663489,
+                "cosim": 0.8771858729992874
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:24:57",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-19 02:33:24",
+            "duration": "00:08:26",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.133454410507774,
+                "px1": 0.885645571999488,
+                "px3": 0.9474223054279856,
+                "px5": 0.964558150622847,
+                "outlier": 4.764412172400038,
+                "own_epe": 1.1334543485913737,
+                "cosim": 0.9239057900310708
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:24:57",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-19 02:33:26",
+            "duration": "00:08:28",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 16.60288055245402,
+                "px1": 0.14019143613712476,
+                "px3": 0.32607381765295607,
+                "px5": 0.44808511131687423,
+                "outlier": 67.38599640827091,
+                "own_epe": 16.60287986124627,
+                "cosim": 0.19313650025667867
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:34:08",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-19 02:42:23",
+            "duration": "00:08:15",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 68.70407056430575,
+                "px1": 0.0183232046670263,
+                "px3": 0.05447831877044521,
+                "px5": 0.08425942322687822,
+                "outlier": 94.5417938814154,
+                "own_epe": 68.70406773420163,
+                "cosim": 0.17753073654818485
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:34:08",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-19 02:42:23",
+            "duration": "00:08:15",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 57.07351613319573,
+                "px1": 0.020367947301136027,
+                "px3": 0.061006824088729476,
+                "px5": 0.09868997862135578,
+                "outlier": 93.88080777764664,
+                "own_epe": 57.073513888259214,
+                "cosim": 0.192893408390949
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:34:08",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-19 02:42:25",
+            "duration": "00:08:17",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 6.3534721498673745,
+                "px1": 0.5864138622264092,
+                "px3": 0.7671174246255992,
+                "px5": 0.8220558387265826,
+                "outlier": 23.01998338047076,
+                "own_epe": 6.35347187055291,
+                "cosim": 0.7760777180595838
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:34:08",
+            "model": "craft",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-19 02:42:26",
+            "duration": "00:08:18",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 7.921493965341539,
+                "px1": 0.5205060850004445,
+                "px3": 0.7290292581316087,
+                "px5": 0.7904843381247291,
+                "outlier": 26.86871770398562,
+                "own_epe": 7.921493635053937,
+                "cosim": 0.7488436176901009
+            }
         }
     ]
 }
