@@ -249,16 +249,16 @@ def main(args):
             attacker = CosPGDAttack(model, architecture='sttr',  epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm, device=device,criterion=criterion)
             # attacker = CosPGDAttack(model,architecture='sttr', epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
         elif attack_type == "fgsm":
-            attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
+            attacker = FGSMAttack( model,epsilon=epsilon, architecture='sttr',targeted=False) 
 
         elif attack_type == "pgd":
-            attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
+            attacker = PGDAttack(model,architecture='sttr',epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
 
         elif attack_type =='bim':
-            attacker = BIMAttack(model,architecture=args.model,epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
+            attacker = BIMAttack(model,architecture='sttr',epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
             
         elif attack_type == 'apgd':
-            attacker = APGDAttack(model, architecture=args.model,num_iterations=num_iterations,norm=norm, eps=epsilon)
+            attacker = APGDAttack(model, architecture='sttr',num_iterations=num_iterations,norm=norm, eps=epsilon)
         
         else:
             raise ValueError("Attack type not recognized")

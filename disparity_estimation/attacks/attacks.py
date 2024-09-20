@@ -713,7 +713,7 @@ class FGSMAttack:
         self.architecture = architecture
 
     @torch.enable_grad()
-    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor):
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor,occ_mask=None,occ_mask_right=None):
         # Klonen der ursprünglichen Bilder
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
@@ -722,6 +722,12 @@ class FGSMAttack:
         perturbed_left = left_image.clone().detach().requires_grad_(True)
         perturbed_right = right_image.clone().detach().requires_grad_(True)
         ground_truth_disparity =  ground_truth_disparity.cuda()
+        if occ_mask_right is not None:
+            device = 'cuda'
+            occ_mask_right=occ_mask_right.cuda()
+        if occ_mask is not None:
+            device = 'cuda'
+            occ_mask=occ_mask.cuda()
 
 
         # Forward Pass: Die perturbierten Bilder durch das Modell leiten
@@ -729,7 +735,10 @@ class FGSMAttack:
 
         if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
             predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
-            
+        
+        elif self.architecture == 'sttr':
+            nested_tensor = NestedTensor(left=perturbed_left,right=perturbed_right,sampled_cols=None)
+            predicted_disparity = self.model(nested_tensor)['disp_pred'].squeeze(0).cuda()
         else:
             predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
 
@@ -807,7 +816,7 @@ class PGDAttack:
         return x
 
     @torch.enable_grad()
-    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor):
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor,occ_mask=None,occ_mask_right=None):
         # Save the original images
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
@@ -816,6 +825,12 @@ class PGDAttack:
         # Start perturbation
         perturbed_left = left_image.clone().detach()
         perturbed_right = right_image.clone().detach()
+
+        if occ_mask_right is not None:
+            occ_mask_right=occ_mask_right.to(device)
+        if occ_mask is not None:
+            occ_mask=occ_mask.to(device)
+
 
         if self.random_start:
             perturbed_left = self._random_init(perturbed_left)
@@ -832,7 +847,9 @@ class PGDAttack:
 
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
                 predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
-
+            elif self.architecture == 'sttr':
+                nested_tensor = NestedTensor(left=perturbed_left,right=perturbed_right,sampled_cols=None)
+                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
             else:
                 predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
 
@@ -966,6 +983,10 @@ class APGDAttack():
         if disparity_target is None:
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 disparity_target = self.model(left=x_left, right=x_right)[0][0].detach().to(self.device)
+            elif self.architecture == 'sttr' in self.architecture:
+                nested_tensor = NestedTensor(left=x_left,right=x_right,sampled_cols=None)
+                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
+
             else:
                 inputs = {"images": [[x_left, x_right]]}
                 disparity_target = self.model(inputs)["disparities"].squeeze(0).detach().to(self.device)
@@ -990,6 +1011,9 @@ class APGDAttack():
         # Compute the initial loss based on architecture
         if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
             disparity_pred = self.model(x_best[:, 0], x_best[:, 1])[0][0].to(self.device)
+        elif self.architecture == 'sttr' in self.architecture:
+            nested_tensor = NestedTensor(left=x_best[:, 0], right=x_best[:, 1], sampled_cols=None)
+            disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
         else:
             inputs = {"images": [[x_best[:, 0], x_best[:, 1]]]}
             disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
@@ -1004,6 +1028,10 @@ class APGDAttack():
 
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 disparity_pred = self.model(left=x_adv[:, 0], right=x_adv[:, 1])[0][0].to(self.device)
+            elif self.architecture == 'sttr' in self.architecture:
+                nested_tensor = NestedTensor(left=x_adv[:, 0], right=x_adv[:, 1], sampled_cols=None)
+                disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
+
             else:
                 inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
                 disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
@@ -1026,6 +1054,10 @@ class APGDAttack():
 
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])[0][0].to(self.device)
+            elif self.architecture == 'sttr' in self.architecture:
+                nested_tensor = NestedTensor(left=x_adv[:, 0], right=x_adv[:, 1], sampled_cols=None)
+                disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
+
             else:
                 inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
                 disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
@@ -1092,6 +1124,10 @@ class BIMAttack:
             inputs = {"images": [[perturbed_left, perturbed_right]]}
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 outputs = self.model(left=perturbed_left, right=perturbed_right)[0][0].squeeze(0)
+            elif self.architecture == 'sttr' in self.architecture:
+                nested_tensor = NestedTensor(left=x_left,right=x_right,sampled_cols=None)
+                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
+
             else:
                 outputs = self.model(inputs)["disparities"].squeeze(0)
 
