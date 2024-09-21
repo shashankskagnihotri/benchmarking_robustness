@@ -5,7 +5,7 @@
 #SBATCH --time=00:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_8
+#SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-7%4
 #SBATCH --job-name=ms_raft+_sintel-clean_3dcc
 #SBATCH --output=slurm/ms_raft+_sintel-clean_3dcc_%A_%a.out
@@ -13,7 +13,7 @@
 
 model="ms_raft+"
 dataset="sintel-clean"
-checkpoint="sintel"
+checkpoint="mixed"
 attack="3dcc"
 tdcc_corruptions="far_focus near_focus fog_3d color_quant iso_noise low_light xy_motion_blur z_motion_blur"
 tdcc_intensities="3"

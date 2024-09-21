@@ -1423,6 +1423,124 @@
                 "l_inf_delta2": 0.005548894291521765,
                 "l_inf_delta12": 0.006054989628334539
             }
+        },
+        {
+            "start_time": "2024-09-11 21:08:26",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 21:10:17",
+            "duration": "00:01:50",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.5518703997836563,
+                "px1": 0.8634004304462849,
+                "px3": 0.9328459629665534,
+                "px5": 0.9523882913429158,
+                "outlier": 6.278902516959382,
+                "own_epe": 1.5518703388191553,
+                "cosim": 0.9130067381646402,
+                "epe_initial_to_negative": 26.484180234551545,
+                "epe_initial_to_zero": 13.242090117275772,
+                "own_epe_ground_truth_to_negative": 26.57377526576306,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.573776453647557,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
+        },
+        {
+            "start_time": "2024-09-17 22:14:05",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-17 22:15:49",
+            "duration": "00:01:43",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.7157883165649332,
+                "px1": 0.8441143855595681,
+                "px3": 0.9257878335076496,
+                "px5": 0.9475359747062843,
+                "outlier": 6.985236178832625,
+                "own_epe": 1.715788249209108,
+                "cosim": 0.9017225790135455
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.241407638367384,
+                "epe_ground_truth": 1.5528765222796674
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.482814985067083,
+                "epe_ground_truth": 1.5528765222796674
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.241407638367384,
+                "epe_ground_truth": 1.5528765222796674
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "hd3",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.482814985067083,
+                "epe_ground_truth": 1.5528765222796674
+            }
         }
     ]
 }

@@ -1041,6 +1041,103 @@
                 "l_inf_delta2": 0.013989121596329809,
                 "l_inf_delta12": 0.01568682837066501
             }
+        },
+        {
+            "start_time": "2024-09-11 21:18:37",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 21:22:17",
+            "duration": "00:03:39",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.477836507763517,
+                "px1": 0.851909404801246,
+                "px3": 0.9181100632583832,
+                "px5": 0.9380975179624718,
+                "outlier": 7.799385310631022,
+                "own_epe": 2.477836379951347,
+                "cosim": 0.9038008704609761,
+                "epe_initial_to_negative": 25.887696432620718,
+                "epe_initial_to_zero": 12.943848216310359,
+                "own_epe_ground_truth_to_negative": 26.02785140401921,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.02785248869778,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.945950827984484,
+                "epe_ground_truth": 2.4767112500543322
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 25.89190165596897,
+                "epe_ground_truth": 2.4767112500543322
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.945950827984484,
+                "epe_ground_truth": 2.4767112500543322
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "scopeflow",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 25.89190165596897,
+                "epe_ground_truth": 2.4767112500543322
+            }
         }
     ]
 }

@@ -971,6 +971,328 @@
                 "l_inf_delta2": 0.009100453704595566,
                 "l_inf_delta12": 0.011503938580863177
             }
+        },
+        {
+            "start_time": "2024-09-11 19:22:53",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 19:24:20",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 6.731858586221933,
+                "px1": 0.5983896708115936,
+                "px3": 0.7729856681078673,
+                "px5": 0.8288346686959267,
+                "outlier": 21.225991112124174,
+                "own_epe": 18.479239103384316,
+                "cosim": 0.18242885065265,
+                "epe_initial_to_negative": 46.464942685961724,
+                "epe_initial_to_zero": 23.232471342980862,
+                "own_epe_ground_truth_to_negative": 30.700403546541928,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 67.00634122729302,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
+        },
+        {
+            "start_time": "2024-09-11 21:33:00",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 21:34:27",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 6.731858586221933,
+                "px1": 0.5983896708115936,
+                "px3": 0.7729856681078673,
+                "px5": 0.8288346686959267,
+                "outlier": 21.225991112124174,
+                "own_epe": 18.479239103384316,
+                "cosim": 0.18242885065265,
+                "epe_initial_to_negative": 46.464942685961724,
+                "epe_initial_to_zero": 23.232471342980862,
+                "own_epe_ground_truth_to_negative": 30.700403546541928,
+                "own_epe_ground_truth_to_zero": 7.4714424176514145,
+                "epe_ground_truth_to_negative": 67.00634122729302,
+                "epe_ground_truth_to_zero": 36.74364090204239
+            }
+        },
+        {
+            "start_time": "2024-09-17 00:38:36",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "optim": "ground_truth",
+            "norm": "inf",
+            "epsilon": 0.0314,
+            "targeted": false,
+            "loss": "epe",
+            "end_time": "2024-09-17 00:48:40",
+            "duration": "00:10:03",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 12.012225477695464,
+                "px1": 0.04962132376695081,
+                "px3": 0.31790856530191375,
+                "px5": 0.587447819961235,
+                "outlier": 66.8988221667707,
+                "own_epe": 21.14545852422714,
+                "cosim": 0.17375881202053278,
+                "l2_delta1": 0.030336133977398275,
+                "l2_delta2": 0.030344550609588624,
+                "l2_delta12": 0.030340363997966052,
+                "l0_delta1": 1317411.55,
+                "l0_delta2": 1317908.05,
+                "l0_delta12": 2635319.6,
+                "l_inf_delta1": 0.03137257695198059,
+                "l_inf_delta2": 0.03137257695198059,
+                "l_inf_delta12": 0.03137257695198059
+            }
+        },
+        {
+            "start_time": "2024-09-17 01:39:36",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-17 01:41:03",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 6.846367497220635,
+                "px1": 0.5871733988821507,
+                "px3": 0.7693021491169929,
+                "px5": 0.8269996829330921,
+                "outlier": 21.560767563581468,
+                "own_epe": 18.461461517103018,
+                "cosim": 0.1820300013938686
+            }
+        },
+        {
+            "start_time": "2024-09-17 01:39:36",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-17 01:41:03",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 20.087032539844515,
+                "px1": 0.3801304081780836,
+                "px3": 0.5484705714136362,
+                "px5": 0.6084995293430984,
+                "outlier": 45.05727170407772,
+                "own_epe": 14.799148115813733,
+                "cosim": 0.1695290157373529
+            }
+        },
+        {
+            "start_time": "2024-09-17 02:40:40",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-17 02:42:03",
+            "duration": "00:01:23",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 37.69972767472267,
+                "px1": 0.10049710278626663,
+                "px3": 0.17747610950085801,
+                "px5": 0.2310234556265641,
+                "outlier": 82.25235067367554,
+                "own_epe": 12.659187150597573,
+                "cosim": 0.017892827117684647
+            }
+        },
+        {
+            "start_time": "2024-09-17 02:40:40",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-17 02:42:05",
+            "duration": "00:01:24",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 10.591778219491243,
+                "px1": 0.5274796082731337,
+                "px3": 0.7001894680969417,
+                "px5": 0.7613613667711615,
+                "outlier": 29.208552722949534,
+                "own_epe": 16.64043511353433,
+                "cosim": 0.17828403457358946
+            }
+        },
+        {
+            "start_time": "2024-09-17 02:40:39",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-17 02:42:06",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 33.35911143541336,
+                "px1": 0.02185736049078514,
+                "px3": 0.07418133158324053,
+                "px5": 0.139477441872732,
+                "outlier": 92.5751392364502,
+                "own_epe": 21.678545561432838,
+                "cosim": 0.09221928767161444
+            }
+        },
+        {
+            "start_time": "2024-09-17 02:40:40",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-17 02:42:06",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 16.521213556528092,
+                "px1": 0.3918355093291757,
+                "px3": 0.5705134431831539,
+                "px5": 0.6384090061113238,
+                "outlier": 42.70472138702869,
+                "own_epe": 14.883095372915268,
+                "cosim": 0.17268151676980778
+            }
+        },
+        {
+            "start_time": "2024-09-17 02:40:40",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-17 02:42:06",
+            "duration": "00:01:26",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 20.139396320432425,
+                "px1": 0.3336235974985175,
+                "px3": 0.5099316906556487,
+                "px5": 0.5764358019828797,
+                "outlier": 48.93952905535698,
+                "own_epe": 14.08990412786603,
+                "cosim": 0.17292902630608295
+            }
+        },
+        {
+            "start_time": "2024-09-17 02:40:39",
+            "model": "videoflow_bof",
+            "checkpoint": "kitti",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-17 02:42:07",
+            "duration": "00:01:27",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 32.37430785655975,
+                "px1": 0.02756135998827631,
+                "px3": 0.0975269654276417,
+                "px5": 0.16023073948358615,
+                "outlier": 90.23979541778564,
+                "own_epe": 21.554047216176986,
+                "cosim": 0.09584274223365355
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "videoflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 23.232471342980862,
+                "epe_ground_truth": 6.731858586221933
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "videoflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 46.464942685961724,
+                "epe_ground_truth": 6.731858586221933
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "videoflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 23.232471342980862,
+                "epe_ground_truth": 6.731858586221933
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "videoflow",
+            "checkpoint": "kitti",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "kitti-2015",
+            "metrics": {
+                "epe": 46.464942685961724,
+                "epe_ground_truth": 6.731858586221933
+            }
         }
     ]
 }

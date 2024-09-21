@@ -6,7 +6,7 @@ dataset_names = ["kitti-2015", "sintel-clean", "sintel-final"]
 kitti_model_names = [
     "raft", "gma", "rpknet", "ccmr", "craft", "csflow", "dicl", "dip",
     "fastflownet", "maskflownet", "flow1d", "flowformer", "flowformer++", 
-    "gmflow", "gmflownet", "hd3", "irr_pwc", "liteflownet", "liteflownet2",
+    "gmflow", "gmflownet", "hd3", "irr_pwc", "liteflownet",
     "liteflownet3_pseudoreg", "llaflow", "matchflow", "ms_raft+", 
     "rapidflow", "scopeflow", "scv4", "separableflow", "skflow", "starflow", 
     "videoflow_bof"
@@ -15,7 +15,7 @@ sintel_model_names = [
     "raft", "pwcnet", "gma", "rpknet", "ccmr", "craft", "dicl", "dip", 
     "fastflownet", "maskflownet", "maskflownet_s", "flow1d", "flowformer", 
     "flowformer++", "gmflow", "hd3", "irr_pwc", "liteflownet", "liteflownet2", 
-    "liteflownet3_pseudoreg", "llaflow", "matchflow", "ms_raft+", 
+    "liteflownet3", "llaflow", "matchflow", "ms_raft+", 
     "rapidflow", "scopeflow", "scv4", "separableflow", "skflow", "starflow", 
     "videoflow_bof"
 ]

@@ -449,6 +449,271 @@
                 "l_inf_delta2": 0.7210864466503191,
                 "l_inf_delta12": 0.7406076455952225
             }
+        },
+        {
+            "start_time": "2024-09-12 06:58:07",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-12 07:20:48",
+            "duration": "00:22:40",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 0.609768565658276,
+                "px1": 0.9152460508728463,
+                "px3": 0.9650543655029978,
+                "px5": 0.9785201003010976,
+                "outlier": 2.939121220290759,
+                "own_epe": 0.6097685387152302,
+                "cosim": 0.9359703558308361,
+                "epe_initial_to_negative": 26.819592705177186,
+                "epe_initial_to_zero": 13.409796352588593,
+                "own_epe_ground_truth_to_negative": 26.86786077571648,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.867861879690693,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
+        },
+        {
+            "start_time": "2024-09-18 13:38:31",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-18 14:01:00",
+            "duration": "00:22:29",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 16.73382968248712,
+                "px1": 0.149864819823862,
+                "px3": 0.28936765601190045,
+                "px5": 0.38577801411380336,
+                "outlier": 71.05684873477917,
+                "own_epe": 16.733829006080324,
+                "cosim": 0.16274543262320842
+            }
+        },
+        {
+            "start_time": "2024-09-18 13:38:37",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-18 14:01:07",
+            "duration": "00:22:29",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 3.6375870892740463,
+                "px1": 0.7618829613152487,
+                "px3": 0.8637275356194586,
+                "px5": 0.8983514139018989,
+                "outlier": 13.202137826679666,
+                "own_epe": 3.6375869223552755,
+                "cosim": 0.8765337883891121
+            }
+        },
+        {
+            "start_time": "2024-09-18 13:38:44",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-18 14:01:08",
+            "duration": "00:22:24",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 0.6715022485746173,
+                "px1": 0.908040896136811,
+                "px3": 0.9617501984526627,
+                "px5": 0.9761280732642676,
+                "outlier": 3.2719232998572103,
+                "own_epe": 0.6715022192554017,
+                "cosim": 0.9312338093143604
+            }
+        },
+        {
+            "start_time": "2024-09-18 13:38:38",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-18 14:01:17",
+            "duration": "00:22:39",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.7054255579049833,
+                "px1": 0.8487406763946861,
+                "px3": 0.9263270434482411,
+                "px5": 0.9484693633605378,
+                "outlier": 6.894918418415994,
+                "own_epe": 1.7054254881157311,
+                "cosim": 0.9020250697086112
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:25:37",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-18 14:48:10",
+            "duration": "00:22:33",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 9.026532720649163,
+                "px1": 0.4794252654210455,
+                "px3": 0.674943991114567,
+                "px5": 0.7444720422047459,
+                "outlier": 32.3457709715904,
+                "own_epe": 9.026532330756917,
+                "cosim": 0.7249185005659157
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:25:37",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-18 14:48:24",
+            "duration": "00:22:46",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 60.77786898635879,
+                "px1": 0.016715780505665363,
+                "px3": 0.05362397827366993,
+                "px5": 0.08916594888709138,
+                "outlier": 94.61402832786128,
+                "own_epe": 60.77786651468414,
+                "cosim": 0.19840305599982974
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:25:39",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-18 14:48:31",
+            "duration": "00:22:52",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 70.41297270264566,
+                "px1": 0.015335339996823114,
+                "px3": 0.047032863366840434,
+                "px5": 0.07639014044630597,
+                "outlier": 95.2879028356957,
+                "own_epe": 70.4129696957316,
+                "cosim": 0.17701448829276412
+            }
+        },
+        {
+            "start_time": "2024-09-18 14:25:43",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-18 14:48:57",
+            "duration": "00:23:13",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 11.66001618180449,
+                "px1": 0.4818829364033453,
+                "px3": 0.6786682123658726,
+                "px5": 0.7362192329412951,
+                "outlier": 31.954426430705404,
+                "own_epe": 11.660015679602434,
+                "cosim": 0.7352586439749187
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.409796352588593,
+                "epe_ground_truth": 0.609768565658276
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.819592705177186,
+                "epe_ground_truth": 0.609768565658276
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 13.409796352588593,
+                "epe_ground_truth": 0.609768565658276
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "flowformer",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 26.819592705177186,
+                "epe_ground_truth": 0.609768565658276
+            }
         }
     ]
 }

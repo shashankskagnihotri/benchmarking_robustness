@@ -1796,6 +1796,103 @@
                 "l_inf_delta2": 0.006827608959106988,
                 "l_inf_delta12": 0.007557547975091781
             }
+        },
+        {
+            "start_time": "2024-09-11 21:00:15",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-09-11 21:02:27",
+            "duration": "00:02:11",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.6144389788066391,
+                "px1": 0.8623687064921077,
+                "px3": 0.9278697993294993,
+                "px5": 0.9470991665617304,
+                "outlier": 6.83919676640818,
+                "own_epe": 1.61443890885993,
+                "cosim": 0.9171908071531228,
+                "epe_initial_to_negative": 25.75955941382792,
+                "epe_initial_to_zero": 12.87977970691396,
+                "own_epe_ground_truth_to_negative": 26.23746939714887,
+                "own_epe_ground_truth_to_zero": 13.495707807405767,
+                "epe_ground_truth_to_negative": 26.237470513175705,
+                "epe_ground_truth_to_zero": 13.495708393346336
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.879916827857322,
+                "epe_ground_truth": 1.6138358143418599
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "inf",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 25.75983345809175,
+                "epe_ground_truth": 1.6138358143418599
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "zero",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 12.879916827857322,
+                "epe_ground_truth": 1.6138358143418599
+            }
+        },
+        {
+            "start_time": "2024-09-19 14:15:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "fgsm",
+            "norm": "two",
+            "epsilon": 0.0,
+            "targeted": true,
+            "target": "negative",
+            "loss": "epe",
+            "end_time": "2024-09-19 14:27:20",
+            "duration": "00:00:00",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 25.75983345809175,
+                "epe_ground_truth": 1.6138358143418599
+            }
         }
     ]
 }

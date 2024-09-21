@@ -56,7 +56,7 @@ from attacks.apgd import apgd
 from attacks.bim_pgd_cospgd import bim_pgd_cospgd
 from attacks.fab import fab
 from attacks.pcfa import pcfa
-# from attacks.tdcc import get_dataset_3DCC
+from attacks.tdcc import get_dataset_3DCC
 from attacks.common_corruptions import common_corrupt
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
@@ -609,13 +609,13 @@ def attack_one_dataloader(
     """
     metrics_sum = {}
     iteration_metrics_sum = {}
-    # if attack_args["attack"] == "3dcc":
-    #     dataloader = get_dataset_3DCC(
-    #         model,
-    #         dataloader_name,
-    #         attack_args["3dcc_corruption"],
-    #         attack_args["3dcc_intensity"],
-    #     )
+    if attack_args["attack"] == "3dcc":
+        dataloader = get_dataset_3DCC(
+            model,
+            dataloader_name,
+            attack_args["3dcc_corruption"],
+            attack_args["3dcc_intensity"],
+        )
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -703,6 +703,8 @@ def attack_one_dataloader(
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
                     preds = orig_preds
+                case "3dcc":
+                    preds = orig_preds
 
             for key in preds:
                 if torch.is_tensor(preds[key]):
@@ -710,7 +712,7 @@ def attack_one_dataloader(
             for key in inputs:
                 if torch.is_tensor(inputs[key]):
                     inputs[key] = inputs[key].detach()
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 for key in perturbed_inputs:
                     if torch.is_tensor(perturbed_inputs[key]):
                         perturbed_inputs[key] = perturbed_inputs[key].detach()
@@ -733,7 +735,7 @@ def attack_one_dataloader(
             inputs = io_adapter.unscale(inputs, image_only=True)
             preds = io_adapter.unscale(preds)
 
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
                 if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                     targeted_inputs = io_adapter.unscale(
@@ -867,7 +869,7 @@ def attack_one_dataloader(
                     metrics["val/epe_ground_truth_to_zero"] = metrics_ground_truth_zero[
                         "val/epe"
                     ]
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
                 image1, image2 = get_image_tensors(inputs)
                 delta1 = adv_image1 - image1
@@ -904,7 +906,7 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 generate_outputs(
                     args,
                     preds,
@@ -914,6 +916,15 @@ def attack_one_dataloader(
                     perturbed_inputs,
                     attack_args,
                 )
+            elif attack_args["attack"] == "3dcc":
+                generate_outputs(
+                    args,
+                    preds,
+                    dataloader_name,
+                    i,
+                    inputs.get("meta"),
+                    attack_args=attack_args,
+                )
             else:
                 generate_outputs(args, preds, dataloader_name, i, inputs.get("meta"))
             if args.max_samples is not None and i >= (args.max_samples - 1):
@@ -922,7 +933,7 @@ def attack_one_dataloader(
             del preds
             del inputs
             del iteration_metrics
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 del perturbed_inputs
             torch.cuda.empty_cache()
 
@@ -989,7 +1000,10 @@ def generate_outputs(
                 attack_args,
             )
         else:
-            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
+            if attack_args is not None and attack_args["attack"] == "3dcc":
+                _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata, attack_args=attack_args)
+            else:
+                _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
 
 
 def _write_to_npy_file(
@@ -1001,7 +1015,6 @@ def _write_to_npy_file(
     perturbed_inputs: Dict[str, torch.Tensor] = None,
     attack_args: Optional[Dict[str, List[object]]] = None,
 ) -> None:
-
     out_root_dir = Path(args.output_path) / dataloader_name
     extra_dirs = ""
     if metadata is not None:
@@ -1030,10 +1043,9 @@ def _write_to_npy_file(
     for k, v in preds.items():
         if isinstance(v, np.ndarray):
             out_dir = out_root_dir
-            if perturbed_inputs is not None:
+            if perturbed_inputs is not None or (attack_args is not None and attack_args["attack"] == "3dcc"):
                 for arg, val in attack_args.items():
                     out_dir = out_dir / f"{arg}={val}"
-
         if flow_ext == "png":
             if k == "flows_viz":
                 out_dir_flows = out_dir / k / extra_dirs
@@ -1077,7 +1089,6 @@ def _write_to_file(
     metadata: Optional[Dict[str, Any]] = None,
 ) -> None:
     out_root_dir = Path(args.output_path) / dataloader_name
-    # pdb.set_trace()
     extra_dirs = ""
     if metadata is not None:
         img_path = Path(metadata["image_paths"][0][0])
@@ -1107,7 +1118,6 @@ def _write_to_file(
             ):
                 if v.max() <= 1:
                     v = v * 255
-                # pdb.set_trace()
                 cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
 
 
