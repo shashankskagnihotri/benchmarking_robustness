@@ -1967,6 +1967,132 @@
                 "epe": 26.196881235790986,
                 "epe_ground_truth": 1.116337429070049
             }
+        },
+        {
+            "start_time": "2024-09-19 02:43:04",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-19 02:45:07",
+            "duration": "00:02:03",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 2.113586972701103,
+                "px1": 0.8385730881698422,
+                "px3": 0.9206436274574996,
+                "px5": 0.9420765054042699,
+                "outlier": 7.640325243732428,
+                "own_epe": 2.1135868767525117,
+                "cosim": 0.8993991730908266
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:43:04",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-19 02:45:10",
+            "duration": "00:02:05",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 24.0941125158038,
+                "px1": 0.0550966989277914,
+                "px3": 0.12231851088988023,
+                "px5": 0.19297583380332523,
+                "outlier": 87.7681434427099,
+                "own_epe": 24.094111564763313,
+                "cosim": 0.0824203225251412
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:45:55",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-19 02:48:00",
+            "duration": "00:02:05",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 6.213003488656538,
+                "px1": 0.5982470140190727,
+                "px3": 0.7822775721789752,
+                "px5": 0.8356491759675309,
+                "outlier": 21.45606932408775,
+                "own_epe": 6.213003210959585,
+                "cosim": 0.7844643944572017
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:45:55",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-19 02:48:01",
+            "duration": "00:02:05",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 61.29842302870224,
+                "px1": 0.008866703221943937,
+                "px3": 0.025913659047668267,
+                "px5": 0.04371904973663011,
+                "outlier": 97.39260138924826,
+                "own_epe": 61.298420240281295,
+                "cosim": 0.13802701437783174
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:45:55",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-19 02:48:01",
+            "duration": "00:02:06",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 49.97436267475344,
+                "px1": 0.01049278183171056,
+                "px3": 0.03991199289273938,
+                "px5": 0.07262922268890355,
+                "outlier": 95.99513637504248,
+                "own_epe": 49.974360532307145,
+                "cosim": 0.1707999645584308
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:45:55",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-19 02:48:02",
+            "duration": "00:02:06",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 4.842643515706978,
+                "px1": 0.6845614581957539,
+                "px3": 0.8331421229551751,
+                "px5": 0.874907937843807,
+                "outlier": 16.390222696101652,
+                "own_epe": 4.842643325584766,
+                "cosim": 0.8281568461379589
+            }
         }
     ]
 }

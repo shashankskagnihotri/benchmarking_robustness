@@ -1893,6 +1893,174 @@
                 "epe": 25.75983345809175,
                 "epe_ground_truth": 1.6138358143418599
             }
+        },
+        {
+            "start_time": "2024-09-19 02:48:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "near_focus",
+            "end_time": "2024-09-19 02:50:50",
+            "duration": "00:02:03",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 2.584474472323653,
+                "px1": 0.8003824045640076,
+                "px3": 0.8969330077527465,
+                "px5": 0.924797747101667,
+                "outlier": 9.973487187383606,
+                "own_epe": 2.584474366970582,
+                "cosim": 0.8873707628831282
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:48:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "far_focus",
+            "end_time": "2024-09-19 02:50:51",
+            "duration": "00:02:04",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 1.7118389479078775,
+                "px1": 0.8512182433290566,
+                "px3": 0.9239178876268188,
+                "px5": 0.9449765892210886,
+                "outlier": 7.224687156542119,
+                "own_epe": 1.711838882820865,
+                "cosim": 0.9088507062047864
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:48:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "color_quant",
+            "end_time": "2024-09-19 02:50:54",
+            "duration": "00:02:07",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 4.223196256501416,
+                "px1": 0.7236149750185162,
+                "px3": 0.837274789749345,
+                "px5": 0.8775928989625343,
+                "outlier": 15.982247160458678,
+                "own_epe": 4.2231960916152715,
+                "cosim": 0.857462910496908
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:48:47",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "fog_3d",
+            "end_time": "2024-09-19 02:50:54",
+            "duration": "00:02:07",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 24.67103721429017,
+                "px1": 0.06885512862346602,
+                "px3": 0.14757384514920496,
+                "px5": 0.21824694155992339,
+                "outlier": 85.24246640347381,
+                "own_epe": 24.671036157782094,
+                "cosim": 0.1068346613519767
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:51:41",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "xy_motion_blur",
+            "end_time": "2024-09-19 02:53:47",
+            "duration": "00:02:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 56.575811047947944,
+                "px1": 0.01759092056796785,
+                "px3": 0.05497112894250881,
+                "px5": 0.08869154978973895,
+                "outlier": 94.49240963236858,
+                "own_epe": 56.57580859047306,
+                "cosim": 0.17284416388391494
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:51:41",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "iso_noise",
+            "end_time": "2024-09-19 02:53:47",
+            "duration": "00:02:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 7.46340750368253,
+                "px1": 0.5151644182904378,
+                "px3": 0.7254998066800472,
+                "px5": 0.7943014532223538,
+                "outlier": 27.167603538324208,
+                "own_epe": 7.463407228562147,
+                "cosim": 0.7525829227120543
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:51:41",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "low_light",
+            "end_time": "2024-09-19 02:53:48",
+            "duration": "00:02:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 5.839695139459757,
+                "px1": 0.6157476605195955,
+                "px3": 0.7882031048992497,
+                "px5": 0.841990788920812,
+                "outlier": 20.877079125827468,
+                "own_epe": 5.839694892924984,
+                "cosim": 0.802255728477961
+            }
+        },
+        {
+            "start_time": "2024-09-19 02:51:41",
+            "model": "dicl",
+            "checkpoint": "sintel",
+            "attack": "3dcc",
+            "targeted": false,
+            "intensity": 3,
+            "corruption": "z_motion_blur",
+            "end_time": "2024-09-19 02:53:48",
+            "duration": "00:02:06",
+            "dataset": "sintel-final",
+            "metrics": {
+                "epe": 48.08621031509696,
+                "px1": 0.01974780695576814,
+                "px3": 0.06580344751533433,
+                "px5": 0.10748115616054701,
+                "outlier": 93.40034509415128,
+                "own_epe": 48.086208350720256,
+                "cosim": 0.20057597499947788
+            }
         }
     ]
 }
