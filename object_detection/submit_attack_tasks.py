@@ -25,8 +25,9 @@ logging.basicConfig(
 )
 
 DEBUG = True
-debug_time = "00:30:00"
-debug_GPU = "gpu_4,gpu_4_a100,gpu_4_h100"  # "dev_gpu_4,dev_gpu_4_a100"
+debug_time = "08:00:00"
+debug_GPU = "gpu_4_a100"
+# debug_GPU = "dev_gpu_4,dev_gpu_4_a100"
 
 # Create a logger
 logger = logging.getLogger("rich")
@@ -35,10 +36,11 @@ TARGETED = False
 RANDOM_START = False
 RESULT_DIR = "slurm/results"
 MODEL_DIR = "models_debug" if DEBUG else "models"
+BATCH_SIZE = 1
 ATTACKS = {
-    # "PGD": pgd_attack,
-    # "FGSM": fgsm_attack,
-    # "BIM": bim_attack,
+    "PGD": pgd_attack,
+    "FGSM": fgsm_attack,
+    "BIM": bim_attack,
     "COSPGD": cospgd_attack,
     #    "none": None
 }
@@ -74,6 +76,7 @@ NORMS = {
 logger.debug("Starting attack tasks")
 logger.debug(f"WORK_DIR: {WORK_DIR}")
 logger.debug(f"RESULT_DIR: {RESULT_DIR}")
+logger.debug(f"BATCH_SIZE: {BATCH_SIZE}")
 logger.debug(f"TARGETED: {TARGETED}")
 logger.debug(f"RANDOM_START: {RANDOM_START}")
 logger.debug(f"MODEL_DIR: {MODEL_DIR}")
@@ -200,11 +203,12 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                         checkpoint_file,
                         attack_kwargs,
                         result_dir,
+                        BATCH_SIZE,
                     )
                     jobs.append(job)
 
-    # if DEBUG and len(jobs) > 3:
-    #     break
+    if DEBUG and len(jobs) > 8:
+        break
 logger.info(
     "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
 )

@@ -1,26 +1,25 @@
 import argparse
 import logging
-from time import sleep
-from mmdet.structures.det_data_sample import DetDataSample
-import torch
-from mmengine.config import Config
-from mmengine.runner import Runner
-from torchvision import transforms
-from typing import Callable
-from typing import Sequence
-from dotenv import load_dotenv
 import os
-from typing import Dict, List, Union
+from copy import deepcopy
+from time import sleep
+from typing import Callable, Dict, List, Sequence, Union
+
+import cospgd
+import torch
+import torch.nn.functional as F
+import torch.version
+from dotenv import load_dotenv
+from mmengine.config import Config
+from mmengine.evaluator import Evaluator
 from mmengine.logging import print_log
 from mmengine.registry import LOOPS
+from mmengine.runner import Runner
 from mmengine.runner.base_loop import BaseLoop
 from torch.utils.data import DataLoader
-from mmengine.evaluator import Evaluator
+from torchvision import transforms
+
 import wandb
-from copy import deepcopy
-import cospgd
-import numpy as np
-import torch.nn.functional as F
 
 load_dotenv()
 WAND_PROJECT = os.getenv("WANDB_PROJECT")
@@ -28,8 +27,13 @@ WAND_ENTITY = os.getenv("WANDB_ENTITY")
 assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
 assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
-MEAN = torch.tensor([123.675, 116.28, 103.53]).to("cuda")
-STD = torch.tensor([58.395, 57.12, 57.375]).to("cuda")
+DEBUG = True
+
+if DEBUG:
+    WAND_PROJECT = "debug"
+
+count_early_stopping = 0
+image_counter = 0
 
 
 def cospgd_scale(
@@ -61,41 +65,42 @@ def cospgd_scale(
     return cossim * loss
 
 
-def pixel_wise_pred(data_batch_prepro, runner, adv_images):
-    datasamples = data_batch_prepro["data_samples"]
+@torch.enable_grad()
+def pixel_wise_pred(data_batch_prepro, model, adv_images):
     with torch.enable_grad():
-        output = runner.model(
-            inputs=adv_images, data_samples=datasamples, mode="predict"
-        )
+        output = model.test_step(data_batch_prepro)
 
-    labels = output[0].pred_instances.labels.to("cuda")
-    bboxes = output[0].pred_instances.bboxes.to("cuda")
-    scores = output[0].pred_instances.scores.to("cuda")
+        labels = output[0].pred_instances.labels
+        bboxes = output[0].pred_instances.bboxes
+        scores = output[0].pred_instances.scores
 
-    if len(labels) == 0:
-        return None
+        # if len(labels) == 0:
+        #     return None
 
-    _, img_h, img_w = data_batch_prepro.get("inputs")[0].shape
+        _, img_h, img_w = data_batch_prepro.get("inputs")[0].shape
 
-    num_classes = runner.model.bbox_head.num_classes
-    result = torch.zeros((num_classes, img_h, img_w), device="cuda")
+        num_classes = 80
+        result = torch.zeros((num_classes, img_h, img_w), device="cuda")
 
-    # Clip bboxes to image dimensions
-    x_min = torch.clamp(bboxes[:, 0], 0, img_w - 1).long()
-    y_min = torch.clamp(bboxes[:, 1], 0, img_h - 1).long()
-    x_max = torch.clamp(bboxes[:, 2], 0, img_w - 1).long()
-    y_max = torch.clamp(bboxes[:, 3], 0, img_h - 1).long()
+        # Clip bboxes to image dimensions
+        x_min = torch.clamp(bboxes[:, 0], 0, img_w - 1).long()
+        y_min = torch.clamp(bboxes[:, 1], 0, img_h - 1).long()
+        x_max = torch.clamp(bboxes[:, 2], 0, img_w - 1).long()
+        y_max = torch.clamp(bboxes[:, 3], 0, img_h - 1).long()
 
-    # Vectorized bbox filling
-    for i in range(bboxes.size(0)):
-        result[labels[i], y_min[i] : y_max[i] + 1, x_min[i] : x_max[i] + 1] = scores[i]
+        # Vectorized bbox filling
+        for i in range(bboxes.size(0)):
+            result[labels[i], y_min[i] : y_max[i] + 1, x_min[i] : x_max[i] + 1] = (
+                scores[i]
+            )
 
-    return result.unsqueeze(0)
+        result = result.unsqueeze(0)
+    return result
 
 
-def pixel_wise_target(data_batch_prepro, num_classes: int):
-    labels = data_batch_prepro["data_samples"][0].gt_instances.labels.to("cuda")
-    bboxes = data_batch_prepro["data_samples"][0].gt_instances.bboxes.to("cuda")
+def pixel_wise_target(data_batch_prepro, num_classes: int = 80):
+    labels = data_batch_prepro["data_samples"][0].gt_instances.labels
+    bboxes = data_batch_prepro["data_samples"][0].gt_instances.bboxes
     _, img_h, img_w = data_batch_prepro.get("inputs")[0].shape
     result = torch.zeros((num_classes, img_h, img_w), device="cuda")
 
@@ -115,9 +120,9 @@ def pixel_wise_target(data_batch_prepro, num_classes: int):
 def preprocess_data(data_batch: dict, runner):
     data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
     images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    # mean = runner.model.data_preprocessor.mean
-    # std = runner.model.data_preprocessor.std
-    images = denorm(images, MEAN, STD)
+    mean = runner.model.data_preprocessor.mean
+    std = runner.model.data_preprocessor.std
+    images = denorm(images, mean, std)
     return data_batch_prepro, images
 
 
@@ -130,15 +135,18 @@ def cospgd_attack(
     targeted: bool,
     random_start: bool,
     evaluators: List[Evaluator],
-    criterion=F.cross_entropy,
+    criterion: Callable[..., torch.Tensor] = F.cross_entropy,
 ):
-    data_batch_prepro, orig_images = preprocess_data(data_batch, runner)
-    adv_images = orig_images.clone().float().detach().to("cuda")
+    global image_counter
+    global count_early_stopping
+    image_counter += 1
+    stopped = False
+
+    data_batch_prepro, images = preprocess_data(data_batch, runner)
+    adv_images = images.clone().float().detach().to("cuda")
     evaluator_process(evaluators[0], data_batch_prepro, runner)
 
-    labels = pixel_wise_target(
-        data_batch_prepro, num_classes=runner.model.bbox_head.num_classes
-    )
+    labels = pixel_wise_target(data_batch_prepro, num_classes=80)
 
     if targeted:
         labels = torch.ones_like(labels)
@@ -146,49 +154,67 @@ def cospgd_attack(
     # Assume norm == inf for now
     adv_images = cospgd.functions.init_linf(
         adv_images, epsilon=epsilon, clamp_min=0, clamp_max=255
-    ).requires_grad_()
+    )
+    adv_images.requires_grad = True
+    data_batch_prepro["inputs"][0] = adv_images
+    runner.model.requires_grad_(True)
 
     for step in range(steps):
-        preds = pixel_wise_pred(data_batch_prepro, runner, adv_images)
+        with torch.enable_grad():
+            preds = pixel_wise_pred(
+                data_batch_prepro, runner.model, adv_images
+            ).requires_grad_(True)
+
         if preds is not None:
-            loss = criterion(preds, labels, reduction="none")
-            loss = cospgd_scale(
-                predictions=preds,
-                labels=labels,
-                loss=loss,
-                num_classes=runner.model.bbox_head.num_classes,
-                targeted=targeted,
+            adv_images.requires_grad = True
+            data_batch_prepro["inputs"][0] = adv_images  # unnormalized
+            runner.model.zero_grad()
+            adv_images.grad = None
+            with torch.enable_grad():
+                loss = criterion(preds, labels, reduction="none")
+                loss = cospgd_scale(
+                    predictions=preds,
+                    labels=labels,
+                    loss=loss,
+                    num_classes=80,
+                    targeted=targeted,
+                )
+                loss = loss.mean()
+            loss.backward(inputs=adv_images)
+
+            if adv_images.grad is None and not stopped:
+                stopped = True
+                count_early_stopping += 1
+                print(
+                    f"No gradient: stopping early. Skipped {count_early_stopping} images of {image_counter} at attack step {step}"
+                )
+            else:
+                # Assume norm == "inf" for now
+                perturbed_image = cospgd.functions.step_inf(
+                    perturbed_image=adv_images,
+                    epsilon=epsilon,
+                    data_grad=adv_images.grad,
+                    orig_image=images,
+                    alpha=alpha,
+                    targeted=targeted,
+                    clamp_min=0,
+                    clamp_max=255,
+                )
+
+                data_batch_prepro["inputs"][0] = perturbed_image
+                adv_images = perturbed_image.detach()
+
+                transforms.Normalize(
+                    runner.model.data_preprocessor.mean,
+                    runner.model.data_preprocessor.std,
+                    inplace=True,
+                )(data_batch_prepro["inputs"][0])
+        elif not stopped:
+            stopped = True
+            count_early_stopping += 1
+            print(
+                f"No predictions: stopping early. Skipped {count_early_stopping} images of {image_counter} at attack step {step}"
             )
-            loss = loss.mean()
-            loss.backward()
-
-            # Assume norm == "inf" for now
-            perturbed_image = cospgd.functions.step_inf(
-                perturbed_image=adv_images,
-                epsilon=epsilon,
-                data_grad=adv_images.grad,
-                orig_image=orig_images,
-                alpha=alpha,
-                targeted=targeted,
-                clamp_min=0,
-                clamp_max=255,
-            )
-
-            data_batch_prepro["inputs"][0] = perturbed_image
-            adv_images = perturbed_image.detach().requires_grad_()
-
-            transforms.Normalize(MEAN, STD, inplace=True)(
-                data_batch_prepro["inputs"][0]
-            )
-        else:
-            import inspect
-
-            stack = inspect.stack()
-            caller_frame = stack[1]
-            caller_locals = caller_frame.frame.f_locals
-            idx = caller_locals["idx"]
-
-            print(f"no bbox predicted at iteration {idx} attack step {step}")  # debug
         evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
     return data_batch_prepro
@@ -204,15 +230,9 @@ def pgd_attack(
     random_start: bool,
     evaluators: List[Evaluator],
 ):
-    data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
-
-    # Preprocess the data
-    images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    assert isinstance(images, torch.Tensor)
-    mean = runner.model.data_preprocessor.mean
-    std = runner.model.data_preprocessor.std
-    images = denorm(images, mean, std)
+    data_batch_prepro, images = preprocess_data(data_batch, runner)
     adv_images = images.clone().float().detach().to("cuda")
+    evaluator_process(evaluators[0], data_batch_prepro, runner)
 
     if targeted:
         raise NotImplementedError
@@ -220,18 +240,17 @@ def pgd_attack(
     if random_start:
         raise NotImplementedError
 
-    evaluator_process(evaluators[0], data_batch_prepro, runner)
-
     for step in range(steps):
         adv_images.requires_grad = True
         data_batch_prepro["inputs"][0] = adv_images
         runner.model.training = True  # avoid missing arguments error in some models
         losses = runner.model(**data_batch_prepro, mode="loss")
-        cost, _ = runner.model.parse_losses(losses)
+        loss, _ = runner.model.parse_losses(losses)
 
         runner.model.zero_grad()
         adv_images.grad = None
-        cost.backward(retain_graph=True)
+
+        loss.backward(retain_graph=True)
         grad = adv_images.grad
         assert grad is not None
 
@@ -239,7 +258,12 @@ def pgd_attack(
         delta = torch.clamp(adv_images - images, min=-epsilon, max=epsilon)
         adv_images = torch.clamp(images + delta, min=0, max=255).detach()
 
-        data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        data_batch_prepro["inputs"][0] = adv_images
+        transforms.Normalize(
+            runner.model.data_preprocessor.mean,
+            runner.model.data_preprocessor.std,
+            inplace=True,
+        )(data_batch_prepro["inputs"][0])
         runner.model.training = False  # avoid missing arguments error in some models
         evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
@@ -264,16 +288,7 @@ def fgsm_attack(
     targeted: bool,
     evaluators: List[Evaluator],
 ):
-    data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
-
-    images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    assert isinstance(images, torch.Tensor)
-
-    # from retinanet_r50_fpn.py. TODO: read from runner.model
-    mean = [123.675, 116.28, 103.53]
-    std = [58.395, 57.12, 57.375]
-
-    images = denorm(images, mean, std)
+    data_batch_prepro, images = preprocess_data(data_batch, runner)
     adv_images = images.clone().float().detach().to("cuda")
 
     evaluator_process(evaluators[0], data_batch_prepro, runner)
@@ -285,9 +300,9 @@ def fgsm_attack(
     runner.model.training = True  # avoid missing arguments error in some models
     losses = runner.model(**data_batch_prepro, mode="loss")
 
-    cost, _ = runner.model.parse_losses(losses)
+    loss, _ = runner.model.parse_losses(losses)
     runner.model.zero_grad()
-    cost.backward(retain_graph=True)
+    loss.backward(retain_graph=True)
     grad = adv_images.grad
     assert grad is not None
 
@@ -308,13 +323,20 @@ def fgsm_attack(
         factor = epsilon / delta_norms
         factor = torch.min(factor, torch.ones_like(delta_norms))
         delta = delta * factor.view(-1, 1, 1, 1)
+    else:
+        raise NotImplementedError
 
     # Clipping to maintain [0, 255] range
-    adv_images = torch.clamp(images + delta, 0, 255)
+    adv_images = torch.clamp(images + delta, 0, 255).detach()
 
     # Return the perturbed image
     adv_images.requires_grad = False
-    data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+    data_batch_prepro["inputs"][0] = adv_images
+    transforms.Normalize(
+        runner.model.data_preprocessor.mean,
+        runner.model.data_preprocessor.std,
+        inplace=True,
+    )(data_batch_prepro["inputs"][0])
     runner.model.training = False  # avoid missing arguments error in some models
     evaluator_process(evaluators[1], data_batch_prepro, runner)
 
@@ -332,16 +354,7 @@ def bim_attack(
     evaluators: List[Evaluator],
 ):
     """see https://arxiv.org/pdf/1607.02533.pdf"""
-    data_batch_prepro = runner.model.data_preprocessor(data_batch, training=False)
-
-    images = data_batch_prepro.get("inputs")[0].clone().detach().to("cuda")
-    assert isinstance(images, torch.Tensor)
-
-    # from retinanet_r50_fpn.py. TODO: read from runner.model
-    mean = [123.675, 116.28, 103.53]
-    std = [58.395, 57.12, 57.375]
-
-    images = denorm(images, mean, std)
+    data_batch_prepro, images = preprocess_data(data_batch, runner)
     adv_images = images.clone().float().detach().to("cuda")
     evaluator_process(evaluators[0], data_batch_prepro, runner)
 
@@ -375,9 +388,16 @@ def bim_attack(
             factor = epsilon / delta_norms
             factor = torch.min(factor, torch.ones_like(delta_norms))
             delta = delta * factor.view(-1, 1, 1, 1)
-        adv_images = torch.clamp(images + delta, 0, 255)
+        else:
+            raise NotImplementedError
+        adv_images = torch.clamp(images + delta, 0, 255).detach()
 
-        data_batch_prepro["inputs"][0] = transforms.Normalize(mean, std)(adv_images)
+        data_batch_prepro["inputs"][0] = adv_images
+        transforms.Normalize(
+            runner.model.data_preprocessor.mean,
+            runner.model.data_preprocessor.std,
+            inplace=True,
+        )(data_batch_prepro["inputs"][0])
         runner.model.training = False  # avoid missing arguments error in some models
         evaluator_process(evaluators[step + 1], data_batch_prepro, runner)
 
@@ -507,6 +527,7 @@ def run_attack_val(
     checkpoint_file: str,
     attack_kwargs: dict,
     log_dir: str,
+    batch_size: int = 1,
 ):
     # Setup the configuration
     cfg = Config.fromfile(config_file)
@@ -527,20 +548,20 @@ def run_attack_val(
                     "attack_kwargs": attack_kwargs,
                     "config_file": config_file,
                     "checkpoint_file": checkpoint_file,
+                    "model_name": model_name,
+                    "batch_size": batch_size,
                 },
-                "name": model_name,
                 "group": model_name,
-                "tags": ["debug"],
+                "tags": ["batch size test"],
             },
         )
     )
+    cfg.val_dataloader.batch_size = batch_size
 
-    # cfg.update(allow_val_change=True)
-    # cfg.val_dataloader.dataset.indices = 500  # reduce dataset size for debugging
-
-    if "cospgd" in attack_name:
-        cfg.model.bbox_head.loss_bbox.reduction = "none"
-        cfg.model.bbox_head.loss_cls.reduction = "none"
+    if DEBUG:
+        os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+        print(f"torch cuda version: {torch.version.cuda}")
+        # cfg.val_dataloader.dataset.indices = 500  # reduce dataset size for debugging
 
     # Register the attack loop if an attack is provided
     if attack is not None:
@@ -573,9 +594,9 @@ def parse_args():
     parser.add_argument(
         "--attack",
         type=str,
-        default="pgd",
+        default="cospgd",
         choices=["pgd", "fgsm", "bim", "cospgd", "none"],
-        help="Type of attack (default: pgd)",
+        help="Type of attack (default: cospgd)",
     )
     parser.add_argument(
         "--checkpoint_file",
@@ -602,6 +623,9 @@ def parse_args():
         type=str,
         default="./work_dirs/",
         help="Directory path where result files are saved (default: ./work_dirs/logs)",
+    )
+    parser.add_argument(
+        "--batch_size", type=int, default=1, help="Number of images per batch"
     )
 
     return parser.parse_args()
@@ -658,4 +682,5 @@ if __name__ == "__main__":
         config_file=args.config_file,
         checkpoint_file=args.checkpoint_file,
         log_dir=args.output_dir,
+        batch_size=args.batch_size,
     )
