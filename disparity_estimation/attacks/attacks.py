@@ -339,7 +339,7 @@ class CosPGDAttack:
         self.num_classes = num_classes
         self.targeted = targeted
         self.architecture = architecture
-        self.criterion = criterion  # Pass the criterion here
+        self.criterion = criterion 
         self.stats = stats if stats is not None else {}
         self.logger = logger
 
@@ -375,18 +375,18 @@ class CosPGDAttack:
 
             elif self.architecture == 'sttr':
                 from sttr.utilities.foward_pass import forward_pass
-                nested_tensor = NestedTensor(left=perturbed_left,right=perturbed_right,sampled_cols=None)
-         # inputs = {'left': perturbed_left, 'right': perturbed_right, 'disp': labels,'occ_mask': occ_mask,'occ_mask_right': occ_mask_right}
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': labels,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                #if reset_on_batch:
+                #    eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+                outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache() 
 
-                # Ensure all tensors are moved to the device
-                # inputs = {k: v.to(device) for k, v in inputs.items()}
-
-                # Pass the entire dictionary to the model
-                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
-                #torch.cuda.empty_cache()
-
-                # outputs = self.model(inputs)["disparities"].squeeze(0).to(device)
-                # outputs, losses, disp = forward_pass(self.model, inputs, device, self.criterion, self.stats, logger=self.logger)
 
             else:
                 outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)
@@ -420,6 +420,7 @@ class CosPGDAttack:
 
             # Backward pass to compute gradients of the loss w.r.t the perturbed images
             loss.backward()
+            #torch.cuda.empty_cache() 
 
             # Collect the gradient data
             left_grad = perturbed_left.grad.data
@@ -473,6 +474,7 @@ class CosPGDAttack:
             
             # Save results after every iteration
             perturbed_results[iteration] = (perturbed_left, perturbed_right)
+            torch.cuda.empty_cache() 
         
         return perturbed_results
 
@@ -706,11 +708,15 @@ class CosPGDAttack:
 from typing import Dict, List, Optional
 
 class FGSMAttack:
-    def __init__(self, model,  architecture:str, epsilon, targeted=False):
+    def __init__(self, model,  architecture:str, epsilon, targeted=False, criterion=False,stats=None, logger=None):
         self.model = model
         self.epsilon = epsilon
         self.targeted = targeted
         self.architecture = architecture
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+
 
     @torch.enable_grad()
     def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor,occ_mask=None,occ_mask_right=None):
@@ -737,8 +743,16 @@ class FGSMAttack:
             predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
         
         elif self.architecture == 'sttr':
-            nested_tensor = NestedTensor(left=perturbed_left,right=perturbed_right,sampled_cols=None)
-            predicted_disparity = self.model(nested_tensor)['disp_pred'].squeeze(0).cuda()
+            from sttr.utilities.foward_pass import forward_pass
+            data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': ground_truth_disparity,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+            outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+            torch.cuda.empty_cache() 
         else:
             predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
 
@@ -797,7 +811,7 @@ import torch
 import torch.nn.functional as F
 
 class PGDAttack:
-    def __init__(self, model,architecture:str, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False):
+    def __init__(self, model,architecture:str, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False, criterion=None, stats=None, logger=None):
         self.model = model
         self.epsilon = epsilon
         self.alpha = alpha
@@ -806,6 +820,9 @@ class PGDAttack:
         self.random_start = random_start
         self.targeted = targeted
         self.architecture = architecture
+        self.criterion = criterion  
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
 
     def _random_init(self, x):
         if self.norm == 'Linf':
@@ -848,8 +865,18 @@ class PGDAttack:
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
                 predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
             elif self.architecture == 'sttr':
-                nested_tensor = NestedTensor(left=perturbed_left,right=perturbed_right,sampled_cols=None)
-                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': labels,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                #if reset_on_batch:
+                #    eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+                outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache() 
             else:
                 predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
 
@@ -922,7 +949,7 @@ import torch.nn as nn
 
 
 class APGDAttack():
-    def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=8/255, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None):
+    def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=8/255, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None,criterion=None, stats=None, logger=None):
         self.model = model
         self.num_iterations = num_iterations
         self.eps = eps
@@ -937,6 +964,9 @@ class APGDAttack():
         self.n_iter_orig =  num_iterations
         self.eps_orig = eps
         self.architecture = architecture
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
 
         if self.norm not in ['Linf', 'L2', 'L1']:
             raise ValueError(f"Unsupported norm: {self.norm}")
@@ -984,8 +1014,18 @@ class APGDAttack():
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 disparity_target = self.model(left=x_left, right=x_right)[0][0].detach().to(self.device)
             elif self.architecture == 'sttr' in self.architecture:
-                nested_tensor = NestedTensor(left=x_left,right=x_right,sampled_cols=None)
-                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': labels,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                #if reset_on_batch:
+                #    eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+                outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache() 
 
             else:
                 inputs = {"images": [[x_left, x_right]]}
@@ -1011,9 +1051,17 @@ class APGDAttack():
         # Compute the initial loss based on architecture
         if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
             disparity_pred = self.model(x_best[:, 0], x_best[:, 1])[0][0].to(self.device)
-        elif self.architecture == 'sttr' in self.architecture:
-            nested_tensor = NestedTensor(left=x_best[:, 0], right=x_best[:, 1], sampled_cols=None)
-            disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
+        elif 'sttr' in self.architecture:
+            data = {
+                'left': x_best[:, 0],
+                'right': x_best[:, 1],
+                'disp': None,  # Optional disparity target
+                'occ_mask': None,
+                'occ_mask_right': None
+            }
+            outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+            disparity_pred = disparity_pred.to(self.device)
+            torch.cuda.empty_cache()
         else:
             inputs = {"images": [[x_best[:, 0], x_best[:, 1]]]}
             disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
@@ -1029,8 +1077,16 @@ class APGDAttack():
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 disparity_pred = self.model(left=x_adv[:, 0], right=x_adv[:, 1])[0][0].to(self.device)
             elif self.architecture == 'sttr' in self.architecture:
-                nested_tensor = NestedTensor(left=x_adv[:, 0], right=x_adv[:, 1], sampled_cols=None)
-                disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
+                data = {
+                    'left': x_adv[:, 0],
+                    'right': x_adv[:, 1],
+                    'disp': None,  # Optional disparity target
+                    'occ_mask': None,
+                    'occ_mask_right': None
+                }
+                outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                disparity_pred = disparity_pred.to(self.device)
+                torch.cuda.empty_cache()
 
             else:
                 inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
@@ -1055,8 +1111,20 @@ class APGDAttack():
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])[0][0].to(self.device)
             elif self.architecture == 'sttr' in self.architecture:
-                nested_tensor = NestedTensor(left=x_adv[:, 0], right=x_adv[:, 1], sampled_cols=None)
-                disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
+                data = {
+                    'left': x_adv[:, 0],
+                    'right': x_adv[:, 1],
+                    'disp': None,  # Optional disparity target
+                    'occ_mask': None,
+                    'occ_mask_right': None
+                }
+                outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                disparity_pred = disparity_pred.to(self.device)
+                torch.cuda.empty_cache()
+
+
+                # nested_tensor = NestedTensor(left=x_adv[:, 0], right=x_adv[:, 1], sampled_cols=None)
+                # disparity_pred = self.model(nested_tensor)['disp_pred'].squeeze(0).to(self.device)
 
             else:
                 inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
@@ -1085,7 +1153,7 @@ from typing import List
 
 class BIMAttack:
   
-    def __init__(self, model, epsilon: float, num_iterations: int, alpha: float, norm: str, targeted: bool, architecture:str):
+    def __init__(self, model, epsilon: float, num_iterations: int, alpha: float, norm: str, targeted: bool, architecture:str,criterion=None, stats=None, logger=None ):
         """see https://arxiv.org/pdf/1607.02533.pdf"""
         self.model = model
         self.epsilon = epsilon
@@ -1094,6 +1162,9 @@ class BIMAttack:
         self.targeted = targeted
         self.norm = norm
         self.architecture = architecture 
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
 
     def _clip_perturbation(self, adv_images, images):
         """Clip perturbation to be within bounds"""
@@ -1125,8 +1196,18 @@ class BIMAttack:
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 outputs = self.model(left=perturbed_left, right=perturbed_right)[0][0].squeeze(0)
             elif self.architecture == 'sttr' in self.architecture:
-                nested_tensor = NestedTensor(left=x_left,right=x_right,sampled_cols=None)
-                outputs = self.model(nested_tensor)['disp_pred'].squeeze(0).to(device)
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': labels,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                #if reset_on_batch:
+                #    eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+                outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache()
 
             else:
                 outputs = self.model(inputs)["disparities"].squeeze(0)

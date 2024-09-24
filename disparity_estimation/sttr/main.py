@@ -238,7 +238,6 @@ def main(args):
         attack_type = args.attack_type
         epsilon = 8/255
         alpha = 0.01
-        num_iterations = 20
         norm = "Linf"
         num_iterations = 20 
 
