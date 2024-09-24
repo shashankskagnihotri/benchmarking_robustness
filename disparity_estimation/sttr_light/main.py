@@ -86,6 +86,9 @@ def get_args_parser():
                         help='Weight for losses')
     parser.add_argument('--validation_max_disp', type=int, default=-1)
 
+    # attack 
+    parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test', default=False)
+
     return parser
 
 
@@ -227,7 +230,48 @@ def main(args):
         print("Start evaluation")
         evaluate(model, criterion, data_loader_test, device, 0, summary_writer, True)
         return
+    if args.attack_type:
+        attack_type = args.attack_type
+        epsilon = 8/255
+        alpha = 0.01
+        norm = "Linf"
+        num_iterations = 20 
+        # mixed precision training
+        scaler = torch.cuda.amp.GradScaler() if args.apex else None
 
+        data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr-light")
+        from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
+
+        if attack_type == "cospgd":
+            attacker = CosPGDAttack(model, architecture='sttr-light',  epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm, device=device,criterion=criterion, scaler=scaler)
+            # attacker = CosPGDAttack(model,architecture='sttr', epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
+        elif attack_type == "fgsm":
+            attacker = FGSMAttack( model,epsilon=epsilon, architecture='sttr-light',targeted=False) 
+
+        elif attack_type == "pgd":
+            attacker = PGDAttack(model,architecture='sttr-light',epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
+
+        elif attack_type =='bim':
+            attacker = BIMAttack(model,architecture='sttr-light',epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
+            
+        elif attack_type == 'apgd':
+            attacker = APGDAttack(model, architecture='sttr-light',num_iterations=num_iterations,norm=norm, eps=epsilon)
+        
+        else:
+            raise ValueError("Attack type not recognized")
+
+        for batch_idx, sample in enumerate(data_loader_test):
+            print("Keys in sample:", sample.keys())
+            perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disp"],sample["occ_mask"],sample["occ_mask_right"])
+            for iteration in perturbed_results.keys():
+                model.eval()
+                perturbed_left, perturbed_right = perturbed_results[iteration]
+                loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
+                save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
+
+
+            print("batch", batch_idx)
+    
     # train
     print("Start training")
     for epoch in range(args.start_epoch, args.epochs):
@@ -258,6 +302,14 @@ def main(args):
     save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, False, amp)
 
     return
+
+def attack( attack_type: str,epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
+
+    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
+
+    ap = argparse.ArgumentParser('Sttr-light training and evaluation script', parents=[get_args_parser()])
+    args, unknown = ap.parse_known_args()
+    main(args) 
 
 def test():
     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])

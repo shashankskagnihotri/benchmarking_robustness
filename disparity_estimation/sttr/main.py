@@ -240,12 +240,14 @@ def main(args):
         alpha = 0.01
         norm = "Linf"
         num_iterations = 20 
+        # mixed precision training
+        scaler = torch.cuda.amp.GradScaler() if args.apex else None
 
         data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
         from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
         if attack_type == "cospgd":
-            attacker = CosPGDAttack(model, architecture='sttr',  epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm, device=device,criterion=criterion)
+            attacker = CosPGDAttack(model, architecture='sttr',  epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm, device=device,criterion=criterion, scaler=scaler)
             # attacker = CosPGDAttack(model,architecture='sttr', epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
         elif attack_type == "fgsm":
             attacker = FGSMAttack( model,epsilon=epsilon, architecture='sttr',targeted=False) 

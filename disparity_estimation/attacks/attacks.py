@@ -315,6 +315,7 @@ class Attack:
 
 import torch
 import torch.nn.functional as F
+from torch.cuda.amp import autocast, GradScaler
 
 class NestedTensor:
     def __init__(self, left, right, sampled_cols=None, sampled_rows=None):
@@ -326,7 +327,7 @@ class NestedTensor:
 
 ## try example
 class CosPGDAttack:
-    def __init__(self, model, architecture, epsilon, alpha, num_iterations, norm='Linf', device='cuda', criterion=None, stats=None, logger=None, num_classes=None, targeted=False):
+    def __init__(self, model, architecture, epsilon, alpha, num_iterations, norm='Linf', device='cuda', criterion=None, scaler=None, stats=None, logger=None, num_classes=None, targeted=False):
         """
         Initialize attack parameters.
         """
@@ -342,6 +343,7 @@ class CosPGDAttack:
         self.criterion = criterion 
         self.stats = stats if stats is not None else {}
         self.logger = logger
+        self.scaler = scaler if scaler is not None else GradScaler()  # Add GradScaler for mixed precision
 
     def attack(self, left_image, right_image, labels,occ_mask=None,occ_mask_right=None):
         device = self.device
@@ -373,7 +375,7 @@ class CosPGDAttack:
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
 
-            elif self.architecture == 'sttr':
+            elif self.architecture == 'sttr' or 'sttr-light' in self.architecture:
                 from sttr.utilities.foward_pass import forward_pass
                 data = {
                     'left': perturbed_left,
@@ -398,10 +400,6 @@ class CosPGDAttack:
             # Compute the loss
             loss = F.mse_loss(outputs, labels)
 
-            # Ensure loss is scalar
-            if loss.dim() > 0:
-                loss = loss.mean()
-
             # Cosine Similarity Scaling (CosPGD)
             loss = Attack.cospgd_scale(
                 predictions=outputs,
@@ -411,22 +409,15 @@ class CosPGDAttack:
                 targeted=self.targeted,
                 one_hot=False
             )
-            
-            if loss.dim() > 0:
-                loss = loss.mean()
 
-            # Zero all existing gradients
-            self.model.zero_grad()
-
-            # Backward pass to compute gradients of the loss w.r.t the perturbed images
-            loss.backward()
-            #torch.cuda.empty_cache() 
+            # Backward pass with mixed precision scaling
+            self.scaler.scale(loss).backward()
 
             # Collect the gradient data
             left_grad = perturbed_left.grad.data
             right_grad = perturbed_right.grad.data
 
-            # Perform attack step based on selected norm
+            # Perform attack step based on selected norm (Linf or L2)
             if self.norm == 'Linf':
                 perturbed_left = Attack.step_inf(
                     perturbed_image=perturbed_left,
@@ -475,7 +466,7 @@ class CosPGDAttack:
             # Save results after every iteration
             perturbed_results[iteration] = (perturbed_left, perturbed_right)
             torch.cuda.empty_cache() 
-        
+
         return perturbed_results
 
 
@@ -742,7 +733,7 @@ class FGSMAttack:
         if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
             predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
         
-        elif self.architecture == 'sttr':
+        elif self.architecture == 'sttr' or 'sttr-light' in self.architecture:
             from sttr.utilities.foward_pass import forward_pass
             data = {
                     'left': perturbed_left,
@@ -864,7 +855,7 @@ class PGDAttack:
 
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture :
                 predicted_disparity = self.model(left=perturbed_left,right=perturbed_right)[0][0].cuda()
-            elif self.architecture == 'sttr':
+            elif self.architecture == 'sttr' or 'sttr-light' in self.architecture:
                 from sttr.utilities.foward_pass import forward_pass
                 data = {
                     'left': perturbed_left,
@@ -1195,7 +1186,7 @@ class BIMAttack:
             inputs = {"images": [[perturbed_left, perturbed_right]]}
             if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
                 outputs = self.model(left=perturbed_left, right=perturbed_right)[0][0].squeeze(0)
-            elif self.architecture == 'sttr' in self.architecture:
+            elif self.architecture == 'sttr' or 'sttr-light' in self.architecture:
                 from sttr.utilities.foward_pass import forward_pass
                 data = {
                     'left': perturbed_left,
