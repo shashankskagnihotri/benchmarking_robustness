@@ -1,6 +1,6 @@
 # /hkfs/work/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/data/coco
 
-auto_scale_lr = dict(base_batch_size=16, enable=True)
+#! auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
     dict(
@@ -322,14 +322,16 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         type="WandbVisBackend",
-        init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
-        ),
-    )
+        init_kwargs=dict(project=f"atss_convnext-b_coco_no-autoscale_train"),
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(project=f"atss_convnext-b_coco_no-autoscale_train"),
+        ),
+    ],
 )

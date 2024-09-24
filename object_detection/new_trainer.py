@@ -18,6 +18,8 @@ from mmdet.utils import setup_cache_size_limit_of_dynamo
 
 import torch
 
+from mmengine.runner import set_random_seed
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="MMDet test (and eval) a model")
@@ -40,6 +42,8 @@ def trainer(
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
+
+    set_random_seed(seed=0)
 
     # load config
     cfg = Config.fromfile(config)
@@ -116,4 +120,13 @@ if __name__ == "__main__":
     )
 
 
-# python -m pudb new_trainer.py configs_erroneous/verification/Detic_new_r50_coco.py cfg_experiments/slum_experiments
+# python -m pudb new_trainer.py horeka_test_submission/atss_convnext-b_coco_wandb-gradient-logging.py cfg_experiments/slum_experiments/nan/atss_seeded
+
+# python -m pudb new_trainer.py horeka_test_submission/cascade_rcnn_convnext-b_coco_no-mixed-precision-training.py cfg_experiments/slum_experiments/nan
+# job 20240920_094025
+
+# python -m pudb new_trainer.py horeka_test_submission/cascade_rcnn_swin-b_coco_no-mixed-precision-training.py cfg_experiments/slum_experiments/nan
+# job
+
+
+# python -m pudb new_trainer.py horeka_test_submission/atss_convnext-b_coco_smaller-autoscale-batchsize.py cfg_experiments/slum_experiments/nan

@@ -148,7 +148,7 @@ optim_wrapper = dict(
         norm_decay_mult=0,
         num_layers=12,
     ),
-    type="AmpOptimWrapper",
+    type="OptimWrapper",  #!
 )
 param_scheduler = [
     dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
@@ -323,13 +323,19 @@ vis_backends = [
     dict(
         type="WandbVisBackend",
         init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
+            project=f"atss_convnext-b_coco-no-mixed-precission-training_train"
         ),
-    )
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(
+                project=f"atss_convnext-b_coco-no-mixed-precission-training_train"
+            ),
+        ),
+    ],
 )

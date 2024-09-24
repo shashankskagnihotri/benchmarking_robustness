@@ -32,21 +32,49 @@ log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
 max_epochs = 100
 model = dict(
     backbone=dict(
-        arch="base",
-        drop_path_rate=0.7,
-        gap_before_final_norm=False,
+        attn_drop_rate=0.0,
+        convert_weights=True,
+        depths=[
+            2,
+            2,
+            18,
+            2,
+            1,
+        ],
+        drop_path_rate=0.3,
+        drop_rate=0.0,
+        embed_dims=128,
         init_cfg=dict(
-            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/convnext-base_in21k-pre-3rdparty_in1k-384px_20221219-4570f792.pth",
-            prefix="backbone.",
+            checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth",
             type="Pretrained",
         ),
-        layer_scale_init_value=1.0,
+        mlp_ratio=4,
+        num_heads=[
+            4,
+            8,
+            16,
+            32,
+            64,
+        ],
         out_indices=[
             1,
             2,
             3,
+            4,
         ],
-        type="mmpretrain.ConvNeXt",
+        patch_norm=True,
+        pretrain_img_size=384,
+        qk_scale=None,
+        qkv_bias=True,
+        strides=[
+            4,
+            2,
+            2,
+            2,
+            2,
+        ],
+        type="SwinTransformer",
+        window_size=12,
         with_cp=True,
     ),
     data_preprocessor=dict(
@@ -69,6 +97,7 @@ model = dict(
             256,
             512,
             1024,
+            2048,
         ],
         num_outs=5,
         out_channels=256,
@@ -318,17 +347,9 @@ model = dict(
     type="CascadeRCNN",
 )
 optim_wrapper = dict(
-    constructor="LearningRateDecayOptimizerConstructor",
     optimizer=dict(lr=0.001, type="AdamW", weight_decay=0.05),
-    paramwise_cfg=dict(
-        bias_decay_mult=0,
-        bypass_duplicate=True,
-        decay_rate=0.8,
-        decay_type="layer_wise",
-        norm_decay_mult=0,
-        num_layers=12,
-    ),
-    type="AmpOptimWrapper",
+    paramwise_cfg=dict(bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
+    type="OptimWrapper",  #!
 )
 param_scheduler = [
     dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
@@ -413,7 +434,7 @@ test_pipeline = [
 train_cfg = dict(max_epochs=100, type="EpochBasedTrainLoop", val_interval=10)
 train_dataloader = dict(
     batch_sampler=dict(type="AspectRatioBatchSampler"),
-    batch_size=32,
+    batch_size=16,
     dataset=dict(
         ann_file="annotations/instances_train2017.json",
         backend_args=None,
@@ -502,7 +523,7 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         type="WandbVisBackend",
-        init_kwargs=dict(project=f"cascade_rcnn_convnext-b_coco_train"),
+        init_kwargs=dict(project=f"cascade_rcnn_swin-b_coco_train"),
     ),
 ]
 visualizer = dict(
@@ -511,7 +532,7 @@ visualizer = dict(
     vis_backends=[
         dict(
             type="WandbVisBackend",
-            init_kwargs=dict(project=f"cascade_rcnn_convnext-b_coco_train"),
+            init_kwargs=dict(project=f"cascade_rcnn_swin-b_coco_train"),
         ),
     ],
 )

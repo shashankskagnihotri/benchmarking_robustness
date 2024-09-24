@@ -1,15 +1,15 @@
 # /hkfs/work/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/data/coco
 
-auto_scale_lr = dict(base_batch_size=16, enable=True)
+#! auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
-    dict(
-        ema_type="ExpMomentumEMA",
-        momentum=0.0002,
-        priority=49,
-        type="EMAHook",
-        update_buffers=True,
-    ),
+    #! dict(
+    #     ema_type="ExpMomentumEMA",
+    #     momentum=0.0002,
+    #     priority=49,
+    #     type="EMAHook",
+    #     update_buffers=True,
+    # ),
     dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
 ]
 data_root = "data/coco/"
@@ -150,18 +150,18 @@ optim_wrapper = dict(
     ),
     type="AmpOptimWrapper",
 )
-param_scheduler = [
-    dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
-    dict(
-        T_max=50,
-        begin=50,
-        by_epoch=True,
-        convert_to_iter_based=True,
-        end=100,
-        eta_min=5e-05,
-        type="CosineAnnealingLR",
-    ),
-]
+#! param_scheduler = [
+#     dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
+#     dict(
+#         T_max=50,
+#         begin=50,
+#         by_epoch=True,
+#         convert_to_iter_based=True,
+#         end=100,
+#         eta_min=5e-05,
+#         type="CosineAnnealingLR",
+#     ),
+# ]
 resume = False
 test_cfg = dict(type="TestLoop")
 test_dataloader = dict(
@@ -323,13 +323,19 @@ vis_backends = [
     dict(
         type="WandbVisBackend",
         init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
+            project=f"atss_convnext-b_coco-bare-adamw-no-param-scheduler-no-ema-no-autoscale_train"
         ),
-    )
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(
+                project=f"atss_convnext-b_coco-bare-adamw-no-param-scheduler-no-ema-no-autoscale_train"
+            ),
+        ),
+    ],
 )

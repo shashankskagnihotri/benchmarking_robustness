@@ -139,6 +139,7 @@ model = dict(
 )
 optim_wrapper = dict(
     constructor="LearningRateDecayOptimizerConstructor",
+    clip_grad=dict(max_norm=1),  #! newly added
     optimizer=dict(lr=0.001, type="AdamW", weight_decay=0.05),
     paramwise_cfg=dict(
         bias_decay_mult=0,
@@ -323,13 +324,19 @@ vis_backends = [
     dict(
         type="WandbVisBackend",
         init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
+            project=f"atss_convnext-b_coco-aggressive-gradient-clipping_train"
         ),
-    )
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(
+                project=f"atss_convnext-b_coco-aggressive-gradient-clipping_train"
+            ),
+        ),
+    ],
 )

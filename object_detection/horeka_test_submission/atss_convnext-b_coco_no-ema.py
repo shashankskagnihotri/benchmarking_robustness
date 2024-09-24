@@ -3,13 +3,13 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
-    dict(
-        ema_type="ExpMomentumEMA",
-        momentum=0.0002,
-        priority=49,
-        type="EMAHook",
-        update_buffers=True,
-    ),
+    #! dict(
+    #     ema_type="ExpMomentumEMA",
+    #     momentum=0.0002,
+    #     priority=49,
+    #     type="EMAHook",
+    #     update_buffers=True,
+    # ),
     dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
 ]
 data_root = "data/coco/"
@@ -322,14 +322,16 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         type="WandbVisBackend",
-        init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
-        ),
-    )
+        init_kwargs=dict(project=f"atss_convnext-b_coco_no-ema_train"),
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(project=f"atss_convnext-b_coco_no-ema_train"),
+        ),
+    ],
 )

@@ -1,5 +1,16 @@
 # /hkfs/work/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/data/coco
 
+# Seed 0
+# 09/16 12:58:43 - mmengine - INFO - Epoch(train)   [1][ 449/3665]  base_lr: 4.4845e-04 lr: 4.9308e-05  eta: 12 days, 17:56:42  time: 3.0098  data_time: 0.0312  memory: 20643  loss: nan  loss_cls: nan  loss_bbox: 1.0464  loss_centerness: 0.6672
+
+custom_imports = dict(
+    imports=[
+        "mmdet.engine.hooks.wandb_hook",
+        "mmdet.engine.hooks.pudb_iteration_stopper_hook",
+    ],
+    allow_failed_imports=False,
+)  #!
+
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
@@ -11,12 +22,25 @@ custom_hooks = [
         update_buffers=True,
     ),
     dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
+    dict(  #!
+        type="WandbHook",
+        interval=50,
+        log_grad=True,
+        project_name="atss_convnext-b_coco_wandb-gradient-logging_train",
+        priority="NORMAL",
+    ),
+    dict(  #!
+        type="Pudb_iteration_stopper_hook",
+        interval=1,
+        iter_to_stop=448,
+        priority="NORMAL",
+    ),
 ]
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
 default_hooks = dict(
-    checkpoint=dict(interval=1, type="CheckpointHook"),
-    logger=dict(interval=50, type="LoggerHook"),
+    checkpoint=dict(interval=1, by_epoch=True, type="CheckpointHook"),
+    logger=dict(interval=1, type="LoggerHook"),
     param_scheduler=dict(type="ParamSchedulerHook"),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     timer=dict(type="IterTimerHook"),
@@ -318,18 +342,4 @@ val_evaluator = dict(
     format_only=False,
     metric="bbox",
     type="CocoMetric",
-)
-vis_backends = [
-    dict(
-        type="WandbVisBackend",
-        init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
-        ),
-    )
-]
-visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
 )

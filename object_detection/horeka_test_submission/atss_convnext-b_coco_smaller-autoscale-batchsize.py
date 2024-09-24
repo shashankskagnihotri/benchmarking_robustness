@@ -1,6 +1,6 @@
 # /hkfs/work/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/data/coco
 
-auto_scale_lr = dict(base_batch_size=16, enable=True)
+auto_scale_lr = dict(base_batch_size=2, enable=True)  #! Changed from 16 to 2
 backend_args = None
 custom_hooks = [
     dict(
@@ -16,7 +16,7 @@ data_root = "data/coco/"
 dataset_type = "CocoDataset"
 default_hooks = dict(
     checkpoint=dict(interval=1, type="CheckpointHook"),
-    logger=dict(interval=50, type="LoggerHook"),
+    logger=dict(interval=1, type="LoggerHook"),  #!
     param_scheduler=dict(type="ParamSchedulerHook"),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     timer=dict(type="IterTimerHook"),
@@ -323,13 +323,19 @@ vis_backends = [
     dict(
         type="WandbVisBackend",
         init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
+            project=f"atss_convnext-b_coco_smaller-autoscale-batchsize_train"
         ),
-    )
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(
+                project=f"atss_convnext-b_coco_smaller-autoscale-batchsize_train"
+            ),
+        ),
+    ],
 )

@@ -176,3 +176,4 @@ data/
 dataset/
 .flo
 .fio
+object_detection/cfg_experiments/slum_experiments

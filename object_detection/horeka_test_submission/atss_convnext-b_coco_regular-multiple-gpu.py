@@ -322,14 +322,18 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         type="WandbVisBackend",
-        init_kwargs=dict(
-            project="Training_Experiments",
-            config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
-            ),
-        ),
-    )
+        init_kwargs=dict(project=f"atss_convnext-b_coco_regular-multiple-gpu_train"),
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            type="WandbVisBackend",
+            init_kwargs=dict(
+                project=f"atss_convnext-b_coco_regular-multiple-gpu_train"
+            ),
+        ),
+    ],
 )

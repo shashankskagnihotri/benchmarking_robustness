@@ -139,7 +139,7 @@ model = dict(
 )
 optim_wrapper = dict(
     constructor="LearningRateDecayOptimizerConstructor",
-    optimizer=dict(lr=0.001, type="AdamW", weight_decay=0.05),
+    optimizer=dict(lr=0.001 * 0.01, type="AdamW", weight_decay=0.05),  #!
     paramwise_cfg=dict(
         bias_decay_mult=0,
         bypass_duplicate=True,
@@ -151,7 +151,7 @@ optim_wrapper = dict(
     type="AmpOptimWrapper",
 )
 param_scheduler = [
-    dict(begin=0, by_epoch=False, end=1000, start_factor=1e-05, type="LinearLR"),
+    dict(begin=0, by_epoch=False, end=3000, start_factor=1e-05, type="LinearLR"),  #!
     dict(
         T_max=50,
         begin=50,
@@ -325,7 +325,7 @@ vis_backends = [
         init_kwargs=dict(
             project="Training_Experiments",
             config=dict(
-                config_name="atss_convnext-b_coco_wandb-gradient-logging_train"
+                config_name="atss_convnext-b_coco_longer-warm-up-smaller-lr_train"
             ),
         ),
     )
