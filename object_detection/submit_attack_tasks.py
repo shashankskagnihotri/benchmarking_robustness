@@ -24,7 +24,7 @@ logging.basicConfig(
     handlers=[RichHandler(rich_tracebacks=True)],
 )
 
-DEBUG = True
+DEBUG = False
 debug_time = "08:00:00"
 debug_GPU = "gpu_4_a100"
 # debug_GPU = "dev_gpu_4,dev_gpu_4_a100"
@@ -39,9 +39,9 @@ MODEL_DIR = "models_debug" if DEBUG else "models"
 BATCH_SIZE = 1
 ATTACKS = {
     "PGD": pgd_attack,
-    "FGSM": fgsm_attack,
-    "BIM": bim_attack,
-    "COSPGD": cospgd_attack,
+    # "FGSM": fgsm_attack,
+    # "BIM": bim_attack,
+    # "COSPGD": cospgd_attack,
     #    "none": None
 }
 STEPS_ATTACK = {
