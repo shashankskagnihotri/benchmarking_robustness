@@ -4,3 +4,4 @@ mmdetection/work_dirs
 slurm
 models
 models_tmp
+wandb/artifacts

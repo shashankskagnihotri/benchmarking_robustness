@@ -137,7 +137,7 @@ optim_wrapper = dict(
         decay_type='layer_wise',
         norm_decay_mult=0,
         num_layers=12),
-    type='AmpOptimWrapper')
+    type='OptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,

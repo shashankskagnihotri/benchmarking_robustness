@@ -255,7 +255,7 @@ def process_files(source_folder):
                 ],
                 type="DetDataPreprocessor",
             )
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
 
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
@@ -277,7 +277,7 @@ def process_files(source_folder):
                     gamma=0.1,
                 )
             ]
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)
@@ -485,7 +485,7 @@ def process_files(source_folder):
         elif "ddq_swin-b" in filename:
             print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)
@@ -581,7 +581,7 @@ def process_files(source_folder):
         elif "free_anchor_convnext-b" in filename or "free_anchor_swin-b" in filename:
             print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)
@@ -603,7 +603,7 @@ def process_files(source_folder):
         # elif "paa_convnext-b_voc0712" in filename:
         #     print(f"Condition of {filename} met")
         #     cfg = Config.fromfile(filepath)
-        #     cfg.optim_wrapper.type = "OptimWrapper"
+        #     #cfg.optim_wrapper.type = "OptimWrapper"
         #     if source_folder != destination_folder:
         #         cfg.dump(destination_file)
         #         os.remove(filepath)
@@ -612,7 +612,7 @@ def process_files(source_folder):
         elif "sparse_rcnn_convnext-b" in filename or "sparse_rcnn_swin-b" in filename:
             print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)
@@ -621,7 +621,7 @@ def process_files(source_folder):
         elif "tood_convnext-b" in filename or "tood_swin-b" in filename:
             print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)
@@ -630,7 +630,7 @@ def process_files(source_folder):
         elif "vfnet_swin-b" in filename or "vfnet_convnext-b" in filename:
             print(f"Condition of {filename} met")
             cfg = Config.fromfile(filepath)
-            cfg.optim_wrapper.type = "OptimWrapper"
+            # cfg.optim_wrapper.type = "OptimWrapper"
             if source_folder != destination_folder:
                 cfg.dump(destination_file)
                 os.remove(filepath)

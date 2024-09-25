@@ -60,7 +60,6 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
     #         return
 
     cfg.optim_wrapper = backbone_cfg.optim_wrapper
-    cfg.optim_wrapper.type = "AmpOptimWrapper"  #! mixed precision training
     cfg.param_scheduler = backbone_cfg.param_scheduler
 
     cfg.max_epochs = backbone_cfg.max_epochs

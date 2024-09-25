@@ -1,4 +1,4 @@
-auto_scale_lr = dict(base_batch_size=16, enable=True)
+auto_scale_lr = dict(base_batch_size=128, enable=True)
 backend_args = None
 batch_augments = [
     dict(size=(
@@ -14,7 +14,6 @@ custom_hooks = [
         priority=49,
         type='EMAHook',
         update_buffers=True),
-    dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
     allow_failed_imports=False,
@@ -26,7 +25,7 @@ dataset_type = 'VOCDataset'
 default_hooks = dict(
     checkpoint=dict(_scope_='mmdet', interval=15, type='CheckpointHook'),
     logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
-    param_scheduler=dict(type='ParamSchedulerHook'),
+    param_scheduler=dict(_scope_='mmdet', type='ParamSchedulerHook'),
     sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
     timer=dict(_scope_='mmdet', type='IterTimerHook'),
     visualization=dict(_scope_='mmdet', type='DetVisualizationHook'))
@@ -41,50 +40,22 @@ load_from = None
 log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 100
+max_epochs = 300
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=([
-            2,
-            2,
-            18,
-            2,
-        ], ),
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
-        init_cfg=dict(
-            checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
-            type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
-        out_indices=([
+        depth=101,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet101', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=[
+            0,
             1,
             2,
-            3,
-        ], ),
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        strides=([
-            4,
-            2,
-            2,
-            2,
-        ], ),
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        ],
+        style='pytorch',
+        type='ResNet'),
     bbox_head=dict(
         anchor_generator=dict(
             center_offset=0.5,
@@ -153,11 +124,11 @@ model = dict(
         ],
         type='DetDataPreprocessor'),
     neck=dict(
-        in_channels=([
+        in_channels=[
             256,
             512,
             1024,
-        ], ),
+        ],
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
         num_stages=6,
@@ -189,21 +160,21 @@ model = dict(
     type='EfficientDet')
 norm_cfg = dict(eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN')
 optim_wrapper = dict(
-    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
+    _scope_='mmdet',
+    clip_grad=dict(max_norm=10, norm_type=2),
+    optimizer=dict(lr=0.16, momentum=0.9, type='SGD', weight_decay=4e-05),
     paramwise_cfg=dict(
         bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='AmpOptimWrapper')
+    type='OptimWrapper')
 param_scheduler = [
+    dict(begin=0, by_epoch=False, end=917, start_factor=0.1, type='LinearLR'),
     dict(
-        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
-        type='LinearLR'),
-    dict(
-        T_max=50,
-        begin=50,
+        T_max=299,
+        begin=1,
         by_epoch=True,
         convert_to_iter_based=True,
-        end=100,
-        eta_min=5e-05,
+        end=300,
+        eta_min=0.0,
         type='CosineAnnealingLR'),
 ]
 resume = False
@@ -394,12 +365,12 @@ test_pipeline = [
 ]
 train_cfg = dict(
     _scope_='mmdet',
-    max_epochs=100,
+    max_epochs=300,
     type='EpochBasedTrainLoop',
-    val_interval=10)
+    val_interval=1)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=16,
+    batch_size=2,
     dataset=dict(
         dataset=dict(
             datasets=[

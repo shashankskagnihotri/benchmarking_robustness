@@ -43,17 +43,17 @@ log_processor = dict(
 max_epochs = 300
 model = dict(
     backbone=dict(
-        depth=101,
+        depth=50,
         frozen_stages=1,
-        init_cfg=dict(checkpoint='torchvision://resnet101', type='Pretrained'),
+        init_cfg=dict(checkpoint='torchvision://resnet50', type='Pretrained'),
         norm_cfg=dict(requires_grad=True, type='BN'),
         norm_eval=True,
         num_stages=4,
-        out_indices=([
+        out_indices=[
             0,
             1,
             2,
-        ], ),
+        ],
         style='pytorch',
         type='ResNet'),
     bbox_head=dict(
@@ -124,11 +124,11 @@ model = dict(
         ],
         type='DetDataPreprocessor'),
     neck=dict(
-        in_channels=([
+        in_channels=[
             256,
             512,
             1024,
-        ], ),
+        ],
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
         num_stages=6,

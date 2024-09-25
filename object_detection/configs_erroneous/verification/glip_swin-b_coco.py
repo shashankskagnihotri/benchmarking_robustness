@@ -164,7 +164,7 @@ optim_wrapper = dict(
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
         bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='AmpOptimWrapper')
+    type='OptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,

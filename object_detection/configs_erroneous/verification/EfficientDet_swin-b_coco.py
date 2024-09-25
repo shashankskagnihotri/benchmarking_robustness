@@ -46,12 +46,12 @@ model = dict(
     backbone=dict(
         attn_drop_rate=0.0,
         convert_weights=True,
-        depths=([
+        depths=[
             2,
             2,
             18,
             2,
-        ], ),
+        ],
         drop_path_rate=0.3,
         drop_rate=0.0,
         embed_dims=128,
@@ -67,21 +67,21 @@ model = dict(
             32,
             64,
         ],
-        out_indices=([
+        out_indices=[
             1,
             2,
             3,
-        ], ),
+        ],
         patch_norm=True,
         pretrain_img_size=384,
         qk_scale=None,
         qkv_bias=True,
-        strides=([
+        strides=[
             4,
             2,
             2,
             2,
-        ], ),
+        ],
         type='SwinTransformer',
         window_size=12,
         with_cp=True),
@@ -153,11 +153,11 @@ model = dict(
         ],
         type='DetDataPreprocessor'),
     neck=dict(
-        in_channels=([
+        in_channels=[
             256,
             512,
             1024,
-        ], ),
+        ],
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
         num_stages=6,
@@ -192,7 +192,7 @@ optim_wrapper = dict(
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
         bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='AmpOptimWrapper')
+    type='OptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=1e-05,
