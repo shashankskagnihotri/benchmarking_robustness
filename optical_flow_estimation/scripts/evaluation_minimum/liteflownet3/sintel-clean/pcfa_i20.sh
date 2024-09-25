@@ -2,14 +2,14 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=48:59:59
+#SBATCH --time=47:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4
+#SBATCH --partition=gpu_8
 #SBATCH --array=0-1%2
-#SBATCH --job-name=liteflownet3_pseudoreg_sintel-clean_pcfa_i20
-#SBATCH --output=slurm/liteflownet3_pseudoreg_sintel-clean_pcfa_i20.out
-#SBATCH --error=slurm/liteflownet3_pseudoreg_sintel-clean_pcfa_i20_err_%A_%a.out
+#SBATCH --job-name=liteflownet3_sintel-clean_pcfa_i20
+#SBATCH --output=slurm/liteflownet3_sintel-clean_pcfa_i20.out
+#SBATCH --error=slurm/liteflownet3_sintel-clean_pcfa_i20_err_%A_%a.out
 
 model="liteflownet3"
 dataset="sintel-clean"

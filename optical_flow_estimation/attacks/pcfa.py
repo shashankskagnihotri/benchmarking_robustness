@@ -64,8 +64,6 @@ def pcfa_attack(model, targeted_inputs, inputs, eps_box, device, optim_mu, attac
     # For logging of different norms for the deltas and EPE for each iteration
     iteration_metrics = {}
 
-    torch.autograd.set_detect_anomaly(True)
-
     model = InputModel(
         model,
         eps_box,

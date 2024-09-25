@@ -2,10 +2,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=48:59:59
+#SBATCH --time=47:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4
+#SBATCH --partition=gpu_8
 #SBATCH --array=0-1%2
 #SBATCH --job-name=craft_sintel-clean_pcfa_i20
 #SBATCH --output=slurm/craft_sintel-clean_pcfa_i20.out
