@@ -34,12 +34,17 @@ sintel_model_names = [
     "videoflow_bof",
 ]
 
+kitti_model_names = [
+    "csflow",
+    "gmflownet",
+]  
+
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 parameter_dict = {"experiment" : []}
-for model_name in sintel_model_names:
-    model = load_model(model_name, "sintel-clean")
+for model_name in kitti_model_names:
+    model = load_model(model_name, "kitti-2015")
     if model:
         params_count = count_parameters(model)
         parameter_dict["experiment"].append({"model": model_name, "model_parameters": params_count})
