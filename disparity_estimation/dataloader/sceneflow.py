@@ -92,14 +92,18 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         for seq_folder in seq_folders:
             self.img_left_filenames += [os.path.join(seq_folder, 'left', img) for img in
                                os.listdir(os.path.join(seq_folder, 'left'))]
-
+            
+            
+        number_of_images_before = len(self.img_left_filenames)
+        number_of_images_after = len(self.img_left_filenames)
+        print(f"Inital number of images: {number_of_images_before}")
+        
         # Remove unused files (in sttr)
         if self.model_name == 'sttr':
             flyingthings3d_index = self.datadir.split('/').index('FlyingThings3D')
             path_unused_files = os.path.join('/', *(self.datadir.split('/')[:flyingthings3d_index + 1] + ['all_unused_files.txt']))
             unused_files = [line.strip().rstrip() for line in open(path_unused_files, mode='r').read().splitlines()]
             
-            number_of_images_before = len(self.img_left_filenames)
             new_img_left_filenames = []
             for img in self.img_left_filenames:
                 add_image = True  # Flag, um festzuhalten, ob das Bild hinzugefügt werden soll
@@ -113,9 +117,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
                 
             self.img_left_filenames = new_img_left_filenames
-            number_of_images_after = len(self.img_left_filenames)
 
-            print(f"Inital number of images: {number_of_images_before}")
             print(f"Removed {number_of_images_before - number_of_images_after} unused files")
         
         

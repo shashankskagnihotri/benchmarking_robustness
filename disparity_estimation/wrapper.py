@@ -32,12 +32,14 @@ if args.scenario == "attack" and args.attack_type is None:
 # https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.start_run
 
 # Get experiment_id dynamically from args.experiment
-experiment_name = args.experiment
+experiment_name = f"{args.experiment}_{args.model}_{args.dataset}"
 experiment = mlflow.get_experiment_by_name(experiment_name)
 if experiment is None:
-    raise ValueError(f"Experiment '{experiment_name}' does not exist")
-
-experiment_id = experiment.experiment_id
+    print(f"Experiment '{experiment_name}' does not exist. Creating a new experiment.")
+    experiment_id = mlflow.create_experiment(experiment_name)
+    # raise ValueError(f"Experiment '{experiment_name}' does not exist")
+else:
+    experiment_id = experiment.experiment_id
 
 # Rest of the code...
 
