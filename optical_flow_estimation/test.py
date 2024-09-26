@@ -1255,7 +1255,7 @@ def load_model(model_name, dataset):
     checkpoints = model_ref.pretrained_checkpoints.keys()
     for c in checkpoints:
         if c in dataset:
-            model = get_model(model_ref, c, args)
+            model = get_model(model_name, c)
             return model
-    print(f"No pre-trained model available for {model}/{dataset}.")
+    print(f"No pre-trained model available for {model_name}/{dataset}.")
     return None
