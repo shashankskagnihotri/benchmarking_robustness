@@ -1,0 +1,112 @@
+{
+    "experiment": [
+        {
+            "model": "raft",
+            "model_parameters": 5257536
+        },
+        {
+            "model": "pwcnet",
+            "model_parameters": 9374274
+        },
+        {
+            "model": "gma",
+            "model_parameters": 5879873
+        },
+        {
+            "model": "rpknet",
+            "model_parameters": 2846624
+        },
+        {
+            "model": "ccmr",
+            "model_parameters": 10780884
+        },
+        {
+            "model": "craft",
+            "model_parameters": 6307435
+        },
+        {
+            "model": "dicl",
+            "model_parameters": 11226036
+        },
+        {
+            "model": "dip",
+            "model_parameters": 5371968
+        },
+        {
+            "model": "fastflownet",
+            "model_parameters": 1366114
+        },
+        {
+            "model": "maskflownet",
+            "model_parameters": 20655716
+        },
+        {
+            "model": "maskflownet_s",
+            "model_parameters": 10514256
+        },
+        {
+            "model": "flow1d",
+            "model_parameters": 5734208
+        },
+        {
+            "model": "flowformer",
+            "model_parameters": 16168113
+        },
+        {
+            "model": "flowformer++",
+            "model_parameters": 16152338
+        },
+        {
+            "model": "gmflow",
+            "model_parameters": 4680288
+        },
+        {
+            "model": "hd3",
+            "model_parameters": 39561975
+        },
+        {
+            "model": "irr_pwc",
+            "model_parameters": 6362092
+        },
+        {
+            "model": "liteflownet",
+            "model_parameters": 5379613
+        },
+        {
+            "model": "liteflownet2",
+            "model_parameters": 6429120
+        },
+        {
+            "model": "liteflownet3",
+            "model_parameters": 7524188
+        },
+        {
+            "model": "llaflow",
+            "model_parameters": 6060355
+        },
+        {
+            "model": "matchflow",
+            "model_parameters": 15446225
+        },
+        {
+            "model": "rapidflow",
+            "model_parameters": 1646016
+        },
+        {
+            "model": "scopeflow",
+            "model_parameters": 6362092
+        },
+        {
+            "model": "skflow",
+            "model_parameters": 6273149
+        },
+        {
+            "model": "starflow",
+            "model_parameters": 4772256
+        },
+        {
+            "model": "videoflow_bof",
+            "model_parameters": 12659389
+        }
+    ]
+}
