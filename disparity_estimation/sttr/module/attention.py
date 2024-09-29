@@ -101,8 +101,6 @@ class MultiheadAttentionRelative(nn.MultiheadAttention):
         # add positional terms
         if pos_enc is not None:
             # 0.3 s
-            print("k:", k.shape)  # sollte eine Form wie [213, N, E, C] haben
-            print("q_r: ", q_r.shape)  # sollte eine Form wie [71, W, E, C] haben    
             attn_feat_pos = torch.einsum('wnec,wvec->newv', q, k_r)  # NxExWxW'
             attn_pos_feat = torch.einsum('vnec,wvec->newv', k, q_r)  # NxExWxW'
 

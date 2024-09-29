@@ -245,7 +245,7 @@ def main(args):
         torch.cuda.empty_cache()
 
         # save if pretrain, save every 50 epochs
-        if args.pre_train or epoch % 50 == 0:
+        if args.pre_train or epoch % 1 == 0:
             save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, False, amp)
 
         # validate
@@ -264,6 +264,18 @@ def test():
     args, unknown = ap.parse_known_args()
     args.eval = True
     main(args)
+
+
+
+def train():
+    ap = argparse.ArgumentParser('STTR Light training and evaluation script', parents=[get_args_parser()])
+    args, unknown = ap.parse_known_args()
+    args.eval = False
+    main(args)
+    # ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+    # args_ = ap.parse_known_args()
+
+    # main(args_)
 
 
 if __name__ == '__main__':

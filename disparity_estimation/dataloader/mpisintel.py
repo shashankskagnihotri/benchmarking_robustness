@@ -68,8 +68,7 @@ class MPISintelDataset(data.Dataset):
         self.left_data = natsorted(self.left_data)
 
 
-        print("DONNNNNNNNEEEEEEEEEEEEEEEEEEEEEEEEEEE")
-
+        
     def _augmentation(self):
         self.transformation = None
 

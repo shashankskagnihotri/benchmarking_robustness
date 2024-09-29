@@ -29,7 +29,6 @@ def train_one_epoch(model: torch.nn.Module, data_loader: Iterable, optimizer: to
     tbar = tqdm(data_loader)
     for idx, data in enumerate(tbar):
         # forward pass
-        print('Batch', idx)
         _, losses, sampled_disp = forward_pass(model, data, device, criterion, train_stats)
 
         if losses is None:

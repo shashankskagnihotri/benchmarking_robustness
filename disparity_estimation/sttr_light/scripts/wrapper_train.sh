@@ -8,7 +8,7 @@ DATASET=""
 CHECKPOINTPATH=""
 EXPERIMENT_NAME=""
 
-MODEL="sttr"
+MODEL="sttr-light"
 
 # Parameter einlesen
 while [[ "$#" -gt 0 ]]; do
@@ -49,7 +49,6 @@ python wrapper.py \
     --datapath $DATAPATH \
     --loadckpt $CHECKPOINTPATH \
     --epochs 400 \
-    --batch_size 1 \
     --ft \
     --model "$MODEL" \
     --logdir "./checkpoints/$DATASET/uniform_sample_d256"

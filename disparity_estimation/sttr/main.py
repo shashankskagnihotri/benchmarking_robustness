@@ -250,7 +250,7 @@ def main(args):
         torch.cuda.empty_cache()
 
         # save if pretrain, save every 50 epochs
-        if args.pre_train or epoch % 50 == 0:
+        if args.pre_train or epoch % 1 == 0:
             save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, False, amp)
 
         # validate

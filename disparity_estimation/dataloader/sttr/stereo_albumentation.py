@@ -103,8 +103,6 @@ def random_crop(min_crop_height, min_crop_width, input_data, split):
 
     height, width = input_data['left'].shape[:2]
 
-    height, width = min_crop_height, min_crop_width
-
     if min_crop_height >= height or min_crop_width > width:
         x1 = 0
         x2 = width - 1
