@@ -48,6 +48,7 @@ class Transformer(nn.Module):
         global layer_idx
         # alternating
         for idx, (self_attn, cross_attn) in enumerate(zip(self.self_attn_layers, self.cross_attn_layers)):
+            print("Layer", idx)
             layer_idx = idx
 
             # checkpoint self attn

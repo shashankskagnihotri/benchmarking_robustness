@@ -16,7 +16,7 @@ from utilities.eval import evaluate
 from utilities.inference import inference
 from utilities.summary_logger import TensorboardSummary
 from utilities.train import train_one_epoch
-from utilities.foward_pass import set_downsample
+from utilities.foward_pass import set_downsample, write_summary
 from module.loss import build_criterion
 
 from dataloader import get_data_loader_1
@@ -186,6 +186,7 @@ def main(args):
             print("Unexpected keys: ", ','.join(unexpected_filtered))
             raise Exception("Unexpected keys.")
         print("Pre-trained model successfully loaded.")
+        print("Path to checkpoint: ", args.loadckpt)
 
         # if not ft/inference/eval, load states for optimizer, lr_scheduler, amp and prev best
         if not (args.ft or args.inference or args.eval):
@@ -257,6 +258,7 @@ def main(args):
         # save if best
         if prev_best > eval_stats['epe'] and 0.5 > eval_stats['px_error_rate']:
             save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, True, amp)
+            write_summary(eval_stats, summary_writer, epoch, 'train')
 
     # save final model
     save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, False, amp)

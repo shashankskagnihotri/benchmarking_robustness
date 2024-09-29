@@ -64,7 +64,7 @@ class KITTIBaseDataset(data.Dataset):
     def generate_disparity_path(self, original_path:str) -> str:
         # Zerlege den originalen Pfad in seine Teile
         parts = original_path.split('/')
-        print("Parts: ", parts)
+        # print("Parts: ", parts)
         
         # Finde den Index des Verzeichnisses 'FlyingThings3D'
         try:
