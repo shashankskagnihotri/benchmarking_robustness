@@ -25,8 +25,8 @@ logging.basicConfig(
 )
 
 DEBUG = False
-debug_time = "08:00:00"
-debug_GPU = "gpu_4_a100"
+debug_time = "00:30:00"
+debug_GPU = "gpu_4,gpu_4_a100"
 # debug_GPU = "dev_gpu_4,dev_gpu_4_a100"
 
 # Create a logger
@@ -128,9 +128,9 @@ jobs = []
 for config_file, checkpoint_file in zip(config_files, checkpoint_files):
     if "DINO_Swin" in config_file or "RTMDet-l_Swin" in config_file:
         # needs more GPU memory
-        slurm_partion = "gpu_4_a100,gpu_4_h100" if not DEBUG else "dev_gpu_4_a100"
+        slurm_partion = "gpu_4_a100" if not DEBUG else "dev_gpu_4_a100"
     else:
-        slurm_partion = "gpu_4,gpu_4_a100,gpu_4_h100" if not DEBUG else debug_GPU
+        slurm_partion = "gpu_4,gpu_4_a100" if not DEBUG else debug_GPU
 
     executor.update_parameters(slurm_partition=slurm_partion)
 
@@ -207,7 +207,7 @@ for config_file, checkpoint_file in zip(config_files, checkpoint_files):
                     )
                     jobs.append(job)
 
-    if DEBUG and len(jobs) > 8:
+    if DEBUG and len(jobs) > 4:
         break
 logger.info(
     "Waiting for all jobs to complete. Can be canceled without cancelling the jobs."
