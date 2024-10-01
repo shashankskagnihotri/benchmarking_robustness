@@ -18,17 +18,17 @@
 # Load necessary modules
 module load devel/cuda/11.8
 
-srun --gres=gpu:1 --ntasks=1 bash mmdetection/tools/dist_train.sh \
+srun --gres=gpu:1 --ntasks=1 python mmdetection/tools/train.py \
     ./horeka_test_submission/train_fully/rtmdet_convnext-b_coco.py \
     1 \
-    --work-dir ./slurm/train_work_dir/$SLURM_JOB_ID/rtmdet_convnext-b_coco \
+    --work-dir ./slurm/train_work_dir/rtmdet_convnext-b_coco \
     --resume \
     --auto-scale-lr &
 
 srun --gres=gpu:3 --ntasks=1 bash mmdetection/tools/dist_train.sh \
     ./horeka_test_submission/train_fully/rtmdet_swin-b_coco.py \
     3 \
-    --work-dir ./slurm/train_work_dir/$SLURM_JOB_ID/rtmdet_swin-b_coco \
+    --work-dir ./slurm/train_work_dir/rtmdet_swin-b_coco \
     --resume \
     --auto-scale-lr
 
