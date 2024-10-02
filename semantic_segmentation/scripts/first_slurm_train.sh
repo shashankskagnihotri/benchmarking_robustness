@@ -17,7 +17,7 @@ source activate openmmlab
 
 cd mmsegmentation
 
-python tools/train.py configs/mask2former/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_ade20k-512x512.py
+python tools/train.py ../configs/mask2former/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_ade20k-512x512.py
 
 end='date +%s'
 runtime=$((end-start))
