@@ -29,36 +29,6 @@ def change_training_implementation(filename, folder_path, backbone_cfg):
     print(f"Processing file: {filename} from {folder_path}")
     cfg = Config.fromfile(f"{folder_path}/{filename}")
 
-    # new_optim_wrapper = backbone_cfg.optim_wrapper
-    # new_expema_hook = backbone_cfg.custom_hooks[0]
-    # if "coco" in filename:
-    #     new_early_stopping_hook = dict(
-    #         type="EarlyStoppingHook",
-    #         monitor="coco/bbox_mAP",
-    #     )
-    # elif "voc" in filename:
-    #     new_early_stopping_hook = dict(
-    #         type="EarlyStoppingHook",
-    #         monitor="pascal_voc/mAP",
-    #     )
-
-    # if (
-    #     hasattr(cfg, "optim_wrapper")
-    #     and hasattr(cfg, "param_scheduler")
-    #     and cfg.train_cfg == backbone_cfg.train_cfg
-    #     and not hasattr(cfg.train_cfg, "max_iters")
-    #     and hasattr(cfg, "custom_hooks")
-    # ):
-    #     if (
-    #         cfg.optim_wrapper == new_optim_wrapper
-    #         and cfg.param_scheduler == backbone_cfg.param_scheduler
-    #         and cfg.custom_hooks[0] == backbone_cfg.custom_hooks[0]
-    #     ):
-    #         print(
-    #             "The relevant parts of the configuration have not changed. No file alteration needed."
-    #         )
-    #         return
-
     cfg.optim_wrapper = backbone_cfg.optim_wrapper
     cfg.param_scheduler = backbone_cfg.param_scheduler
 
@@ -137,21 +107,37 @@ for filename in filenames_to_train:
         change_training_implementation(filename, path_folder_to_train, swin_b_cfg)
     elif "convnext-b" in filename:
         change_training_implementation(filename, path_folder_to_train, convnext_b_cfg)
+    elif "swin-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, swin_b_cfg)
+    elif "convnext-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, convnext_b_cfg)
 
 for filename in filenames_verified:
     if "swin-b" in filename:
         change_training_implementation(filename, path_folder_verified, swin_b_cfg)
     elif "convnext-b" in filename:
         change_training_implementation(filename, path_folder_verified, convnext_b_cfg)
+    elif "swin-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, swin_b_cfg)
+    elif "convnext-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, convnext_b_cfg)
 
 for filename in filenames_erroneous:
     if "swin-b" in filename:
         change_training_implementation(filename, path_folder_erroneous, swin_b_cfg)
     elif "convnext-b" in filename:
         change_training_implementation(filename, path_folder_erroneous, convnext_b_cfg)
+    elif "swin-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, swin_b_cfg)
+    elif "convnext-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, convnext_b_cfg)
 
 for filename in filenames_to_test:
     if "swin-b" in filename:
         change_training_implementation(filename, path_folder_to_test, swin_b_cfg)
     elif "convnext-b" in filename:
         change_training_implementation(filename, path_folder_to_test, convnext_b_cfg)
+    elif "swin-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, swin_b_cfg)
+    elif "convnext-s" in filename:
+        change_training_implementation(filename, path_folder_to_train, convnext_b_cfg)

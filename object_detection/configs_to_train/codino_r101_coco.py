@@ -6,15 +6,6 @@ batch_augments = [
         1024,
     ), type='BatchFixedSizePad'),
 ]
-custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
-    dict(monitor='coco/bbox_mAP', type='EarlyStoppingHook'),
-]
 custom_imports = dict(
     allow_failed_imports=False, imports=[
         'projects.CO-DETR.codetr',
@@ -29,7 +20,7 @@ default_hooks = dict(
         max_keep_ckpts=3,
         type='CheckpointHook'),
     logger=dict(_scope_='mmdet', interval=50, type='LoggerHook'),
-    param_scheduler=dict(type='ParamSchedulerHook'),
+    param_scheduler=dict(_scope_='mmdet', type='ParamSchedulerHook'),
     sampler_seed=dict(_scope_='mmdet', type='DistSamplerSeedHook'),
     timer=dict(_scope_='mmdet', type='IterTimerHook'),
     visualization=dict(_scope_='mmdet', type='DetVisualizationHook'))
@@ -84,54 +75,24 @@ log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
 loss_lambda = 2.0
-max_epochs = 100
+max_epochs = 12
 max_iters = 270000
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-            1,
-        ],
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
-        init_cfg=dict(
-            checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
-            type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
+        depth=101,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint='torchvision://resnet101', type='Pretrained'),
+        norm_cfg=dict(requires_grad=True, type='BN'),
+        norm_eval=True,
+        num_stages=4,
         out_indices=[
+            0,
             1,
             2,
             3,
-            4,
         ],
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        strides=[
-            4,
-            2,
-            2,
-            2,
-            2,
-        ],
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        style='pytorch',
+        type='ResNet'),
     bbox_head=[
         dict(
             anchor_generator=dict(
@@ -446,22 +407,14 @@ model = dict(
 num_classes = 80
 num_dec_layer = 6
 optim_wrapper = dict(
-    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
-    paramwise_cfg=dict(
-        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
+    clip_grad=dict(max_norm=0.1, norm_type=2),
+    optimizer=dict(lr=0.0002, type='AdamW', weight_decay=0.0001),
+    paramwise_cfg=dict(custom_keys=dict(backbone=dict(lr_mult=0.1))),
     type='OptimWrapper')
 param_scheduler = [
-    dict(
-        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
-        type='LinearLR'),
-    dict(
-        T_max=50,
-        begin=50,
-        by_epoch=True,
-        convert_to_iter_based=True,
-        end=100,
-        eta_min=5e-05,
-        type='CosineAnnealingLR'),
+    dict(milestones=[
+        30,
+    ]),
 ]
 resume = False
 test_cfg = dict(_scope_='mmdet', type='TestLoop')
@@ -539,9 +492,9 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
+train_cfg = dict(max_epochs=36, type='EpochBasedTrainLoop', val_interval=1)
 train_dataloader = dict(
-    batch_size=16,
+    batch_size=2,
     dataset=dict(
         _scope_='mmdet',
         dataset=dict(

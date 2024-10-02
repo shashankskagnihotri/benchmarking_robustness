@@ -88,50 +88,22 @@ max_epochs = 100
 max_iters = 270000
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-            1,
-        ],
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
+        arch='small',
+        drop_path_rate=0.6,
+        gap_before_final_norm=False,
         init_cfg=dict(
             checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
+            'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth',
+            prefix='backbone.',
             type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
+        layer_scale_init_value=1.0,
         out_indices=[
+            0,
             1,
             2,
             3,
-            4,
         ],
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        strides=[
-            4,
-            2,
-            2,
-            2,
-            2,
-        ],
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        type='mmpretrain.ConvNeXt'),
     bbox_head=[
         dict(
             anchor_generator=dict(
@@ -202,10 +174,10 @@ model = dict(
     neck=dict(
         act_cfg=None,
         in_channels=[
-            256,
-            512,
-            1024,
-            2048,
+            96,
+            192,
+            384,
+            768,
         ],
         kernel_size=1,
         norm_cfg=dict(num_groups=32, type='GN'),
@@ -446,9 +418,15 @@ model = dict(
 num_classes = 80
 num_dec_layer = 6
 optim_wrapper = dict(
+    constructor='LearningRateDecayOptimizerConstructor',
     optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
-        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
+        bias_decay_mult=0,
+        bypass_duplicate=True,
+        decay_rate=0.8,
+        decay_type='layer_wise',
+        norm_decay_mult=0,
+        num_layers=12),
     type='OptimWrapper')
 param_scheduler = [
     dict(
@@ -541,7 +519,7 @@ test_pipeline = [
 ]
 train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
 train_dataloader = dict(
-    batch_size=16,
+    batch_size=32,
     dataset=dict(
         _scope_='mmdet',
         dataset=dict(

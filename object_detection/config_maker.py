@@ -169,6 +169,42 @@ new_backbone_configs = {
         "style": "pytorch",
         "init_cfg": dict(type="Pretrained", checkpoint="torchvision://resnet50"),
     },
+    "swin-s": {
+        # _delete_=True,
+        "type": "SwinTransformer",
+        "embed_dims": 96,
+        "depths": [2, 2, 18, 2],
+        "num_heads": [3, 6, 12, 24],
+        "window_size": 7,
+        "mlp_ratio": 4,
+        "qkv_bias": True,
+        "qk_scale": None,
+        "drop_rate": 0.0,
+        "attn_drop_rate": 0.0,
+        "drop_path_rate": 0.2,
+        "patch_norm": True,
+        "out_indices": (0, 1, 2, 3),
+        "with_cp": False,
+        "convert_weights": True,
+        "init_cfg": dict(
+            type="Pretrained",
+            checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth",
+        ),
+    },
+    "convnext-s": {
+        # _delete_=True,
+        "type": "mmpretrain.ConvNeXt",
+        "arch": "small",
+        "out_indices": [0, 1, 2, 3],
+        "drop_path_rate": 0.6,
+        "layer_scale_init_value": 1.0,
+        "gap_before_final_norm": False,
+        "init_cfg": dict(
+            type="Pretrained",
+            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth",
+            prefix="backbone.",
+        ),
+    },
 }
 swin_b_max_epochs = 100
 swin_b_base_lr = 0.001
@@ -199,6 +235,8 @@ new_neck_configs = {
     "convnext-b": {"in_channels": [256, 512, 1024]},
     "r101": {"in_channels": [256, 512, 1024, 2048]},
     "r50": {"in_channels": [256, 512, 1024, 2048]},
+    "swin-s": {"in_channels": [96, 192, 384, 768]},
+    "convnext-s": {"in_channels": [96, 192, 384, 768]},
 }
 
 
@@ -356,6 +394,8 @@ backbones_we_want = [
     "convnext-b",
     "r50",
     "r101",
+    "swin-s",
+    "convnext-s",
 ]
 datasets_we_want = [
     "coco",
@@ -371,6 +411,8 @@ def which(path):
             "convnext-b": ["convnext_b"],
             "r50": ["r50"],
             "r101": ["r101"],
+            "swin-s": ["swin-s"],
+            "convnext-s": ["convnext-s"],
         }
 
         for backbone, names in backbones.items():
