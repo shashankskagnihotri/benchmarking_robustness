@@ -140,12 +140,7 @@ model = dict(
             type='CoATSSHead'),
     ],
     data_preprocessor=dict(
-        batch_augments=[
-            dict(pad_mask=True, size=(
-                1024,
-                1024,
-            ), type='BatchFixedSizePad'),
-        ],
+        batch_augments=[],
         bgr_to_rgb=True,
         mean=[
             123.675,
@@ -412,9 +407,15 @@ optim_wrapper = dict(
     paramwise_cfg=dict(custom_keys=dict(backbone=dict(lr_mult=0.1))),
     type='OptimWrapper')
 param_scheduler = [
-    dict(milestones=[
-        30,
-    ]),
+    dict(
+        begin=0,
+        by_epoch=True,
+        end=12,
+        gamma=0.1,
+        milestones=[
+            10,
+        ],
+        type='MultiStepLR'),
 ]
 resume = False
 test_cfg = dict(_scope_='mmdet', type='TestLoop')

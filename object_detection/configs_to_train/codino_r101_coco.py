@@ -75,7 +75,7 @@ log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
 loss_lambda = 2.0
-max_epochs = 12
+max_epochs = 36
 max_iters = 270000
 model = dict(
     backbone=dict(
@@ -412,9 +412,15 @@ optim_wrapper = dict(
     paramwise_cfg=dict(custom_keys=dict(backbone=dict(lr_mult=0.1))),
     type='OptimWrapper')
 param_scheduler = [
-    dict(milestones=[
-        30,
-    ]),
+    dict(
+        begin=0,
+        by_epoch=True,
+        end=36,
+        gamma=0.1,
+        milestones=[
+            10,
+        ],
+        type='MultiStepLR'),
 ]
 resume = False
 test_cfg = dict(_scope_='mmdet', type='TestLoop')

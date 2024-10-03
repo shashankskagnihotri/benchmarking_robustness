@@ -53,7 +53,6 @@ model = dict(
             0,
             1,
             2,
-            3,
         ],
         style='pytorch',
         type='ResNet'),
@@ -129,7 +128,6 @@ model = dict(
             256,
             512,
             1024,
-            2048,
         ],
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
@@ -338,7 +336,6 @@ val_evaluator = dict(
     type='CocoMetric')
 vis_backends = [
     dict(type='LocalVisBackend'),
-    dict(type='TensorboardVisBackend'),
 ]
 visualizer = dict(
     _scope_='mmdet',
@@ -346,5 +343,4 @@ visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='TensorboardVisBackend'),
     ])

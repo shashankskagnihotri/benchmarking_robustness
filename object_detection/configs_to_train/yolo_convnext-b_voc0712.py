@@ -53,9 +53,9 @@ model = dict(
             type='Pretrained'),
         layer_scale_init_value=1.0,
         out_indices=[
-            1,
-            2,
             3,
+            2,
+            1,
         ],
         type='mmpretrain.ConvNeXt',
         with_cp=True),
@@ -161,9 +161,9 @@ model = dict(
         type='DetDataPreprocessor'),
     neck=dict(
         in_channels=[
-            256,
-            512,
             1024,
+            512,
+            256,
         ],
         num_scales=3,
         out_channels=[

@@ -50,7 +50,6 @@ model = dict(
             2,
             18,
             2,
-            1,
         ],
         drop_path_rate=0.3,
         drop_rate=0.0,
@@ -68,10 +67,9 @@ model = dict(
             64,
         ],
         out_indices=[
-            1,
-            2,
             3,
-            4,
+            2,
+            1,
         ],
         patch_norm=True,
         pretrain_img_size=384,
@@ -79,7 +77,6 @@ model = dict(
         qkv_bias=True,
         strides=[
             4,
-            2,
             2,
             2,
             2,
@@ -189,10 +186,9 @@ model = dict(
         type='DetDataPreprocessor'),
     neck=dict(
         in_channels=[
-            256,
-            512,
             1024,
-            2048,
+            512,
+            256,
         ],
         num_scales=3,
         out_channels=[
