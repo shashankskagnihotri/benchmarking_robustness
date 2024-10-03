@@ -60,7 +60,7 @@ custom_hooks = [
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
 default_hooks = dict(
-    checkpoint=dict(interval=10, max_keep_ckpts=3, type="CheckpointHook"),
+    checkpoint=dict(interval=1, max_keep_ckpts=3, type="CheckpointHook"),
     logger=dict(interval=50, type="LoggerHook"),
     param_scheduler=dict(type="ParamSchedulerHook"),
     sampler_seed=dict(type="DistSamplerSeedHook"),
