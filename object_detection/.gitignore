@@ -12,3 +12,4 @@ models_debug
 configs_to_train
 configs_to_test
 3DCommonCorruptions/create_3dcc/motion_video/tmp
+cfg_experiments
