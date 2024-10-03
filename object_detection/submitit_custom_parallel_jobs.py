@@ -28,8 +28,8 @@ cfgs = [
     # cfg("rtmdet_swin-b_coco", 3),
     # cfg("dino_convnext-b_coco", 2),
     # cfg("dino_swin-b_coco", 4),
-    cfg("dino_convnext-s_coco", 2),
-    cfg("dino_swin-s_coco", 2),
+    cfg("dino_convnext-s_coco", 4),
+    cfg("dino_swin-s_coco", 4),
 ]
 
 
@@ -48,8 +48,11 @@ jobs = []
 #! cfg("dino_convnext-s_coco", 1), accelerated 2672792 -> RuntimeError: The server socket has failed to listen on any local network address. The server socket has failed to listen on [::]:29500 (errno: 98 - Address already in use). The server socket has failed to bind to 0.0.0.0:29500 (errno: 98 - Address already in use).
 #! cfg("dino_swin-s_coco", 1), accelerated 2672793 -> torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 102.00 MiB. GPU 0 has a total capacty of 39.38 GiB of which 29.81 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 37.54 GiB is allocated by PyTorch, and 1.12 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
 
-# cfg("dino_convnext-s_coco", 1) accelerated 2674043 ->
-# cfg("dino_swin-s_coco", 1) accelerated 2674044 ->
+# cfg("dino_convnext-s_coco", 2) accelerated 2674043 -> memory error
+# cfg("dino_swin-s_coco", 2) accelerated 2674044 -> memory error
+
+# cfg("dino_convnext-s_coco", 4) accelerated 2674497 ->
+# cfg("dino_swin-s_coco", 4) accelerated 2674498 ->
 
 
 # cfg("dino_swin-b_coco", 4), accelerated, 2669626_submission -> memory error
