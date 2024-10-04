@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+import random
 import submitit
 
 # rich logger
@@ -28,8 +28,10 @@ cfgs = [
     # cfg("rtmdet_swin-b_coco", 3),
     # cfg("dino_convnext-b_coco", 2),
     # cfg("dino_swin-b_coco", 4),
-    cfg("dino_convnext-s_coco", 4),
-    cfg("dino_swin-s_coco", 4),
+    # cfg("dino_convnext-s_coco", 1),
+    # cfg("dino_swin-s_coco", 1),
+    cfg("rtmdet_convnext-s_coco", 1),
+    cfg("rtmdet_swin-s_coco", 1),
 ]
 
 
@@ -45,14 +47,26 @@ jobs = []
 
 
 #! swin-s and convnext-s runs
-#! cfg("dino_convnext-s_coco", 1), accelerated 2672792 -> RuntimeError: The server socket has failed to listen on any local network address. The server socket has failed to listen on [::]:29500 (errno: 98 - Address already in use). The server socket has failed to bind to 0.0.0.0:29500 (errno: 98 - Address already in use).
-#! cfg("dino_swin-s_coco", 1), accelerated 2672793 -> torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 102.00 MiB. GPU 0 has a total capacty of 39.38 GiB of which 29.81 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 37.54 GiB is allocated by PyTorch, and 1.12 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+# cfg("dino_convnext-s_coco", 1), accelerated 2672792 -> RuntimeError: The server socket has failed to listen on any local network address. The server socket has failed to listen on [::]:29500 (errno: 98 - Address already in use). The server socket has failed to bind to 0.0.0.0:29500 (errno: 98 - Address already in use).
+# cfg("dino_swin-s_coco", 1), accelerated 2672793 -> torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 102.00 MiB. GPU 0 has a total capacty of 39.38 GiB of which 29.81 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 37.54 GiB is allocated by PyTorch, and 1.12 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
 
-# cfg("dino_convnext-s_coco", 2) accelerated 2674043 -> memory error
-# cfg("dino_swin-s_coco", 2) accelerated 2674044 -> memory error
+# cfg("dino_convnext-s_coco", 2) was with convnext-b training hp accelerated 2674043 -> memory error
+# cfg("dino_swin-s_coco", 2) was with swin-b training hp accelerated 2674044 -> memory error
 
-# cfg("dino_convnext-s_coco", 4) accelerated 2674497 ->
-# cfg("dino_swin-s_coco", 4) accelerated 2674498 ->
+# cfg("dino_convnext-s_coco", 4) was with convnext-b training hp accelerated 2674497 -> memory error
+# cfg("dino_swin-s_coco", 4) was with swin-b training hp accelerated 2674498 -> memory error
+
+# cfg("dino_convnext-s_coco", 1) was with convnext-s training hp accelerated 2675047 -> did run
+# cfg("dino_swin-s_coco", 1) was with swin-s training hp accelerated 2675048 -> adress already in use
+# cfg("dino_swin-s_coco", 1) was with swin-s training hp accelerated 2675055 -> adress already in use
+# cfg("dino_swin-s_coco", 2) was with swin-s training hp accelerated 2675057 -> adress already in use
+# cfg("dino_swin-s_coco", 2) was with swin-s training hp accelerated (first killed the terminal and used a new one) 2675061 -> adress already in use
+
+
+#! cfg("dino_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675106 ->
+#! cfg("dino_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675105 ->
+#! cfg("dino_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675140 ->
+#! cfg("dino_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675141 ->
 
 
 # cfg("dino_swin-b_coco", 4), accelerated, 2669626_submission -> memory error
@@ -73,6 +87,9 @@ jobs = []
 
 
 for cfg in cfgs:
+    # Generate a random port number between 10000 and 60000
+    port = random.randint(10000, 60000)
+
     command = submitit.helpers.CommandFunction(
         [
             "mmdetection/tools/dist_train.sh",
@@ -94,6 +111,8 @@ for cfg in cfgs:
         slurm_gres=f"gpu:{cfg.num_gpus}",
         slurm_mail_user="ruben.weber@students.uni-mannheim.de",
         slurm_mail_type="END,FAIL",
+        # Set the PORT environment variable using slurm_additional_parameters
+        slurm_additional_parameters={"export": f"ALL,PORT={port}"},
     )
     executor.submit(command)
-    logger.info(f"Submitted job for {cfg}")
+    logger.info(f"Submitted job for {cfg} with PORT {port}")
