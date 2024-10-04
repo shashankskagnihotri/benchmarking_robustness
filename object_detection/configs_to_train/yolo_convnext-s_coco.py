@@ -189,7 +189,7 @@ optim_wrapper = dict(
             0.999,
         ), lr=0.0002, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(decay_rate=0.7, decay_type='layer_wise', num_layers=12),
-    type='AmpOptimWrapper')
+    type='OptimWrapper')
 param_scheduler = [
     dict(
         begin=0, by_epoch=False, end=1000, start_factor=0.001,

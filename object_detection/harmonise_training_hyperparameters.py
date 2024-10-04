@@ -45,6 +45,7 @@ def harmonise_training_hyperparameters(file4head, folder_path, path4backbonefile
     cfg_backbone = Config.fromfile(path4backbonefile)
 
     cfg_head.optim_wrapper = cfg_backbone.optim_wrapper
+    cfg_head.optim_wrapper.type = "OptimWrapper"
     cfg_head.param_scheduler = cfg_backbone.param_scheduler
 
     cfg_head.max_epochs = cfg_backbone.max_epochs
