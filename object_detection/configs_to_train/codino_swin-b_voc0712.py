@@ -7,12 +7,6 @@ batch_augments = [
     ), type='BatchFixedSizePad'),
 ]
 custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
     dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
@@ -179,7 +173,12 @@ model = dict(
             type='CoATSSHead'),
     ],
     data_preprocessor=dict(
-        batch_augments=[],
+        batch_augments=[
+            dict(pad_mask=True, size=(
+                1024,
+                1024,
+            ), type='BatchFixedSizePad'),
+        ],
         bgr_to_rgb=True,
         mean=[
             123.675,

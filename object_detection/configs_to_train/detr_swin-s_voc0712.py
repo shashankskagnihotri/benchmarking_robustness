@@ -1,12 +1,6 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
     dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 data_root = 'data/VOCdevkit/'
@@ -26,7 +20,7 @@ env_cfg = dict(
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 100
+max_epochs = 36
 model = dict(
     backbone=dict(
         attn_drop_rate=0.0,
@@ -140,22 +134,31 @@ model = dict(
             type='HungarianAssigner')),
     type='DETR')
 optim_wrapper = dict(
-    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
+    optimizer=dict(
+        betas=(
+            0.9,
+            0.999,
+        ), lr=0.0001, type='AdamW', weight_decay=0.05),
     paramwise_cfg=dict(
-        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='OptimWrapper')
+        custom_keys=dict(
+            absolute_pos_embed=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0),
+            relative_position_bias_table=dict(decay_mult=0.0))),
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
-        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
+        begin=0, by_epoch=False, end=1000, start_factor=0.001,
         type='LinearLR'),
     dict(
-        T_max=50,
-        begin=50,
+        begin=0,
         by_epoch=True,
-        convert_to_iter_based=True,
-        end=100,
-        eta_min=5e-05,
-        type='CosineAnnealingLR'),
+        end=36,
+        gamma=0.1,
+        milestones=[
+            27,
+            33,
+        ],
+        type='MultiStepLR'),
 ]
 resume = False
 test_cfg = dict(type='TestLoop')
@@ -343,10 +346,10 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
+train_cfg = dict(max_epochs=36, type='EpochBasedTrainLoop', val_interval=1)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=16,
+    batch_size=2,
     dataset=dict(
         dataset=dict(
             datasets=[

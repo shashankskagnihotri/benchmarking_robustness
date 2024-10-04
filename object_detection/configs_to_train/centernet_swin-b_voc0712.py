@@ -7,12 +7,6 @@ batch_augments = [
     ), type='BatchFixedSizePad'),
 ]
 custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
     dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 data_root = 'data/VOCdevkit/'

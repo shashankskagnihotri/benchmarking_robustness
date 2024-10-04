@@ -6,7 +6,7 @@ custom_hooks = [
     dict(priority=48, type='SyncNormHook'),
     dict(
         ema_type='ExpMomentumEMA',
-        momentum=0.0002,
+        momentum=0.0001,
         priority=49,
         type='EMAHook',
         update_buffers=True),

@@ -8,12 +8,6 @@ cls_layer = dict(
     zs_weight_dim=512,
     zs_weight_path='data/metadata/lvis_v1_clip_a+cname.npy')
 custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
     dict(monitor='pascal_voc/mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
@@ -126,7 +120,7 @@ log_level = 'INFO'
 log_processor = dict(
     _scope_='mmdet', by_epoch=True, type='LogProcessor', window_size=50)
 lvis_cat_frequency_info = 'data/metadata/lvis_v1_train_cat_info.json'
-max_epochs = 100
+max_epochs = 36
 max_iter = 180000
 model = dict(
     backbone=dict(
@@ -463,27 +457,27 @@ model = dict(
 num_classes = 20
 optim_wrapper = dict(
     constructor='LearningRateDecayOptimizerConstructor',
-    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
-    paramwise_cfg=dict(
-        bias_decay_mult=0,
-        bypass_duplicate=True,
-        decay_rate=0.8,
-        decay_type='layer_wise',
-        norm_decay_mult=0,
-        num_layers=12),
-    type='OptimWrapper')
+    optimizer=dict(
+        betas=(
+            0.9,
+            0.999,
+        ), lr=0.0002, type='AdamW', weight_decay=0.05),
+    paramwise_cfg=dict(decay_rate=0.7, decay_type='layer_wise', num_layers=12),
+    type='AmpOptimWrapper')
 param_scheduler = [
     dict(
-        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
+        begin=0, by_epoch=False, end=1000, start_factor=0.001,
         type='LinearLR'),
     dict(
-        T_max=50,
-        begin=50,
+        begin=0,
         by_epoch=True,
-        convert_to_iter_based=True,
-        end=100,
-        eta_min=5e-05,
-        type='CosineAnnealingLR'),
+        end=36,
+        gamma=0.1,
+        milestones=[
+            27,
+            33,
+        ],
+        type='MultiStepLR'),
 ]
 reg_layer = [
     dict(in_features=1024, out_features=1024, type='Linear'),
@@ -676,10 +670,10 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
+train_cfg = dict(max_epochs=36, type='EpochBasedTrainLoop', val_interval=1)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
-    batch_size=32,
+    batch_size=2,
     dataset=dict(
         dataset=dict(
             datasets=[

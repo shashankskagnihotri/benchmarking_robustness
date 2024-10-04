@@ -51,6 +51,7 @@ model = dict(
             2,
             18,
             2,
+            1,
         ],
         drop_path_rate=0.3,
         drop_rate=0.0,
@@ -71,6 +72,7 @@ model = dict(
             1,
             2,
             3,
+            4,
         ],
         patch_norm=True,
         pretrain_img_size=384,
@@ -78,6 +80,7 @@ model = dict(
         qkv_bias=True,
         strides=[
             4,
+            2,
             2,
             2,
             2,
@@ -157,6 +160,7 @@ model = dict(
             256,
             512,
             1024,
+            2048,
         ],
         norm_cfg=dict(
             eps=0.001, momentum=0.01, requires_grad=True, type='SyncBN'),
@@ -365,6 +369,7 @@ val_evaluator = dict(
     type='CocoMetric')
 vis_backends = [
     dict(type='LocalVisBackend'),
+    dict(type='TensorboardVisBackend'),
 ]
 visualizer = dict(
     _scope_='mmdet',
@@ -372,4 +377,5 @@ visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
+        dict(type='TensorboardVisBackend'),
     ])

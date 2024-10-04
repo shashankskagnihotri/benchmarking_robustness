@@ -40,9 +40,10 @@ model = dict(
         norm_eval=True,
         num_stages=4,
         out_indices=[
-            2,
-            1,
             0,
+            1,
+            2,
+            3,
         ],
         style='pytorch',
         type='ResNet'),
@@ -148,9 +149,10 @@ model = dict(
         type='DetDataPreprocessor'),
     neck=dict(
         in_channels=[
-            1024,
-            512,
             256,
+            512,
+            1024,
+            2048,
         ],
         num_scales=3,
         out_channels=[

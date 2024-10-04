@@ -2,12 +2,6 @@ auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend = 'pillow'
 backend_args = None
 custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
     dict(monitor='coco/bbox_mAP', type='EarlyStoppingHook'),
 ]
 custom_imports = dict(
