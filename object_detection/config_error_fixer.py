@@ -609,6 +609,31 @@ def process_files(source_folder):
         #         os.remove(filepath)
         #     else:
         #         cfg.dump(destination_file)
+        elif "rtmdet_convnext-s" in filename:
+            print(f"Condition of {neck}, {backbone}, {dataset} met")
+            cfg = Config.fromfile(filepath)
+            cfg.norm_cfg = dict(num_groups=16, type="GN")
+            cfg.model.bbox_head.norm_cfg = cfg.norm_cfg
+            cfg.model.neck.norm_cfg = cfg.norm_cfg
+
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
+        elif "rtmdet_swin-s" in filename:
+            cfg = Config.fromfile(filepath)
+            cfg.norm_cfg = dict(num_groups=16, type="GN")
+            cfg.model.bbox_head.norm_cfg = cfg.norm_cfg
+            cfg.model.neck.norm_cfg = cfg.norm_cfg
+            if hasattr(cfg.optim_wrapper, "paramwise_cfg"):
+                del cfg.optim_wrapper.paramwise_cfg
+
+            if source_folder != destination_folder:
+                cfg.dump(destination_file)
+                os.remove(filepath)
+            else:
+                cfg.dump(destination_file)
         elif "sparse_rcnn_convnext-b" in filename or "sparse_rcnn_swin-b" in filename:
             print(f"Condition of {neck}, {backbone}, {dataset} met")
             cfg = Config.fromfile(filepath)

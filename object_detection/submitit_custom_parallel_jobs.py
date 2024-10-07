@@ -28,10 +28,10 @@ cfgs = [
     # cfg("rtmdet_swin-b_coco", 3),
     # cfg("dino_convnext-b_coco", 2),
     # cfg("dino_swin-b_coco", 4),
-    # cfg("dino_convnext-s_coco", 1),
-    # cfg("dino_swin-s_coco", 1),
-    cfg("rtmdet_convnext-s_coco", 1),
-    cfg("rtmdet_swin-s_coco", 1),
+    # cfg("dino_convnext-s_coco", 2),
+    # cfg("dino_swin-s_coco", 2),
+    # cfg("rtmdet_convnext-s_coco", 2),
+    cfg("rtmdet_swin-s_coco", 2),
 ]
 
 
@@ -63,10 +63,16 @@ jobs = []
 # cfg("dino_swin-s_coco", 2) was with swin-s training hp accelerated (first killed the terminal and used a new one) 2675061 -> adress already in use
 
 
-#! cfg("dino_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675106 ->
-#! cfg("dino_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675105 ->
-#! cfg("dino_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675140 ->
-#! cfg("dino_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675141 ->
+# cfg("dino_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675106 -> ran
+# cfg("dino_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675105 -> ran
+# cfg("rtmdet_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675140 -> ValueError: num_channels must be divisible by num_groups
+# cfg("rtmdet_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675141 -> ValueError: num_channels must be divisible by num_groups
+
+#! cfg("dino_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678903 ->
+#! cfg("dino_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678904 ->
+#! cfg("rtmdet_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678905 ->
+#! cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678906 -> raise ValueError("some parameters appear in more than one parameter group")
+#! cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting; changed paramwise... 2679458 ->
 
 
 # cfg("dino_swin-b_coco", 4), accelerated, 2669626_submission -> memory error
