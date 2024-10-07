@@ -157,7 +157,7 @@ optim_wrapper = dict(
             relative_position_bias_table=dict(decay_mult=0.0),
         )
     ),
-    type="AmpOptimWrapper",
+    type="OptimWrapper",
 )
 param_scheduler = [
     dict(begin=0, by_epoch=False, end=1000, start_factor=0.001, type="LinearLR"),

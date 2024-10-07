@@ -211,6 +211,7 @@ optim_wrapper = dict(
         type="AdamW",
         weight_decay=0.05,
     ),
+    #! changed, check if it runs correctly
     # paramwise_cfg=dict(
     #     custom_keys=dict(
     #         absolute_pos_embed=dict(decay_mult=0.0),
@@ -218,7 +219,8 @@ optim_wrapper = dict(
     #         relative_position_bias_table=dict(decay_mult=0.0),
     #     )
     # ),
-    type="AmpOptimWrapper",
+    #! changed, check if it runs correctly
+    type="OptimWrapper",
 )
 param_scheduler = [
     dict(begin=0, by_epoch=False, end=1000, start_factor=0.001, type="LinearLR"),
@@ -673,12 +675,14 @@ val_evaluator = dict(
     type="CocoMetric",
 )
 vis_backends = [
-    dict(type="LocalVisBackend"),
+    dict(
+        type="WandbVisBackend",
+        init_kwargs=dict(
+            project="Training",
+            config=dict(config_name="rtmdet_swin-s_coco"),
+        ),
+    )
 ]
 visualizer = dict(
-    name="visualizer",
-    type="DetLocalVisualizer",
-    vis_backends=[
-        dict(type="LocalVisBackend"),
-    ],
+    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
 )

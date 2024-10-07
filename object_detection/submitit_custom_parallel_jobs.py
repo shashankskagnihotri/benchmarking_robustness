@@ -24,13 +24,15 @@ class cfg:
 
 
 cfgs = [
-    # cfg("rtmdet_convnext-b_coco", 1),
-    # cfg("rtmdet_swin-b_coco", 3),
-    # cfg("dino_convnext-b_coco", 2),
-    # cfg("dino_swin-b_coco", 4),
+    cfg("cascade_rcnn_convnext-s_coco", 2),
+    cfg("cascade_rcnn_swin-s_coco", 2),
+    cfg("deformable_detr_convnext-s_coco", 2),
+    cfg("deformable_detr_swin-s_coco", 2),
     # cfg("dino_convnext-s_coco", 2),
     # cfg("dino_swin-s_coco", 2),
-    # cfg("rtmdet_convnext-s_coco", 2),
+    cfg("glip_convnext-s_coco", 2),
+    cfg("glip_swin-s_coco", 2),
+    cfg("rtmdet_convnext-s_coco", 2),
     cfg("rtmdet_swin-s_coco", 2),
 ]
 
@@ -70,9 +72,19 @@ jobs = []
 
 #! cfg("dino_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678903 ->
 #! cfg("dino_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678904 ->
-#! cfg("rtmdet_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678905 ->
-#! cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678906 -> raise ValueError("some parameters appear in more than one parameter group")
-#! cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting; changed paramwise... 2679458 ->
+# cfg("rtmdet_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678905 -> fogot wandb
+# cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678906 -> raise ValueError("some parameters appear in more than one parameter group")
+# cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting; changed paramwise... 2679458 -> fogot wandb
+
+
+#! cfg("cascade_rcnn_convnext-s_coco", 2), 2679977
+#! cfg("cascade_rcnn_swin-s_coco", 2), 2679976
+#! cfg("deformable_detr_convnext-s_coco", 2), 2679975
+#! cfg("deformable_detr_swin-s_coco", 2), 2679974
+#! cfg("glip_convnext-s_coco", 2), 2679973
+#! cfg("glip_swin-s_coco", 2), 2679972
+#! cfg("rtmdet_convnext-s_coco", 2), 2679971
+#! cfg("rtmdet_swin-s_coco", 2), 2679970
 
 
 # cfg("dino_swin-b_coco", 4), accelerated, 2669626_submission -> memory error
