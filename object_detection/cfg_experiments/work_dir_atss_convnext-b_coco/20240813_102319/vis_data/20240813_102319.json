@@ -1,0 +1,2 @@
+{"base_lr": 9.018918918918918e-06, "lr": 9.91640622132031e-07, "data_time": 0.0325814962387085, "loss": 2.9732562780380247, "loss_cls": 1.0886430859565734, "loss_bbox": 1.19045991897583, "loss_centerness": 0.6941532611846923, "time": 9.758082056045533, "iter": 10, "memory": 24088, "step": 10}
+{"coco/bbox_mAP": 0.0, "coco/bbox_mAP_50": 0.0, "coco/bbox_mAP_75": 0.0, "coco/bbox_mAP_s": 0.0, "coco/bbox_mAP_m": 0.0, "coco/bbox_mAP_l": 0.0, "data_time": 0.0017704858303070068, "time": 0.0785143054485321, "step": 10}

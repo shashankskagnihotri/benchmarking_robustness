@@ -1,0 +1,18 @@
+submitit INFO (2024-08-08 20:26:44,882) - Starting with JobEnvironment(job_id=23938805, hostname=uc2n487.localdomain, local_rank=0(1), node=0(1), global_rank=0(1))
+submitit INFO (2024-08-08 20:26:44,882) - Loading pickle: /pfs/work7/workspace/scratch/ma_ruweber-team_project_fss2024/benchmarking_robustness/object_detection/slurm_work_dir/23938805_submitted.pkl
+submitit ERROR (2024-08-08 20:26:44,954) - Submitted job triggered an exception
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n487
+Job ID: 23938805
+Cluster: uc2
+User/Group: ma_ruweber/ma_ma
+State: FAILED (exit code 1)
+Nodes: 1
+Cores per node: 10
+CPU Utilized: 00:00:01
+CPU Efficiency: 0.21% of 00:08:00 core-walltime
+Job Wall-clock time: 00:00:48
+Memory Utilized: 21.65 MB
+Memory Efficiency: 0.02% of 91.80 GB
