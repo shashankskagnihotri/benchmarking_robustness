@@ -24,16 +24,16 @@ class cfg:
 
 
 cfgs = [
-    cfg("cascade_rcnn_convnext-s_coco", 2),
-    cfg("cascade_rcnn_swin-s_coco", 2),
-    cfg("deformable_detr_convnext-s_coco", 2),
-    cfg("deformable_detr_swin-s_coco", 2),
+    # cfg("cascade_rcnn_convnext-s_coco", 2),
+    # cfg("cascade_rcnn_swin-s_coco", 2),
+    cfg("deformable_detr_convnext-s_coco", 4),
+    cfg("deformable_detr_swin-s_coco", 4),
     # cfg("dino_convnext-s_coco", 2),
     # cfg("dino_swin-s_coco", 2),
-    cfg("glip_convnext-s_coco", 2),
-    cfg("glip_swin-s_coco", 2),
-    cfg("rtmdet_convnext-s_coco", 2),
-    cfg("rtmdet_swin-s_coco", 2),
+    # cfg("glip_convnext-s_coco", 2),
+    # cfg("glip_swin-s_coco", 2),
+    # cfg("rtmdet_convnext-s_coco", 2),
+    # cfg("rtmdet_swin-s_coco", 2),
 ]
 
 
@@ -70,28 +70,33 @@ jobs = []
 # cfg("rtmdet_convnext-s_coco", 1) was with swin-s training hp accelerated after trying port setting 2675140 -> ValueError: num_channels must be divisible by num_groups
 # cfg("rtmdet_swin-s_coco", 1) was with covnext-s training hp accelerated after trying port setting 2675141 -> ValueError: num_channels must be divisible by num_groups
 
-#! cfg("dino_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678903 ->
-#! cfg("dino_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678904 ->
+
 # cfg("rtmdet_convnext-s_coco", 2) was with convnext-s training hp accelerated after trying port setting 2678905 -> fogot wandb
 # cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting 2678906 -> raise ValueError("some parameters appear in more than one parameter group")
 # cfg("rtmdet_swin-s_coco", 2) was with swin-s training hp accelerated after trying port setting; changed paramwise... 2679458 -> fogot wandb
 
 
-#! cfg("cascade_rcnn_convnext-s_coco", 2), 2679977
-#! cfg("cascade_rcnn_swin-s_coco", 2), 2679976
-#! cfg("deformable_detr_convnext-s_coco", 2), 2679975
-#! cfg("deformable_detr_swin-s_coco", 2), 2679974
-#! cfg("glip_convnext-s_coco", 2), 2679973
-#! cfg("glip_swin-s_coco", 2), 2679972
-#! cfg("rtmdet_convnext-s_coco", 2), 2679971
-#! cfg("rtmdet_swin-s_coco", 2), 2679970
+#! cfg("dino_convnext-s_coco", 2) 2678903 ->
+#! cfg("dino_swin-s_coco", 2) 2678904 ->
+#! cfg("cascade_rcnn_convnext-s_coco", 2), 2679970
+#! cfg("cascade_rcnn_swin-s_coco", 2), 2679971
+# ? cfg("deformable_detr_convnext-s_coco", 2), 2679972 -> out of memory
+# ? cfg("deformable_detr_swin-s_coco", 2), 2679973 -> out of memory
+#! cfg("glip_convnext-s_coco", 2), 2679974
+#! cfg("glip_swin-s_coco", 2), 2679975
+#! cfg("rtmdet_convnext-s_coco", 2), 2679976
+#! cfg("rtmdet_swin-s_coco", 2), 2679977
+
+
+#! cfg("deformable_detr_convnext-s_coco", 4), 2680326 ->
+#! cfg("deformable_detr_swin-s_coco", 4), 2680327 ->
 
 
 # cfg("dino_swin-b_coco", 4), accelerated, 2669626_submission -> memory error
 # cfg("dino_swin-b_coco", 4), accelerated-h100, 2669719_submission -> CUDA error: no kernel image is available for execution on the device
 
-#! cfg("rtmdet_convnext-b_coco", 1), accelerated-h100, 2669839_submitted -> running till val loop than crashed because of CUDA error: no kernel image is available for execution on the device
-#! cfg("rtmdet_swin-b_coco", 3), accelerated-h100, 2669840_submission -> running till val loop than crashed because of CUDA error: no kernel image is available for execution on the device
+# cfg("rtmdet_convnext-b_coco", 1), accelerated-h100, 2669839_submitted -> running till val loop than crashed because of CUDA error: no kernel image is available for execution on the device
+# cfg("rtmdet_swin-b_coco", 3), accelerated-h100, 2669840_submission -> running till val loop than crashed because of CUDA error: no kernel image is available for execution on the device
 # cfg("dino_convnext-b_coco", 2), accelerated-h100, 2669841_submission -> memory error and child process exited
 
 # cfg("dino_swin-b_coco", 4), accelerated, with AvoidCUDAOOM in train.py v1, 2671230_submission -> RuntimeError: `scale_lr` should be called before building ParamScheduler because ParamScheduler will store initial lr from optimizer wrappers
