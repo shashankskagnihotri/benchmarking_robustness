@@ -19,6 +19,7 @@ env_cfg = dict(
     dist_cfg=dict(backend="nccl"),
     mp_cfg=dict(mp_start_method="fork", opencv_num_threads=0),
 )
+launcher = "pytorch"
 load_from = None
 log_level = "INFO"
 log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
@@ -26,50 +27,33 @@ max_epochs = 36
 model = dict(
     as_two_stage=True,
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-        ],
-        drop_path_rate=0.2,
-        drop_rate=0.0,
-        embed_dims=96,
+        arch="small",
+        drop_path_rate=0.6,
+        gap_before_final_norm=False,
         init_cfg=dict(
-            checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth",
+            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth",
+            prefix="backbone.",
             type="Pretrained",
         ),
-        mlp_ratio=4,
-        num_heads=[
-            3,
-            6,
-            12,
-            24,
-        ],
-        out_indices=(
+        layer_scale_init_value=1.0,
+        out_indices=[
             0,
             1,
             2,
             3,
-        ),
-        patch_norm=True,
-        qk_scale=None,
-        qkv_bias=True,
-        type="SwinTransformer",
-        window_size=7,
-        with_cp=False,
+        ],
+        type="mmpretrain.ConvNeXt",
+        with_cp=True,
     ),
     bbox_head=dict(
         loss_bbox=dict(loss_weight=5.0, type="L1Loss"),
         loss_cls=dict(
-            alpha=0.25, gamma=2.0, loss_weight=2.0, type="FocalLoss", use_sigmoid=True
+            alpha=0.25, gamma=2.0, loss_weight=1.0, type="FocalLoss", use_sigmoid=True
         ),
         loss_iou=dict(loss_weight=2.0, type="GIoULoss"),
         num_classes=80,
         sync_cls_avg_factor=True,
-        type="DeformableDETRHead",
+        type="DDQDETRHead",
     ),
     data_preprocessor=dict(
         bgr_to_rgb=True,
@@ -88,20 +72,25 @@ model = dict(
     ),
     decoder=dict(
         layer_cfg=dict(
-            cross_attn_cfg=dict(batch_first=True, embed_dims=256),
-            ffn_cfg=dict(embed_dims=256, feedforward_channels=1024, ffn_drop=0.1),
-            self_attn_cfg=dict(
-                batch_first=True, dropout=0.1, embed_dims=256, num_heads=8
-            ),
+            cross_attn_cfg=dict(dropout=0.0, embed_dims=256, num_levels=5),
+            ffn_cfg=dict(embed_dims=256, feedforward_channels=2048, ffn_drop=0.0),
+            self_attn_cfg=dict(dropout=0.0, embed_dims=256, num_heads=8),
         ),
         num_layers=6,
         post_norm_cfg=None,
         return_intermediate=True,
     ),
+    dense_topk_ratio=1.5,
+    dn_cfg=dict(
+        box_noise_scale=1.0,
+        group_cfg=dict(dynamic=True, num_dn_queries=100, num_groups=None),
+        label_noise_scale=0.5,
+    ),
+    dqs_cfg=dict(iou_threshold=0.8, type="nms"),
     encoder=dict(
         layer_cfg=dict(
-            ffn_cfg=dict(embed_dims=256, feedforward_channels=1024, ffn_drop=0.1),
-            self_attn_cfg=dict(batch_first=True, embed_dims=256),
+            ffn_cfg=dict(embed_dims=256, feedforward_channels=2048, ffn_drop=0.0),
+            self_attn_cfg=dict(dropout=0.0, embed_dims=256, num_levels=5),
         ),
         num_layers=6,
     ),
@@ -115,14 +104,14 @@ model = dict(
         ],
         kernel_size=1,
         norm_cfg=dict(num_groups=32, type="GN"),
-        num_outs=4,
+        num_outs=5,
         out_channels=256,
         type="ChannelMapper",
     ),
-    num_feature_levels=4,
-    num_queries=300,
-    positional_encoding=dict(normalize=True, num_feats=128, offset=-0.5),
-    test_cfg=dict(max_per_img=100),
+    num_feature_levels=5,
+    num_queries=900,
+    positional_encoding=dict(normalize=True, num_feats=128, offset=0.0, temperature=20),
+    test_cfg=dict(max_per_img=300),
     train_cfg=dict(
         assigner=dict(
             match_costs=[
@@ -133,27 +122,22 @@ model = dict(
             type="HungarianAssigner",
         )
     ),
-    type="DeformableDETR",
+    type="DDQDETR",
     with_box_refine=True,
 )
 optim_wrapper = dict(
+    constructor="LearningRateDecayOptimizerConstructor",
     optimizer=dict(
         betas=(
             0.9,
             0.999,
         ),
-        lr=0.0001,
+        lr=0.0002,
         type="AdamW",
         weight_decay=0.05,
     ),
-    paramwise_cfg=dict(
-        custom_keys=dict(
-            absolute_pos_embed=dict(decay_mult=0.0),
-            norm=dict(decay_mult=0.0),
-            relative_position_bias_table=dict(decay_mult=0.0),
-        )
-    ),
-    type="AmpOptimWrapper",
+    paramwise_cfg=dict(decay_rate=0.7, decay_type="layer_wise", num_layers=12),
+    type="OptimWrapper",
 )
 param_scheduler = [
     dict(begin=0, by_epoch=False, end=1000, start_factor=0.001, type="LinearLR"),
@@ -169,7 +153,7 @@ param_scheduler = [
         type="MultiStepLR",
     ),
 ]
-resume = False
+resume = True
 test_cfg = dict(type="TestLoop")
 test_dataloader = dict(
     batch_size=1,
@@ -584,13 +568,22 @@ val_evaluator = dict(
 )
 vis_backends = [
     dict(
-        type="WandbVisBackend",
         init_kwargs=dict(
-            project="Training",
-            config=dict(config_name="deformable_detr_swin-s_coco"),
+            config=dict(config_name="ddq_convnext-s_coco"), project="Training"
         ),
-    )
+        type="WandbVisBackend",
+    ),
 ]
 visualizer = dict(
-    name="visualizer", type="DetLocalVisualizer", vis_backends=vis_backends
+    name="visualizer",
+    type="DetLocalVisualizer",
+    vis_backends=[
+        dict(
+            init_kwargs=dict(
+                config=dict(config_name="ddq_convnext-s_coco"), project="Training"
+            ),
+            type="WandbVisBackend",
+        ),
+    ],
 )
+work_dir = "./slurm/train_work_dir/ddq_convnext-s_coco"

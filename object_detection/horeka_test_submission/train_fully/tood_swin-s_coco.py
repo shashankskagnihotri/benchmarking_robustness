@@ -17,6 +17,7 @@ env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+launcher = 'pytorch'
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
@@ -72,6 +73,7 @@ model = dict(
                 128,
             ],
             type='AnchorGenerator'),
+        anchor_type='anchor_free',
         bbox_coder=dict(
             target_means=[
                 0.0,
@@ -88,21 +90,23 @@ model = dict(
             type='DeltaXYWHBBoxCoder'),
         feat_channels=256,
         in_channels=256,
-        loss_bbox=dict(loss_weight=1.3, type='GIoULoss'),
-        loss_centerness=dict(
-            loss_weight=0.5, type='CrossEntropyLoss', use_sigmoid=True),
-        loss_cls=dict(
+        initial_loss_cls=dict(
+            activated=True,
             alpha=0.25,
             gamma=2.0,
             loss_weight=1.0,
             type='FocalLoss',
             use_sigmoid=True),
+        loss_bbox=dict(loss_weight=2.0, type='GIoULoss'),
+        loss_cls=dict(
+            activated=True,
+            beta=2.0,
+            loss_weight=1.0,
+            type='QualityFocalLoss',
+            use_sigmoid=True),
         num_classes=80,
-        reg_decoded_bbox=True,
-        score_voting=True,
-        stacked_convs=4,
-        topk=9,
-        type='PAAHead'),
+        stacked_convs=6,
+        type='TOODHead'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -137,15 +141,14 @@ model = dict(
         score_thr=0.05),
     train_cfg=dict(
         allowed_border=-1,
-        assigner=dict(
-            ignore_iof_thr=-1,
-            min_pos_iou=0,
-            neg_iou_thr=0.1,
-            pos_iou_thr=0.1,
-            type='MaxIoUAssigner'),
+        alpha=1,
+        assigner=dict(topk=13, type='TaskAlignedAssigner'),
+        beta=6,
         debug=False,
+        initial_assigner=dict(topk=9, type='ATSSAssigner'),
+        initial_epoch=4,
         pos_weight=-1),
-    type='PAA')
+    type='TOOD')
 optim_wrapper = dict(
     optimizer=dict(
         betas=(
@@ -173,7 +176,7 @@ param_scheduler = [
         ],
         type='MultiStepLR'),
 ]
-resume = False
+resume = True
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
@@ -246,7 +249,7 @@ train_dataloader = dict(
                 scale=[
                     (
                         1333,
-                        640,
+                        480,
                     ),
                     (
                         1333,
@@ -269,7 +272,7 @@ train_pipeline = [
         scale=[
             (
                 1333,
-                640,
+                480,
             ),
             (
                 1333,
@@ -318,11 +321,19 @@ val_evaluator = dict(
     metric='bbox',
     type='CocoMetric')
 vis_backends = [
-    dict(type='LocalVisBackend'),
+    dict(
+        init_kwargs=dict(
+            config=dict(config_name='tood_swin-s_coco'), project='Training'),
+        type='WandbVisBackend'),
 ]
 visualizer = dict(
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
-        dict(type='LocalVisBackend'),
+        dict(
+            init_kwargs=dict(
+                config=dict(config_name='tood_swin-s_coco'),
+                project='Training'),
+            type='WandbVisBackend'),
     ])
+work_dir = './slurm/train_work_dir/tood_swin-s_coco'

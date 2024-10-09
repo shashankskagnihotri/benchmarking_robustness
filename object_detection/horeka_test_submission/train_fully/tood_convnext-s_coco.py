@@ -17,6 +17,7 @@ env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+launcher = 'pytorch'
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
@@ -154,7 +155,7 @@ param_scheduler = [
         ],
         type='MultiStepLR'),
 ]
-resume = False
+resume = True
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
@@ -299,11 +300,20 @@ val_evaluator = dict(
     metric='bbox',
     type='CocoMetric')
 vis_backends = [
-    dict(type='LocalVisBackend'),
+    dict(
+        init_kwargs=dict(
+            config=dict(config_name='tood_convnext-s_coco'),
+            project='Training'),
+        type='WandbVisBackend'),
 ]
 visualizer = dict(
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
-        dict(type='LocalVisBackend'),
+        dict(
+            init_kwargs=dict(
+                config=dict(config_name='tood_convnext-s_coco'),
+                project='Training'),
+            type='WandbVisBackend'),
     ])
+work_dir = './slurm/train_work_dir/tood_convnext-s_coco'

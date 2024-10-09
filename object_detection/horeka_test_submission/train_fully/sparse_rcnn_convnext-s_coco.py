@@ -17,46 +17,29 @@ env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+launcher = 'pytorch'
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 max_epochs = 36
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-        ],
-        drop_path_rate=0.2,
-        drop_rate=0.0,
-        embed_dims=96,
+        arch='small',
+        drop_path_rate=0.6,
+        gap_before_final_norm=False,
         init_cfg=dict(
             checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth',
+            'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth',
+            prefix='backbone.',
             type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            3,
-            6,
-            12,
-            24,
-        ],
-        out_indices=(
+        layer_scale_init_value=1.0,
+        out_indices=[
             0,
             1,
             2,
             3,
-        ),
-        patch_norm=True,
-        qk_scale=None,
-        qkv_bias=True,
-        type='SwinTransformer',
-        window_size=7,
-        with_cp=False),
+        ],
+        type='mmpretrain.ConvNeXt'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -432,16 +415,13 @@ model = dict(
 num_proposals = 300
 num_stages = 6
 optim_wrapper = dict(
+    constructor='LearningRateDecayOptimizerConstructor',
     optimizer=dict(
         betas=(
             0.9,
             0.999,
-        ), lr=0.0001, type='AdamW', weight_decay=0.05),
-    paramwise_cfg=dict(
-        custom_keys=dict(
-            absolute_pos_embed=dict(decay_mult=0.0),
-            norm=dict(decay_mult=0.0),
-            relative_position_bias_table=dict(decay_mult=0.0))),
+        ), lr=0.0002, type='AdamW', weight_decay=0.05),
+    paramwise_cfg=dict(decay_rate=0.7, decay_type='layer_wise', num_layers=12),
     type='OptimWrapper')
 param_scheduler = [
     dict(
@@ -458,7 +438,7 @@ param_scheduler = [
         ],
         type='MultiStepLR'),
 ]
-resume = False
+resume = True
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
@@ -839,11 +819,20 @@ val_evaluator = dict(
     metric='bbox',
     type='CocoMetric')
 vis_backends = [
-    dict(type='LocalVisBackend'),
+    dict(
+        init_kwargs=dict(
+            config=dict(config_name='sparse_rcnn_convnext-s_coco'),
+            project='Training'),
+        type='WandbVisBackend'),
 ]
 visualizer = dict(
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
-        dict(type='LocalVisBackend'),
+        dict(
+            init_kwargs=dict(
+                config=dict(config_name='sparse_rcnn_convnext-s_coco'),
+                project='Training'),
+            type='WandbVisBackend'),
     ])
+work_dir = './slurm/train_work_dir/sparse_rcnn_convnext-s_coco'

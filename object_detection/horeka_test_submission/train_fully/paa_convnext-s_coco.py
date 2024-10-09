@@ -1,24 +1,12 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
-batch_augments = [
-    dict(size=(
-        1024,
-        1024,
-    ), type='BatchFixedSizePad'),
-]
 custom_hooks = [
-    dict(
-        ema_type='ExpMomentumEMA',
-        momentum=0.0002,
-        priority=49,
-        type='EMAHook',
-        update_buffers=True),
     dict(monitor='coco/bbox_mAP', type='EarlyStoppingHook'),
 ]
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'
 default_hooks = dict(
-    checkpoint=dict(interval=1, max_keep_ckpts=2, type='CheckpointHook'),
+    checkpoint=dict(interval=1, type='CheckpointHook'),
     logger=dict(interval=50, type='LoggerHook'),
     param_scheduler=dict(type='ParamSchedulerHook'),
     sampler_seed=dict(type='DistSamplerSeedHook'),
@@ -29,86 +17,76 @@ env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
-image_size = (
-    1024,
-    1024,
-)
+launcher = 'pytorch'
 load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
-max_epochs = 100
+max_epochs = 36
 model = dict(
     backbone=dict(
-        attn_drop_rate=0.0,
-        convert_weights=True,
-        depths=[
-            2,
-            2,
-            18,
-            2,
-            1,
-        ],
-        drop_path_rate=0.3,
-        drop_rate=0.0,
-        embed_dims=128,
+        arch='small',
+        drop_path_rate=0.6,
+        gap_before_final_norm=False,
         init_cfg=dict(
             checkpoint=
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
+            'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth',
+            prefix='backbone.',
             type='Pretrained'),
-        mlp_ratio=4,
-        num_heads=[
-            4,
-            8,
-            16,
-            32,
-            64,
-        ],
+        layer_scale_init_value=1.0,
         out_indices=[
+            0,
             1,
             2,
             3,
-            4,
         ],
-        patch_norm=True,
-        pretrain_img_size=384,
-        qk_scale=None,
-        qkv_bias=True,
-        strides=[
-            4,
-            2,
-            2,
-            2,
-            2,
-        ],
-        type='SwinTransformer',
-        window_size=12,
-        with_cp=True),
+        type='mmpretrain.ConvNeXt'),
     bbox_head=dict(
+        anchor_generator=dict(
+            octave_base_scale=8,
+            ratios=[
+                1.0,
+            ],
+            scales_per_octave=1,
+            strides=[
+                8,
+                16,
+                32,
+                64,
+                128,
+            ],
+            type='AnchorGenerator'),
+        bbox_coder=dict(
+            target_means=[
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+            ],
+            target_stds=[
+                0.1,
+                0.1,
+                0.2,
+                0.2,
+            ],
+            type='DeltaXYWHBBoxCoder'),
         feat_channels=256,
         in_channels=256,
-        loss_bbox=dict(loss_weight=2.0, type='GIoULoss'),
+        loss_bbox=dict(loss_weight=1.3, type='GIoULoss'),
+        loss_centerness=dict(
+            loss_weight=0.5, type='CrossEntropyLoss', use_sigmoid=True),
         loss_cls=dict(
+            alpha=0.25,
+            gamma=2.0,
             loss_weight=1.0,
-            neg_weight=0.75,
-            pos_weight=0.25,
-            type='GaussianFocalLoss'),
+            type='FocalLoss',
+            use_sigmoid=True),
         num_classes=80,
+        reg_decoded_bbox=True,
+        score_voting=True,
         stacked_convs=4,
-        strides=[
-            8,
-            16,
-            32,
-            64,
-            128,
-        ],
-        type='CenterNetUpdateHead'),
+        topk=9,
+        type='PAAHead'),
     data_preprocessor=dict(
-        batch_augments=[
-            dict(size=(
-                1024,
-                1024,
-            ), type='BatchFixedSizePad'),
-        ],
         bgr_to_rgb=True,
         mean=[
             123.675,
@@ -125,15 +103,13 @@ model = dict(
     neck=dict(
         add_extra_convs='on_output',
         in_channels=[
-            256,
-            512,
-            1024,
-            2048,
+            96,
+            192,
+            384,
+            768,
         ],
-        init_cfg=dict(layer='Conv2d', type='Caffe2Xavier'),
         num_outs=5,
         out_channels=256,
-        relu_before_extra_convs=True,
         start_level=1,
         type='FPN'),
     test_cfg=dict(
@@ -142,27 +118,42 @@ model = dict(
         nms=dict(iou_threshold=0.6, type='nms'),
         nms_pre=1000,
         score_thr=0.05),
-    train_cfg=None,
-    type='CenterNet')
+    train_cfg=dict(
+        allowed_border=-1,
+        assigner=dict(
+            ignore_iof_thr=-1,
+            min_pos_iou=0,
+            neg_iou_thr=0.1,
+            pos_iou_thr=0.1,
+            type='MaxIoUAssigner'),
+        debug=False,
+        pos_weight=-1),
+    type='PAA')
 optim_wrapper = dict(
-    optimizer=dict(lr=0.001, type='AdamW', weight_decay=0.05),
-    paramwise_cfg=dict(
-        bias_decay_mult=0, bypass_duplicate=True, norm_decay_mult=0),
-    type='AmpOptimWrapper')
+    constructor='LearningRateDecayOptimizerConstructor',
+    optimizer=dict(
+        betas=(
+            0.9,
+            0.999,
+        ), lr=0.0002, type='AdamW', weight_decay=0.05),
+    paramwise_cfg=dict(decay_rate=0.7, decay_type='layer_wise', num_layers=12),
+    type='OptimWrapper')
 param_scheduler = [
     dict(
-        begin=0, by_epoch=False, end=1000, start_factor=1e-05,
+        begin=0, by_epoch=False, end=1000, start_factor=0.001,
         type='LinearLR'),
     dict(
-        T_max=50,
-        begin=50,
+        begin=0,
         by_epoch=True,
-        convert_to_iter_based=True,
-        end=100,
-        eta_min=5e-05,
-        type='CosineAnnealingLR'),
+        end=36,
+        gamma=0.1,
+        milestones=[
+            27,
+            33,
+        ],
+        type='MultiStepLR'),
 ]
-resume = False
+resume = True
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
@@ -217,50 +208,37 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=10)
+train_cfg = dict(max_epochs=36, type='EpochBasedTrainLoop', val_interval=1)
 train_dataloader = dict(
-    batch_size=16,
+    batch_sampler=dict(type='AspectRatioBatchSampler'),
+    batch_size=2,
     dataset=dict(
-        dataset=dict(
-            ann_file='annotations/instances_train2017.json',
-            backend_args=None,
-            data_prefix=dict(img='train2017/'),
-            data_root='data/coco/',
-            filter_cfg=dict(filter_empty_gt=True, min_size=32),
-            pipeline=[
-                dict(backend_args=None, type='LoadImageFromFile'),
-                dict(type='LoadAnnotations', with_bbox=True),
-                dict(
-                    keep_ratio=True,
-                    ratio_range=(
-                        0.1,
-                        2.0,
+        ann_file='annotations/instances_train2017.json',
+        backend_args=None,
+        data_prefix=dict(img='train2017/'),
+        data_root='data/coco/',
+        filter_cfg=dict(filter_empty_gt=True, min_size=32),
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                keep_ratio=True,
+                scale=[
+                    (
+                        1333,
+                        640,
                     ),
-                    scale=(
-                        1024,
-                        1024,
+                    (
+                        1333,
+                        800,
                     ),
-                    type='RandomResize'),
-                dict(
-                    allow_negative_crop=True,
-                    crop_size=(
-                        1024,
-                        1024,
-                    ),
-                    crop_type='absolute_range',
-                    recompute_bbox=True,
-                    type='RandomCrop'),
-                dict(min_gt_bbox_wh=(
-                    0.01,
-                    0.01,
-                ), type='FilterAnnotations'),
-                dict(prob=0.5, type='RandomFlip'),
-                dict(type='PackDetInputs'),
-            ],
-            type='CocoDataset'),
-        times=8,
-        type='RepeatDataset'),
-    num_workers=4,
+                ],
+                type='RandomResize'),
+            dict(prob=0.5, type='RandomFlip'),
+            dict(type='PackDetInputs'),
+        ],
+        type='CocoDataset'),
+    num_workers=2,
     persistent_workers=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))
 train_pipeline = [
@@ -268,28 +246,17 @@ train_pipeline = [
     dict(type='LoadAnnotations', with_bbox=True),
     dict(
         keep_ratio=True,
-        ratio_range=(
-            0.1,
-            2.0,
-        ),
-        scale=(
-            1024,
-            1024,
-        ),
+        scale=[
+            (
+                1333,
+                640,
+            ),
+            (
+                1333,
+                800,
+            ),
+        ],
         type='RandomResize'),
-    dict(
-        allow_negative_crop=True,
-        crop_size=(
-            1024,
-            1024,
-        ),
-        crop_type='absolute_range',
-        recompute_bbox=True,
-        type='RandomCrop'),
-    dict(min_gt_bbox_wh=(
-        0.01,
-        0.01,
-    ), type='FilterAnnotations'),
     dict(prob=0.5, type='RandomFlip'),
     dict(type='PackDetInputs'),
 ]
@@ -331,11 +298,20 @@ val_evaluator = dict(
     metric='bbox',
     type='CocoMetric')
 vis_backends = [
-    dict(type='LocalVisBackend'),
+    dict(
+        init_kwargs=dict(
+            config=dict(config_name='paa_convnext-s_coco'),
+            project='Training'),
+        type='WandbVisBackend'),
 ]
 visualizer = dict(
     name='visualizer',
     type='DetLocalVisualizer',
     vis_backends=[
-        dict(type='LocalVisBackend'),
+        dict(
+            init_kwargs=dict(
+                config=dict(config_name='paa_convnext-s_coco'),
+                project='Training'),
+            type='WandbVisBackend'),
     ])
+work_dir = './slurm/train_work_dir/paa_convnext-s_coco'
