@@ -1,3 +1,4 @@
+find_unused_parameters = True
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [

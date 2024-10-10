@@ -1,7 +1,7 @@
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
-    dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
+    dict(monitor="coco/bbox_mAP", patience=15, type="EarlyStoppingHook"),
 ]
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
@@ -41,6 +41,7 @@ model = dict(
             2,
             3,
         ],
+        with_cp=True,
         type="mmpretrain.ConvNeXt",
     ),
     bbox_head=dict(
