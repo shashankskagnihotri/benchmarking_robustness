@@ -384,10 +384,11 @@ def test_sample(sample, compute_metrics=True):
     return tensor2float(loss), tensor2float(scalar_outputs), image_outputs
 
 
-def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
+def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf", model = model):
 
     from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
-    model.eval()
+    # model = NormalizedModel(model,mean=[0.485,0.456,0.406],std=[0.229,0.224,0.225])
+    # model.eval()
     num_iterations = 20
 
     if attack_type == "cospgd":
@@ -408,19 +409,31 @@ def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20,
         raise ValueError("Attack type not recognized")
 
     for batch_idx, sample in enumerate(TestImgLoader):
+        model = NormalizedModel(model,mean=[0.485,0.456,0.406],std=[0.229,0.224,0.225])
+        model.eval()
         perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
         for iteration in perturbed_results.keys():
             model.eval()
             perturbed_left, perturbed_right = perturbed_results[iteration]
             loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
             save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
+            print(iteration)
 
 
         print("batch", batch_idx)
 
+class NormalizedModel(nn.Module):
 
+    def __init__(self, model, mean, std) -> None:
+        super(NormalizedModel, self).__init__()  
+        self.mean = mean
+        self.std = std
+        self.model = model
 
-
+    def forward(self, perturbed_left, perturbed_right, **kwargs):
+        perturbed_left = F.normalize(perturbed_left, self.mean, self.std)
+        perturbed_right = F.normalize(perturbed_right, self.mean, self.std)
+        return self.model(perturbed_left, perturbed_right, **kwargs)
 
 
 if __name__ == "__main__":
