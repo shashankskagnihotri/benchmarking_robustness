@@ -508,6 +508,7 @@ class cfnet(nn.Module):
         return cost_volume, disparity_samples
 
     def forward(self, left, right):
+        # TODO: Implement normalization here!
         features_left = self.feature_extraction(left)
         features_right = self.feature_extraction(right)
 

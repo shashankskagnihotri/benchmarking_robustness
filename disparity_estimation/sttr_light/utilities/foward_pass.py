@@ -25,6 +25,7 @@ def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):
     """
     forward pass of the model given input
     """
+    # TODO: Implement normalization here!
     # read data
     left, right = data['left'].to(device), data['right'].to(device)
     disp, occ_mask, occ_mask_right = data['disp'].to(device), data['occ_mask'].to(device), \
