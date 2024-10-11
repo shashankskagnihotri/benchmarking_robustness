@@ -32,6 +32,7 @@ def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):
     """
     forward pass of the model given input
     """
+    # TODO: Implement normalization here!
     model.to(device)
     
     # read data
