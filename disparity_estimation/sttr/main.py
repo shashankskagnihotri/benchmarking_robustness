@@ -253,7 +253,7 @@ def main(args):
             attacker = FGSMAttack( model,epsilon=epsilon, architecture='sttr',targeted=False) 
 
         elif attack_type == "pgd":
-            attacker = PGDAttack(model,architecture='sttr',epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
+            attacker = PGDAttack(model,architecture='sttr',epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False,device=device)
 
         elif attack_type =='bim':
             attacker = BIMAttack(model,architecture='sttr',epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 

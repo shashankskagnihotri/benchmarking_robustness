@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from typing import Dict, Optional, List
+from sttr.utilities.foward_pass import forward_pass
 
 
 
@@ -324,9 +325,166 @@ class NestedTensor:
         self.sampled_cols = sampled_cols
         self.sampled_rows = sampled_rows
 
+class CosPGDAttack:
+    def __init__(self, model, architecture, epsilon, alpha, num_iterations, norm='Linf', device='cuda', criterion=None, scaler=None, stats=None, logger=None, num_classes=None, targeted=False):
+        """
+        Initialize attack parameters.
+        """
+        self.model = model
+        self.epsilon = epsilon
+        self.alpha = alpha
+        self.num_iterations = num_iterations
+        self.norm = norm
+        self.device = device
+        self.num_classes = num_classes
+        self.targeted = targeted
+        self.architecture = architecture
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+        self.scaler = scaler if scaler is not None else GradScaler()  # GradScaler for mixed precision
+
+    def attack(self, left_image, right_image, labels, occ_mask=None, occ_mask_right=None):
+        device = self.device
+        left_image = left_image.to(device)
+        right_image = right_image.to(device)
+        labels = labels.to(device)
+
+        if occ_mask_right is not None:
+            occ_mask_right = occ_mask_right.to(device)
+        if occ_mask is not None:
+            occ_mask = occ_mask.to(device)
+
+        # Initialize perturbations for both left and right images and the norm
+        if self.norm == 'Linf':
+            perturbed_left = Attack.init_linf(left_image, self.epsilon)
+            perturbed_right = Attack.init_linf(right_image, self.epsilon)
+        elif self.norm == 'L2':
+            perturbed_left = Attack.init_l2(left_image, self.epsilon)
+            perturbed_right = Attack.init_l2(right_image, self.epsilon)
+        else:
+            raise ValueError("Unsupported norm type. Use 'Linf' or 'L2' instead.")
+        
+        perturbed_results = {}
+
+        for iteration in range(self.num_iterations):
+            perturbed_left.requires_grad = True
+            perturbed_right.requires_grad = True
+            
+            # Check if mixed precision should be used
+            use_mixed_precision = 'sttr' in self.architecture or 'sttr-light' in self.architecture
+            
+            if use_mixed_precision:
+                with autocast():  # Enable mixed precision context
+                    outputs, losses = self.forward_pass(perturbed_left, perturbed_right, labels, occ_mask, occ_mask_right, device)
+            else:
+                outputs, losses = self.forward_pass(perturbed_left, perturbed_right, labels, occ_mask, occ_mask_right, device)
+
+            # Ensure loss is scalar before backward pass
+            if losses.dim() > 0:
+                losses = losses.mean()
+
+            # Backward pass with mixed precision if required
+            if use_mixed_precision:
+                self.scaler.scale(losses).backward()  # Ensure it is scalar
+            else:
+                losses.backward()
+
+            # Collect the gradient data
+            left_grad = perturbed_left.grad.data
+            right_grad = perturbed_right.grad.data
+
+            # Perform attack step based on the selected norm (Linf or L2)
+            if self.norm == 'Linf':
+                perturbed_left = Attack.step_inf(
+                    perturbed_image=perturbed_left,
+                    epsilon=self.epsilon,
+                    data_grad=left_grad,
+                    orig_image=left_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+                
+                perturbed_right = Attack.step_inf(
+                    perturbed_image=perturbed_right,
+                    epsilon=self.epsilon,
+                    data_grad=right_grad,
+                    orig_image=right_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+            elif self.norm == 'L2':
+                perturbed_left = Attack.step_l2(
+                    perturbed_image=perturbed_left,
+                    epsilon=self.epsilon,
+                    data_grad=left_grad,
+                    orig_image=left_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+                
+                perturbed_right = Attack.step_l2(
+                    perturbed_image=perturbed_right,
+                    epsilon=self.epsilon,
+                    data_grad=right_grad,
+                    orig_image=right_image,
+                    alpha=self.alpha,
+                    targeted=self.targeted,
+                    clamp_min=0,
+                    clamp_max=1
+                )
+            
+            # Save results after every iteration
+            perturbed_results[iteration] = (perturbed_left, perturbed_right)
+
+            # Update scaler at the end of each iteration if using mixed precision
+            if use_mixed_precision:
+                self.scaler.update()
+
+            torch.cuda.empty_cache()
+
+        return perturbed_results
+
+    def forward_pass(self, perturbed_left, perturbed_right, labels, occ_mask, occ_mask_right, device):
+        """Perform the forward pass for the model."""
+        data = {
+            'left': perturbed_left,
+            'right': perturbed_right,
+            'disp': labels,
+            'occ_mask': occ_mask,
+            'occ_mask_right': occ_mask_right
+        }
+        if self.architecture in ['sttr', 'sttr-light']:
+            from sttr.utilities.foward_pass import forward_pass
+            with torch.no_grad():  # Disable gradients for STTR architectures
+                outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+            return outputs, losses
+            
+        else:
+            # Handle other architectures as before
+            if self.architecture in ['cfnet', 'gwcnet']:
+                outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
+            else:
+                outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)
+            return outputs, self.compute_loss(outputs, labels)
+
+    def compute_loss(self, outputs, labels):
+        """Compute the loss based on the model outputs and the true labels."""
+        loss = F.mse_loss(outputs, labels)
+        loss = Attack.cospgd_scale(predictions=outputs, labels=labels, loss=loss, num_classes=self.num_classes, targeted=self.targeted, one_hot=False)
+        return loss
+
+
+
 
 ## try example
-class CosPGDAttack:
+'''class CosPGDAttack:
     def __init__(self, model, architecture, epsilon, alpha, num_iterations, norm='Linf', device='cuda', criterion=None, scaler=None, stats=None, logger=None, num_classes=None, targeted=False):
         """
         Initialize attack parameters.
@@ -477,7 +635,7 @@ class CosPGDAttack:
             torch.cuda.empty_cache() 
 
         return perturbed_results
-
+'''
 
 
 
@@ -707,6 +865,105 @@ class CosPGDAttack:
 
 from typing import Dict, List, Optional
 
+
+import torch
+import torch.nn.functional as F
+from torch.cuda.amp import autocast
+
+class FGSMAttack:
+    def __init__(self, model, architecture: str, epsilon, targeted=False, criterion=False, stats=None, logger=None):
+        self.model = model
+        self.epsilon = epsilon
+        self.targeted = targeted
+        self.architecture = architecture
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+
+    @torch.enable_grad()
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor, occ_mask=None, occ_mask_right=None):
+        # Clone the original images
+        orig_left_image = left_image.clone().detach()
+        orig_right_image = right_image.clone().detach()
+
+        # Initialize perturbations for both images
+        perturbed_left = left_image.clone().detach().requires_grad_(True)
+        perturbed_right = right_image.clone().detach().requires_grad_(True)
+        ground_truth_disparity = ground_truth_disparity.cuda()
+        
+        if occ_mask_right is not None:
+            occ_mask_right = occ_mask_right.cuda()
+        if occ_mask is not None:
+            occ_mask = occ_mask.cuda()
+
+        # Forward Pass: Pass the perturbed images through the model
+        if self.architecture in ['cfnet', 'gwcnet']:
+            predicted_disparity = self.model(left=perturbed_left, right=perturbed_right)[0][0].cuda()
+        
+        elif self.architecture in ['sttr', 'sttr-light']:
+            from sttr.utilities.foward_pass import forward_pass
+            
+            data = {
+                'left': perturbed_left,
+                'right': perturbed_right,
+                'disp': ground_truth_disparity,
+                'occ_mask': occ_mask,
+                'occ_mask_right': occ_mask_right
+            }
+            # Use mixed precision for sttr and sttr-light
+            with autocast():
+                outputs, losses, disp = forward_pass(self.model, data, 'cuda', self.criterion, self.stats, logger=self.logger)
+            predicted_disparity = disp  # Adjust as necessary based on actual output structure
+            torch.cuda.empty_cache()
+        else:
+            predicted_disparity = self.model({"images": [[perturbed_left, perturbed_right]]})["disparities"].squeeze(0).cuda()
+
+        # Calculate the loss
+        loss = F.mse_loss(predicted_disparity.float(), ground_truth_disparity.float())
+        if self.targeted:
+            loss = -loss
+
+        # Set gradients to zero
+        self.model.zero_grad()
+
+        # Backward Pass: Compute gradients of the loss w.r.t. the perturbed images
+        loss.backward()
+
+        # Collect gradient information
+        left_grad = perturbed_left.grad.data
+        right_grad = perturbed_right.grad.data
+
+        # Perform FGSM step for both images
+        perturbed_left = self.fgsm_attack_step(perturbed_left, left_grad, orig_left_image)
+        perturbed_right = self.fgsm_attack_step(perturbed_right, right_grad, orig_right_image)
+
+        # Detach the perturbed images from the computation graph
+        perturbed_left = perturbed_left.detach()
+        perturbed_right = perturbed_right.detach()
+        
+        iteration = 0
+        perturbed_results = {iteration: (perturbed_left, perturbed_right)}
+
+        # Return the perturbed images
+        return perturbed_results
+
+    def fgsm_attack_step(self, perturbed_image: torch.Tensor, data_grad: torch.Tensor, orig_image: torch.Tensor):
+        # Determine the sign of the gradient
+        sign_data_grad = data_grad.sign()
+        if self.targeted:
+            sign_data_grad *= -1
+
+        # Perform FGSM step
+        perturbed_image = perturbed_image.detach() + self.epsilon * sign_data_grad
+
+        # Clamp the perturbation and keep the result within the allowed range [0, 1]
+        perturbed_image = torch.clamp(perturbed_image, 0, 1)
+
+        return perturbed_image
+
+
+# working for cfnet and gwcnet
+'''
 class FGSMAttack:
     def __init__(self, model,  architecture:str, epsilon, targeted=False, criterion=False,stats=None, logger=None):
         self.model = model
@@ -801,7 +1058,7 @@ class FGSMAttack:
         perturbed_image = torch.clamp(perturbed_image, 0, 1)
 
         return perturbed_image
-    
+'''
 
     ###
 
@@ -810,8 +1067,12 @@ class FGSMAttack:
 import torch
 import torch.nn.functional as F
 
+import torch
+import torch.nn.functional as F
+from torch.cuda.amp import autocast
+
 class PGDAttack:
-    def __init__(self, model,architecture:str, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False, criterion=None, stats=None, logger=None):
+    def __init__(self, model, architecture: str, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False, device='cuda', criterion=None, stats=None, logger=None):
         self.model = model
         self.epsilon = epsilon
         self.alpha = alpha
@@ -823,6 +1084,7 @@ class PGDAttack:
         self.criterion = criterion  
         self.stats = stats if stats is not None else {}
         self.logger = logger
+        self.device = device
 
     def _random_init(self, x):
         if self.norm == 'Linf':
@@ -833,8 +1095,140 @@ class PGDAttack:
         return x
 
     @torch.enable_grad()
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor, occ_mask=None, occ_mask_right=None):
+        # Save the original images
+        orig_left_image = left_image.clone().detach()
+        orig_right_image = right_image.clone().detach()
+        ground_truth_disparity = ground_truth_disparity.cuda()
+
+        # Start perturbation
+        perturbed_left = left_image.clone().detach()
+        perturbed_right = right_image.clone().detach()
+
+        if occ_mask_right is not None:
+            occ_mask_right = occ_mask_right.to(self.device)
+        if occ_mask is not None:
+            occ_mask = occ_mask.to(self.device)
+
+        if self.random_start:
+            perturbed_left = self._random_init(perturbed_left)
+            perturbed_right = self._random_init(perturbed_right)
+
+        perturbed_results = {}
+
+        for iteration in range(self.num_iterations):
+            perturbed_left.requires_grad = True
+            perturbed_right.requires_grad = True
+
+            # Prepare the input for the model
+            inputs = {"images": [[perturbed_left, perturbed_right]]}
+
+            if self.architecture in ['cfnet', 'gwcnet']:
+                # Forward pass without mixed precision
+                predicted_disparity = self.model(left=perturbed_left, right=perturbed_right)[0][0].cuda()
+            elif self.architecture in ['sttr', 'sttr-light']:
+                from sttr.utilities.foward_pass import forward_pass
+                
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': ground_truth_disparity,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                # Forward pass with mixed precision
+                with autocast():
+                    outputs, losses, disp = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                predicted_disparity = disp  # Adjust as necessary based on actual output structure
+            else:
+                predicted_disparity = self.model(inputs)["disparities"].squeeze(0).cuda()
+
+            # Calculate the loss between predicted disparity and ground truth
+            loss = F.mse_loss(predicted_disparity.float(), ground_truth_disparity.float())
+            if self.targeted:
+                loss = -loss
+
+            # Backpropagate to obtain gradients
+            self.model.zero_grad()
+            loss.backward()
+
+            # Update the perturbed images with gradients
+            left_grad = perturbed_left.grad.detach()
+            right_grad = perturbed_right.grad.detach()
+
+            if self.norm == 'Linf':
+                perturbed_left = self.pgd_attack_step_inf(perturbed_left, left_grad, orig_left_image)
+                perturbed_right = self.pgd_attack_step_inf(perturbed_right, right_grad, orig_right_image)
+            elif self.norm == 'L2':
+                perturbed_left = self.pgd_attack_step_l2(perturbed_left, left_grad, orig_left_image)
+                perturbed_right = self.pgd_attack_step_l2(perturbed_right, right_grad, orig_right_image)
+
+            perturbed_left = perturbed_left.detach()
+            perturbed_right = perturbed_right.detach()
+
+            # Save the perturbed images after every iteration
+            perturbed_results[iteration] = (perturbed_left, perturbed_right)
+
+        return perturbed_results
+
+    def pgd_attack_step_inf(self, perturbed_image: torch.Tensor, grad: torch.Tensor, orig_image: torch.Tensor):
+        grad_sign = grad.sign()
+        if self.targeted:
+            grad_sign *= -1
+
+        # Apply the perturbation step for L∞ norm
+        perturbed_image = perturbed_image + self.alpha * grad_sign
+        delta = torch.clamp(perturbed_image - orig_image, min=-self.epsilon, max=self.epsilon)
+        perturbed_image = torch.clamp(orig_image + delta, 0, 1)
+        return perturbed_image
+
+    def pgd_attack_step_l2(self, perturbed_image: torch.Tensor, grad: torch.Tensor, orig_image: torch.Tensor):
+        grad_norm = torch.norm(grad.view(grad.size(0), -1), dim=1).view(-1, 1, 1, 1)
+        scaled_grad = grad / (grad_norm + 1e-10)
+        if self.targeted:
+            scaled_grad *= -1
+
+        # Apply the perturbation step for L2 norm
+        perturbed_image = perturbed_image + self.alpha * scaled_grad
+        delta = perturbed_image - orig_image
+        delta_norm = torch.norm(delta.view(delta.size(0), -1), dim=1).view(-1, 1, 1, 1)
+        factor = torch.clamp(delta_norm, max=self.epsilon) / (delta_norm + 1e-10)
+        perturbed_image = orig_image + delta * factor
+        perturbed_image = torch.clamp(perturbed_image, 0, 1)
+        return perturbed_image
+
+
+
+'''
+# working for cfnet and gwcnet
+class PGDAttack:
+    def __init__(self, model,architecture:str, epsilon, num_iterations, alpha, norm='Linf', random_start=True, targeted=False,device='cuda', criterion=None, stats=None, logger=None):
+        self.model = model
+        self.epsilon = epsilon
+        self.alpha = alpha
+        self.num_iterations = num_iterations
+        self.norm = norm
+        self.random_start = random_start
+        self.targeted = targeted
+        self.architecture = architecture
+        self.criterion = criterion  
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+        self.device = device
+
+    def _random_init(self, x):
+        device = self.device
+        if self.norm == 'Linf':
+            x = x + (torch.rand(x.size(), dtype=x.dtype, device=x.device) - 0.5) * 2 * self.epsilon
+        elif self.norm == 'L2':
+            x = x + torch.randn_like(x) * self.epsilon
+        x = torch.clamp(x, 0, 1)
+        return x
+
+    @torch.enable_grad()
     def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, ground_truth_disparity: torch.Tensor,occ_mask=None,occ_mask_right=None):
         # Save the original images
+        device = self.device
         orig_left_image = left_image.clone().detach()
         orig_right_image = right_image.clone().detach()
         ground_truth_disparity =  ground_truth_disparity.cuda()
@@ -869,7 +1263,7 @@ class PGDAttack:
                 data = {
                     'left': perturbed_left,
                     'right': perturbed_right,
-                    'disp': labels,
+                    'disp': ground_truth_disparity,
                     'occ_mask': occ_mask,
                     'occ_mask_right': occ_mask_right
                 }
@@ -933,7 +1327,7 @@ class PGDAttack:
         perturbed_image = orig_image + delta * factor
         perturbed_image = torch.clamp(perturbed_image, 0, 1)
         return perturbed_image
-
+'''
 
 ''' Based on the implementation of Francesco Croce, Matthias Hein
 "Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks"
@@ -947,7 +1341,207 @@ import time
 import math
 import torch.nn as nn
 
+'''
+class APGDAttack():
+    def __init__(self, model, architecture: str, num_iterations, norm='Linf', eps=8/255, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None, criterion=None, stats=None, logger=None):
+        self.model = model
+        self.num_iterations = num_iterations
+        self.eps = eps
+        self.norm = norm
+        self.seed = seed
+        self.loss = loss
+        self.eot_iter = eot_iter
+        self.thr_decr = rho
+        self.verbose = verbose
+        self.device = device
+        self.use_rs = True
+        self.n_iter_orig = num_iterations
+        self.eps_orig = eps
+        self.architecture = architecture
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
 
+        if self.norm not in ['Linf', 'L2', 'L1']:
+            raise ValueError(f"Unsupported norm: {self.norm}")
+
+        if self.loss not in ['l1', 'l2']:
+            raise ValueError(f"Unsupported loss: {self.loss}")
+
+        self.criterion = nn.L1Loss(reduction='none') if self.loss == 'l1' else nn.MSELoss(reduction='none')
+
+    def init_hyperparam(self, x):
+        if self.device is None:
+            self.device = x.device
+        self.orig_dim = list(x.shape[2:])  # Assuming x is [B, C, H, W] for each image
+        self.ndims = len(self.orig_dim)
+        if self.seed is None:
+            self.seed = time.time()
+
+    def normalize(self, x):
+        if self.norm == 'Linf':
+            t = x.abs().view(x.shape[0], -1).max(1)[0]
+        elif self.norm == 'L2':
+            t = (x ** 2).view(x.shape[0], -1).sum(-1).sqrt()
+        elif self.norm == 'L1':
+            t = x.abs().view(x.shape[0], -1).sum(dim=-1)
+        return x / (t.view(-1, *([1] * (self.ndims + 1))) + 1e-12)
+
+    def L1_projection(self, x, delta, eps):
+        delta_flat = delta.view(delta.size(0), -1)
+        abs_delta = delta_flat.abs()
+        abs_delta_sum = abs_delta.sum(dim=1, keepdim=True)
+        factor = torch.clamp(abs_delta_sum - eps, min=0) / abs_delta_sum
+        delta_flat *= (1 - factor).view(-1, 1)
+        return delta_flat.view_as(delta)
+
+    def attack_single_run(self, x_left, x_right, disparity_target=None,occ_mask=None, occ_mask_right=None):
+        x_left = x_left.unsqueeze(0) if len(x_left.shape) < self.ndims + 1 else x_left
+        x_right = x_right.unsqueeze(0) if len(x_right.shape) < self.ndims + 1 else x_right
+
+        # Move inputs to the correct device
+        x_left = x_left.to(self.device)
+        x_right = x_right.to(self.device)
+
+        if occ_mask_right is not None:
+        occ_mask_right = occ_mask_right.to(self.device)
+        if occ_mask is not None:
+        occ_mask = occ_mask.to(self.device)
+
+        # Handle model output based on architecture
+        if disparity_target is None:
+            if self.architecture in ['cfnet', 'gwcnet']:
+                disparity_target = self.model(left=x_left, right=x_right)[0][0].detach().to(self.device)
+            elif self.architecture in ['sttr', 'sttr-light']:
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': labels,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                with autocast():
+                    outputs, losses, disparity_target = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache()
+            else:
+                inputs = {"images": [[x_left, x_right]]}
+                disparity_target = self.model(inputs)["disparities"].squeeze(0).detach().to(self.device)
+
+        x_left_right = torch.stack((x_left, x_right), dim=1)  # [B, 2, C, H, W]
+
+        # Generate the initial perturbation
+        if self.norm == 'Linf':
+            t = 2 * torch.rand(x_left_right.shape).to(self.device).detach() - 1
+            x_adv = x_left_right + self.eps * self.normalize(t)
+        elif self.norm == 'L2':
+            t = torch.randn(x_left_right.shape).to(self.device).detach()
+            x_adv = x_left_right + self.eps * self.normalize(t)
+        elif self.norm == 'L1':
+            t = torch.randn(x_left_right.shape).to(self.device).detach()
+            delta = self.L1_projection(x_left_right, t, self.eps)
+            x_adv = x_left_right + t + delta
+
+        x_adv = x_adv.clamp(0., 1.)
+        x_best = x_adv.clone()
+
+        # Compute the initial loss based on architecture
+        if self.architecture in ['cfnet', 'gwcnet']:
+            disparity_pred = self.model(x_best[:, 0], x_best[:, 1])[0][0].to(self.device)
+        elif self.architecture in ['sttr', 'sttr-light']:
+            data = {
+                'left': x_best[:, 0],
+                'right': x_best[:, 1],
+                'disp': None,
+                'occ_mask': None,
+                'occ_mask_right': None
+            }
+            with autocast():
+                outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+            disparity_pred = disparity_pred.to(self.device)
+            torch.cuda.empty_cache()
+        else:
+            inputs = {"images": [[x_best[:, 0], x_best[:, 1]]]}
+            disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+        loss_best = self.criterion(disparity_pred, disparity_target).mean().item()
+
+        step_size = 2. * self.eps / self.num_iterations
+        perturbed_results = {}
+
+        for i in range(self.num_iterations):
+            x_adv.requires_grad_()
+
+            if self.architecture in ['cfnet', 'gwcnet']:
+                disparity_pred = self.model(left=x_adv[:, 0], right=x_adv[:, 1])[0][0].to(self.device)
+            elif self.architecture in ['sttr', 'sttr-light']:
+                data = {
+                    'left': x_adv[:, 0],
+                    'right': x_adv[:, 1],
+                    'disp': None,
+                    'occ_mask': None,
+                    'occ_mask_right': None
+                }
+                with autocast():
+                    outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                disparity_pred = disparity_pred.to(self.device)
+                torch.cuda.empty_cache()
+            else:
+                inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
+                disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+            loss_indiv = self.criterion(disparity_pred, disparity_target).sum()
+
+            with autocast():
+                grad = torch.autograd.grad(loss_indiv, [x_adv])[0]
+            grad_norm = self.normalize(grad)
+
+            if self.norm == 'Linf':
+                x_adv = x_adv.detach() + step_size * torch.sign(grad_norm)
+            elif self.norm == 'L2':
+                x_adv = x_adv.detach() + step_size * grad_norm
+            elif self.norm == 'L1':
+                grad_topk = grad.abs().view(x_left_right.shape[0], -1).sort(-1)[0]
+                sparsegrad = grad * (grad.abs() >= grad_topk).float()
+                x_adv = x_adv.detach() + step_size * sparsegrad.sign() / (grad_norm.sum() + 1e-10)
+
+            x_adv = x_adv.clamp(0., 1.)
+
+            if self.architecture in ['cfnet', 'gwcnet']:
+                disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])[0][0].to(self.device)
+            elif self.architecture in ['sttr', 'sttr-light']:
+                data = {
+                    'left': x_adv[:, 0],
+                    'right': x_adv[:, 1],
+                    'disp': None,
+                    'occ_mask': None,
+                    'occ_mask_right': None
+                }
+                with autocast():
+                    outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                disparity_pred = disparity_pred.to(self.device)
+                torch.cuda.empty_cache()
+            else:
+                inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
+                disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+            loss_curr = self.criterion(disparity_pred, disparity_target).mean().item()
+
+            if loss_curr < loss_best:
+                loss_best = loss_curr
+                x_best = x_adv.clone()
+
+            perturbed_results[i] = (x_adv[:, 0].clone(), x_adv[:, 1].clone())
+
+        return perturbed_results
+
+    def attack(self, x_left, x_right, disparity_target=None,occ_mask=None, occ_mask_right=None):
+        self.init_hyperparam(x_left)
+        perturbed_results = self.attack_single_run(x_left, x_right, disparity_target)
+        return perturbed_results'''
+
+# working apgd code 
+'''
 class APGDAttack():
     def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=8/255, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None,criterion=None, stats=None, logger=None):
         self.model = model
@@ -1144,13 +1738,354 @@ class APGDAttack():
     def attack(self, x_left, x_right, disparity_target=None):
         self.init_hyperparam(x_left)
         perturbed_results = self.attack_single_run(x_left, x_right, disparity_target)
+        return perturbed_results '''
+
+import torch
+import torch.cuda.amp as amp  # Import for mixed precision
+from sttr.utilities.foward_pass import forward_pass 
+class APGDAttack():
+    def __init__(self, model, architecture:str, num_iterations, norm='Linf', eps=8/255, seed=0, loss='l1', eot_iter=1, rho=.75, verbose=False, device=None, criterion=None, stats=None, logger=None):
+        self.model = model
+        self.num_iterations = num_iterations
+        self.eps = eps
+        self.norm = norm
+        self.seed = seed
+        self.loss = loss
+        self.eot_iter = eot_iter
+        self.thr_decr = rho
+        self.verbose = verbose
+        self.device = device
+        self.use_rs = True
+        self.n_iter_orig = num_iterations
+        self.eps_orig = eps
+        self.architecture = architecture
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+
+        if self.architecture == 'sttr':
+            self.scaler = amp.GradScaler() 
+
+        if self.norm not in ['Linf', 'L2', 'L1']:
+            raise ValueError(f"Unsupported norm: {self.norm}")
+
+        if self.loss not in ['l1', 'l2']:
+            raise ValueError(f"Unsupported loss: {self.loss}")
+
+        self.criterion = nn.L1Loss(reduction='none') if self.loss == 'l1' else nn.MSELoss(reduction='none')
+    
+    def init_hyperparam(self, x):
+        if self.device is None:
+            self.device = x.device
+        self.orig_dim = list(x.shape[2:])  # Assuming x is [B, C, H, W] for each image
+        self.ndims = len(self.orig_dim)
+        if self.seed is None:
+            self.seed = time.time()
+
+    def normalize(self, x):
+        if self.norm == 'Linf':
+            t = x.abs().view(x.shape[0], -1).max(1)[0]
+        elif self.norm == 'L2':
+            t = (x ** 2).view(x.shape[0], -1).sum(-1).sqrt()
+        elif self.norm == 'L1':
+            t = x.abs().view(x.shape[0], -1).sum(dim=-1)
+        return x / (t.view(-1, *([1] * (self.ndims + 1))) + 1e-12)
+
+    def L1_projection(self, x, delta, eps):
+        delta_flat = delta.view(delta.size(0), -1)
+        abs_delta = delta_flat.abs()
+        abs_delta_sum = abs_delta.sum(dim=1, keepdim=True)
+        factor = torch.clamp(abs_delta_sum - eps, min=0) / abs_delta_sum
+        delta_flat *= (1 - factor).view(-1, 1)
+        return delta_flat.view_as(delta)
+
+
+    def attack(self, x_left, x_right, disparity_target=None,  occ_mask=None, occ_mask_right=None):
+        self.init_hyperparam(x_left)
+
+        x_left = x_left.unsqueeze(0) if len(x_left.shape) < self.ndims + 1 else x_left
+        x_right = x_right.unsqueeze(0) if len(x_right.shape) < self.ndims + 1 else x_right
+
+        # Move inputs to the correct device
+        if 'sttr' in self.architecture:
+            x_left = x_left.to(self.device).half()  # Convert to float16
+            x_right = x_right.to(self.device).half()
+            disparity_target =  disparity_target.to(self.device).half()
+
+        
+        else:
+            x_left = x_left.to(self.device)
+            x_right = x_right.to(self.device)
+            disparity_target =  disparity_target.to(self.device)
+
+        # occ_mask = occ_mask.to(self.device) if occ_mask is not None else None
+        # occ_mask_right = occ_mask_right.to(self.device) if occ_mask_right is not None else None
+        occ_mask = occ_mask.to(self.device).half() if occ_mask is not None else None
+        occ_mask_right = occ_mask_right.to(self.device).half() if occ_mask_right is not None else None
+
+        print(x_left.dtype)
+        print(x_right.dtype)
+        if occ_mask is not None:
+            print(occ_mask.dtype)
+        if occ_mask_right is not None:
+            print(occ_mask_right.dtype)
+
+        print(disparity_target.dtype)
+
+        # Handle model output based on architecture
+        if disparity_target is None:
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                disparity_target = self.model(left=x_left, right=x_right)[0][0].detach().to(self.device)
+            elif self.architecture == 'sttr' in self.architecture:
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': x_left,
+                    'right': x_right,
+                    'disp': disparity_target,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                #if reset_on_batch:
+                #    eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+                with amp.autocast():
+                    outputs, losses, disparity_target = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache() 
+
+            else:
+                inputs = {"images": [[x_left, x_right]]}
+                disparity_target = self.model(inputs)["disparities"].squeeze(0).detach().to(self.device)
+
+        x_left_right = torch.stack((x_left, x_right), dim=1)  # [B, 2, C, H, W]
+
+        # Generate the initial perturbation
+        if self.norm == 'Linf':
+            t = 2 * torch.rand(x_left_right.shape).to(self.device).detach() - 1
+            x_adv = x_left_right + self.eps * self.normalize(t)
+        elif self.norm == 'L2':
+            t = torch.randn(x_left_right.shape).to(self.device).detach()
+            x_adv = x_left_right + self.eps * self.normalize(t)
+        elif self.norm == 'L1':
+            t = torch.randn(x_left_right.shape).to(self.device).detach()
+            delta = self.L1_projection(x_left_right, t, self.eps)
+            x_adv = x_left_right + t + delta
+
+        x_adv = x_adv.clamp(0., 1.)
+        x_best = x_adv.clone()
+
+        # Compute the initial loss based on architecture
+        if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+            disparity_pred = self.model(x_best[:, 0], x_best[:, 1])[0][0].to(self.device)
+        elif 'sttr' in self.architecture:
+            from sttr.utilities.foward_pass import forward_pass
+            data = {
+                'left': x_best[:, 0],
+                'right': x_best[:, 1],
+                'disp': disparity_target,  # Optional disparity target
+                'occ_mask': occ_mask,
+                'occ_mask_right': occ_mask_right
+            }
+            print( x_best[:, 0].dtype)
+            print( x_best[:, 1].dtype)
+            print( disparity_target.dtype)
+            print( occ_mask.dtype)
+            print( occ_mask_right.dtype)
+            # Mixed precision with autocast
+            with torch.cuda.amp.autocast():
+                outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+            disparity_pred = disparity_pred.to(self.device)
+            torch.cuda.empty_cache()
+        else:
+            inputs = {"images": [[x_best[:, 0], x_best[:, 1]]]}
+            disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+        loss_best = self.criterion(disparity_pred, disparity_target).mean().item()
+
+        step_size = 2. * self.eps / self.num_iterations
+        perturbed_results = {}
+
+        for i in range(self.num_iterations):
+            x_adv.requires_grad_()
+
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                disparity_pred = self.model(left=x_adv[:, 0], right=x_adv[:, 1])[0][0].to(self.device)
+            elif self.architecture == 'sttr' in self.architecture:
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': x_adv[:, 0],
+                    'right': x_adv[:, 1],
+                    'disp': disparity_target,  # Optional disparity target
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                with amp.autocast():
+                    outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                disparity_pred = disparity_pred.to(self.device)
+                torch.cuda.empty_cache()
+
+            else:
+                inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
+                disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+            loss_indiv = self.criterion(disparity_pred, disparity_target).sum()
+
+            grad = torch.autograd.grad(loss_indiv, [x_adv])[0]
+            grad_norm = self.normalize(grad)
+
+            if self.norm == 'Linf':
+                x_adv = x_adv.detach() + step_size * torch.sign(grad_norm)
+            elif self.norm == 'L2':
+                x_adv = x_adv.detach() + step_size * grad_norm
+            elif self.norm == 'L1':
+                grad_topk = grad.abs().view(x_left_right.shape[0], -1).sort(-1)[0]
+                sparsegrad = grad * (grad.abs() >= grad_topk).float()
+                x_adv = x_adv.detach() + step_size * sparsegrad.sign() / (grad_norm.sum() + 1e-10)
+
+            x_adv = x_adv.clamp(0., 1.)
+
+            if self.architecture == 'cfnet' or 'gwcnet' in self.architecture:
+                disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])[0][0].to(self.device)
+            elif self.architecture == 'sttr' in self.architecture:
+                from sttr.utilities.foward_pass import forward_pass
+                data = {
+                    'left': x_adv[:, 0],
+                    'right': x_adv[:, 1],
+                    'disp': disparity_target, 
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                with amp.autocast():
+                    outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
+                disparity_pred = disparity_pred.to(self.device)
+                torch.cuda.empty_cache()
+
+            else:
+                inputs = {"images": [[x_adv[:, 0], x_adv[:, 1]]]}
+                disparity_pred = self.model(inputs)["disparities"].squeeze(0).to(self.device)
+
+            loss_curr = self.criterion(disparity_pred, disparity_target).mean().item()
+
+            if loss_curr < loss_best:
+                loss_best = loss_curr
+                x_best = x_adv.clone()
+
+            perturbed_results[i] = (x_adv[:, 0].clone(), x_adv[:, 1].clone())
+
         return perturbed_results
 
+    # def attack(self, x_left, x_right, disparity_target=None,occ_mask=None, occ_mask_right=None):
+    #     self.init_hyperparam(x_left)
+    #     perturbed_results = self.attack_single_run(x_left, x_right, disparity_target,)
+    #     return perturbed_results
+ 
 
 import torch
 import torch.nn.functional as F
 from typing import List
 
+class BIMAttack:
+  
+    def __init__(self, model, epsilon: float, num_iterations: int, alpha: float, norm: str, targeted: bool, architecture: str, criterion=None, stats=None, logger=None):
+        """see https://arxiv.org/pdf/1607.02533.pdf"""
+        self.model = model
+        self.epsilon = epsilon
+        self.num_iterations = num_iterations
+        self.alpha = alpha
+        self.targeted = targeted
+        self.norm = norm
+        self.architecture = architecture 
+        self.criterion = criterion 
+        self.stats = stats if stats is not None else {}
+        self.logger = logger
+
+    def _clip_perturbation(self, adv_images, images):
+        """Clip perturbation to be within bounds"""
+        if self.norm == 'Linf':
+            delta = torch.clamp(adv_images - images, min=-self.epsilon, max=self.epsilon)
+        elif self.norm == 'L2':
+            delta = adv_images - images
+            delta_norms = torch.norm(delta.view(delta.size(0), -1), p=2, dim=1)
+            factor = self.epsilon / delta_norms
+            factor = torch.min(factor, torch.ones_like(delta_norms))
+            delta = delta * factor.view(-1, 1, 1, 1)
+        adv_images = torch.clamp(images + delta, 0, 1)  # Assuming images are in [0, 1] range
+        return adv_images
+
+    @torch.enable_grad()
+    def attack(self, left_image: torch.Tensor, right_image: torch.Tensor, labels: torch.Tensor, occ_mask=None, occ_mask_right=None):
+        orig_left_image = left_image.clone().detach()
+        orig_right_image = right_image.clone().detach()
+        labels = labels.cuda()
+
+        perturbed_left = left_image.clone().detach().requires_grad_(True)
+        perturbed_right = right_image.clone().detach().requires_grad_(True)
+
+        # if occ_mask_right is not None:
+        #     occ_mask_right = occ_mask_right.to(self.device)
+        # if occ_mask is not None:
+        #     occ_mask = occ_mask.to(self.device)
+
+        perturbed_results = {}
+
+        for iteration in range(self.num_iterations):
+            # Forward Pass
+            inputs = {"images": [[perturbed_left, perturbed_right]]}
+            if self.architecture in ['cfnet', 'gwcnet']:
+                # Forward pass without mixed precision
+                outputs = self.model(left=perturbed_left, right=perturbed_right)[0][0].squeeze(0)
+            elif self.architecture in ['sttr', 'sttr-light']:
+                from sttr.utilities.foward_pass import forward_pass
+                
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': labels,
+                    'occ_mask': occ_mask,
+                    'occ_mask_right': occ_mask_right
+                }
+                # Forward pass with mixed precision
+                with autocast():
+                    outputs, losses, disp = forward_pass(self.model, data, 'cuda', self.criterion, self.stats, logger=self.logger)
+                torch.cuda.empty_cache()
+
+            else:
+                outputs = self.model(inputs)["disparities"].squeeze(0)
+
+            # Compute loss
+            loss = F.mse_loss(outputs.float(), labels.float())
+            if self.targeted:
+                loss = -loss
+
+            # Zero gradients, backward pass, and update gradients
+            self.model.zero_grad()
+            loss.backward()
+
+            left_grad = perturbed_left.grad.data
+            right_grad = perturbed_right.grad.data
+
+            # Perform BIM step
+            if self.targeted:
+                left_grad *= -1
+                right_grad *= -1
+
+            perturbed_left = perturbed_left.detach() + self.alpha * left_grad
+            perturbed_right = perturbed_right.detach() + self.alpha * right_grad
+
+            # Clip perturbations to stay within bounds
+            perturbed_left = self._clip_perturbation(perturbed_left, orig_left_image)
+            perturbed_right = self._clip_perturbation(perturbed_right, orig_right_image)
+
+            # Prepare for the next iteration
+            perturbed_left.requires_grad_(True)
+            perturbed_right.requires_grad_(True)
+
+            # Store perturbed images for the current iteration
+            perturbed_results[iteration] = (perturbed_left.detach(), perturbed_right.detach())
+
+        return perturbed_results
+
+
+'''
+# working for cfnet and gwcnet
 class BIMAttack:
   
     def __init__(self, model, epsilon: float, num_iterations: int, alpha: float, norm: str, targeted: bool, architecture:str,criterion=None, stats=None, logger=None ):
@@ -1244,3 +2179,4 @@ class BIMAttack:
             perturbed_results[iteration] = (perturbed_left.detach(), perturbed_right.detach())
 
         return perturbed_results
+'''
