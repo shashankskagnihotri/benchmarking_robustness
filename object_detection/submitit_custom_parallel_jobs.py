@@ -26,38 +26,38 @@ class cfg:
 cfgs = [
     # cfg("cascade_rcnn_convnext-s_coco", 2), #* with patience 15 Epoch(val) [22][2500/2500]    coco/bbox_mAP: 0.4790  coco/bbox_mAP_50: 0.6770  coco/bbox_mAP_75: 0.5230  coco/bbox_mAP_s: 0.3150  coco/bbox_mAP_m: 0.5190  coco/bbox_mAP_l: 0.6270
     # cfg("cascade_rcnn_swin-s_coco", 2), #* with patience 5 Epoch(val) [6][2500/2500]    coco/bbox_mAP: 0.4490  coco/bbox_mAP_50: 0.6500  coco/bbox_mAP_75: 0.4870  coco/bbox_mAP_s: 0.2710  coco/bbox_mAP_m: 0.4830  coco/bbox_mAP_l: 0.6060
-    cfg("codino_convnext-s_coco", 2),  #! resubmit
-    cfg(
-        "codino_swin-s_coco", 2
-    ),  # ? memory error did with_cp=true and submitted if fails again try ampoptim
-    cfg(
-        "ddq_convnext-s_coco", 2
-    ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors
-    cfg(
-        "ddq_swin-s_coco", 2
-    ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors
+    # cfg("codino_convnext-s_coco", 2),  #! resubmit
+    # cfg(
+    #     "codino_swin-s_coco", 2
+    # ),  # ? memory error did with_cp=true and submitted if fails again try ampoptim
+    # cfg(
+    #     "ddq_convnext-s_coco", 2
+    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors
+    # cfg(
+    #     "ddq_swin-s_coco", 2
+    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors
     # cfg("deformable_detr_convnext-s_coco", 4), #* with patience 15 Epoch(val) [24][1250/1250]    coco/bbox_mAP: 0.4620  coco/bbox_mAP_50: 0.6550  coco/bbox_mAP_75: 0.5050  coco/bbox_mAP_s: 0.2890  coco/bbox_mAP_m: 0.4920  coco/bbox_mAP_l: 0.6140
-    cfg("deformable_detr_swin-s_coco", 4),  #! resubmit
-    cfg("dino_convnext-s_coco", 2),  #! resubmit
-    cfg("dino_swin-s_coco", 2),  #! resubmit
+    # cfg("deformable_detr_swin-s_coco", 4),  #! resubmit
+    # cfg("dino_convnext-s_coco", 2),  #! resubmit
+    # cfg("dino_swin-s_coco", 2),  #! resubmit
     cfg("glip_convnext-s_coco", 2),  #! resubmit
     cfg("glip_swin-s_coco", 2),  #! resubmit
     # cfg(
     #     "paa_convnext-s_coco", 2
     # ),  # ? 2684645 -> ValueError: Fitting the mixture model failed because some components have ill-defined empirical covariance (for instance caused by singleton or collapsed samples). Try to decrease the number of components, or increase reg_covar.
     # cfg("paa_swin-s_coco", 2), #* with patience 5 Epoch(val) [11][2500/2500]    coco/bbox_mAP: 0.4500  coco/bbox_mAP_50: 0.6410  coco/bbox_mAP_75: 0.4900  coco/bbox_mAP_s: 0.2790  coco/bbox_mAP_m: 0.4940  coco/bbox_mAP_l: 0.6040
-    cfg(
-        "rtmdet_convnext-s_coco", 2
-    ),  #! with patience 5: Epoch(val) [16][500/500]    coco/bbox_mAP: 0.3690  coco/bbox_mAP_50: 0.5440  coco/bbox_mAP_75: 0.3960  coco/bbox_mAP_s: 0.1780  coco/bbox_mAP_m: 0.4170  coco/bbox_mAP_l: 0.5540
-    cfg("rtmdet_swin-s_coco", 2),  #! resubmit
-    cfg("sparse_rcnn_convnext-s_coco", 2),  #! resubmit
-    cfg("sparse_rcnn_swin-s_coco", 2),  #! resubmit
-    cfg(
-        "tood_convnext-s_coco", 2
-    ),  #! with patience 5 Epoch(val) [10][2500/2500]    coco/bbox_mAP: 0.4550  coco/bbox_mAP_50: 0.6390  coco/bbox_mAP_75: 0.4950  coco/bbox_mAP_s: 0.2910  coco/bbox_mAP_m: 0.5030  coco/bbox_mAP_l: 0.5860
-    cfg(
-        "tood_swin-s_coco", 2
-    ),  #! with patience 5 Epoch(val) [10][2500/2500]    coco/bbox_mAP: 0.4510  coco/bbox_mAP_50: 0.6360  coco/bbox_mAP_75: 0.4890  coco/bbox_mAP_s: 0.2840  coco/bbox_mAP_m: 0.4890  coco/bbox_mAP_l: 0.5940
+    # cfg(
+    #     "rtmdet_convnext-s_coco", 2
+    # ),  #! with patience 5: Epoch(val) [16][500/500]    coco/bbox_mAP: 0.3690  coco/bbox_mAP_50: 0.5440  coco/bbox_mAP_75: 0.3960  coco/bbox_mAP_s: 0.1780  coco/bbox_mAP_m: 0.4170  coco/bbox_mAP_l: 0.5540
+    # cfg("rtmdet_swin-s_coco", 2),  #! resubmit
+    # cfg("sparse_rcnn_convnext-s_coco", 2),  #! resubmit
+    # cfg("sparse_rcnn_swin-s_coco", 2),  #! resubmit
+    # cfg(
+    #     "tood_convnext-s_coco", 2
+    # ),  #! with patience 5 Epoch(val) [10][2500/2500]    coco/bbox_mAP: 0.4550  coco/bbox_mAP_50: 0.6390  coco/bbox_mAP_75: 0.4950  coco/bbox_mAP_s: 0.2910  coco/bbox_mAP_m: 0.5030  coco/bbox_mAP_l: 0.5860
+    # cfg(
+    #     "tood_swin-s_coco", 2
+    # ),  #! with patience 5 Epoch(val) [10][2500/2500]    coco/bbox_mAP: 0.4510  coco/bbox_mAP_50: 0.6360  coco/bbox_mAP_75: 0.4890  coco/bbox_mAP_s: 0.2840  coco/bbox_mAP_m: 0.4890  coco/bbox_mAP_l: 0.5940
 ]
 
 
