@@ -54,7 +54,7 @@ custom_hooks = [
         ],
         type="PipelineSwitchHook",
     ),
-    dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
+    dict(monitor="coco/bbox_mAP", patience=15, type="EarlyStoppingHook"),
 ]
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
