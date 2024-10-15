@@ -337,8 +337,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
             disparity = np.ascontiguousarray(disparity, dtype=np.float32)
             processed = cfnet.data_io.get_transform()
-            left_img = processed(left_img)
-            right_img = processed(right_img)
+            
+            # Commented out because normalization is done in the cfnet model itself during the attacks
+            # left_img = processed(left_img)
+            # right_img = processed(right_img)
 
 
 
@@ -388,10 +390,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             disparity = np.ascontiguousarray(np.array(disparity)).astype(np.float32)
 
 
-            # to tensor, normalize
-            processed = gwcnet.data_io.get_transform()
-            left_img = processed(left_img)
-            right_img = processed(right_img)
+            # to tensor, normalize - comment out because normalization is done in the gwcnet model itself during the attacks
+            # processed = gwcnet.data_io.get_transform()
+            # left_img = processed(left_img)
+            # right_img = processed(right_img)
 
             return {"left": left_img,
                     "right": right_img,

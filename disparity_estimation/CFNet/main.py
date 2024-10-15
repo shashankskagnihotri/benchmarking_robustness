@@ -14,6 +14,8 @@ import numpy as np
 import time
 from torch.utils.tensorboard import SummaryWriter
 
+from torchvision import transforms
+
 # from datasets import __datasets__
 from models import __models__, model_loss
 from utils import *
@@ -376,15 +378,17 @@ def test_sample(sample, compute_metrics=True):
 
 
 def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20, norm = "Linf"):
-
-    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
+    global model
     model.eval()
+    from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
+    # model.eval()
+    model = NormalizedModel(model,mean=[0.485,0.456,0.406],std=[0.229,0.224,0.225])
     num_iterations = 20
 
     if attack_type == "cospgd":
         attacker = CosPGDAttack(model,architecture=args.model, epsilon=epsilon, alpha=alpha, num_iterations=num_iterations, norm=norm,num_classes=None, targeted=False )
     elif attack_type == "fgsm":
-        attacker = FGSMAttack( model,epsilon=epsilon, architecture=args.model,targeted=False) 
+        attacker = FGSMAttack(model,epsilon=epsilon, architecture=args.model,targeted=False) 
 
     elif attack_type == "pgd":
         attacker = PGDAttack(model,architecture=args.model,epsilon=epsilon,num_iterations= num_iterations,alpha=alpha,norm=norm,random_start=True,targeted=False)
@@ -399,16 +403,46 @@ def attack(attack_type: str, epsilon = 8/255, alpha = 0.01, num_iterations = 20,
         raise ValueError("Attack type not recognized")
 
     for batch_idx, sample in enumerate(TestImgLoader):
+
+        # mean and std are the same for cfnet, gwcnet and sttr/sttr-light
+        # model.eval()
         perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disparity"])
         for iteration in perturbed_results.keys():
             model.eval()
             perturbed_left, perturbed_right = perturbed_results[iteration]
             loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
             save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
-            print(iteration)
+            print(f"Iteration {iteration} loss: {loss}")
+
+            if batch_idx < 1:
+                mlflow.log_image(perturbed_left.detach().squeeze().permute(1, 2, 0).cpu().numpy(), f"perturbed_left_batch_{batch_idx}_iteration_{iteration}.png")
+                mlflow.log_image(perturbed_right.detach().squeeze().permute(1, 2, 0).cpu().numpy(), f"perturbed_right_{batch_idx}.png")
+                mlflow.log_image(image_outputs["disp_est"][0].detach().squeeze().cpu().numpy(), f"disp_est_{batch_idx}_iteration_{iteration}.png")
 
         print("batch", batch_idx)
 
+        # convert perturbed_images to an PIL.Image and store it in mlflow
+        if batch_idx < 10:
+            print("Logging images")
+            mlflow.log_image(perturbed_left.detach().squeeze().permute(1, 2, 0).cpu().numpy(), f"perturbed_left_{batch_idx}.png")
+            mlflow.log_image(perturbed_right.detach().squeeze().permute(1, 2, 0).cpu().numpy(), f"perturbed_right_{batch_idx}.png")
+            mlflow.log_image(image_outputs["disp_est"][0].detach().squeeze().cpu().numpy(), f"disp_est_{batch_idx}.png")
+            
+    
+
+class NormalizedModel(nn.Module):
+
+    def __init__(self, model, mean, std) -> None:
+        super(NormalizedModel, self).__init__()  
+        self.mean = mean
+        self.std = std
+        self.model = model
+
+    def forward(self, left, right, **kwargs):
+        normalize = transforms.Normalize(mean=self.mean, std=self.std)
+        perturbed_left = normalize(left)
+        perturbed_right = normalize(right)
+        return self.model(perturbed_left, perturbed_right, **kwargs)
 
 if __name__ == "__main__":
     train()

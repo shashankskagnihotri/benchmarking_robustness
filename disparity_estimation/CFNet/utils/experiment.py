@@ -69,6 +69,7 @@ def save_scalars(logger, mode_tag, scalar_dict, global_step):
             # if len(values) > 1:
             scalar_name = scalar_name + "_" + str(idx)
             #logger.add_scalar(scalar_name, value, global_step)
+            print("Log", scalar_name, value, global_step)
             mlflow.log_metric(scalar_name, value, global_step)
 
 
@@ -90,6 +91,7 @@ def save_images(logger, mode_tag, images_dict, global_step):
             #                  global_step)
             # mlflow.log_figure(image_name, vutils.make_grid(value, padding=0, nrow=1, normalize=True, scale_each=True),
             #                   global_step)
+            mlflow.log_artifact(image_name, vutils.make_grid(value, padding=0, nrow=1, normalize=True, scale_each=True), global_step)
 
 def adjust_learning_rate(optimizer, epoch, base_lr, lrepochs):
     splits = lrepochs.split(':')

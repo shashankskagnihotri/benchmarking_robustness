@@ -610,7 +610,7 @@ class cfnet(nn.Module):
 
         # pred1_v_s2 = disparity_variance_confidence(cost1_s2_possibility, disparity_samples_s2, pred1_s2)
         # pred1_v_s2 = pred1_v_s2.sqrt()
-        print(self.training)
+        # print(self.training)
         if self.training:
             cost0_4 = self.classif0(cost0_4)
             cost1_4 = self.classif1(out1_4)
