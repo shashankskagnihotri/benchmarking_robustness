@@ -12,13 +12,17 @@ data_preprocessor = dict(
     bgr_to_rgb=True,
     pad_val=0,
     seg_pad_val=255,
-    size=crop_size)
+    size=crop_size,
+    enable_normalization = False,
+    corruption = None)
 num_classes = 150
 
 depths = [2, 2, 18, 2]
 model = dict(
     type='EncoderDecoder',
     data_preprocessor=data_preprocessor,
+    normalize_mean_std=dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]),
+    perform_attack=False,
     backbone=dict(
         type='SwinTransformer',
         pretrain_img_size=384,
@@ -144,7 +148,9 @@ model = dict(
                 ]),
             sampler=dict(type='mmdet.MaskPseudoSampler'))),
     train_cfg=dict(),
-    test_cfg=dict(mode='whole'))
+    test_cfg=dict(mode='whole'),
+    attack_loss=dict(
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, reduction='none'),)
 
 # dataset config
 train_pipeline = [

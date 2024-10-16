@@ -1,12 +1,12 @@
-Started at Tue Aug  6 18:00:11 CEST 2024
-08/06 18:02:10 - mmengine - INFO - 
+Started at Wed Aug 21 06:53:31 CEST 2024
+08/21 06:55:20 - mmengine - INFO - 
 ------------------------------------------------------------
 System environment:
     sys.platform: linux
     Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
     CUDA available: True
     MUSA available: False
-    numpy_random_seed: 743327494
+    numpy_random_seed: 1982555247
     GPU 0: Tesla V100-SXM2-32GB
     CUDA_HOME: None
     GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
@@ -34,13 +34,13 @@ Runtime environment:
     cudnn_benchmark: True
     mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
     dist_cfg: {'backend': 'nccl'}
-    seed: 743327494
+    seed: 1982555247
     Distributed launcher: none
     Distributed training: False
     GPU number: 1
 ------------------------------------------------------------
 
-08/06 18:02:10 - mmengine - INFO - Config:
+08/21 06:55:21 - mmengine - INFO - Config:
 checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b0_20220624-7e0fe6dd.pth'
 crop_size = (
     512,
@@ -96,6 +96,11 @@ log_processor = dict(by_epoch=False)
 model = dict(
     attack_cfg=dict(
         alpha=0.01, epsilon=2, iterations=5, name='cospgd', norm='linf'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
     backbone=dict(
         attn_drop_rate=0.0,
         drop_path_rate=0.1,
@@ -383,8 +388,8 @@ work_dir = '../aa_workdir/ade/MIT-B0/attack_cospgd/norm_linf/iterations_5/epsilo
 
 /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
   warnings.warn('Now, we support DCNv4 in InternImage.')
-08/06 18:04:15 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
-08/06 18:04:15 - mmengine - INFO - Hooks will be executed in the following order:
+08/21 06:56:28 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+08/21 06:56:28 - mmengine - INFO - Hooks will be executed in the following order:
 before_run:
 (VERY_HIGH   ) RuntimeInfoHook                    
 (BELOW_NORMAL) LoggerHook                         
@@ -469,220 +474,4220 @@ after_test:
 after_run:
 (BELOW_NORMAL) LoggerHook                         
  -------------------- 
-08/06 18:04:17 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+08/21 06:56:30 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
 Loads checkpoint by local backend from path: ../aa_workdir/ade/MIT-B0/segformer_mit-b0_512x512_160k_ade20k_20210726_101530-8ffa8fda.pth
-08/06 18:04:18 - mmengine - INFO - Load checkpoint from ../aa_workdir/ade/MIT-B0/segformer_mit-b0_512x512_160k_ade20k_20210726_101530-8ffa8fda.pth
-08/06 18:06:49 - mmengine - INFO - Iter(test) [  50/2000]    eta: 1:38:24  time: 0.9516  data_time: 0.0016  memory: 21524  
-08/06 18:07:40 - mmengine - INFO - Iter(test) [ 100/2000]    eta: 1:04:02  time: 1.1675  data_time: 0.0017  memory: 21380  
-08/06 18:08:13 - mmengine - INFO - Iter(test) [ 150/2000]    eta: 0:48:19  time: 0.6212  data_time: 0.0016  memory: 21184  
-08/06 18:08:59 - mmengine - INFO - Iter(test) [ 200/2000]    eta: 0:42:09  time: 0.8515  data_time: 0.0015  memory: 21556  
-08/06 18:09:44 - mmengine - INFO - Iter(test) [ 250/2000]    eta: 0:38:01  time: 0.5667  data_time: 0.0015  memory: 21390  
-08/06 18:10:23 - mmengine - INFO - Iter(test) [ 300/2000]    eta: 0:34:28  time: 0.3754  data_time: 0.0016  memory: 21499  
-08/06 18:11:03 - mmengine - INFO - Iter(test) [ 350/2000]    eta: 0:31:49  time: 0.5589  data_time: 0.0015  memory: 21399  
-08/06 18:11:35 - mmengine - INFO - Iter(test) [ 400/2000]    eta: 0:29:09  time: 0.5553  data_time: 0.0015  memory: 21387  
-08/06 18:11:58 - mmengine - INFO - Iter(test) [ 450/2000]    eta: 0:26:23  time: 0.5501  data_time: 0.0014  memory: 21085  
-08/06 18:12:20 - mmengine - INFO - Iter(test) [ 500/2000]    eta: 0:24:04  time: 0.3253  data_time: 0.0015  memory: 20689  
-08/06 18:12:42 - mmengine - INFO - Iter(test) [ 550/2000]    eta: 0:22:08  time: 0.5051  data_time: 0.0015  memory: 21482  
-08/06 18:13:03 - mmengine - INFO - Iter(test) [ 600/2000]    eta: 0:20:24  time: 0.5418  data_time: 0.0016  memory: 21368  
-08/06 18:13:29 - mmengine - INFO - Iter(test) [ 650/2000]    eta: 0:19:03  time: 0.5975  data_time: 0.0013  memory: 21482  
-08/06 18:14:00 - mmengine - INFO - Iter(test) [ 700/2000]    eta: 0:18:01  time: 0.3674  data_time: 0.0016  memory: 21499  
-08/06 18:14:32 - mmengine - INFO - Iter(test) [ 750/2000]    eta: 0:17:03  time: 1.3139  data_time: 0.0015  memory: 21698  
-08/06 18:14:51 - mmengine - INFO - Iter(test) [ 800/2000]    eta: 0:15:49  time: 0.3669  data_time: 0.0016  memory: 21191  
-08/06 18:15:09 - mmengine - INFO - Iter(test) [ 850/2000]    eta: 0:14:41  time: 0.3704  data_time: 0.0017  memory: 3485  
-08/06 18:15:30 - mmengine - INFO - Iter(test) [ 900/2000]    eta: 0:13:41  time: 0.4997  data_time: 0.0014  memory: 20936  
-08/06 18:16:00 - mmengine - INFO - Iter(test) [ 950/2000]    eta: 0:12:56  time: 0.7446  data_time: 0.0016  memory: 21446  
-08/06 18:16:23 - mmengine - INFO - Iter(test) [1000/2000]    eta: 0:12:04  time: 0.3186  data_time: 0.0014  memory: 21460  
-08/06 18:16:49 - mmengine - INFO - Iter(test) [1050/2000]    eta: 0:11:19  time: 0.8048  data_time: 0.0015  memory: 21705  
-08/06 18:17:15 - mmengine - INFO - Iter(test) [1100/2000]    eta: 0:10:35  time: 0.3509  data_time: 0.0015  memory: 21076  
-08/06 18:17:36 - mmengine - INFO - Iter(test) [1150/2000]    eta: 0:09:50  time: 0.5498  data_time: 0.0014  memory: 20900  
-08/06 18:17:55 - mmengine - INFO - Iter(test) [1200/2000]    eta: 0:09:04  time: 0.3111  data_time: 0.0014  memory: 14182  
-08/06 18:18:15 - mmengine - INFO - Iter(test) [1250/2000]    eta: 0:08:22  time: 0.5183  data_time: 0.0015  memory: 21095  
-08/06 18:18:30 - mmengine - INFO - Iter(test) [1300/2000]    eta: 0:07:38  time: 0.3234  data_time: 0.0014  memory: 3499  
-08/06 18:18:49 - mmengine - INFO - Iter(test) [1350/2000]    eta: 0:06:59  time: 0.3029  data_time: 0.0014  memory: 20559  
-08/06 18:19:15 - mmengine - INFO - Iter(test) [1400/2000]    eta: 0:06:24  time: 0.5490  data_time: 0.0014  memory: 21274  
-08/06 18:19:34 - mmengine - INFO - Iter(test) [1450/2000]    eta: 0:05:47  time: 0.5555  data_time: 0.0014  memory: 20968  
-08/06 18:19:50 - mmengine - INFO - Iter(test) [1500/2000]    eta: 0:05:10  time: 0.2892  data_time: 0.0014  memory: 3484  
-08/06 18:20:10 - mmengine - INFO - Iter(test) [1550/2000]    eta: 0:04:36  time: 0.3275  data_time: 0.0014  memory: 21406  
-08/06 18:20:27 - mmengine - INFO - Iter(test) [1600/2000]    eta: 0:04:02  time: 0.3456  data_time: 0.0016  memory: 3415  
-08/06 18:20:49 - mmengine - INFO - Iter(test) [1650/2000]    eta: 0:03:30  time: 0.2926  data_time: 0.0014  memory: 21472  
-08/06 18:21:11 - mmengine - INFO - Iter(test) [1700/2000]    eta: 0:02:58  time: 0.3538  data_time: 0.0015  memory: 21085  
-08/06 18:21:32 - mmengine - INFO - Iter(test) [1750/2000]    eta: 0:02:27  time: 0.3205  data_time: 0.0014  memory: 21335  
-08/06 18:21:51 - mmengine - INFO - Iter(test) [1800/2000]    eta: 0:01:56  time: 0.3784  data_time: 0.0016  memory: 20617  
-08/06 18:22:09 - mmengine - INFO - Iter(test) [1850/2000]    eta: 0:01:26  time: 0.3702  data_time: 0.0017  memory: 3076  
-08/06 18:22:26 - mmengine - INFO - Iter(test) [1900/2000]    eta: 0:00:57  time: 0.2922  data_time: 0.0014  memory: 21608  
-08/06 18:22:48 - mmengine - INFO - Iter(test) [1950/2000]    eta: 0:00:28  time: 0.3232  data_time: 0.0014  memory: 20835  
-08/06 18:23:09 - mmengine - INFO - Iter(test) [2000/2000]    eta: 0:00:00  time: 0.2920  data_time: 0.0013  memory: 20835  
-08/06 18:23:10 - mmengine - INFO - per class results:
-08/06 18:23:10 - mmengine - INFO - 
+08/21 06:56:31 - mmengine - INFO - Load checkpoint from ../aa_workdir/ade/MIT-B0/segformer_mit-b0_512x512_160k_ade20k_20210726_101530-8ffa8fda.pth
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 06:59:06 - mmengine - INFO - Iter(test) [  50/2000]    eta: 1:40:53  time: 0.9412  data_time: 0.0019  memory: 21524  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 06:59:56 - mmengine - INFO - Iter(test) [ 100/2000]    eta: 1:04:57  time: 1.1569  data_time: 0.0016  memory: 21380  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:00:28 - mmengine - INFO - Iter(test) [ 150/2000]    eta: 0:48:41  time: 0.6006  data_time: 0.0015  memory: 21184  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:01:13 - mmengine - INFO - Iter(test) [ 200/2000]    eta: 0:42:19  time: 0.8397  data_time: 0.0014  memory: 21556  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:01:58 - mmengine - INFO - Iter(test) [ 250/2000]    eta: 0:38:08  time: 0.5630  data_time: 0.0014  memory: 21390  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:02:36 - mmengine - INFO - Iter(test) [ 300/2000]    eta: 0:34:31  time: 0.3654  data_time: 0.0015  memory: 21499  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:03:16 - mmengine - INFO - Iter(test) [ 350/2000]    eta: 0:31:49  time: 0.5540  data_time: 0.0014  memory: 21399  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:03:48 - mmengine - INFO - Iter(test) [ 400/2000]    eta: 0:29:08  time: 0.5521  data_time: 0.0014  memory: 21387  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:04:10 - mmengine - INFO - Iter(test) [ 450/2000]    eta: 0:26:21  time: 0.5466  data_time: 0.0014  memory: 21085  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:04:32 - mmengine - INFO - Iter(test) [ 500/2000]    eta: 0:24:03  time: 0.3369  data_time: 0.0015  memory: 20689  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:04:55 - mmengine - INFO - Iter(test) [ 550/2000]    eta: 0:22:10  time: 0.5294  data_time: 0.0016  memory: 21482  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:05:17 - mmengine - INFO - Iter(test) [ 600/2000]    eta: 0:20:27  time: 0.5397  data_time: 0.0015  memory: 21368  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:05:42 - mmengine - INFO - Iter(test) [ 650/2000]    eta: 0:19:04  time: 0.5960  data_time: 0.0013  memory: 21482  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:06:14 - mmengine - INFO - Iter(test) [ 700/2000]    eta: 0:18:02  time: 0.3546  data_time: 0.0015  memory: 21499  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:06:45 - mmengine - INFO - Iter(test) [ 750/2000]    eta: 0:17:03  time: 1.2724  data_time: 0.0014  memory: 21698  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:07:03 - mmengine - INFO - Iter(test) [ 800/2000]    eta: 0:15:48  time: 0.3634  data_time: 0.0016  memory: 21191  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:07:21 - mmengine - INFO - Iter(test) [ 850/2000]    eta: 0:14:40  time: 0.3641  data_time: 0.0015  memory: 3485  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:07:42 - mmengine - INFO - Iter(test) [ 900/2000]    eta: 0:13:40  time: 0.4901  data_time: 0.0013  memory: 20936  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:08:11 - mmengine - INFO - Iter(test) [ 950/2000]    eta: 0:12:54  time: 0.7117  data_time: 0.0015  memory: 21446  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:08:33 - mmengine - INFO - Iter(test) [1000/2000]    eta: 0:12:02  time: 0.3135  data_time: 0.0014  memory: 21460  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:08:59 - mmengine - INFO - Iter(test) [1050/2000]    eta: 0:11:16  time: 0.7951  data_time: 0.0015  memory: 21705  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:09:25 - mmengine - INFO - Iter(test) [1100/2000]    eta: 0:10:33  time: 0.3449  data_time: 0.0015  memory: 21076  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:09:46 - mmengine - INFO - Iter(test) [1150/2000]    eta: 0:09:47  time: 0.5456  data_time: 0.0014  memory: 20900  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:10:04 - mmengine - INFO - Iter(test) [1200/2000]    eta: 0:09:02  time: 0.3064  data_time: 0.0014  memory: 14182  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:10:24 - mmengine - INFO - Iter(test) [1250/2000]    eta: 0:08:19  time: 0.5140  data_time: 0.0015  memory: 21095  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:10:39 - mmengine - INFO - Iter(test) [1300/2000]    eta: 0:07:36  time: 0.3178  data_time: 0.0014  memory: 3499  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:10:57 - mmengine - INFO - Iter(test) [1350/2000]    eta: 0:06:57  time: 0.2992  data_time: 0.0014  memory: 20559  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:11:23 - mmengine - INFO - Iter(test) [1400/2000]    eta: 0:06:22  time: 0.5456  data_time: 0.0015  memory: 21274  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:11:42 - mmengine - INFO - Iter(test) [1450/2000]    eta: 0:05:45  time: 0.5521  data_time: 0.0015  memory: 20968  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:11:58 - mmengine - INFO - Iter(test) [1500/2000]    eta: 0:05:09  time: 0.2863  data_time: 0.0016  memory: 3484  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:12:17 - mmengine - INFO - Iter(test) [1550/2000]    eta: 0:04:34  time: 0.3238  data_time: 0.0015  memory: 21406  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:12:34 - mmengine - INFO - Iter(test) [1600/2000]    eta: 0:04:00  time: 0.3405  data_time: 0.0016  memory: 3415  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:12:56 - mmengine - INFO - Iter(test) [1650/2000]    eta: 0:03:28  time: 0.2866  data_time: 0.0014  memory: 21472  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:13:18 - mmengine - INFO - Iter(test) [1700/2000]    eta: 0:02:57  time: 0.3509  data_time: 0.0017  memory: 21085  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:13:39 - mmengine - INFO - Iter(test) [1750/2000]    eta: 0:02:26  time: 0.3091  data_time: 0.0015  memory: 21335  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:13:57 - mmengine - INFO - Iter(test) [1800/2000]    eta: 0:01:56  time: 0.3673  data_time: 0.0017  memory: 20617  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:14:15 - mmengine - INFO - Iter(test) [1850/2000]    eta: 0:01:26  time: 0.3628  data_time: 0.0016  memory: 3076  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:14:31 - mmengine - INFO - Iter(test) [1900/2000]    eta: 0:00:56  time: 0.2873  data_time: 0.0014  memory: 21608  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:14:54 - mmengine - INFO - Iter(test) [1950/2000]    eta: 0:00:28  time: 0.3180  data_time: 0.0014  memory: 20835  
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+old: epsilon=2, alpha=0.01
+new: epsilon=2, alpha=2.5500000000000003
+08/21 07:15:14 - mmengine - INFO - Iter(test) [2000/2000]    eta: 0:00:00  time: 0.2853  data_time: 0.0013  memory: 20835  
+08/21 07:15:14 - mmengine - INFO - per class results:
+08/21 07:15:14 - mmengine - INFO - 
 +---------------------+-------+-------+
 |        Class        |  IoU  |  Acc  |
 +---------------------+-------+-------+
-|         wall        |  18.3 | 31.83 |
-|       building      | 14.78 | 20.13 |
-|         sky         | 55.93 | 58.29 |
-|        floor        | 20.32 | 30.26 |
-|         tree        | 22.72 | 29.13 |
-|       ceiling       |  24.1 | 30.36 |
-|         road        |  20.7 | 24.66 |
-|         bed         | 18.49 | 30.68 |
-|      windowpane     | 12.86 | 20.79 |
-|        grass        | 12.28 | 17.46 |
-|       cabinet       |  9.95 | 21.77 |
-|       sidewalk      |  7.01 | 13.34 |
-|        person       | 31.19 | 40.45 |
-|        earth        |  1.26 |  2.67 |
-|         door        |  3.1  |  7.79 |
-|        table        |  6.28 | 14.34 |
-|       mountain      |  9.97 | 21.39 |
-|        plant        |  9.37 |  17.2 |
-|       curtain       | 13.07 |  31.4 |
-|        chair        |  7.25 | 15.11 |
-|         car         | 34.48 | 40.26 |
-|        water        |  6.22 | 12.25 |
-|       painting      | 16.67 | 27.09 |
-|         sofa        |  5.42 | 13.43 |
-|        shelf        |  1.84 |  5.59 |
-|        house        |  1.01 |  4.29 |
-|         sea         |  8.3  | 24.05 |
-|        mirror       |  3.38 | 26.11 |
-|         rug         |  6.8  | 13.65 |
-|        field        |  0.08 |  0.28 |
-|       armchair      |  2.63 |  5.97 |
-|         seat        |  6.07 | 15.87 |
-|        fence        |  3.22 |  9.69 |
-|         desk        |  4.31 |  11.4 |
-|         rock        |  7.9  | 14.96 |
-|       wardrobe      |  2.85 | 11.33 |
-|         lamp        | 14.81 | 24.64 |
-|       bathtub       |  4.7  |  6.81 |
-|       railing       |  2.55 |  6.87 |
-|       cushion       |  7.47 | 21.28 |
-|         base        |  0.35 |  1.47 |
-|         box         |  2.17 |  4.83 |
-|        column       |  1.66 |  4.4  |
-|      signboard      |  4.83 | 13.54 |
-|   chest of drawers  | 11.62 |  20.8 |
-|       counter       |  0.78 |  1.02 |
-|         sand        |  0.08 |  0.17 |
-|         sink        | 13.31 | 22.89 |
-|      skyscraper     |  4.71 |  9.68 |
-|      fireplace      |  7.1  | 14.05 |
-|     refrigerator    |  3.86 |  9.46 |
-|      grandstand     |  0.27 |  1.24 |
-|         path        |  3.27 |  5.65 |
-|        stairs       |  2.38 |  5.08 |
-|        runway       |  7.8  | 12.69 |
-|         case        |  0.38 |  0.83 |
-|      pool table     | 47.29 | 52.59 |
-|        pillow       |  7.62 | 14.54 |
-|     screen door     |  3.2  | 23.23 |
-|       stairway      |  2.5  |  3.92 |
-|        river        |  0.03 |  0.06 |
-|        bridge       |  1.75 | 13.68 |
-|       bookcase      |  4.29 | 12.31 |
-|        blind        |  1.22 |  2.03 |
-|     coffee table    |  7.93 | 14.97 |
-|        toilet       | 23.13 | 30.81 |
-|        flower       |  6.49 | 21.99 |
-|         book        | 10.09 | 18.11 |
-|         hill        |  0.72 |  1.32 |
-|        bench        | 10.09 | 16.21 |
-|      countertop     |  5.21 | 13.17 |
-|        stove        |  6.51 | 10.57 |
-|         palm        |  4.27 | 31.19 |
-|    kitchen island   |  0.38 |  1.6  |
-|       computer      | 11.38 | 16.65 |
-|     swivel chair    |  7.58 | 14.35 |
-|         boat        |  0.46 |  0.69 |
+|         wall        |  7.3  | 10.97 |
+|       building      |  5.53 |  7.69 |
+|         sky         | 35.36 | 37.07 |
+|        floor        |  8.81 | 12.96 |
+|         tree        |  9.74 |  12.1 |
+|       ceiling       | 11.62 | 15.19 |
+|         road        |  8.2  |  9.92 |
+|         bed         |  8.64 | 15.45 |
+|      windowpane     |  5.03 |  8.98 |
+|        grass        |  7.25 |  10.6 |
+|       cabinet       |  3.77 |  9.33 |
+|       sidewalk      |  4.07 |  8.32 |
+|        person       | 17.43 |  20.9 |
+|        earth        |  0.44 |  1.04 |
+|         door        |  1.48 |  4.33 |
+|        table        |  2.23 |  6.14 |
+|       mountain      |  2.43 |  5.9  |
+|        plant        |  4.11 |  7.88 |
+|       curtain       |  5.83 | 16.01 |
+|        chair        |  2.25 |  5.63 |
+|         car         | 20.77 | 26.37 |
+|        water        |  1.5  |  3.99 |
+|       painting      |  6.49 | 13.11 |
+|         sofa        |  3.36 |  9.61 |
+|        shelf        |  2.18 |  8.39 |
+|        house        |  0.38 |  2.18 |
+|         sea         |  3.69 |  12.9 |
+|        mirror       |  1.16 | 12.63 |
+|         rug         |  4.12 |  9.09 |
+|        field        |  0.33 |  1.28 |
+|       armchair      |  0.66 |  1.62 |
+|         seat        |  0.47 |  1.45 |
+|        fence        |  0.46 |  1.66 |
+|         desk        |  1.15 |  4.02 |
+|         rock        |  4.57 |  9.45 |
+|       wardrobe      |  1.45 |  8.03 |
+|         lamp        |  7.24 | 15.83 |
+|       bathtub       |  1.22 |  2.25 |
+|       railing       |  4.13 | 14.64 |
+|       cushion       |  5.11 | 22.18 |
+|         base        |  0.01 |  0.04 |
+|         box         |  1.19 |  3.45 |
+|        column       |  0.09 |  0.25 |
+|      signboard      |  2.14 |  7.56 |
+|   chest of drawers  |  5.14 | 10.22 |
+|       counter       |  0.0  |  0.0  |
+|         sand        |  1.83 |  4.17 |
+|         sink        |  4.05 |  7.63 |
+|      skyscraper     |  2.5  |  6.21 |
+|      fireplace      |  3.12 |  9.28 |
+|     refrigerator    |  3.26 | 10.17 |
+|      grandstand     |  0.0  |  0.0  |
+|         path        |  0.03 |  0.03 |
+|        stairs       |  0.79 |  1.67 |
+|        runway       |  4.53 |  8.82 |
+|         case        |  3.04 |  8.18 |
+|      pool table     | 17.11 | 20.17 |
+|        pillow       |  3.52 |  6.8  |
+|     screen door     |  0.6  |  5.37 |
+|       stairway      |  0.61 |  1.12 |
+|        river        |  0.0  |  0.0  |
+|        bridge       |  0.99 | 10.37 |
+|       bookcase      |  2.54 |  7.76 |
+|        blind        |  0.23 |  0.56 |
+|     coffee table    |  1.63 |  3.94 |
+|        toilet       |  8.59 | 11.38 |
+|        flower       |  3.62 | 13.97 |
+|         book        |  4.4  |  8.54 |
+|         hill        |  0.2  |  0.77 |
+|        bench        |  1.66 |  3.24 |
+|      countertop     |  1.9  |  6.01 |
+|        stove        |  4.55 |  8.97 |
+|         palm        |  1.31 | 11.67 |
+|    kitchen island   |  0.04 |  0.24 |
+|       computer      |  7.61 | 13.71 |
+|     swivel chair    |  4.24 |  6.57 |
+|         boat        |  2.21 |  7.52 |
 |         bar         |  0.0  |  0.0  |
-|    arcade machine   |  0.0  |  0.0  |
+|    arcade machine   |  0.4  |  1.32 |
 |        hovel        |  0.0  |  0.0  |
-|         bus         |  2.02 |  4.3  |
-|        towel        |  3.52 | 13.38 |
-|        light        | 10.45 | 11.47 |
-|        truck        |  1.2  |  9.13 |
-|        tower        |  0.98 |  6.75 |
-|      chandelier     | 13.29 | 19.48 |
-|        awning       |  0.0  |  0.0  |
-|     streetlight     |  3.67 |  4.6  |
-|        booth        |  0.33 |  1.54 |
-| television receiver | 15.09 | 19.37 |
-|       airplane      |  7.1  |  30.4 |
-|      dirt track     |  0.1  |  0.56 |
-|       apparel       |  5.21 | 10.93 |
-|         pole        |  2.1  |  3.84 |
-|         land        |  0.02 |  0.03 |
-|      bannister      |  0.36 |  0.64 |
-|      escalator      |  0.46 |  0.95 |
-|       ottoman       |  0.31 |  0.92 |
-|        bottle       |  1.06 |  2.12 |
-|        buffet       |  0.03 |  0.07 |
-|        poster       |  1.55 |  3.53 |
-|        stage        |  0.65 |  3.59 |
-|         van         |  1.7  |  3.36 |
+|         bus         |  4.89 |  11.4 |
+|        towel        |  2.31 | 14.45 |
+|        light        |  6.69 |  8.38 |
+|        truck        |  0.61 |  8.41 |
+|        tower        |  0.21 |  1.77 |
+|      chandelier     |  6.37 |  8.84 |
+|        awning       |  0.1  |  0.37 |
+|     streetlight     |  1.63 |  2.06 |
+|        booth        |  0.0  |  0.0  |
+| television receiver |  4.71 |  6.66 |
+|       airplane      |  0.67 |  3.6  |
+|      dirt track     |  0.0  |  0.0  |
+|       apparel       |  3.48 |  9.93 |
+|         pole        |  3.21 |  6.19 |
+|         land        |  0.02 |  0.02 |
+|      bannister      |  0.43 |  0.82 |
+|      escalator      |  1.16 |  2.79 |
+|       ottoman       |  0.17 |  0.5  |
+|        bottle       |  0.75 |  1.26 |
+|        buffet       |  0.09 |  0.26 |
+|        poster       |  0.21 |  0.61 |
+|        stage        |  0.4  |  5.77 |
+|         van         |  1.46 |  3.11 |
 |         ship        |  0.0  |  0.0  |
 |       fountain      |  0.0  |  0.0  |
 |    conveyer belt    |  0.0  |  0.0  |
-|        canopy       |  0.48 |  1.57 |
-|        washer       | 20.21 | 24.59 |
-|      plaything      |  0.46 |  1.33 |
+|        canopy       |  0.16 |  0.91 |
+|        washer       |  3.67 |  4.7  |
+|      plaything      |  0.53 |  1.76 |
 |    swimming pool    |  0.0  |  0.0  |
-|        stool        |  2.59 |  4.67 |
+|        stool        |  0.88 |  2.02 |
 |        barrel       |  0.0  |  0.0  |
-|        basket       |  2.45 |  6.76 |
-|      waterfall      |  7.01 | 10.85 |
-|         tent        |  8.29 | 21.73 |
-|         bag         |  0.54 |  0.75 |
-|       minibike      |  1.74 |  3.83 |
-|        cradle       | 17.67 | 40.24 |
-|         oven        |  0.63 |  1.42 |
-|         ball        |  0.07 |  0.08 |
-|         food        |  4.85 |  5.48 |
-|         step        |  0.35 |  0.68 |
-|         tank        | 13.11 | 16.93 |
-|      trade name     |  1.38 |  1.72 |
-|      microwave      |  4.83 |  6.49 |
-|         pot         |  3.39 |  4.55 |
-|        animal       | 24.59 | 30.64 |
-|       bicycle       | 10.31 | 30.63 |
+|        basket       |  0.79 |  3.09 |
+|      waterfall      |  0.26 |  0.57 |
+|         tent        |  1.89 |  9.88 |
+|         bag         |  0.08 |  0.13 |
+|       minibike      |  1.32 |  3.64 |
+|        cradle       |  2.93 |  5.82 |
+|         oven        |  0.0  |  0.0  |
+|         ball        |  0.42 |  0.5  |
+|         food        |  1.14 |  1.38 |
+|         step        |  0.47 |  0.8  |
+|         tank        |  0.06 |  0.1  |
+|      trade name     |  0.0  |  0.0  |
+|      microwave      |  2.18 |  3.3  |
+|         pot         |  1.42 |  2.09 |
+|        animal       |  4.71 |  6.62 |
+|       bicycle       |  2.93 | 13.85 |
 |         lake        |  0.0  |  0.0  |
-|      dishwasher     |  5.65 |  9.65 |
-|        screen       | 14.38 | 23.75 |
-|       blanket       |  1.02 |  2.85 |
-|      sculpture      |  0.13 |  1.16 |
-|         hood        |  5.94 | 14.72 |
-|        sconce       |  5.97 |  7.53 |
-|         vase        |  4.96 | 10.98 |
-|    traffic light    |  2.71 |  5.27 |
-|         tray        |  0.58 |  0.89 |
-|        ashcan       |  0.32 |  0.51 |
-|         fan         |  9.92 | 14.93 |
-|         pier        |  0.0  |  0.0  |
-|      crt screen     |  0.0  |  0.0  |
-|        plate        |  2.87 |  3.72 |
-|       monitor       |  3.7  |  4.38 |
-|    bulletin board   |  7.72 | 10.69 |
-|        shower       |  0.08 |  2.24 |
-|       radiator      |  8.71 |  10.3 |
-|        glass        |  2.06 |  2.9  |
-|        clock        |  7.19 |  8.98 |
-|         flag        |  5.85 |  7.45 |
+|      dishwasher     |  2.29 |  3.16 |
+|        screen       |  1.23 |  4.17 |
+|       blanket       |  0.25 |  0.87 |
+|      sculpture      |  0.02 |  0.17 |
+|         hood        |  0.45 |  1.81 |
+|        sconce       |  2.02 |  2.27 |
+|         vase        |  1.72 |  4.54 |
+|    traffic light    |  2.18 |  5.75 |
+|         tray        |  0.82 |  1.85 |
+|        ashcan       |  0.26 |  0.47 |
+|         fan         |  3.34 |  5.61 |
+|         pier        |  0.11 |  0.55 |
+|      crt screen     |  0.97 |  1.75 |
+|        plate        |  1.84 |  2.75 |
+|       monitor       |  0.03 |  0.05 |
+|    bulletin board   |  1.17 |  2.27 |
+|        shower       |  0.23 |  7.55 |
+|       radiator      |  1.5  |  1.82 |
+|        glass        |  1.16 |  1.58 |
+|        clock        |  4.15 |  4.84 |
+|         flag        |  5.49 |  6.87 |
 +---------------------+-------+-------+
-08/06 18:23:10 - mmengine - INFO - Iter(test) [2000/2000]    aAcc: 26.0000  mIoU: 6.4800  mAcc: 11.5000  data_time: 0.0030  time: 0.5655
-/var/spool/slurmd/job23933915/slurm_script: line 28: date +%s: command not found
+08/21 07:15:14 - mmengine - INFO - Iter(test) [2000/2000]    aAcc: 12.2500  mIoU: 2.7900  mAcc: 5.6900  data_time: 0.0029  time: 0.5616
+/var/spool/slurmd/job24008204/slurm_script: line 28: date +%s: command not found
 Runtime: 0
 
 ============================= JOB FEEDBACK =============================
 
-NodeName=uc2n513
-Job ID: 23933915
+NodeName=uc2n485
+Job ID: 24008204
 Cluster: uc2
 User/Group: ma_dschader/ma_ma
 State: COMPLETED (exit code 0)
 Nodes: 1
 Cores per node: 8
-CPU Utilized: 00:13:30
-CPU Efficiency: 7.14% of 03:09:04 core-walltime
-Job Wall-clock time: 00:23:38
-Memory Utilized: 2.64 GB
-Memory Efficiency: 13.21% of 20.00 GB
+CPU Utilized: 00:13:21
+CPU Efficiency: 7.47% of 02:58:40 core-walltime
+Job Wall-clock time: 00:22:20
+Memory Utilized: 3.00 GB
+Memory Efficiency: 15.00% of 20.00 GB

@@ -91,6 +91,8 @@ class EncoderDecoder(BaseSegmentor):
                  normalize_mean_std: ConfigType=None,
                  enable_normalization: bool = False,
                  perform_attack: bool=False):
+        # import pdb
+        # pdb.set_trace()
         super().__init__(
             data_preprocessor=data_preprocessor, init_cfg=init_cfg)
         if pretrained is not None:
@@ -109,12 +111,12 @@ class EncoderDecoder(BaseSegmentor):
             attack_cfg["targeted"] = False
         self.attack_cfg = attack_cfg
         self.attack_loss = attack_loss
-        # self.criterion = MODELS.build(self.attack_loss) 
+        self.criterion = MODELS.build(self.attack_loss) 
         self.perform_attack=perform_attack
         self.enable_normalization = enable_normalization
         
-        self.mean= normalize_mean_std['mean']
-        self.std= normalize_mean_std['std']
+        self.mean=normalize_mean_std['mean']
+        self.std=normalize_mean_std['std']
         self.counter=0
 
         assert self.with_decode_head
@@ -179,7 +181,7 @@ class EncoderDecoder(BaseSegmentor):
             losses.update(add_prefix(loss_aux, 'aux'))
 
         return losses
-    
+
     def segpgd_scale(
             self,
             predictions,
@@ -394,7 +396,7 @@ class EncoderDecoder(BaseSegmentor):
                     counter3 = 0
                     
         return x_best_adv*255
-
+        
     def loss(self, inputs: Tensor, data_samples: SampleList) -> dict:
         """Calculate losses from a batch of inputs and data samples.
 
@@ -454,15 +456,30 @@ class EncoderDecoder(BaseSegmentor):
                     padding_size=[0, 0, 0, 0])
             ] * inputs.shape[0]
         
-        self.attack_cfg["epsilon"] = self.attack_cfg["epsilon"]/255 if inputs.max() <= 1 else self.attack_cfg["epsilon"]
-        self.attack_cfg["alpha"] = self.attack_cfg["alpha"]*255 if inputs.max() > 1 else self.attack_cfg["alpha"]
+        # print(f"old: epsilon={self.attack_cfg['epsilon']}, alpha={self.attack_cfg['alpha']}")
+
+        # old version: 
+        # self.attack_cfg["epsilon"] = self.attack_cfg["epsilon"]/255 if inputs.max() <= 1 else self.attack_cfg["epsilon"]
+        # self.attack_cfg["alpha"] = self.attack_cfg["alpha"]*255 if inputs.max() > 1 else self.attack_cfg["alpha"]
+
+
+        # propose:
+        epsilon = self.attack_cfg["epsilon"]/255 if inputs.max() <= 1 else self.attack_cfg["epsilon"]
+        alpha = self.attack_cfg["alpha"]*255 if inputs.max() > 1 else self.attack_cfg["alpha"]
+
+        # print(f"new: epsilon={epsilon}, alpha={alpha}")
+
+        
+
+        # import pdb
+        # pdb.set_trace()
 
         normalize = torchvision.transforms.Normalize(mean = self.mean, std=self.std) if not self.enable_normalization else torch.nn.Identity()
         
         
         if self.perform_attack:
             if self.attack_cfg['name']=='apgd':
-                inputs = self.apgd(model = self.inference, normalize_inputs=normalize, batch_img_metas = batch_img_metas, data_samples=data_samples, n_iter=self.attack_cfg['iterations'], x = inputs/255., y = data_samples[-1].gt_sem_seg, device = inputs.device, eps=self.attack_cfg['epsilon']/255.)
+                inputs = self.apgd(model = self.inference, normalize_inputs=normalize, batch_img_metas = batch_img_metas, data_samples=data_samples, n_iter=self.attack_cfg['iterations'], x = inputs/255., y = data_samples[-1].gt_sem_seg, device = inputs.device, eps=epsilon/255.)
             else:
                 orig_inputs = inputs.clone().detach()
                 
@@ -470,9 +487,9 @@ class EncoderDecoder(BaseSegmentor):
                 # pdb.set_trace()
                 if 'pgd' in self.attack_cfg['name']:
                     if self.attack_cfg['norm'] == 'linf':
-                        inputs = attack.init_linf(inputs, self.attack_cfg['epsilon'], clamp_min = 0, clamp_max=255)
+                        inputs = attack.init_linf(inputs, epsilon, clamp_min = 0, clamp_max=255)
                     elif self.attack_cfg['norm'] == 'l2':
-                        inputs = attack.init_l2(inputs, self.attack_cfg['epsilon'], clamp_min = 0, clamp_max=255)
+                        inputs = attack.init_l2(inputs, epsilon, clamp_min = 0, clamp_max=255)
                     else:
                         raise NotImplementedError('Only linf and l2 norm implemented')                                               
                 
@@ -523,9 +540,9 @@ class EncoderDecoder(BaseSegmentor):
                         loss.mean().backward()
                     
                     if self.attack_cfg['norm'] == 'linf':
-                        inputs = attack.step_inf(inputs, self.attack_cfg['epsilon'], data_grad=inputs.grad, orig_image=orig_inputs, alpha=self.attack_cfg['alpha'], targeted=self.attack_cfg['targeted'], clamp_min = 0, clamp_max=255)
+                        inputs = attack.step_inf(inputs, epsilon, data_grad=inputs.grad, orig_image=orig_inputs, alpha=alpha, targeted=self.attack_cfg['targeted'], clamp_min = 0, clamp_max=255)
                     elif self.attack_cfg['norm'] == 'l2':
-                        inputs = attack.step_l2(inputs, self.attack_cfg['epsilon'], data_grad=inputs.grad, orig_image=orig_inputs, alpha=self.attack_cfg['alpha'], targeted=self.attack_cfg['targeted'], clamp_min = 0, clamp_max=255)
+                        inputs = attack.step_l2(inputs, epsilon, data_grad=inputs.grad, orig_image=orig_inputs, alpha=alpha, targeted=self.attack_cfg['targeted'], clamp_min = 0, clamp_max=255)
                     else:
                         raise NotImplementedError('Only linf and l2 norm implemented')
         

@@ -15,6 +15,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     pretrained=None,
     normalize_mean_std=dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]),
+    perform_attack = False,
     backbone=dict(
         type='MixVisionTransformer',
         in_channels=3,
@@ -42,4 +43,6 @@ model = dict(
         loss_decode=dict(
             type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, reduction="none")), # added reduction='none', if error on loss -> line before `loss.backward()`, add loss=loss.mean()
     train_cfg=dict(),
-    test_cfg=dict(mode='whole'))
+    test_cfg=dict(mode='whole'),
+    attack_loss=dict(
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, reduction='none'),)

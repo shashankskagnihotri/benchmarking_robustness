@@ -1,0 +1,19 @@
+Started at Fri Sep 20 02:41:48 CEST 2024
+/var/spool/slurmd/job24246205/slurm_script: line 31: @i: syntax error: operand expected (error token is "@i")
+/var/spool/slurmd/job24246205/slurm_script: line 34: date +%s: command not found
+Runtime: 0
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n487
+Job ID: 24246205
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 00:04:08 core-walltime
+Job Wall-clock time: 00:00:31
+Memory Utilized: 2.51 MB
+Memory Efficiency: 0.01% of 20.00 GB

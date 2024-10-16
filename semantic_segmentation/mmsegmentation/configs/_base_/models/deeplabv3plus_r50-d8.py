@@ -6,10 +6,14 @@ data_preprocessor = dict(
     std=[58.395, 57.12, 57.375],
     bgr_to_rgb=True,
     pad_val=0,
-    seg_pad_val=255)
+    seg_pad_val=255,
+    enable_normalization = False,
+    corruption = None)
 model = dict(
     type='EncoderDecoder',
     data_preprocessor=data_preprocessor,
+    normalize_mean_std=dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]),
+    perform_attack=False,
     pretrained='open-mmlab://resnet50_v1c',
     backbone=dict(
         type='ResNetV1c',
@@ -35,7 +39,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, reduction="none")),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=1024,
@@ -48,7 +52,9 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4, reduction="none")),
     # model training and testing settings
     train_cfg=dict(),
-    test_cfg=dict(mode='whole'))
+    test_cfg=dict(mode='whole'),
+    attack_loss=dict(
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, reduction='none'),)
