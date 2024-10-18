@@ -310,9 +310,9 @@ class KITTIBaseDataset(data.Dataset):
             right_img = right_img.crop((x1, y1, x1 + crop_w, y1 + crop_h))
             disparity = disparity[y1:y1 + crop_h, x1:x1 + crop_w]
 
-            transform = gwcnet.data_io.get_transform()
-            left_img = transform(left_img)
-            right_img = transform(right_img)
+            # transform = gwcnet.data_io.get_transform()
+            # left_img = transform(left_img)
+            # right_img = transform(right_img)
 
 
             # # to tensor, normalize
@@ -434,9 +434,9 @@ class KITTIBaseDataset(data.Dataset):
 
             # to tensor, normalize
             disparity = np.ascontiguousarray(disparity, dtype=np.float32)
-            processed = cfnet.data_io.get_transform()
-            left_img = processed(left_img)
-            right_img = processed(right_img)
+            # processed = cfnet.data_io.get_transform()
+            # left_img = processed(left_img)
+            # right_img = processed(right_img)
 
             return {"left": left_img,
                     "right": right_img,
