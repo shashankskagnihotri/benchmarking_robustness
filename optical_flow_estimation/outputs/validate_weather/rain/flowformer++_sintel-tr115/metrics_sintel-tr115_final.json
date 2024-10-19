@@ -9,7 +9,11 @@
             "target": "negative",
             "loss": "epe",
             "optimizer": "Adam",
+<<<<<<< HEAD
             "steps": 750,
+=======
+            "steps": 300,
+>>>>>>> flow_luca
             "learn": true,
             "alph": 1000.0,
             "data": "/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/weather_sampledata/rain_1500_npz/weather_rain_15",
@@ -60,7 +64,11 @@
             "target": "zero",
             "loss": "epe",
             "optimizer": "Adam",
+<<<<<<< HEAD
             "steps": 750,
+=======
+            "steps": 300,
+>>>>>>> flow_luca
             "learn": true,
             "alph": 1000.0,
             "data": "/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/weather_sampledata/rain_1500_npz/weather_rain_15",
@@ -111,7 +119,11 @@
             "target": "negative",
             "loss": "epe",
             "optimizer": "Adam",
+<<<<<<< HEAD
             "steps": 750,
+=======
+            "steps": 300,
+>>>>>>> flow_luca
             "learn": true,
             "alph": 1000.0,
             "data": "/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/weather_sampledata/rain_1500_npz/weather_rain_15",
@@ -168,7 +180,11 @@
             "target": "zero",
             "loss": "epe",
             "optimizer": "Adam",
+<<<<<<< HEAD
             "steps": 750,
+=======
+            "steps": 300,
+>>>>>>> flow_luca
             "learn": true,
             "alph": 1000.0,
             "data": "/pfs/work7/workspace/scratch/ma_xinygao-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/weather_sampledata/rain_1500_npz/weather_rain_15",

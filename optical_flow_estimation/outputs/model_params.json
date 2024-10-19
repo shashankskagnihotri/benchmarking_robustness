@@ -1,0 +1,184 @@
+{
+    "experiment": [
+        {
+          "model": "ccmr",
+          "model_parameters": 10780884,
+          "point_matching_method": "attention",
+          "time": "01/2024"
+        },
+        {
+          "model": "craft",
+          "model_parameters": 6307435,
+          "point_matching_method": "attention",
+          "time": "03/2022"
+        },
+        {
+          "model": "csflow",
+          "model_parameters": 5604672,
+          "point_matching_method": "correlation",
+          "time": "02/2022"
+        },
+        {
+          "model": "dicl",
+          "model_parameters": 11226036,
+          "point_matching_method": "cnn",
+          "time": "10/2020"
+        },
+        {
+          "model": "dip",
+          "model_parameters": 5371968,
+          "point_matching_method": "correlation",
+          "time": "04/2022"
+        },
+        {
+          "model": "fastflownet",
+          "model_parameters": 1366114,
+          "point_matching_method": "cnn",
+          "time": "03/2021"
+        },
+        {
+          "model": "flow1d",
+          "model_parameters": 5734208,
+          "point_matching_method": "attention + correlation",
+          "time": "04/2021"
+        },
+        {
+          "model": "flowformer",
+          "model_parameters": 16168113,
+          "point_matching_method": "attention",
+          "time": "03/2022"
+        },
+        {
+          "model": "flowformer++",
+          "model_parameters": 16152338,
+          "point_matching_method": "attention",
+          "time": "03/2023"
+        },
+        {
+          "model": "gma",
+          "model_parameters": 5879873,
+          "point_matching_method": "attention",
+          "time": "04/2021"
+        },
+        {
+          "model": "gmflow",
+          "model_parameters": 4680288,
+          "point_matching_method": "attention",
+          "time": "11/2021"
+        },
+        {
+          "model": "gmflownet",
+          "model_parameters": 9343248,
+          "point_matching_method": "attention",
+          "time": "03/2022"
+        },
+        {
+          "model": "hd3",
+          "model_parameters": 39561975,
+          "point_matching_method": "cnn",
+          "time": "12/2018"
+        },
+        {
+          "model": "irr_pwc",
+          "model_parameters": null,
+          "point_matching_method": "cnn",
+          "time": "04/2019"
+        },
+        {
+          "model": "liteflownet",
+          "model_parameters": 5379613,
+          "point_matching_method": "cnn",
+          "time": "05/2018"
+        },
+        {
+          "model": "liteflownet2",
+          "model_parameters": 6429120,
+          "point_matching_method": "cnn",
+          "time": "02/2020"
+        },
+        {
+          "model": "liteflownet3",
+          "model_parameters": 7524188,
+          "point_matching_method": "cnn",
+          "time": "07/2020"
+        },
+        {
+          "model": "llaflow",
+          "model_parameters": 6060355,
+          "point_matching_method": "attention + cost volume",
+          "time": "04/2023"
+        },
+        {
+          "model": "maskflownet_s",
+          "model_parameters": 10514256,
+          "point_matching_method": "attention + correlation",
+          "time": "03/2023"
+        },
+        {
+          "model": "maskflownet",
+          "model_parameters": 20655716,
+          "point_matching_method": "attention + correlation",
+          "time": "03/2023"
+        },
+        {
+          "model": "ms_raft+",
+          "model_parameters": null,
+          "point_matching_method": "cost volume + correlation",
+          "time": "10/2022"
+        },
+        {
+          "model": "matchflow",
+          "model_parameters": 15446225,
+          "point_matching_method": "attention",
+          "time": "03/2023"
+        },
+        {
+          "model": "pwcnet",
+          "model_parameters": 9374274,
+          "point_matching_method": "cnn + cost volume",
+          "time": "09/2017"
+        },
+        {
+          "model": "rapidflow",
+          "model_parameters": 1646016,
+          "point_matching_method": "cnn + cost volume",
+          "time": "05/2024"
+        },
+        {
+          "model": "raft",
+          "model_parameters": 5257536,
+          "point_matching_method": "correlation",
+          "time": "03/2020"
+        },
+        {
+          "model": "rpknet",
+          "model_parameters": 2846624,
+          "point_matching_method": "cnn + cost volume",
+          "time": "03/2024"
+        },
+        {
+          "model": "scopeflow",
+          "model_parameters": 6362092,
+          "point_matching_method": "cnn + cost volume",
+          "time": "02/2020"
+        },
+        {
+          "model": "skflow",
+          "model_parameters": 6273149,
+          "point_matching_method": "cnn + cost volume",
+          "time": "11/2022"
+        },
+        {
+          "model": "starflow",
+          "model_parameters": 4772256,
+          "point_matching_method": "cnn + cost volume",
+          "time": "07/2020"
+        },
+        {
+          "model": "videoflow_bof",
+          "model_parameters": 12659389,
+          "point_matching_method": "correlation",
+          "time": "03/2023"
+        }
+      ]
+}

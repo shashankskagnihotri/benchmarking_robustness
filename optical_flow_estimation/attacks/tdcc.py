@@ -1,7 +1,7 @@
 import logging
 from torch.utils.data import Dataset
-from ptlflow_attacked.ptlflow.utils.utils import config_logging
-from ptlflow_attacked.ptlflow.utils.utils import (
+from ptlflow.utils.utils import config_logging
+from ptlflow.utils.utils import (
     config_logging,
     make_divisible,
     bgr_val_as_tensor,
@@ -9,8 +9,8 @@ from ptlflow_attacked.ptlflow.utils.utils import (
 from torch.utils.data import DataLoader, Dataset
 
 config_logging()
-from ptlflow_attacked.ptlflow.data import flow_transforms as ft
-from ptlflow_attacked.ptlflow.data.datasets_3DCC import (
+from ptlflow.data import flow_transforms as ft
+from ptlflow.data.datasets_3DCC import (
     KittiDataset3DCC,
     SintelDataset3DCC,
 )

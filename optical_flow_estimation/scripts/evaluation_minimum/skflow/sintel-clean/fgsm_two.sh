@@ -2,7 +2,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
+<<<<<<< HEAD
 #SBATCH --time=00:44:59
+=======
+#SBATCH --time=01:44:59
+>>>>>>> flow_luca
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
@@ -26,8 +30,13 @@ cd ../../../../
 
 for targeted in $targeteds
 do
+<<<<<<< HEAD
     epsilons="12.75"
     alphas="0.0001"
+=======
+    epsilons="64"
+    alphas="0.1"
+>>>>>>> flow_luca
     for epsilon in $epsilons
     do
         epsilon=$(echo "scale=10; $epsilon/255" | bc)

@@ -27,8 +27,8 @@ cd ../../../../
 
 for targeted in $targeteds
 do
-    epsilons="12.75"
-    alphas="0.0001"
+    epsilons="64"
+    alphas="0.1"
     for epsilon in $epsilons
     do
         epsilon=$(echo "scale=10; $epsilon/255" | bc)

@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=30:00:00
+#SBATCH --time=47:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4_a100
@@ -13,7 +13,7 @@
 
 model="ms_raft+"
 dataset="kitti-2015"
-checkpoint="kitti"
+checkpoint="mixed"
 targeteds="True"
 targets="negative zero"
 norms="two"

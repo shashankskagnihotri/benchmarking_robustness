@@ -1,0 +1,59 @@
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: libnvjpeg.so.11: cannot open shared object file: No such file or directory
+  warn(f"Failed to load image Python extension: {e}")
+[rank: 0] Global seed set to 1234
+06/12/2024 21:26:58 - INFO: Loading 530 samples from Sintel_clean_final dataset.
+GPU available: True (cuda), used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/setup.py:176: PossibleUserWarning: GPU available but not used. Set `accelerator` and `devices` using `Trainer(accelerator='gpu', devices=1)`.
+  rank_zero_warn(
+[rank: 0] Global seed set to 1234
+Initializing distributed: GLOBAL_RANK: 0, MEMBER: 1/1
+06/12/2024 21:26:59 - INFO: Added key: store_based_barrier_key:1 to store for rank: 0
+06/12/2024 21:26:59 - INFO: Rank 0: Completed store-based barrier for key:store_based_barrier_key:1 with 1 nodes.
+----------------------------------------------------------------------------------------------------
+distributed_backend=gloo
+All distributed processes registered. Starting with 1 processes
+----------------------------------------------------------------------------------------------------
+
+06/12/2024 21:26:59 - INFO: Loading 1552 samples from Sintel_clean_final dataset.
+
+  | Name          | Type          | Params
+------------------------------------------------
+0 | loss_fn       | MultiScale    | 0     
+1 | train_metrics | FlowMetrics   | 0     
+2 | val_metrics   | FlowMetrics   | 0     
+3 | flownetc      | FlowNetC      | 39.2 M
+4 | flownets_1    | FlowNetS      | 38.7 M
+5 | flownets_2    | FlowNetS      | 38.7 M
+6 | flownets_d    | FlowNetSD     | 45.4 M
+7 | flownetfusion | FlowNetFusion | 581 K 
+------------------------------------------------
+162 M     Trainable params
+0         Non-trainable params
+162 M     Total params
+650.075   Total estimated model params size (MB)
+SLURM auto-requeueing enabled. Setting signal handlers.
+06/12/2024 21:27:12 - INFO: Loading 530 samples from Sintel_clean_final dataset.
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:224: PossibleUserWarning: The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 80 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  rank_zero_warn(
+06/12/2024 21:27:42 - INFO: Loading 1552 samples from Sintel_clean_final dataset.
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/utilities/data.py:83: UserWarning: Trying to infer the `batch_size` from an ambiguous collection. The batch size we found is 8. To avoid any miscalculations, use `self.log(..., batch_size=batch_size)`.
+  warning_cache.warn(
+06/12/2024 21:30:39 - INFO: Reducer buckets have been rebuilt in this iteration.
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/epe', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/px1', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/px3', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/px5', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/outlier', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('train/loss', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/miniconda3/envs/ptl/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('epe', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+`Trainer.fit` stopped: `max_epochs=3` reached.

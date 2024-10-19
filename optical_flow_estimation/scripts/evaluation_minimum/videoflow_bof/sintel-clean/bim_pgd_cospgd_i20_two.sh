@@ -5,7 +5,11 @@
 #SBATCH --time=04:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
+<<<<<<< HEAD
 #SBATCH --partition=gpu_4
+=======
+#SBATCH --partition=gpu_4_a100
+>>>>>>> flow_luca
 #SBATCH --array=0-8%4
 #SBATCH --job-name=videoflow_bof_sintel-clean_bim_pgd_cospgd_i20_two
 #SBATCH --output=slurm/videoflow_bof_sintel-clean_bim_pgd_cospgd_i20_two_%A_%a.out
@@ -27,8 +31,13 @@ cd ../../../../
 
 for targeted in $targeteds
 do
+<<<<<<< HEAD
     epsilons="12.75"
     alphas="0.0001"
+=======
+    epsilons="64"
+    alphas="0.1"
+>>>>>>> flow_luca
     for epsilon in $epsilons
     do
         epsilon=$(echo "scale=10; $epsilon/255" | bc)

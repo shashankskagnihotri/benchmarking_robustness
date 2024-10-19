@@ -36,12 +36,16 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import ptlflow
-from ptlflow_attacked.ptlflow import get_model, get_model_reference
-from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
-from ptlflow_attacked.ptlflow.utils import flow_utils
-from ptlflow_attacked.ptlflow.utils.io_adapter import IOAdapter
-from ptlflow_attacked.ptlflow.utils.utils import (
+current_directory = os.path.dirname(os.path.abspath(__file__))
+ptl_directory = os.path.join(current_directory, "ptlflow")
+
+sys.path.insert(0, ptl_directory)
+
+from ptlflow import get_model, get_model_reference
+from ptlflow.models.base_model.base_model import BaseModel
+from ptlflow.utils import flow_utils
+from ptlflow.utils.io_adapter import IOAdapter
+from ptlflow.utils.utils import (
     add_datasets_to_parser,
     config_logging,
     get_list_of_available_models_list,
@@ -68,7 +72,7 @@ from attacks.attack_utils.loss_criterion import LossCriterion
 from ptlflow_attacked.validate import (
     validate_one_dataloader,
     generate_outputs,
-    _get_model_names,
+   _get_model_names,
 )
 
 # Import cosPGD functions
@@ -119,6 +123,14 @@ def _init_parser() -> ArgumentParser:
             "none",
         ],
         help="Name of the attack to use.",
+    )
+    parser.add_argument(
+        "--attack_optim_target",
+        type=str,
+        default="ground_truth",
+        nargs="*",
+        choices=["ground_truth", "initial_flow"],
+        help="Set optimization target for adversarial attacks.",
     )
     parser.add_argument(
         "--cc_name",
@@ -695,7 +707,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
                 iteration_data.append((k, iteration_metrics_mean[k]))
 
             args.output_path.mkdir(parents=True, exist_ok=True)
-         
+
             output_dict = {}
             for key, value in output_data:
                 if "val" in key:
@@ -714,7 +726,30 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
 
             with open(output_filename, "w") as json_file:
                 json.dump(metrics, json_file, indent=4)
-    # return metrics_df
+
+            if iteration_metrics_mean:
+                iteration_output_dict = {}
+                for key, value in iteration_data:
+                    if "val" in key:
+                        iteration_output_dict.setdefault("metrics", {})[
+                            key.split("/")[1]
+                        ] = value
+                    else:
+                        iteration_output_dict[key] = value
+                output_filename = (
+                    args.output_path / f"iteration_metrics_{args.val_dataset}.json"
+                )
+
+                if os.path.exists(output_filename) and not overwrite_flag:
+                    with open(output_filename, "r") as json_file:
+                        metrics = json.load(json_file)
+                else:
+                    metrics = {"experiments": []}
+
+                metrics["experiments"].append(iteration_output_dict)
+
+                with open(output_filename, "w") as json_file:
+                    json.dump(metrics, json_file, indent=4)
 
             if iteration_metrics_mean:
                 iteration_output_dict = {}
@@ -763,7 +798,7 @@ def attack_list_of_models(args: Namespace) -> None:
             continue
 
         logging.info(mname)
-        model_ref = ptlflow.get_model_reference(mname)
+        model_ref = get_model_reference(mname)
 
         if hasattr(model_ref, "pretrained_checkpoints"):
             ckpt_names = model_ref.pretrained_checkpoints.keys()
@@ -824,19 +859,21 @@ def attack_one_dataloader(
     Dict[str, float]
         The average metric values for this dataloader.
     """
-
     metrics_sum = {}
     iteration_metrics_sum = {}
-    # if attack_args["attack"] == "3dcc":
-    #     dataloader = get_dataset_3DCC(
-    #         model,
-    #         dataloader_name,
-    #         attack_args["3dcc_corruption"],
-    #         attack_args["3dcc_intensity"],
-    #     )
+
     if attack_args["attack"] == "weather":
         attack_args["model"] = args.model
         # attack_args["val_dataset"] = args.weather_dataset
+
+    if attack_args["attack"] == "3dcc":
+        dataloader = get_dataset_3DCC(
+            model,
+            dataloader_name,
+            attack_args["3dcc_corruption"],
+            attack_args["3dcc_intensity"],
+        )
+
     metrics_individual = None
     if args.write_individual_metrics:
         metrics_individual = {"filename": [], "epe": [], "outlier": []}
@@ -878,6 +915,7 @@ def attack_one_dataloader(
                 or attack_args["attack"] == "pcfa"
                 or attack_args["attack"] == "weather"
             ):
+
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
                 else:
@@ -888,55 +926,73 @@ def attack_one_dataloader(
 
                 targeted_inputs = inputs.copy()
                 targeted_inputs["flows"] = targeted_flow_tensor
+            # for logging
+            if attack_args["attack"] == "none":
+                targeted_inputs = inputs.copy()
 
              # for logging
             if attack_args["attack"] == "none":
                 targeted_inputs = inputs.copy()
 
             iteration_metrics = {}
-
+        
             match attack_args["attack"]:  # Commit adversarial attack
                 case "fgsm":
-                    preds = fgsm(attack_args, inputs, model, targeted_inputs)
+                    (
+                        preds,
+                        perturbed_inputs,
+                    ) = fgsm(attack_args, inputs, model, targeted_inputs)
                 case "pgd":
-                    preds = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs, orig_preds
+                    )
                 case "cospgd":
-                    preds = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs, orig_preds
+                    )
                 case "bim":
-                    preds = bim_pgd_cospgd(attack_args, inputs, model, targeted_inputs)
+                    preds, perturbed_inputs, iteration_metrics = bim_pgd_cospgd(
+                        attack_args, inputs, model, targeted_inputs, orig_preds
+                    )
+
                 case "apgd":
                     preds = apgd(attack_args, inputs, model, targeted_inputs)
                 case "fab":
                     preds = fab(attack_args, inputs, model, targeted_inputs)
                 case "pcfa":
-                    preds = pcfa(attack_args, model, targeted_inputs)
+
+                    preds, perturbed_inputs, iteration_metrics = pcfa(
+                        attack_args, inputs, model, targeted_inputs
+                    )
                 case "weather":
                     preds, perturbed_inputs = weather(
                         attack_args, model, targeted_inputs, i, args.output_path
+
                     )
                 case "common_corruptions":
                     preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
                 case "none":
-                    # from torch.cuda.amp import GradScaler, autocast
-                    # with autocast():
-                    preds = model(inputs)
-                # case "3dcc" | "none":
-                #     preds = model(inputs)
+                    preds = orig_preds
+                case "3dcc":
+                    preds = orig_preds
 
             for key in preds:
                  if torch.is_tensor(preds[key]):
+
+
                     preds[key] = preds[key].detach()
             for key in inputs:
                 if torch.is_tensor(inputs[key]):
                     inputs[key] = inputs[key].detach()
-            if attack_args["attack"] != "none":
+
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
+
                 for key in perturbed_inputs:
                     if torch.is_tensor(perturbed_inputs[key]):
                         perturbed_inputs[key] = perturbed_inputs[key].detach()
             for key in iteration_metrics:
                 if torch.is_tensor(iteration_metrics[key]):
                     iteration_metrics[key] = iteration_metrics[key].detach()
-
 
             if args.warm_start:
                 if (
@@ -953,7 +1009,8 @@ def attack_one_dataloader(
             inputs = io_adapter.unscale(inputs, image_only=True)
             preds = io_adapter.unscale(preds)
 
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
+
                 perturbed_inputs = io_adapter.unscale(perturbed_inputs, image_only=True)
                 if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
                     targeted_inputs = io_adapter.unscale(
@@ -978,6 +1035,7 @@ def attack_one_dataloader(
                         inputs[key] = val[:, k : k + 1]
 
             if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+
                 metrics = model.val_metrics(preds, targeted_inputs)
 
                 criterion = LossCriterion("epe")
@@ -1088,7 +1146,7 @@ def attack_one_dataloader(
                         "val/epe"
                     ]
 
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 adv_image1, adv_image2 = get_image_tensors(perturbed_inputs)
                 image1, image2 = get_image_tensors(inputs)
                 delta1 = adv_image1 - image1
@@ -1096,7 +1154,6 @@ def attack_one_dataloader(
                 delta_dic = losses.calc_delta_metrics(delta1, delta2)
                 for k, v in delta_dic.items():
                     metrics[k] = v
-
 
             for k in metrics.keys():
                 if metrics_sum.get(k) is None:
@@ -1107,7 +1164,6 @@ def attack_one_dataloader(
                 if iteration_metrics_sum.get(k) is None:
                     iteration_metrics_sum[k] = 0.0
                 iteration_metrics_sum[k] += iteration_metrics[k].item()
-
 
             free, total = torch.cuda.mem_get_info()
             tdl.set_postfix(
@@ -1127,7 +1183,7 @@ def attack_one_dataloader(
                 metrics_individual["epe"].append(metrics["val/epe"].item())
                 metrics_individual["outlier"].append(metrics["val/outlier"].item())
 
-            if attack_args["attack"] != "none":
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
                 generate_outputs(
                     args,
                     preds,
@@ -1137,6 +1193,17 @@ def attack_one_dataloader(
                     perturbed_inputs,
                     attack_args,
                 )
+
+            elif attack_args["attack"] == "3dcc":
+                generate_outputs(
+                    args,
+                    preds,
+                    dataloader_name,
+                    i,
+                    inputs.get("meta"),
+                    attack_args=attack_args,
+                )
+
             else:
                 generate_outputs(args, preds, dataloader_name, i, inputs.get("meta"))
             if args.max_samples is not None and i >= (args.max_samples - 1):
@@ -1145,7 +1212,9 @@ def attack_one_dataloader(
             del preds
             del inputs
             del iteration_metrics
-            if attack_args["attack"] != "none":
+
+            if attack_args["attack"] != "none" and attack_args["attack"] != "3dcc":
+
                 del perturbed_inputs
             torch.cuda.empty_cache()
 
@@ -1201,7 +1270,8 @@ def generate_outputs(
 
     if args.write_outputs:
         if perturbed_inputs is not None:
-            perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
+
+            # perturbed_inputs = tensor_dict_to_numpy(perturbed_inputs)
             _write_to_npy_file(
                 args,
                 preds,
@@ -1212,7 +1282,10 @@ def generate_outputs(
                 attack_args,
             )
         else:
-            _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
+            if attack_args is not None and attack_args["attack"] == "3dcc":
+                _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata, attack_args=attack_args)
+            else:
+                _write_to_npy_file(args, preds, dataloader_name, batch_idx, metadata)
 
 
 def _write_to_npy_file(
@@ -1234,9 +1307,22 @@ def _write_to_npy_file(
         if "sintel" in dataloader_name:
             seq_name = img_path.parts[-2]
             extra_dirs = seq_name
+        elif "spring" in dataloader_name:
+            seq_name = img_path.parts[-3]
+            extra_dirs = seq_name
     else:
         image_name = f"{batch_idx:08d}"
         image2_name = f"{batch_idx:08d}_2"
+
+
+    if args.flow_format != "original":
+        flow_ext = args.flow_format
+    else:
+        if "kitti" in dataloader_name or "hd1k" in dataloader_name or "sintel" in dataloader_name or "spring" in dataloader_name:
+            flow_ext = "png"
+        else:
+            flow_ext = "flo"
+
 
     if args.flow_format != "original":
             flow_ext = args.flow_format
@@ -1246,11 +1332,11 @@ def _write_to_npy_file(
         else:
             flow_ext = "flo"
 
-    out_dir_flows = None  # 初始化为 None 以避免 UnboundLocalError
+    out_dir_flows = None  
     for k, v in preds.items():
         if isinstance(v, np.ndarray):
             out_dir = out_root_dir
-            if perturbed_inputs is not None:
+            if perturbed_inputs is not None or (attack_args is not None and attack_args["attack"] == "3dcc"):
                 for arg, val in attack_args.items():
                     out_dir = out_dir / f"{arg}={val}"
 
@@ -1259,10 +1345,11 @@ def _write_to_npy_file(
                 out_dir_flows = out_dir / k / extra_dirs
                 out_dir_flows.mkdir(parents=True, exist_ok=True)
 
-                cv.imwrite(str(out_dir_flows / f"{image_name}.{flow_ext}"), v.astype(np.uint8))
+                cv.imwrite(
+                    str(out_dir_flows / f"{image_name}.{flow_ext}"), v.astype(np.uint8)
+                    )
         elif k == "flows":
-                # flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
-                if out_dir_flows is None:  # 确保 out_dir_flows 已经设置
+                if out_dir_flows is None:  
                     out_dir_flows = out_dir / k / extra_dirs
                     out_dir_flows.mkdir(parents=True, exist_ok=True)
                 flow_utils.flow_write(out_dir_flows / f"{image_name}.{flow_ext}", v)
@@ -1276,8 +1363,19 @@ def _write_to_npy_file(
                     v = v * 255
                 
                 if isinstance(v, np.ndarray):
-                    # 如果 v 是 numpy 数组，将其转换为 PyTorch 张量
                     v = torch.tensor(v)
+
+
+                image = v[0, 0].detach().cpu()
+                image2 = v[0, 1].detach().cpu()
+                # Convert from (C, H, W) to (H, W, C)
+                image = image.permute(1, 2, 0).numpy()
+                image2 = image2.permute(1, 2, 0).numpy()
+                output_filepath = out_dir_imgs / f"{image_name}.png"
+                output_filepath2 = out_dir_imgs / f"{image2_name}.png"
+
+                cv.imwrite(str(output_filepath), image.astype(np.uint8))
+                cv.imwrite(str(output_filepath2), image2.astype(np.uint8))
 
                 image = v[0, 0].detach().cpu()
                 image2 = v[0, 1].detach().cpu()
@@ -1298,7 +1396,6 @@ def _write_to_file(
     metadata: Optional[Dict[str, Any]] = None,
 ) -> None:
     out_root_dir = Path(args.output_path) / dataloader_name
-    # pdb.set_trace()
     extra_dirs = ""
     if metadata is not None:
         img_path = Path(metadata["image_paths"][0][0])
@@ -1328,7 +1425,6 @@ def _write_to_file(
             ):
                 if v.max() <= 1:
                     v = v * 255
-                pdb.set_trace()
                 cv.imwrite(str(out_dir / f"{image_name}.png"), v.astype(np.uint8))
 
 
@@ -1342,7 +1438,7 @@ if __name__ == "__main__":
         FlowModel = get_model_reference(sys.argv[1])
         parser = FlowModel.add_model_specific_args(parser)
 
-    add_datasets_to_parser(parser, "./ptlflow_attacked/datasets.yml")
+    add_datasets_to_parser(parser, "./ptlflow/datasets.yml")
 
     args = parser.parse_args()
 

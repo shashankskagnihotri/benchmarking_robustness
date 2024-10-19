@@ -2,10 +2,17 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
+<<<<<<< HEAD
 #SBATCH --time=00:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu_4
+=======
+#SBATCH --time=01:59:59
+#SBATCH --cpus-per-task=16
+#SBATCH --gres=gpu:1
+#SBATCH --partition=gpu_8
+>>>>>>> flow_luca
 #SBATCH --array=0-11%4
 #SBATCH --job-name=skflow_kitti-2015_bim_pgd_cospgd_i20_inf
 #SBATCH --output=slurm/skflow_kitti-2015_bim_pgd_cospgd_i20_inf_%A_%a.out

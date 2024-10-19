@@ -8,14 +8,14 @@
 #SBATCH --partition=gpu_4
 #SBATCH --array=0-14%4
 #SBATCH --job-name=craft_sintel-final_cc
-#SBATCH --output=cc_slurm/craft_sintel-final_cc_%A_%a.out
-#SBATCH --error=cc_slurm/craft_sintel-final_cc_err_%A_%a.out
+#SBATCH --output=slurm/craft_sintel-final_cc_%A_%a.out
+#SBATCH --error=slurm/craft_sintel-final_cc_err_%A_%a.out
 
 model="craft"
 dataset="sintel-final"
 checkpoint="sintel"
 attack="common_corruptions"
-cc_names="gaussian_noise "
+cc_names="gaussian_noise shot_noise impulse_noise defocus_blur glass_blur motion_blur zoom_blur snow frost fog brightness contrast elastic_transform pixelate jpeg_compression"
 cc_severitys="3"
 jobnum=0
 
@@ -29,7 +29,7 @@ do
         if [[ $SLURM_ARRAY_TASK_ID -eq $jobnum ]]
         then
             echo "Running job $model $checkpoint $dataset $attack $cc_name $cc_severity $jobnum"
-            python attacks2.py \
+            python attacks.py \
                 $model \
                 --pretrained_ckpt $checkpoint \
                 --val_dataset $dataset \

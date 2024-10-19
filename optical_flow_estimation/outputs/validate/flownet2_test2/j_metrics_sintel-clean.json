@@ -1,0 +1,42 @@
+{
+    "experiments": [
+        {
+            "start_time": "2024-06-03 10:00:54",
+            "model": "flownet2",
+            "checkpoint": "/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/checkpoints/flownet2/test2.ckpt",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-03 10:05:01",
+            "duration": "00:04:06",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 12.364851052934567,
+                "px1": 0.20759219722184963,
+                "px3": 0.44527372321345804,
+                "px5": 0.5581017591976218,
+                "outlier": 55.47261973472306,
+                "own_epe": 12.36485053703375,
+                "cosim": 0.27466878378090576
+            }
+        },
+        {
+            "start_time": "2024-06-03 17:07:01",
+            "model": "flownet2",
+            "checkpoint": "/pfs/work7/workspace/scratch/ma_jcaspary-team_project_fss2024/checkpoints/flownet2/test2.ckpt",
+            "attack": "none",
+            "targeted": false,
+            "end_time": "2024-06-03 17:11:50",
+            "duration": "00:04:48",
+            "dataset": "sintel-clean",
+            "metrics": {
+                "epe": 12.364851017206135,
+                "px1": 0.20759219932783748,
+                "px3": 0.4452737167147768,
+                "px5": 0.5581017571023698,
+                "outlier": 55.472620382415414,
+                "own_epe": 12.364850514359937,
+                "cosim": 0.2746687709740182
+            }
+        }
+    ]
+}

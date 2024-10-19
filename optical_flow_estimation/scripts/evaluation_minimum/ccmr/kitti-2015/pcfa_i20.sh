@@ -2,10 +2,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
-#SBATCH --time=30:00:00
+#SBATCH --time=47:59:59
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu_4
+#SBATCH --partition=gpu_4_a100
 #SBATCH --array=0-1%2
 #SBATCH --job-name=ccmr_kitti-2015_pcfa_i20
 #SBATCH --output=slurm/ccmr_kitti-2015_pcfa_i20.out

@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 import torch
-from ptlflow_attacked.ptlflow.models.base_model.base_model import BaseModel
+from ptlflow.models.base_model.base_model import BaseModel
 from attacks.attack_utils.utils import (
     get_image_tensors,
     get_image_grads,
@@ -8,6 +8,7 @@ from attacks.attack_utils.utils import (
 )
 from cospgd import functions as attack_functions
 from attacks.attack_utils.loss_criterion import LossCriterion
+import attacks.attack_utils.loss_criterion as losses
 
 
 @torch.enable_grad()
@@ -16,6 +17,7 @@ def bim_pgd_cospgd(
     inputs: Dict[str, torch.Tensor],
     model: BaseModel,
     targeted_inputs: Optional[Dict[str, torch.Tensor]],
+    orig_preds: Optional[Dict[str, torch.Tensor]]
 ):
     """Perform bim, pgd or cospgd adversarial attack on input images.
 
@@ -33,18 +35,22 @@ def bim_pgd_cospgd(
     torch.Tensor
         Perturbed images.
     """
+    # import pdb
+
+    iteration_metrics = {}
 
     if attack_args["attack_targeted"]:
         labels = targeted_inputs["flows"].squeeze(0)
-    else:
-        labels = inputs["flows"].squeeze(0)
+    elif attack_args["attack_optim_target"] == "ground_truth":
+        labels = inputs["flows"].clone().squeeze(0)
+    elif attack_args["attack_optim_target"] == "initial_flow":
+        labels = orig_preds["flows"].clone().squeeze(0)
 
     criterion = LossCriterion(attack_args["attack_loss"])
 
-    orig_image_1 = inputs["images"][0].clone()[0].unsqueeze(0)
-    orig_image_2 = inputs["images"][0].clone()[1].unsqueeze(0)
+    image_1, image_2 = get_image_tensors(inputs, clone=True)
 
-    image_1, image_2 = get_image_tensors(inputs)
+    orig_image_1, orig_image_2 = get_image_tensors(inputs)
 
     if "pgd" in attack_args["attack"]:
         if attack_args["attack_norm"] == "inf":
@@ -64,10 +70,9 @@ def bim_pgd_cospgd(
     else:
         attack_args["attack_alpha"] = attack_args["attack_epsilon"]
 
-    perturbed_inputs = replace_images_dic(inputs, image_1, image_2)
-    perturbed_images = perturbed_inputs["images"]
-    perturbed_images.requires_grad = True
-    perturbed_inputs["images"] = perturbed_images
+    perturbed_inputs = replace_images_dic(inputs, image_1, image_2, clone=True)
+
+    perturbed_inputs["images"].requires_grad_(True)
 
     preds = model(perturbed_inputs)
     pred_flows = preds["flows"].squeeze(0)
@@ -84,6 +89,7 @@ def bim_pgd_cospgd(
             )
         loss = loss.mean()
         loss.backward()
+        # pdb.set_trace()
         image_1_adv, image_2_adv = get_image_tensors(perturbed_inputs)
         image_1_grad, image_2_grad = get_image_grads(perturbed_inputs)
         if attack_args["attack_norm"] == "inf":
@@ -132,17 +138,25 @@ def bim_pgd_cospgd(
                 clamp_max=1,
                 grad_scale=None,
             )
-
+        # pdb.set_trace()
         perturbed_inputs = replace_images_dic(
             perturbed_inputs, image_1_adv, image_2_adv
         )
-        perturbed_images = perturbed_inputs["images"]
-        perturbed_images.requires_grad = True
-        perturbed_inputs["images"] = perturbed_images
+
+        perturbed_inputs["images"].requires_grad_(True)
 
         preds = model(perturbed_inputs)
         pred_flows = preds["flows"].squeeze(0)
         loss = criterion.loss(pred_flows.float(), labels.float())
 
+        delta1 = image_1_adv - orig_image_1
+        delta2 = image_2_adv - orig_image_2
+        iteration_metrics = iteration_metrics | losses.calc_delta_metrics(
+            delta1, delta2, t + 1
+        )
+        iteration_metrics = iteration_metrics | losses.calc_epe_metrics(
+            model, preds, inputs, t + 1, targeted_inputs
+        )
+
     loss = loss.mean()
-    return preds, perturbed_inputs # labels, preds, loss.item()
+    return preds, perturbed_inputs, iteration_metrics
