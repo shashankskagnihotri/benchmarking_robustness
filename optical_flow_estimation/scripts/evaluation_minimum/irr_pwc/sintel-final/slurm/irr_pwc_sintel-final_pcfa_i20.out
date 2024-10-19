@@ -1,0 +1,21 @@
+Running job irr_pwc sintel sintel-final pcfa 20 two 0.0000001 0.05 True zero 1
+[!!alt_cuda_corr is not compiled!!]
+{'attack': 'pcfa', 'attack_epsilon': 0.05, 'pcfa_boxconstraint': 'change_of_variables', 'attack_iterations': 20, 'attack_alpha': 1e-07, 'attack_targeted': True, 'attack_target': 'negative', 'attack_loss': 'epe'}
+[!!alt_cuda_corr is not compiled!!]
+{'attack': 'pcfa', 'attack_epsilon': 0.05, 'pcfa_boxconstraint': 'change_of_variables', 'attack_iterations': 20, 'attack_alpha': 1e-07, 'attack_targeted': True, 'attack_target': 'zero', 'attack_loss': 'epe'}
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n516
+Job ID: 24415550
+Array Job ID: 24415171_0
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 16:20:20
+CPU Efficiency: 6.23% of 10-22:28:00 core-walltime
+Job Wall-clock time: 16:24:15
+Memory Utilized: 1.76 GB
+Memory Efficiency: 1.76% of 100.00 GB

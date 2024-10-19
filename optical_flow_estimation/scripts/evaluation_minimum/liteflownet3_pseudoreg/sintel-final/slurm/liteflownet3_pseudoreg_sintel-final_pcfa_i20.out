@@ -1,0 +1,38 @@
+Running job liteflownet3 sintel sintel-final pcfa 20 two 0.0000001 0.05 True zero 1
+Running job liteflownet3 sintel sintel-final pcfa 20 two 0.0000001 0.05 True negative 0
+[!!alt_cuda_corr is not compiled!!]
+[!!alt_cuda_corr is not compiled!!]
+{'attack': 'pcfa', 'attack_epsilon': 0.05, 'pcfa_boxconstraint': 'change_of_variables', 'attack_iterations': 20, 'attack_alpha': 1e-07, 'attack_targeted': True, 'attack_target': 'negative', 'attack_loss': 'epe'}
+{'attack': 'pcfa', 'attack_epsilon': 0.05, 'pcfa_boxconstraint': 'change_of_variables', 'attack_iterations': 20, 'attack_alpha': 1e-07, 'attack_targeted': True, 'attack_target': 'zero', 'attack_loss': 'epe'}
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n517
+Job ID: 24415614
+Array Job ID: 24415219_0
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 16:08:04
+CPU Efficiency: 6.23% of 10-19:01:20 core-walltime
+Job Wall-clock time: 16:11:20
+Memory Utilized: 1.97 GB
+Memory Efficiency: 1.97% of 100.00 GB
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n517
+Job ID: 24415219
+Array Job ID: 24415219_1
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 16:48:38
+CPU Efficiency: 6.23% of 11-06:01:52 core-walltime
+Job Wall-clock time: 16:52:37
+Memory Utilized: 1.85 GB
+Memory Efficiency: 1.85% of 100.00 GB

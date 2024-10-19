@@ -1,0 +1,6 @@
+Running job csflow kitti kitti-2015 common_corruptions jpeg_compression 3 14
+{'attack': 'common_corruptions', 'cc_name': 'jpeg_compression', 'cc_severity': 3, 'attack_targeted': False}
+Original shapes: image_1: torch.Size([1, 3, 375, 1242]), image_2: torch.Size([1, 3, 375, 1242])
+Permuted shapes: image_1: torch.Size([375, 1242, 3]), image_2: torch.Size([375, 1242, 3])
+Tensors shapes: image_1: torch.Size([1, 1242, 3, 375]), image_2: torch.Size([1, 1242, 3, 375])
+Concatenated images shape: torch.Size([2, 1242, 3, 375])

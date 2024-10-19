@@ -1,0 +1,18 @@
+Running job liteflownet2 sintel sintel-final common_corruptions pixelate 3 13
+{'attack': 'common_corruptions', 'cc_name': 'pixelate', 'cc_severity': 3, 'attack_targeted': False}
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n482
+Job ID: 23876945
+Array Job ID: 23874535_13
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 00:00:17
+CPU Efficiency: 2.12% of 00:13:20 core-walltime
+Job Wall-clock time: 00:00:50
+Memory Utilized: 828.76 MB
+Memory Efficiency: 0.81% of 100.00 GB

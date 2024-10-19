@@ -1,0 +1,20 @@
+07/18/2024 06:17:40 - INFO: Loading 1041 samples from Sintel_final dataset.
+  0%|          | 0/1041 [00:00<?, ?it/s]/home/ma/ma_ma/ma_xinygao/miniconda3/envs/pcfa/lib/python3.10/site-packages/torch/nn/modules/conv.py:456: UserWarning: Applied workaround for CuDNN issue, install nvrtc.so (Triggered internally at /opt/conda/conda-bld/pytorch_1708025831440/work/aten/src/ATen/native/cudnn/Conv_v8.cpp:80.)
+  return F.conv2d(input, weight, bias, self.stride,
+  0%|          | 0/1041 [00:29<?, ?it/s]
+
+-------------------------------------------------------------------------------
+attacks.py 1368 <module>
+attack(args, model)
+
+attacks.py 677 attack
+metrics_mean, iteration_metrics_mean = attack_one_dataloader(
+
+_contextlib.py 115 decorate_context
+return func(*args, **kwargs)
+
+attacks.py 1111 attack_one_dataloader
+delta_dic = losses.calc_delta_metrics(delta1, delta2)
+
+AttributeError:
+'Tensor' object has no attribute 'calc_delta_metrics'

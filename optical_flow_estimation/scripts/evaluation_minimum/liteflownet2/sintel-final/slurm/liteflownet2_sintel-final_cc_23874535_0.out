@@ -1,0 +1,18 @@
+Running job liteflownet2 sintel sintel-final common_corruptions gaussian_noise 3 0
+{'attack': 'common_corruptions', 'cc_name': 'gaussian_noise', 'cc_severity': 3, 'attack_targeted': False}
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n485
+Job ID: 23876919
+Array Job ID: 23874535_0
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 00:00:22
+CPU Efficiency: 0.60% of 01:01:20 core-walltime
+Job Wall-clock time: 00:03:50
+Memory Utilized: 1.26 GB
+Memory Efficiency: 1.26% of 100.00 GB

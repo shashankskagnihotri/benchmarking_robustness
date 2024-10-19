@@ -1,0 +1,18 @@
+10/03/2024 17:13:40 - INFO: Loading faiss with AVX2 support.
+10/03/2024 17:13:40 - INFO: Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+10/03/2024 17:13:40 - INFO: Loading faiss.
+10/03/2024 17:13:40 - INFO: Successfully loaded faiss.
+
+-------------------------------------------------------------------------------
+attacks.py 1147 <module>
+model = get_model(sys.argv[1], args.pretrained_ckpt, args)
+
+__init__.py 265 get_model
+ckpt = load_checkpoint(pretrained_ckpt, model_ref, model_name)
+
+__init__.py 359 load_checkpoint
+raise ValueError(
+
+ValueError:
+Invalid checkpoint name sintel. Choose one from {kitti}

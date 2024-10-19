@@ -1,0 +1,2 @@
+Running job liteflownet2 sintel sintel-final common_corruptions jpeg_compression 3 14
+{'attack': 'common_corruptions', 'cc_name': 'jpeg_compression', 'cc_severity': 3, 'attack_targeted': False}

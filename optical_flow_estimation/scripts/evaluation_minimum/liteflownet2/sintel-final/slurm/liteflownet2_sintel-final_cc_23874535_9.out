@@ -1,0 +1,18 @@
+Running job liteflownet2 sintel sintel-final common_corruptions fog 3 9
+{'attack': 'common_corruptions', 'cc_name': 'fog', 'cc_severity': 3, 'attack_targeted': False}
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n482
+Job ID: 23876936
+Array Job ID: 23874535_9
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 00:00:17
+CPU Efficiency: 2.08% of 00:13:36 core-walltime
+Job Wall-clock time: 00:00:51
+Memory Utilized: 829.53 MB
+Memory Efficiency: 0.81% of 100.00 GB

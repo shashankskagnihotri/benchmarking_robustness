@@ -1,0 +1,20 @@
+Running job csflow kitti kitti-2015 common_corruptions glass_blur 3 4
+{'attack': 'common_corruptions', 'cc_name': 'glass_blur', 'cc_severity': 3, 'attack_targeted': False}
+Original shapes: image_1: torch.Size([1, 3, 375, 1242]), image_2: torch.Size([1, 3, 375, 1242])
+Permuted shapes: image_1: torch.Size([375, 1242, 3]), image_2: torch.Size([375, 1242, 3])
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n485
+Job ID: 23895095
+Array Job ID: 23893307_4
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 00:00:18
+CPU Efficiency: 2.21% of 00:13:36 core-walltime
+Job Wall-clock time: 00:00:51
+Memory Utilized: 812.18 MB
+Memory Efficiency: 0.79% of 100.00 GB

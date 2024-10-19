@@ -1,0 +1,35 @@
+07/23/2024 05:46:42 - INFO: Loading 200 samples from KITTI_2015 dataset.
+  0%|          | 0/200 [00:00<?, ?it/s]/home/ma/ma_ma/ma_xinygao/miniconda3/envs/pcfa/lib/python3.10/site-packages/torch/nn/modules/conv.py:456: UserWarning: Applied workaround for CuDNN issue, install nvrtc.so (Triggered internally at /opt/conda/conda-bld/pytorch_1708025831440/work/aten/src/ATen/native/cudnn/Conv_v8.cpp:80.)
+  return F.conv2d(input, weight, bias, self.stride,
+  0%|          | 0/200 [00:13<?, ?it/s]
+
+-------------------------------------------------------------------------------
+attacks.py 1361 <module>
+attack(args, model)
+
+attacks.py 675 attack
+metrics_mean, iteration_metrics_mean = attack_one_dataloader(
+
+_contextlib.py 115 decorate_context
+return func(*args, **kwargs)
+
+attacks.py 918 attack_one_dataloader
+preds, perturbed_inputs = common_corrupt(attack_args, inputs, model)
+
+common_corruptions.py 92 common_corrupt
+preds = model(perturbed_inputs)
+
+module.py 1511 _wrapped_call_impl
+return self._call_impl(*args, **kwargs)
+
+module.py 1520 _call_impl
+return forward_call(*args, **kwargs)
+
+csflow.py 114 forward
+images, image_resizer = self.preprocess_images(
+
+base_model.py 272 preprocess_images
+images = images + bgr_add
+
+RuntimeError:
+The size of tensor a (1242) must match the size of tensor b (3) at non-singleton dimension 1

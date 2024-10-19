@@ -1,0 +1,22 @@
+Downloading: "https://github.com/hmorimitsu/ptlflow/releases/download/weights1/liteflownet2-sintel-1e1eb282.ckpt" to /home/ma/ma_ma/ma_xinygao/.cache/torch/hub/ptlflow/checkpoints/liteflownet2-sintel-1e1eb282.ckpt
+  0%|          | 0.00/24.6M [00:00<?, ?B/s]  8%|▊         | 1.91M/24.6M [00:00<00:01, 20.1MB/s] 17%|█▋        | 4.11M/24.6M [00:00<00:00, 21.8MB/s] 25%|██▌       | 6.19M/24.6M [00:00<00:00, 21.0MB/s] 33%|███▎      | 8.20M/24.6M [00:00<00:00, 17.9MB/s] 43%|████▎     | 10.6M/24.6M [00:00<00:00, 20.1MB/s] 53%|█████▎    | 12.9M/24.6M [00:00<00:00, 21.6MB/s] 69%|██████▉   | 16.9M/24.6M [00:00<00:00, 27.8MB/s] 87%|████████▋ | 21.4M/24.6M [00:00<00:00, 33.7MB/s]100%|██████████| 24.6M/24.6M [00:00<00:00, 28.1MB/s]
+07/18/2024 06:17:38 - INFO: Loading 1041 samples from Sintel_final dataset.
+  0%|          | 0/1041 [00:00<?, ?it/s]/home/ma/ma_ma/ma_xinygao/miniconda3/envs/pcfa/lib/python3.10/site-packages/torch/nn/modules/conv.py:456: UserWarning: Applied workaround for CuDNN issue, install nvrtc.so (Triggered internally at /opt/conda/conda-bld/pytorch_1708025831440/work/aten/src/ATen/native/cudnn/Conv_v8.cpp:80.)
+  return F.conv2d(input, weight, bias, self.stride,
+  0%|          | 0/1041 [00:31<?, ?it/s]
+
+-------------------------------------------------------------------------------
+attacks.py 1368 <module>
+attack(args, model)
+
+attacks.py 677 attack
+metrics_mean, iteration_metrics_mean = attack_one_dataloader(
+
+_contextlib.py 115 decorate_context
+return func(*args, **kwargs)
+
+attacks.py 1111 attack_one_dataloader
+delta_dic = losses.calc_delta_metrics(delta1, delta2)
+
+AttributeError:
+'Tensor' object has no attribute 'calc_delta_metrics'

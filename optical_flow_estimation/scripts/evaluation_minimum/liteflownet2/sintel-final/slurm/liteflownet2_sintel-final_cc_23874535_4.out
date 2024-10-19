@@ -1,0 +1,18 @@
+Running job liteflownet2 sintel sintel-final common_corruptions glass_blur 3 4
+{'attack': 'common_corruptions', 'cc_name': 'glass_blur', 'cc_severity': 3, 'attack_targeted': False}
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n482
+Job ID: 23876927
+Array Job ID: 23874535_4
+Cluster: uc2
+User/Group: ma_xinygao/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 16
+CPU Utilized: 00:00:17
+CPU Efficiency: 2.04% of 00:13:52 core-walltime
+Job Wall-clock time: 00:00:52
+Memory Utilized: 827.21 MB
+Memory Efficiency: 0.81% of 100.00 GB
