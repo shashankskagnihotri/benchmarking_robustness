@@ -285,28 +285,6 @@ def attack_image(
     flow_init = preds_init["flows"].squeeze(0)
     flow_init = flow_init.to(device).detach()
 
-    #======================================================================
-    # from DistractingDownpour.helper_functions.own_models import ScaledInputWeatherModel
-    # # 创建 ScaledInputWeatherModel 的实例
-    # modelw = ScaledInputWeatherModel(args=attack_args, model="GMA", make_unit_input=False)
-    # pred_flow = modelw.forward(rendered_image1, rendered_image2, weather=weather, scene_data=scene_data, args_=attack_args, test_mode=True)
-    # perturbed_inputs = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
-    # flow_weather_pred = pred_flow["flows"].squeeze(0)  #flow_pred =...
-    # flow_weather_pred = flow_weather_pred.to(device)
-    # define the initial flow, the target, and update mu
-    # flow_weather_init = flow_weather_pred.detach().clone()
-    # flow_weather_init.requires_grad = False
-
-    # flow_init = ScaledInputWeatherModel.forward(rendered_image1_init, rendered_image2_init, weather=None, scene_data=None, args_=None, test_mode=True)
-    # perturbed_inputs_init = replace_images_dic(targeted_inputs, rendered_image1, rendered_image2, clone=True)
-    # targeted_inputs_init = flow_init["flows"].squeeze(0)
-    # targeted_inputs_init = targeted_inputs_init.to(device).detach()
-
-    # define target (potentially based on first flow prediction)
-    # define attack target
-    # target = targets.get_target(attack_args["weather_target"], flow_init, device=device)
-    # target = target.to(device)
-    # target.requires_grad = False
     target = get_flow_tensors(targeted_inputs)
     target = target.to(device)
     target.requires_grad = False
