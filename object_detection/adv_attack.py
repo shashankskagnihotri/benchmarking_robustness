@@ -27,7 +27,7 @@ WAND_ENTITY = os.getenv("WANDB_ENTITY")
 assert WAND_PROJECT, "Please set the WANDB_PROJECT environment variable"
 assert WAND_ENTITY, "Please set the WANDB_ENTITY environment variable"
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     WAND_PROJECT = "debug"
@@ -273,9 +273,14 @@ def pgd_attack(
 def evaluator_process(evaluator, data_batch_prepro, runner):
     runner.model.training = False  # avoid missing arguments error in some models
 
+    if "reppoint" in runner.model_name.lower():
+        runner.model.bbox_head.adv_attack = False
+
     with torch.no_grad():
         outputs = runner.model(**data_batch_prepro, mode="predict")
 
+    if "reppoint" in runner.model_name.lower():
+        runner.model.bbox_head.adv_attack = True
     evaluator.process(data_samples=outputs, data_batch=data_batch_prepro)
 
 
@@ -509,7 +514,7 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict):
             data_batch_prepro = attack(
                 data_batch, self.runner, **attack_kwargs, evaluators=evaluators
             )
-
+            self.runner.model.bbox_head.adv_attack = False
             with torch.no_grad():
                 outputs = self.runner.model(**data_batch_prepro, mode="predict")
 
