@@ -1,0 +1,44 @@
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/pudb/__init__.py", line 172, in _runscript
+    dbg._runscript(mainpyfile)
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/pudb/debugger.py", line 545, in _runscript
+    self.run(statement)
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/bdb.py", line 600, in run
+    exec(cmd, globals, locals)
+  File "<string>", line 1, in <module>
+  File "wrapper.py", line 95, in <module>
+    main.test()
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/sttr/main.py", line 327, in test
+    main(args)
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/sttr/main.py", line 235, in main
+    evaluate(model, criterion, data_loader_test, device, 0, summary_writer, save_output=False)
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/sttr/utilities/eval.py", line 38, in evaluate
+    outputs, losses, sampled_disp = forward_pass(model, data, device, criterion, eval_stats, idx, logger)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/sttr/utilities/foward_pass.py", line 66, in forward_pass
+    outputs = model(inputs)
+              ^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/sttr/utilities/foward_pass.py", line 113, in forward
+    inputs.disp = self.normalize_single(inputs.disp, inputs.disp.device)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/code/benchmarking_robustness/disparity_estimation/sttr/utilities/foward_pass.py", line 129, in normalize_single
+    tensor_img = F.normalize(tensor_img, self.mean, self.std, self.max_pixel_value)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/albumentations/augmentations/utils.py", line 122, in wrapped_function
+    result = func(img, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/albumentations/augmentations/functional.py", line 120, in normalize
+    return normalize_numpy(img, mean_np, denominator)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/miniconda3/envs/unified_env/lib/python3.12/site-packages/albumentations/augmentations/functional.py", line 102, in normalize_numpy
+    img -= mean
+ValueError: operands could not be broadcast together with shapes (1,234,880) (3,) (1,234,880) 
