@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-
+# omg, how idotic can you be to create a class which is named like the pytorch class
 class NestedTensor(object):
     def __init__(self, left, right, disp=None, sampled_cols=None, sampled_rows=None, occ_mask=None,
                  occ_mask_right=None):

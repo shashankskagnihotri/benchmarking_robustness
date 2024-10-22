@@ -4,6 +4,9 @@
 
 import torch
 import mlflow
+from torch import nn
+import albumentations.augmentations.functional as F
+from pudb import set_trace; set_trace()
 
 from utilities.misc import NestedTensor
 
@@ -55,7 +58,11 @@ def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):
     inputs = NestedTensor(left, right, sampled_cols=sampled_cols, sampled_rows=sampled_rows, disp=disp,
                           occ_mask=occ_mask, occ_mask_right=occ_mask_right)
 
+    #set_trace() # nested = torch.nested_tensor([t1, t2])
     # forward pass
+    __imagenet_stats = {'mean': (0.485, 0.456, 0.406),
+                        'std': (0.229, 0.224, 0.225)}
+    model = NormalizedModel(model, __imagenet_stats['mean'], __imagenet_stats['std'])
     outputs = model(inputs)
 
     # compute loss
@@ -82,3 +89,43 @@ def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):
                      losses['epe'].item(), losses['iou'].item(), losses['error_px'] / losses['total_px']))
 
     return outputs, losses, disp
+
+
+
+
+
+class NormalizedModel(nn.Module):
+
+    def __init__(self, model, mean, std, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.max_pixel_value: float = 255.0
+        self.mean = mean
+        self.std = std
+        self.model = model
+
+    def forward(self, inputs: NestedTensor): # !!!! this is not the PyTorch nested tensor class
+        # for i in range(len(inputs)):
+        #     inputs[i] = F.normalize(inputs[i], self.mean, self.std, self.max_pixel_value)
+        # return self.model(inputs)
+        #set_trace()
+        # Normalize only the specified tensors within the NestedTensor instance
+        if inputs.disp is not None:
+            inputs.disp = self.normalize_single(inputs.disp, inputs.disp.device)
+
+        if inputs.left is not None:
+            inputs.left = self.normalize_single(inputs.left, inputs.left.device)
+
+        if inputs.occ_mask is not None:
+            inputs.occ_mask = self.normalize_single(inputs.occ_mask, inputs.occ_mask.device)
+
+        if inputs.occ_mask_right is not None:
+            inputs.occ_mask_right = self.normalize_single(inputs.occ_mask_right, inputs.occ_mask_right.device)
+
+        # Pass the modified inputs to the model
+        return self.model(inputs)
+
+    def normalize_single(self, img: torch.Tensor, device) -> torch.Tensor:
+        img = img.cpu().detach().numpy()
+        img = F.normalize(img, self.mean, self.std, self.max_pixel_value)
+        img = torch.from_numpy(img).to(device)
+        return img
