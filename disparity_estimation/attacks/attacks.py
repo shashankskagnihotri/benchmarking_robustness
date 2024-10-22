@@ -1823,14 +1823,15 @@ class APGDAttack():
         occ_mask = occ_mask.to(self.device).half() if occ_mask is not None else None
         occ_mask_right = occ_mask_right.to(self.device).half() if occ_mask_right is not None else None
 
-        print(x_left.dtype)
-        print(x_right.dtype)
+        print(f"x_left: {x_left.dtype}")
+        print(f"x_right: {x_right.dtype}")
         if occ_mask is not None:
-            print(occ_mask.dtype)
+            print(f"occ_mask: {occ_mask.dtype}")
         if occ_mask_right is not None:
-            print(occ_mask_right.dtype)
+            print(f"occ_mask_right: {occ_mask_right.dtype}")
 
-        print(disparity_target.dtype)
+        print(f"disparity_target: {disparity_target.dtype}")
+        print()
 
         # Handle model output based on architecture
         if disparity_target is None:
@@ -1870,7 +1871,7 @@ class APGDAttack():
             x_adv = x_left_right + t + delta
 
         x_adv = x_adv.clamp(0., 1.)
-        x_best = x_adv.clone()
+        x_best = x_adv.clone().half() if 'sttr' in self.architecture else x_adv.clone()
 
         # Compute the initial loss based on architecture
         if self.architecture == 'cfnet' or 'gwcnet-g' in self.architecture:
@@ -1884,11 +1885,15 @@ class APGDAttack():
                 'occ_mask': occ_mask,
                 'occ_mask_right': occ_mask_right
             }
-            print( x_best[:, 0].dtype)
-            print( x_best[:, 1].dtype)
-            print( disparity_target.dtype)
-            print( occ_mask.dtype)
-            print( occ_mask_right.dtype)
+            # print( x_best[:, 0].dtype)
+            print(f"x_best: {x_best.dtype}")
+            # print( x_best[:, 1].dtype)
+            # print( disparity_target.dtype)
+            print(f"disparity_target: {disparity_target.dtype}")
+            # print( occ_mask.dtype)
+            print(f"occ_mask: {occ_mask.dtype}")
+            # print( occ_mask_right.dtype)
+            print(f"occ_mask_right: {occ_mask_right.dtype}")
             # Mixed precision with autocast
             with torch.cuda.amp.autocast():
                 outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
@@ -1904,6 +1909,7 @@ class APGDAttack():
         perturbed_results = {}
 
         for i in range(self.num_iterations):
+            print(f"iteration: {i}")
             x_adv.requires_grad_()
 
             if self.architecture == 'cfnet' or 'gwcnet-g' in self.architecture:

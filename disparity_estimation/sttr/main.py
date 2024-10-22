@@ -164,6 +164,7 @@ def main(args):
     lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.lr_decay_rate)
 
     # mixed precision training
+    print("AMP: ", args.apex)
     if args.apex:
         from apex import amp
         model, optimizer = amp.initialize(model, optimizer, opt_level='O1')
@@ -243,6 +244,13 @@ def main(args):
         # mixed precision training
         scaler = torch.cuda.amp.GradScaler() if args.apex else None
 
+        model = torch.nn.DataParallel(model.half())
+        # model = model.half().to('cuda:0')
+        # Annahme: model ist dein geladenes Modell
+        for name, param in model.named_parameters():
+            print(f"Parameter: {name}, Datentyp: {param.dtype}, Device: {param.device}")
+
+
         data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
         from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
@@ -259,7 +267,7 @@ def main(args):
             attacker = BIMAttack(model,architecture='sttr',epsilon=epsilon,num_iterations=num_iterations,alpha=alpha,norm=norm, targeted=False) 
             
         elif attack_type == 'apgd':
-            attacker = APGDAttack(model, architecture='sttr',num_iterations=num_iterations,norm=norm, eps=epsilon)
+            attacker = APGDAttack(model, architecture='sttr',num_iterations=num_iterations,norm=norm, eps=epsilon, device=device)
         
         else:
             raise ValueError("Attack type not recognized")
