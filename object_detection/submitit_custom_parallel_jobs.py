@@ -26,30 +26,30 @@ class cfg:
 cfgs = [
     # cfg("cascade_rcnn_convnext-s_coco", 2), #* with patience 15 Epoch(val) [22][2500/2500]    coco/bbox_mAP: 0.4790  coco/bbox_mAP_50: 0.6770  coco/bbox_mAP_75: 0.5230  coco/bbox_mAP_s: 0.3150  coco/bbox_mAP_m: 0.5190  coco/bbox_mAP_l: 0.6270
     # cfg("cascade_rcnn_swin-s_coco", 2), #* with patience 5 Epoch(val) [6][2500/2500]    coco/bbox_mAP: 0.4490  coco/bbox_mAP_50: 0.6500  coco/bbox_mAP_75: 0.4870  coco/bbox_mAP_s: 0.2710  coco/bbox_mAP_m: 0.4830  coco/bbox_mAP_l: 0.6060
-    # cfg("codino_convnext-s_coco", 2),  #! resubmit
-    # cfg(
-    #     "codino_swin-s_coco", 2
-    # ),  # ? memory error did with_cp=true and submitted if fails again try ampoptim, but it runs
-    # cfg(
-    #     "ddq_convnext-s_coco", 2
-    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs
-    # cfg(
-    #     "ddq_swin-s_coco", 2
-    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs some time might have to fix something
+    cfg("codino_convnext-s_coco", 2),  #! resubmit
+    cfg(
+        "codino_swin-s_coco", 2
+    ),  # ? memory error did with_cp=true and submitted if fails again try ampoptim, but it runs
+    cfg(
+        "ddq_convnext-s_coco", 2
+    ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs
+    cfg(
+        "ddq_swin-s_coco", 2
+    ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs some time might have to fix something
     # cfg("deformable_detr_convnext-s_coco", 4), #* with patience 15 Epoch(val) [24][1250/1250]    coco/bbox_mAP: 0.4620  coco/bbox_mAP_50: 0.6550  coco/bbox_mAP_75: 0.5050  coco/bbox_mAP_s: 0.2890  coco/bbox_mAP_m: 0.4920  coco/bbox_mAP_l: 0.6140
     # cfg("deformable_detr_swin-s_coco", 4),  #* ran completly Epoch(val) [36][1250/1250]    coco/bbox_mAP: 0.4830  coco/bbox_mAP_50: 0.6700  coco/bbox_mAP_75: 0.5280  coco/bbox_mAP_s: 0.3250  coco/bbox_mAP_m: 0.5090  coco/bbox_mAP_l: 0.6250
-    # cfg("dino_convnext-s_coco", 2),  #! resubmit
-    # cfg("dino_swin-s_coco", 2),  #! resubmit
-    # cfg("glip_convnext-s_coco", 2),  #! resubmit
-    # cfg("glip_swin-s_coco", 2),  #! resubmit
+    cfg("dino_convnext-s_coco", 2),  #! resubmit
+    cfg("dino_swin-s_coco", 2),  #! resubmit
+    cfg("glip_convnext-s_coco", 2),  #! resubmit
+    cfg("glip_swin-s_coco", 2),  #! resubmit
     # cfg(
     #     "paa_convnext-s_coco", 2
     # ),  #* stopped with patience 5, Epoch(val) [11][2500/2500]    coco/bbox_mAP: 0.4440  coco/bbox_mAP_50: 0.6340  coco/bbox_mAP_75: 0.4870  coco/bbox_mAP_s: 0.2880  coco/bbox_mAP_m: 0.4890  coco/bbox_mAP_l: 0.5930
     # cfg("paa_swin-s_coco", 2), #* with patience 5 Epoch(val) [11][2500/2500]    coco/bbox_mAP: 0.4500  coco/bbox_mAP_50: 0.6410  coco/bbox_mAP_75: 0.4900  coco/bbox_mAP_s: 0.2790  coco/bbox_mAP_m: 0.4940  coco/bbox_mAP_l: 0.6040
-    # cfg(
-    #     "rtmdet_convnext-s_coco", 2
-    # ),  #! with patience 5: Epoch(val) [16][500/500]    coco/bbox_mAP: 0.3690  coco/bbox_mAP_50: 0.5440 coco/bbox_mAP_75: 0.3960  coco/bbox_mAP_s: 0.1780  coco/bbox_mAP_m: 0.4170  coco/bbox_mAP_l: 0.5540
-    # cfg("rtmdet_swin-s_coco", 2),  #! resubmit
+    cfg(
+        "rtmdet_convnext-s_coco", 2
+    ),  #! with patience 5: Epoch(val) [16][500/500]    coco/bbox_mAP: 0.3690  coco/bbox_mAP_50: 0.5440 coco/bbox_mAP_75: 0.3960  coco/bbox_mAP_s: 0.1780  coco/bbox_mAP_m: 0.4170  coco/bbox_mAP_l: 0.5540
+    cfg("rtmdet_swin-s_coco", 2),  #! resubmit
     # cfg("sparse_rcnn_convnext-s_coco", 2),  #* ran full 36 epochs Epoch(val) [36][2500/2500]    coco/bbox_mAP: 0.4740  coco/bbox_mAP_50: 0.6700  coco/bbox_mAP_75: 0.5200  coco/bbox_mAP_s: 0.3030  coco/bbox_mAP_m: 0.5050  coco/bbox_mAP_l: 0.6430
     # cfg("sparse_rcnn_swin-s_coco", 2),  #* ran fully Epoch(val) [36][2500/2500]    coco/bbox_mAP: 0.4750  coco/bbox_mAP_50: 0.6710  coco/bbox_mAP_75: 0.5170  coco/bbox_mAP_s: 0.3040  coco/bbox_mAP_m: 0.5030  coco/bbox_mAP_l: 0.6420
     # cfg(
@@ -58,7 +58,7 @@ cfgs = [
     # cfg(
     #     "tood_swin-s_coco", 2
     # ),  #* with patience 5 Epoch(val) [10][2500/2500]    coco/bbox_mAP: 0.4510  coco/bbox_mAP_50: 0.6360  coco/bbox_mAP_75: 0.4890  coco/bbox_mAP_s: 0.2840  coco/bbox_mAP_m: 0.4890  coco/bbox_mAP_l: 0.5940; with patience 15 Epoch(val) [26][2500/2500]    coco/bbox_mAP: 0.4590  coco/bbox_mAP_50: 0.6410  coco/bbox_mAP_75: 0.4970  coco/bbox_mAP_s: 0.3080  coco/bbox_mAP_m: 0.5030  coco/bbox_mAP_l: 0.5910
-    # cfg("tood_r101-dconv-c3-c5_fpn_ms-2x_coco", 2),
+    cfg("tood_r101-dconv-c3-c5_fpn_ms-2x_coco", 2),
 ]
 
 
