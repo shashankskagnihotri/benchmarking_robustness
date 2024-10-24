@@ -1,9 +1,5 @@
-find_unused_parameters = True
-auto_scale_lr = dict(base_batch_size=16, enable=True)
+auto_scale_lr = dict(base_batch_size=16, enable=False)
 backend_args = None
-custom_hooks = [
-    dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
-]
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
 default_hooks = dict(
@@ -14,35 +10,42 @@ default_hooks = dict(
     timer=dict(type="IterTimerHook"),
     visualization=dict(type="DetVisualizationHook"),
 )
+custom_hooks = [
+    dict(monitor="coco/bbox_mAP", patience=15, type="EarlyStoppingHook"),
+]
 default_scope = "mmdet"
 env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend="nccl"),
     mp_cfg=dict(mp_start_method="fork", opencv_num_threads=0),
 )
-launcher = "pytorch"
 load_from = None
 log_level = "INFO"
 log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
-max_epochs = 36
+max_epochs = 24
 model = dict(
     backbone=dict(
-        arch="small",
-        drop_path_rate=0.6,
-        gap_before_final_norm=False,
-        init_cfg=dict(
-            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth",
-            prefix="backbone.",
-            type="Pretrained",
-        ),
-        layer_scale_init_value=1.0,
-        out_indices=[
+        dcn=dict(deformable_groups=1, fallback_on_stride=False, type="DCNv2"),
+        depth=101,
+        frozen_stages=1,
+        init_cfg=dict(checkpoint="torchvision://resnet101", type="Pretrained"),
+        norm_cfg=dict(requires_grad=True, type="BN"),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=(
             0,
             1,
             2,
             3,
-        ],
-        type="mmpretrain.ConvNeXt",
+        ),
+        stage_with_dcn=(
+            False,
+            True,
+            True,
+            True,
+        ),
+        style="pytorch",
+        type="ResNet",
     ),
     bbox_head=dict(
         anchor_generator=dict(
@@ -60,6 +63,7 @@ model = dict(
             ],
             type="AnchorGenerator",
         ),
+        anchor_type="anchor_free",
         bbox_coder=dict(
             target_means=[
                 0.0,
@@ -77,20 +81,26 @@ model = dict(
         ),
         feat_channels=256,
         in_channels=256,
-        loss_bbox=dict(loss_weight=1.3, type="GIoULoss"),
-        loss_centerness=dict(
-            loss_weight=0.5, type="CrossEntropyLoss", use_sigmoid=True
+        initial_loss_cls=dict(
+            activated=True,
+            alpha=0.25,
+            gamma=2.0,
+            loss_weight=1.0,
+            type="FocalLoss",
+            use_sigmoid=True,
         ),
+        loss_bbox=dict(loss_weight=2.0, type="GIoULoss"),
         loss_cls=dict(
-            alpha=0.25, gamma=2.0, loss_weight=1.0, type="FocalLoss", use_sigmoid=True
+            activated=True,
+            beta=2.0,
+            loss_weight=1.0,
+            type="QualityFocalLoss",
+            use_sigmoid=True,
         ),
         num_classes=80,
-        reg_decoded_bbox=True,
-        score_voting=True,
-        stacked_convs=4,
-        topk=9,
-        type="PAAHead",
-        covariance_type="full",
+        num_dcn=2,
+        stacked_convs=6,
+        type="TOODHead",
     ),
     data_preprocessor=dict(
         bgr_to_rgb=True,
@@ -110,10 +120,10 @@ model = dict(
     neck=dict(
         add_extra_convs="on_output",
         in_channels=[
-            96,
-            192,
-            384,
-            768,
+            256,
+            512,
+            1024,
+            2048,
         ],
         num_outs=5,
         out_channels=256,
@@ -129,47 +139,35 @@ model = dict(
     ),
     train_cfg=dict(
         allowed_border=-1,
-        assigner=dict(
-            ignore_iof_thr=-1,
-            min_pos_iou=0,
-            neg_iou_thr=0.1,
-            pos_iou_thr=0.1,
-            type="MaxIoUAssigner",
-        ),
+        alpha=1,
+        assigner=dict(topk=13, type="TaskAlignedAssigner"),
+        beta=6,
         debug=False,
+        initial_assigner=dict(topk=9, type="ATSSAssigner"),
+        initial_epoch=4,
         pos_weight=-1,
     ),
-    type="PAA",
+    type="TOOD",
 )
 optim_wrapper = dict(
-    constructor="LearningRateDecayOptimizerConstructor",
-    optimizer=dict(
-        betas=(
-            0.9,
-            0.999,
-        ),
-        lr=0.0002,
-        type="AdamW",
-        weight_decay=0.05,
-    ),
-    paramwise_cfg=dict(decay_rate=0.7, decay_type="layer_wise", num_layers=12),
+    optimizer=dict(lr=0.01, momentum=0.9, type="SGD", weight_decay=0.0001),
     type="OptimWrapper",
 )
 param_scheduler = [
-    dict(begin=0, by_epoch=False, end=1000, start_factor=0.001, type="LinearLR"),
+    dict(begin=0, by_epoch=False, end=500, start_factor=0.001, type="LinearLR"),
     dict(
         begin=0,
         by_epoch=True,
-        end=36,
+        end=24,
         gamma=0.1,
         milestones=[
-            27,
-            33,
+            16,
+            22,
         ],
         type="MultiStepLR",
     ),
 ]
-resume = True
+resume = False
 test_cfg = dict(type="TestLoop")
 test_dataloader = dict(
     batch_size=1,
@@ -237,7 +235,7 @@ test_pipeline = [
         type="PackDetInputs",
     ),
 ]
-train_cfg = dict(max_epochs=36, type="EpochBasedTrainLoop", val_interval=1)
+train_cfg = dict(max_epochs=24, type="EpochBasedTrainLoop", val_interval=1)
 train_dataloader = dict(
     batch_sampler=dict(type="AspectRatioBatchSampler"),
     batch_size=2,
@@ -255,7 +253,7 @@ train_dataloader = dict(
                 scale=[
                     (
                         1333,
-                        640,
+                        480,
                     ),
                     (
                         1333,
@@ -281,7 +279,7 @@ train_pipeline = [
         scale=[
             (
                 1333,
-                640,
+                480,
             ),
             (
                 1333,
@@ -339,23 +337,12 @@ val_evaluator = dict(
     type="CocoMetric",
 )
 vis_backends = [
-    dict(
-        init_kwargs=dict(
-            config=dict(config_name="paa_convnext-s_coco"), project="Training"
-        ),
-        type="WandbVisBackend",
-    ),
+    dict(type="LocalVisBackend"),
 ]
 visualizer = dict(
     name="visualizer",
     type="DetLocalVisualizer",
     vis_backends=[
-        dict(
-            init_kwargs=dict(
-                config=dict(config_name="paa_convnext-s_coco"), project="Training"
-            ),
-            type="WandbVisBackend",
-        ),
+        dict(type="LocalVisBackend"),
     ],
 )
-work_dir = "./slurm/train_work_dir/paa_convnext-s_coco"

@@ -2,7 +2,7 @@ find_unused_parameters = True
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
-    dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
+    dict(monitor="coco/bbox_mAP", patience=15, type="EarlyStoppingHook"),
 ]
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
@@ -60,6 +60,7 @@ model = dict(
             ],
             type="AnchorGenerator",
         ),
+        anchor_type="anchor_free",
         bbox_coder=dict(
             target_means=[
                 0.0,
@@ -77,20 +78,25 @@ model = dict(
         ),
         feat_channels=256,
         in_channels=256,
-        loss_bbox=dict(loss_weight=1.3, type="GIoULoss"),
-        loss_centerness=dict(
-            loss_weight=0.5, type="CrossEntropyLoss", use_sigmoid=True
+        initial_loss_cls=dict(
+            activated=True,
+            alpha=0.25,
+            gamma=2.0,
+            loss_weight=1.0,
+            type="FocalLoss",
+            use_sigmoid=True,
         ),
+        loss_bbox=dict(loss_weight=2.0, type="GIoULoss"),
         loss_cls=dict(
-            alpha=0.25, gamma=2.0, loss_weight=1.0, type="FocalLoss", use_sigmoid=True
+            activated=True,
+            beta=2.0,
+            loss_weight=1.0,
+            type="QualityFocalLoss",
+            use_sigmoid=True,
         ),
         num_classes=80,
-        reg_decoded_bbox=True,
-        score_voting=True,
-        stacked_convs=4,
-        topk=9,
-        type="PAAHead",
-        covariance_type="full",
+        stacked_convs=6,
+        type="TOODHead",
     ),
     data_preprocessor=dict(
         bgr_to_rgb=True,
@@ -129,17 +135,15 @@ model = dict(
     ),
     train_cfg=dict(
         allowed_border=-1,
-        assigner=dict(
-            ignore_iof_thr=-1,
-            min_pos_iou=0,
-            neg_iou_thr=0.1,
-            pos_iou_thr=0.1,
-            type="MaxIoUAssigner",
-        ),
+        alpha=1,
+        assigner=dict(topk=13, type="TaskAlignedAssigner"),
+        beta=6,
         debug=False,
+        initial_assigner=dict(topk=9, type="ATSSAssigner"),
+        initial_epoch=4,
         pos_weight=-1,
     ),
-    type="PAA",
+    type="TOOD",
 )
 optim_wrapper = dict(
     constructor="LearningRateDecayOptimizerConstructor",
@@ -255,7 +259,7 @@ train_dataloader = dict(
                 scale=[
                     (
                         1333,
-                        640,
+                        480,
                     ),
                     (
                         1333,
@@ -281,7 +285,7 @@ train_pipeline = [
         scale=[
             (
                 1333,
-                640,
+                480,
             ),
             (
                 1333,
@@ -341,7 +345,7 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         init_kwargs=dict(
-            config=dict(config_name="paa_convnext-s_coco"), project="Training"
+            config=dict(config_name="tood_convnext-s_coco"), project="Training"
         ),
         type="WandbVisBackend",
     ),
@@ -352,10 +356,10 @@ visualizer = dict(
     vis_backends=[
         dict(
             init_kwargs=dict(
-                config=dict(config_name="paa_convnext-s_coco"), project="Training"
+                config=dict(config_name="tood_convnext-s_coco"), project="Training"
             ),
             type="WandbVisBackend",
         ),
     ],
 )
-work_dir = "./slurm/train_work_dir/paa_convnext-s_coco"
+work_dir = "./slurm/train_work_dir/tood_convnext-s_coco"

@@ -20,3 +20,4 @@ slurm
 models
 models_tmp
 wandb/artifacts
+*.pth

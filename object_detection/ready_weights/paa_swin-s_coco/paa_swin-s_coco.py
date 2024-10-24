@@ -27,22 +27,40 @@ log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
 max_epochs = 36
 model = dict(
     backbone=dict(
-        arch="small",
-        drop_path_rate=0.6,
-        gap_before_final_norm=False,
+        attn_drop_rate=0.0,
+        convert_weights=True,
+        depths=[
+            2,
+            2,
+            18,
+            2,
+        ],
+        drop_path_rate=0.2,
+        drop_rate=0.0,
+        embed_dims=96,
         init_cfg=dict(
-            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth",
-            prefix="backbone.",
+            checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth",
             type="Pretrained",
         ),
-        layer_scale_init_value=1.0,
-        out_indices=[
+        mlp_ratio=4,
+        num_heads=[
+            3,
+            6,
+            12,
+            24,
+        ],
+        out_indices=(
             0,
             1,
             2,
             3,
-        ],
-        type="mmpretrain.ConvNeXt",
+        ),
+        patch_norm=True,
+        qk_scale=None,
+        qkv_bias=True,
+        type="SwinTransformer",
+        window_size=7,
+        with_cp=False,
     ),
     bbox_head=dict(
         anchor_generator=dict(
@@ -90,7 +108,6 @@ model = dict(
         stacked_convs=4,
         topk=9,
         type="PAAHead",
-        covariance_type="full",
     ),
     data_preprocessor=dict(
         bgr_to_rgb=True,
@@ -142,17 +159,22 @@ model = dict(
     type="PAA",
 )
 optim_wrapper = dict(
-    constructor="LearningRateDecayOptimizerConstructor",
     optimizer=dict(
         betas=(
             0.9,
             0.999,
         ),
-        lr=0.0002,
+        lr=0.0001,
         type="AdamW",
         weight_decay=0.05,
     ),
-    paramwise_cfg=dict(decay_rate=0.7, decay_type="layer_wise", num_layers=12),
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            absolute_pos_embed=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0),
+            relative_position_bias_table=dict(decay_mult=0.0),
+        )
+    ),
     type="OptimWrapper",
 )
 param_scheduler = [
@@ -341,7 +363,7 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         init_kwargs=dict(
-            config=dict(config_name="paa_convnext-s_coco"), project="Training"
+            config=dict(config_name="paa_swin-s_coco"), project="Training"
         ),
         type="WandbVisBackend",
     ),
@@ -352,10 +374,10 @@ visualizer = dict(
     vis_backends=[
         dict(
             init_kwargs=dict(
-                config=dict(config_name="paa_convnext-s_coco"), project="Training"
+                config=dict(config_name="paa_swin-s_coco"), project="Training"
             ),
             type="WandbVisBackend",
         ),
     ],
 )
-work_dir = "./slurm/train_work_dir/paa_convnext-s_coco"
+work_dir = "./slurm/train_work_dir/paa_swin-s_coco"

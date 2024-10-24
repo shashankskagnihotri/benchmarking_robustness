@@ -2,7 +2,7 @@ find_unused_parameters = True
 auto_scale_lr = dict(base_batch_size=16, enable=True)
 backend_args = None
 custom_hooks = [
-    dict(monitor="coco/bbox_mAP", type="EarlyStoppingHook"),
+    dict(monitor="coco/bbox_mAP", patience=15, type="EarlyStoppingHook"),
 ]
 data_root = "data/coco/"
 dataset_type = "CocoDataset"
@@ -27,22 +27,40 @@ log_processor = dict(by_epoch=True, type="LogProcessor", window_size=50)
 max_epochs = 36
 model = dict(
     backbone=dict(
-        arch="small",
-        drop_path_rate=0.6,
-        gap_before_final_norm=False,
+        attn_drop_rate=0.0,
+        convert_weights=True,
+        depths=[
+            2,
+            2,
+            18,
+            2,
+        ],
+        drop_path_rate=0.2,
+        drop_rate=0.0,
+        embed_dims=96,
         init_cfg=dict(
-            checkpoint="https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth",
-            prefix="backbone.",
+            checkpoint="https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth",
             type="Pretrained",
         ),
-        layer_scale_init_value=1.0,
-        out_indices=[
+        mlp_ratio=4,
+        num_heads=[
+            3,
+            6,
+            12,
+            24,
+        ],
+        out_indices=(
             0,
             1,
             2,
             3,
-        ],
-        type="mmpretrain.ConvNeXt",
+        ),
+        patch_norm=True,
+        qk_scale=None,
+        qkv_bias=True,
+        type="SwinTransformer",
+        window_size=7,
+        with_cp=False,
     ),
     bbox_head=dict(
         anchor_generator=dict(
@@ -60,6 +78,7 @@ model = dict(
             ],
             type="AnchorGenerator",
         ),
+        anchor_type="anchor_free",
         bbox_coder=dict(
             target_means=[
                 0.0,
@@ -77,20 +96,25 @@ model = dict(
         ),
         feat_channels=256,
         in_channels=256,
-        loss_bbox=dict(loss_weight=1.3, type="GIoULoss"),
-        loss_centerness=dict(
-            loss_weight=0.5, type="CrossEntropyLoss", use_sigmoid=True
+        initial_loss_cls=dict(
+            activated=True,
+            alpha=0.25,
+            gamma=2.0,
+            loss_weight=1.0,
+            type="FocalLoss",
+            use_sigmoid=True,
         ),
+        loss_bbox=dict(loss_weight=2.0, type="GIoULoss"),
         loss_cls=dict(
-            alpha=0.25, gamma=2.0, loss_weight=1.0, type="FocalLoss", use_sigmoid=True
+            activated=True,
+            beta=2.0,
+            loss_weight=1.0,
+            type="QualityFocalLoss",
+            use_sigmoid=True,
         ),
         num_classes=80,
-        reg_decoded_bbox=True,
-        score_voting=True,
-        stacked_convs=4,
-        topk=9,
-        type="PAAHead",
-        covariance_type="full",
+        stacked_convs=6,
+        type="TOODHead",
     ),
     data_preprocessor=dict(
         bgr_to_rgb=True,
@@ -129,30 +153,33 @@ model = dict(
     ),
     train_cfg=dict(
         allowed_border=-1,
-        assigner=dict(
-            ignore_iof_thr=-1,
-            min_pos_iou=0,
-            neg_iou_thr=0.1,
-            pos_iou_thr=0.1,
-            type="MaxIoUAssigner",
-        ),
+        alpha=1,
+        assigner=dict(topk=13, type="TaskAlignedAssigner"),
+        beta=6,
         debug=False,
+        initial_assigner=dict(topk=9, type="ATSSAssigner"),
+        initial_epoch=4,
         pos_weight=-1,
     ),
-    type="PAA",
+    type="TOOD",
 )
 optim_wrapper = dict(
-    constructor="LearningRateDecayOptimizerConstructor",
     optimizer=dict(
         betas=(
             0.9,
             0.999,
         ),
-        lr=0.0002,
+        lr=0.0001,
         type="AdamW",
         weight_decay=0.05,
     ),
-    paramwise_cfg=dict(decay_rate=0.7, decay_type="layer_wise", num_layers=12),
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            absolute_pos_embed=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0),
+            relative_position_bias_table=dict(decay_mult=0.0),
+        )
+    ),
     type="OptimWrapper",
 )
 param_scheduler = [
@@ -255,7 +282,7 @@ train_dataloader = dict(
                 scale=[
                     (
                         1333,
-                        640,
+                        480,
                     ),
                     (
                         1333,
@@ -281,7 +308,7 @@ train_pipeline = [
         scale=[
             (
                 1333,
-                640,
+                480,
             ),
             (
                 1333,
@@ -341,7 +368,7 @@ val_evaluator = dict(
 vis_backends = [
     dict(
         init_kwargs=dict(
-            config=dict(config_name="paa_convnext-s_coco"), project="Training"
+            config=dict(config_name="tood_swin-s_coco"), project="Training"
         ),
         type="WandbVisBackend",
     ),
@@ -352,10 +379,10 @@ visualizer = dict(
     vis_backends=[
         dict(
             init_kwargs=dict(
-                config=dict(config_name="paa_convnext-s_coco"), project="Training"
+                config=dict(config_name="tood_swin-s_coco"), project="Training"
             ),
             type="WandbVisBackend",
         ),
     ],
 )
-work_dir = "./slurm/train_work_dir/paa_convnext-s_coco"
+work_dir = "./slurm/train_work_dir/tood_swin-s_coco"
