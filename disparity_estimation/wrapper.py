@@ -3,13 +3,15 @@ import os
 import sys
 import mlflow
 
+os.environ["CUDA_VISIBLE_DEVICES"]="{}".format(3)
+
 # Add the CFNet path
 # cfnet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'CFNet'))
 # sys.path.append(cfnet_path)
 # cfnet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Gw'))
 # sys.path.append(cfnet_path)
 
-mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/mlflow/")
+mlflow.set_tracking_uri("/ceph/sagnihot/mlflow")
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', required=True, help='Specify an model', choices=['cfnet', 'gwcnet', 'gwcnet-g', 'gwcnet-gc', 'psmnet', 'sttr', 'sttr-light'])
 parser.add_argument('--scenario', required=True, help='Specify whether to train or test the model', choices=['train', 'test', 'attack', 'commoncorruption'])

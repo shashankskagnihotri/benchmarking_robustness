@@ -60,6 +60,7 @@ def train_one_epoch(model: torch.nn.Module, data_loader: Iterable, optimizer: to
         torch.cuda.empty_cache()
 
     # compute avg
+    import ipdb;ipdb.set_trace()
     train_stats['px_error_rate'] = train_stats['error_px'] / train_stats['total_px']
 
     # log to tensorboard

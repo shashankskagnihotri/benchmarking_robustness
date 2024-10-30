@@ -132,7 +132,7 @@ Please see [sample_data](sample_data) folder for details. We keep the original d
 
 Scene Flow 
 ```
-SCENE_FLOW
+FlyingThings3D
     |_ RGB_finalpass
         |_ TRAIN
             |_ A
