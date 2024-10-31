@@ -325,7 +325,7 @@ dependencies:
       - model-index==0.1.11
       - modelindex==0.0.2
       - numba==0.59.1
-      - numpy==1.26.4
+      # - numpy==1.26.4
       - opencv-python==4.10.0.84
       - opendatalab==0.0.10
       - openmim==0.3.9
@@ -348,7 +348,7 @@ dependencies:
       - pyyaml==6.0.2
       - regex==2024.5.15
       - requests==2.28.2
-      - rich==13.9.1
+      # - rich==13.9.1
       - scikit-image==0.23.1
       - selenium==4.23.1
       - setuptools==60.2.0

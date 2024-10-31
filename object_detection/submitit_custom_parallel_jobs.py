@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import random
 import submitit
+import numpy
+import os
 
 # rich logger
 import logging
@@ -188,6 +190,8 @@ jobs = []
 # cfg("dino_swin-b_voc0712", 4), accelerated-h100, 2669719_submission -> CUDA error: no kernel image is available for execution on the device
 # cfg("dino_swin-b_voc0712", 4), accelerated-h100, 2669719_submission -> CUDA error: no kernel image is available for execution on the device
 
+os.environ["MKL_SERVICE_FORCE_INTEL"] = "1"
+
 
 for cfg in cfgs:
     # Generate a random port number between 10000 and 60000
@@ -209,8 +213,8 @@ for cfg in cfgs:
     executor.update_parameters(
         tasks_per_node=1,
         nodes=1,
-        slurm_time="2-00:00:00",
-        slurm_partition="accelerated",
+        slurm_time="2-00:00:00",  # "2-00:00:00" "00:30:00"
+        slurm_partition="gpu_4_a100",  # accelerated for horeka gpu_4_a100 "dev_gpu_4_a100"
         slurm_gres=f"gpu:{cfg.num_gpus}",
         slurm_mail_user="ruben.weber@students.uni-mannheim.de",
         slurm_mail_type="END,FAIL",
