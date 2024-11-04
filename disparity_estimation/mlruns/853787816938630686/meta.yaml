@@ -1,0 +1,6 @@
+artifact_location: file:///pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/mlruns/853787816938630686
+creation_time: 1730305456263
+experiment_id: '853787816938630686'
+last_update_time: 1730305456263
+lifecycle_stage: active
+name: debug_cfnet_sceneflow

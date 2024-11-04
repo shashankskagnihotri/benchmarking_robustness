@@ -1,0 +1,15 @@
+artifact_uri: file:///pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/code/benchmarking_robustness/disparity_estimation/mlruns/853787816938630686/b9d73bb720d54205bd1681537411d04b/artifacts
+end_time: 1730305517497
+entry_point_name: ''
+experiment_id: '853787816938630686'
+lifecycle_stage: active
+run_id: b9d73bb720d54205bd1681537411d04b
+run_name: smiling-perch-710
+run_uuid: b9d73bb720d54205bd1681537411d04b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1730305463783
+status: 4
+tags: []
+user_id: ma_faroesch
