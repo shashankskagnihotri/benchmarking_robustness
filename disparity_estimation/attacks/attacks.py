@@ -340,7 +340,7 @@ class CosPGDAttack:
         self.targeted = targeted
         self.architecture = architecture
         self.criterion = criterion 
-        self.stats = stats if stats is not None else {}
+        self.stats = stats if stats is not None else {'rr': 0.0, 'l1': 0.0, 'l1_raw': 0.0, 'occ_be': 0.0, 'iou': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
         self.logger = logger
         self.scaler = scaler if scaler is not None else GradScaler()  # GradScaler for mixed precision
 
@@ -377,10 +377,13 @@ class CosPGDAttack:
             if use_mixed_precision:
                 with autocast():  # Enable mixed precision context
                     outputs, losses = self.forward_pass(perturbed_left, perturbed_right, labels, occ_mask, occ_mask_right, device)
+                    
             else:
                 outputs, losses = self.forward_pass(perturbed_left, perturbed_right, labels, occ_mask, occ_mask_right, device)
 
             # Ensure loss is scalar before backward pass
+            import pdb; 
+            pdb.set_trace()
             if losses.dim() > 0:
                 losses = losses.mean()
 
@@ -1924,6 +1927,7 @@ class APGDAttack():
                     'occ_mask_right': occ_mask_right
                 }
                 with amp.autocast():
+                    
                     outputs, losses, disparity_pred = forward_pass(self.model, data, self.device, self.criterion, self.stats, logger=self.logger)
                 disparity_pred = disparity_pred.to(self.device)
                 torch.cuda.empty_cache()

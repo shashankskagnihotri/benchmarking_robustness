@@ -22,6 +22,7 @@ def read_all_lines(filename):
 
 # read an .pfm file into numpy array, used to load SceneFlow disparity files
 def pfm_imread(filename) -> tuple[np.ndarray, float]:
+    # print(filename);import pdb;pdb.set_trace()
     file = open(filename, 'rb')
     color = None
     width = None

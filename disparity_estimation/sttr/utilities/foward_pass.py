@@ -7,7 +7,7 @@ import mlflow
 
 from utilities.misc import NestedTensor
 
-downsample = 0
+downsample = 2
 
 
 def set_downsample(args):
@@ -28,17 +28,24 @@ def write_summary(stats, summary, step, mode):
     mlflow.log_metric(mode + '/3px_error', stats['px_error_rate'], step)
 
 
-def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):
+def forward_pass(model, data, device, criterion, stats=None, idx=0, logger=None):
     """
     forward pass of the model given input
     """
+
+    if stats is None:
+        stats = {
+            'rr': 0.0, 'l1': 0.0, 'l1_raw': 0.0, 'occ_be': 0.0, 'iou': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0
+        }
+
+
     # TODO: Implement normalization here!
     model.to(device)
     
     # read data
     left, right = data['left'].to(device).half(), data['right'].to(device).half()
-    disp, occ_mask, occ_mask_right = data['disp'].to(device).half(), data['occ_mask'].to(device).half(), \
-                                     data['occ_mask_right'].to(device).half()
+    disp, occ_mask, occ_mask_right = data['disp'].to(device).half(), data['occ_mask'].to(device).bool(), \
+                                     data['occ_mask_right'].to(device).bool()
 
     # if need to downsample, sample with a provided stride
     bs, _, h, w = left.size()
@@ -74,6 +81,22 @@ def forward_pass(model, data, device, criterion, stats, idx=0, logger=None):
     stats['epe'] += losses['epe'].item()
     stats['error_px'] += losses['error_px']
     stats['total_px'] += losses['total_px']
+    # Get the loss, checking if each key exists in losses
+    # if 'rr' in losses:
+    #     stats['rr'] += losses['rr'].item()
+    # if 'l1_raw' in losses:
+    #     stats['l1_raw'] += losses['l1_raw'].item()
+    # if 'l1' in losses:
+    #     stats['l1'] += losses['l1'].item()
+    # if 'occ_be' in losses:
+    #     stats['occ_be'] += losses['occ_be'].item()
+    # if 'iou' in losses:
+    #     stats['iou'] += losses['iou'].item()
+    # if 'epe' in losses:
+    #     stats['epe'] += losses['epe'].item()
+    # if 'error_px' in losses and 'total_px' in losses:
+    #     stats['error_px'] += losses['error_px']
+    #     stats['total_px'] += losses['total_px']
 
     # log for eval only
     if logger is not None:

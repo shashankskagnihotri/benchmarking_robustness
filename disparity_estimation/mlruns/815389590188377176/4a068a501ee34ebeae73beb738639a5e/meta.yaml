@@ -1,0 +1,15 @@
+artifact_uri: file:///pfs/work7/workspace/scratch/ma_adackerm-team_project_fss2024/benchmarking_robustness/disparity_estimation/mlruns/815389590188377176/4a068a501ee34ebeae73beb738639a5e/artifacts
+end_time: 1730276604326
+entry_point_name: ''
+experiment_id: '815389590188377176'
+lifecycle_stage: active
+run_id: 4a068a501ee34ebeae73beb738639a5e
+run_name: gwcnet-g_attack_sceneflow_bim
+run_uuid: 4a068a501ee34ebeae73beb738639a5e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1730276401163
+status: 4
+tags: []
+user_id: ma_adackerm
