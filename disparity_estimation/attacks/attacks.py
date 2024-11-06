@@ -346,6 +346,7 @@ class CosPGDAttack:
 
     def attack(self, left_image, right_image, labels, occ_mask=None, occ_mask_right=None):
         device = self.device
+        print(f"Image shape: {left_image.shape}")
         left_image = left_image.to(device)
         right_image = right_image.to(device)
         labels = labels.to(device)
@@ -368,6 +369,7 @@ class CosPGDAttack:
         perturbed_results = {}
 
         for iteration in range(self.num_iterations):
+            print(f"Iteration: {iteration}")
             perturbed_left.requires_grad = True
             perturbed_right.requires_grad = True
             
@@ -380,11 +382,15 @@ class CosPGDAttack:
                     
             else:
                 outputs, losses = self.forward_pass(perturbed_left, perturbed_right, labels, occ_mask, occ_mask_right, device)
-
+            
             # Ensure loss is scalar before backward pass
-            import pdb; 
-            pdb.set_trace()
-            if losses.dim() > 0:
+            # import pdb
+
+            # pdb.set_trace()
+            # if "sttr" in self.architecture:
+            #     losses = losses['l1_pixel']
+
+            if True or losses.dim() > 0:
                 losses = losses.mean()
 
             # Backward pass with mixed precision if required
@@ -447,8 +453,8 @@ class CosPGDAttack:
             perturbed_results[iteration] = (perturbed_left, perturbed_right)
 
             # Update scaler at the end of each iteration if using mixed precision
-            if use_mixed_precision:
-                self.scaler.update()
+            # if use_mixed_precision:
+            #     self.scaler.update()
 
             torch.cuda.empty_cache()
 
@@ -465,9 +471,9 @@ class CosPGDAttack:
         }
         if self.architecture in ['sttr', 'sttr-light']:
             from sttr.utilities.foward_pass import forward_pass
-            with torch.no_grad():  # Disable gradients for STTR architectures
-                outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
-            return outputs, losses
+            # with torch.no_grad():  # Disable gradients for STTR architectures
+            outputs, losses, labels = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
+            return outputs['disp_pred'], self.compute_loss(outputs['disp_pred'], labels)
             
         else:
             # Handle other architectures as before
@@ -479,7 +485,7 @@ class CosPGDAttack:
 
     def compute_loss(self, outputs, labels):
         """Compute the loss based on the model outputs and the true labels."""
-        loss = F.mse_loss(outputs, labels)
+        loss = F.mse_loss(outputs, labels, reduction='none')
         loss = Attack.cospgd_scale(predictions=outputs, labels=labels, loss=loss, num_classes=self.num_classes, targeted=self.targeted, one_hot=False)
         return loss
 

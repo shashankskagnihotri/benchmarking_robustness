@@ -21,6 +21,9 @@ from module.loss import build_criterion
 
 from dataloader import get_data_loader_1
 
+from utilities.foward_pass import forward_pass, write_summary
+            
+
 
 def get_args_parser():
     """
@@ -235,7 +238,19 @@ def main(args):
         print("Start evaluation")
         evaluate(model, criterion, data_loader_test, device, 0, summary_writer, save_output=False)
         return
+
     if args.attack_type:
+
+        def test_sample(data:dict[str, torch.Tensor], epoch:int):
+            with torch.cuda.amp.autocast():
+                logger = summary_writer.config_logger(epoch)
+                eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0,
+                    'total_px': 0.0}
+                outputs, losses, sampled_disp = forward_pass(model, data, device, criterion, eval_stats, epoch, logger)
+                eval_stats['px_error_rate'] = eval_stats['error_px'] / eval_stats['total_px']
+                write_summary(eval_stats, summary_writer, epoch, 'attack')
+                return losses, None, outputs
+
         attack_type = args.attack_type
         epsilon = 8/255
         alpha = 0.01
@@ -247,10 +262,7 @@ def main(args):
         model = torch.nn.DataParallel(model.half())
         # model = model.half().to('cuda:0')
         # Annahme: model ist dein geladenes Modell
-        for name, param in model.named_parameters():
-            print(f"Parameter: {name}, Datentyp: {param.dtype}, Device: {param.device}")
-
-
+        
         data_loader_train, data_loader_val, data_loader_test = get_data_loader_1(args, "sttr")
         from attacks import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack,BIMAttack
 
@@ -273,16 +285,12 @@ def main(args):
             raise ValueError("Attack type not recognized")
 
         for batch_idx, sample in enumerate(data_loader_test):
-            print("Keys in sample:", sample.keys())
             perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disp"],sample["occ_mask"],sample["occ_mask_right"])
             for iteration in perturbed_results.keys():
                 model.eval()
                 perturbed_left, perturbed_right = perturbed_results[iteration]
-                loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disparity':sample["disparity"]})
-                save_scalars(logger, f"test_{iteration}", scalar_outputs, batch_idx)
-
-
-            print("batch", batch_idx)
+                loss, scalar_outputs, image_outputs  = test_sample({'left':perturbed_left,'right':perturbed_right,'disp':sample["disp"], 'occ_mask': sample["occ_mask"], 'occ_mask_right': sample["occ_mask_right"]}, batch_idx)
+             print("batch", batch_idx)
 
 
     # train

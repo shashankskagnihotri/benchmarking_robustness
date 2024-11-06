@@ -117,7 +117,6 @@ class Criterion(nn.Module):
             pass
         try:
             rr_loss_occ_right = - torch.log(outputs['gt_response_occ_right'] + eps)
-            # print(rr_loss_occ_right.shape)
             rr_loss = torch.cat([rr_loss, rr_loss_occ_right])
         except KeyError:
             pass
@@ -201,6 +200,18 @@ class Criterion(nn.Module):
         loss['l1_raw'] = self.compute_l1_loss(outputs['disp_pred_low_res'], inputs, invalid_mask, fullres=False)
         loss['l1'] = self.compute_l1_loss(outputs['disp_pred'], inputs, invalid_mask)
         loss['occ_be'] = self.compute_entropy_loss(outputs['occ_pred'], inputs, invalid_mask)
+
+        # loss['l1_raw'] = self.compute_l1_loss(outputs['disp_pred_low_res'], inputs, invalid_mask, fullres=False).mean()
+        # loss['l1_pixel'] = self.compute_l1_loss(outputs['disp_pred'], inputs, invalid_mask)
+        # loss['l1'] = loss['l1_pixel'].mean()
+        # loss['occ_be'] = loss['occ_be_pixel'].mean()
+        
+
+        # print('rr_loss', loss['rr'].shape)
+        # print('l1_raw_loss', loss['l1_raw'].shape)
+        # print('l1_loss', loss['l1'].shape)
+        # print('occ_be_loss', loss['occ_be'].shape)
+        
 
         self.aggregate_loss(loss)
 
