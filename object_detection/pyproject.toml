@@ -1,0 +1,38 @@
+[project]
+name = "DetecBench"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mmdet",
+    "mmengine>=0.10.5",
+    "openmim>=0.3.9",
+    "torch>=2.4.0",
+    "torchaudio>=2.4.0",
+    "torchvision>=0.20.1",
+    "tyro>=0.8.14",
+    "wandb>=0.18.5",
+]
+
+[dependency-groups]
+dev = [
+    "commitizen>=3.30.0",
+    "pre-commit>=4.0.1",
+    "ruff>=0.7.2",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+include = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.uv.sources]
+mmdet = { path = "mmdetection", editable = true }
