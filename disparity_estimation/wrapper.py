@@ -21,7 +21,7 @@ parser.add_argument('--norm', required=False, help='Specify the normalization to
 parser.add_argument('--epsilon', required=False, help='Specify the epsilon value to use in the attack',default=8/255)
 parser.add_argument('--alpha', required=False, help='Specify the alpha value to use in the attack', default=0.01)
 parser.add_argument('--num_iteration', required=False, help='Specify the number of iterations of the attack', default=20)
-parser.add_argument('--experiment', required=False, default='debug', type=str, choices=['debug', 'Common_Corruptions'], help='Specify the experiment to log to')
+parser.add_argument('--experiment', required=True, default='debug', type=str, help='Specify the experiment to log to')
 
 args, unknown = parser.parse_known_args()
 args.scenario = args.scenario.lower()

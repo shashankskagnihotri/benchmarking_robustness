@@ -69,4 +69,5 @@ python wrapper.py \
     --maxdisp 256 \
     --model "$MODEL" \
     --logdir "./checkpoints/$DATASET/uniform_sample_d256"  \
-    --test_batch_size 1
+    --test_batch_size 1 \
+    --experiment $EXPERIMENT_NAME

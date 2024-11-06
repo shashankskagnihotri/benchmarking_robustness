@@ -316,8 +316,8 @@ class KITTIBaseDataset(data.Dataset):
 
 
             # # to tensor, normalize
-            # left_img = F.to_tensor(left_img)
-            # right_img = F.to_tensor(right_img)
+            left_img = F.to_tensor(left_img)
+            right_img = F.to_tensor(right_img)
 
             return {"left": left_img,
                     "right": right_img,

@@ -53,6 +53,10 @@ get_checkpoint_path() {
                 "gwcnet-g")
                     echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/gwcnet/kitti15/gwcnet-g/best.ckpt"
                     ;;
+
+                "sttr")
+                    echo "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr/kitti_finetuned_model.pth.tar"
+                    ;;
                     
                 *)
                     echo "Unknown model: $model" >&2
