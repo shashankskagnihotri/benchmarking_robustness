@@ -1,3 +1,11 @@
+import logging
+from collections.abc import Callable, Sequence
+from copy import deepcopy
+from time import sleep
+from typing import Dict, List, Union
+
+import torch
+import wandb
 from mmengine.config import Config
 from mmengine.evaluator import Evaluator
 from mmengine.logging import print_log
@@ -5,14 +13,13 @@ from mmengine.registry import LOOPS
 from mmengine.runner import Runner
 from mmengine.runner.base_loop import BaseLoop
 from torch.utils.data import DataLoader
-from typing import Callable, Dict, List, Sequence, Union
-import logging
-from copy import deepcopy
-import wandb
-from time import sleep
-import torch
 
-def replace_val_loop(attack: Callable, attack_kwargs: dict, use_wandb: bool):
+from .common import Attack
+
+
+def replace_val_loop(attack: Attack, use_wandb: bool):
+    """"""
+
     LOOPS.module_dict.pop("ValLoop")
 
     @LOOPS.register_module()
@@ -20,10 +27,9 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict, use_wandb: bool):
         def __init__(
             self,
             runner,
-            dataloader: Union[DataLoader, Dict],
-            evaluator: Union[Evaluator, Dict, List],
+            dataloader: DataLoader | dict,
+            evaluator: Evaluator | dict | list,
             fp16: bool = False,
-
         ) -> None:
             super().__init__(runner, dataloader)
 
@@ -36,12 +42,8 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict, use_wandb: bool):
                 )
                 self.evaluator = evaluator
             if hasattr(self.dataloader.dataset, "metainfo"):
-                self.evaluator.dataset_meta = getattr(
-                    self.dataloader.dataset, "metainfo"
-                )
-                self.runner.visualizer.dataset_meta = getattr(
-                    self.dataloader.dataset, "metainfo"
-                )
+                self.evaluator.dataset_meta = getattr(self.dataloader.dataset, "metainfo")
+                self.runner.visualizer.dataset_meta = getattr(self.dataloader.dataset, "metainfo")
             else:
                 print_log(
                     f"Dataset {self.dataloader.dataset.__class__.__name__} has no "
@@ -57,7 +59,7 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict, use_wandb: bool):
             self.runner.call_hook("before_val_epoch")
             self.runner.model.eval()
 
-            steps = attack_kwargs.get("steps", 1)
+            steps = getattr(attack, "steps", 1)
             # +1 since we want to evaluate the original data as well
             evaluators = [deepcopy(self.evaluator) for _ in range(steps + 1)]
 
@@ -87,18 +89,18 @@ def replace_val_loop(attack: Callable, attack_kwargs: dict, use_wandb: bool):
         def run_iter(
             self,
             idx,
-            data_batch: Sequence[dict],
-            evaluators: List[Evaluator],
+            data_batch: dict,
+            evaluators: list[Evaluator],
         ):
-            self.runner.call_hook(
-                "before_val_iter", batch_idx=idx, data_batch=data_batch
+            self.runner.call_hook("before_val_iter", batch_idx=idx, data_batch=data_batch)
+
+            data_batch_prepro = attack.run_batch(
+                data_batch=data_batch, model=self.runner.model, evaluators=evaluators
             )
 
-            data_batch_prepro = attack(
-                data_batch, self.runner.model, **attack_kwargs, evaluators=evaluators
+            self.runner.model.bbox_head.adv_attack = (
+                False  # needed to avoid issue with reppoint heads
             )
-
-            self.runner.model.bbox_head.adv_attack = False # needed to avoid issue with reppoint heads
             with torch.no_grad():
                 outputs = self.runner.model(**data_batch_prepro, mode="predict")
 
