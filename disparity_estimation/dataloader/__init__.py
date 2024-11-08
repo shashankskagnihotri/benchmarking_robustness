@@ -1,30 +1,31 @@
-def get_dataset(dataset_name:str, datadir:str, split:str, architeture_name:str):
+def get_dataset(dataset:str, dataset_path:str, split:str, architeture_name:str):
 
-    dataset_name = dataset_name.lower()
+    dataset = dataset.lower()
     
-    print(f'Loading {dataset_name} dataset')
-    if dataset_name == 'sceneflow':
+    print(f'Loading {dataset} dataset')
+    if dataset == 'sceneflow':
         from .sceneflow import SceneFlowFlyingThings3DDataset
-        return SceneFlowFlyingThings3DDataset(datadir, architeture_name, split)
+        print("Dataset path: ", dataset_path)
+        return SceneFlowFlyingThings3DDataset(dataset_path, architeture_name, split)
     
-    elif dataset_name == 'sintel':
+    elif dataset == 'sintel':
         from .mpisintel import MPISintelDataset
-        return MPISintelDataset(datadir, architeture_name, split)
+        return MPISintelDataset(dataset_path, architeture_name, split)
     
-    elif dataset_name == 'kitti' or dataset_name == 'kitti2015':
+    elif dataset == 'kitti' or dataset == 'kitti2015':
         from .kitti2015 import KITTIBaseDataset
         if split == 'test':
             return None
-        return KITTIBaseDataset(datadir, architeture_name, split)
-    elif dataset_name == 'eth3d':
+        return KITTIBaseDataset(dataset_path, architeture_name, split)
+    elif dataset == 'eth3d':
         from .eth3d     import ETH3DDataset
         #isTrain = True if split == 'train' else False
-        return ETH3DDataset(datadir, architeture_name, split)
-    elif dataset_name == 'mpisintel':
+        return ETH3DDataset(dataset_path, architeture_name, split)
+    elif dataset == 'mpisintel':
         from .mpisintel import MPISintelDataset
-        return MPISintelDataset(datadir, architeture_name, split)
+        return MPISintelDataset(dataset_path, architeture_name, split)
     else:
-        raise NotImplementedError(f'Dataset {dataset_name} not implemented')
+        raise NotImplementedError(f'Dataset {dataset} not implemented')
 
 
 ### START - Get data loaders for CFNet and GWCNet
@@ -38,11 +39,11 @@ from dataloader import get_dataset
 
 def get_data_loader_1(args, architeture_name):
     train_dataset = get_dataset(
-        args.dataset, args.datapath, architeture_name=architeture_name, split="train"
+        args.dataset, args.dataset_path, architeture_name=architeture_name, split="train"
     )
 
     test_dataset = get_dataset(
-        args.dataset, args.datapath, architeture_name=architeture_name, split="test"
+        args.dataset, args.dataset_path, architeture_name=architeture_name, split="test"
     )
 
     # TODO: Change for inferance, add if that checks if only inference is performed, then only test data is loaded 

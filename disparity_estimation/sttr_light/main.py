@@ -20,6 +20,8 @@ from module.loss import build_criterion
 
 from dataloader import get_data_loader_1
 
+from dataloader.utils import get_checkpoint_path, get_dataset_path
+
 def get_args_parser():
     """
     Parse arguments
@@ -46,7 +48,7 @@ def get_args_parser():
     parser.add_argument('--eval', action='store_true')
     parser.add_argument('--inference', action='store_true')
     parser.add_argument('--num_workers', default=1, type=int)
-    parser.add_argument('--checkpoint', type=str, default='dev', help='checkpoint name for current experiment')
+    parser.add_argument('--checkpoint', type=str, default=None, help='checkpoint name for current experiment')
     parser.add_argument('--pre_train', action='store_true')
     parser.add_argument('--downsample', default=3, type=int,
                         help='This is outdated in STTR-light. Default downsampling is 4 and cannot be changed.')
@@ -75,7 +77,7 @@ def get_args_parser():
 
     # * Dataset parameters
     parser.add_argument('--dataset', default='sceneflow', type=str, help='dataset to train/eval on')
-    parser.add_argument('--datapath', default='', type=str, help='directory to dataset')
+    parser.add_argument('--dataset_path', default=None, type=str, help='directory to dataset')
     parser.add_argument('--validation', default='validation', type=str, choices={'validation', 'validation_all'},
                         help='If we validate on all provided training images')
 
@@ -85,6 +87,10 @@ def get_args_parser():
     parser.add_argument('--loss_weight', type=str, default='rr:1.0, l1_raw:1.0, l1:1.0, occ_be:1.0',
                         help='Weight for losses')
     parser.add_argument('--validation_max_disp', type=int, default=-1)
+
+    parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
+    parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
+
 
     return parser
 
@@ -128,6 +134,26 @@ def print_param(model):
 
 
 def main(args):
+    if args.checkpoint is None:
+        args.checkpoint = get_checkpoint_path(args.dataset, 'sttr-light')
+
+    if args.checkpoint is not None:
+        if not os.path.exists(args.checkpoint):
+            raise ValueError(f"Checkpoint {args.checkpoint} does not exist")
+    
+    if args.dataset_path is None:
+        if args.dataset is None:
+            raise ValueError("Either --dataset_path or --dataset must be specified")
+        else:
+            args.dataset_path = get_dataset_path(args.dataset, args.commoncorruption, args.severity)
+
+    if args.dataset_path is not None:
+        if not os.path.exists(args.dataset_path):
+            raise ValueError(f"Dataset path {args.dataset_path} does not exist")
+
+
+
+
     # get device
     device = torch.device(args.device)
 
@@ -280,5 +306,5 @@ def train():
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
-    args_ = ap.parse_args()
-    main(args_)
+    args = ap.parse_args()
+    main(args)

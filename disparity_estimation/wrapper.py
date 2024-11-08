@@ -2,12 +2,9 @@ import argparse
 import os
 import sys
 import mlflow
+from dataloader.utils import get_checkpoint_path, get_dataset_path
 
-# Add the CFNet path
-# cfnet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'CFNet'))
-# sys.path.append(cfnet_path)
-# cfnet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Gw'))
-# sys.path.append(cfnet_path)
+
 
 mlflow.set_tracking_uri("/pfs/work7/workspace/scratch/ma_aansari-team_project_fss2024_de/mlflow/")
 parser = argparse.ArgumentParser()
@@ -17,7 +14,9 @@ parser.add_argument('--dataset', required=True, help='Specify the dataset to use
 parser.add_argument('--commoncorruption', required=False, help='Specify the name of the common corruptions to apply. --phase must be test')
 parser.add_argument('--severity', required=False, help='Specify the severity level of the common corruptions to apply. --phase must be test and --commoncorruption must be specified')
 parser.add_argument('--attack_type', required=False, help='Specify the attack to apply. --phase must be test')
-parser.add_argument('--experiment', required=False, default='debug', type=str, choices=['debug', 'Common_Corruptions'], help='Specify the experiment to log to')
+parser.add_argument('--experiment', required=True, default='debug', type=str, choices=['debug', 'Common_Corruptions'], help='Specify the experiment to log to')
+parser.add_argument('--checkpoint', required=False, default=None, type=str, help='Specify the checkpoint to load')
+parser.add_argument('--dataset_path', required=False, default=None, type=str, help='Specify the path to the dataset')
 
 args, unknown = parser.parse_known_args()
 args.scenario = args.scenario.lower()
@@ -28,6 +27,24 @@ if args.scenario == "commoncorruption" and (args.commoncorruption is None or arg
 
 if args.scenario == "attack" and args.attack_type is None:
     raise ValueError("If --scenario is attack, --attack must be specified")
+
+
+if args.checkpoint is None:
+    args.checkpoint = get_checkpoint_path(args.dataset, args.model)
+
+if args.checkpoint is not None:
+    if not os.path.exists(args.checkpoint):
+        raise ValueError(f"Checkpoint {args.checkpoint} does not exist")
+    
+if args.dataset_path is None:
+    if args.dataset is None:
+        raise ValueError("Either --dataset_path or --dataset must be specified")
+    else:
+        args.dataset_path = get_dataset_path(args.dataset, args.commoncorruption, args.severity)
+
+if args.dataset_path is not None:
+    if not os.path.exists(args.dataset_path):
+        raise ValueError(f"Dataset path {args.dataset_path} does not exist")
 
 # https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.start_run
 

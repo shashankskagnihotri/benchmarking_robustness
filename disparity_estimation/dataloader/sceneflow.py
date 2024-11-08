@@ -16,10 +16,10 @@ from . import cfnet, sttr, sttr_light, psmnet, hsmnet, gwcnet
 
 # SceneFlow dataloader from CFNet
 class SceneFlowFlyingThings3DDataset(Dataset):
-    def __init__(self, datadir, architecture_name, split='train'):
+    def __init__(self, dataset_path, architecture_name, split='train'):
         super().__init__()
 
-        self.datadir = datadir
+        self.dataset_path = dataset_path
         self.model_name = architecture_name.lower()
         
         if split.upper() == 'TRAIN':
@@ -61,13 +61,13 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             # os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
 
             # Zerlege den originalen Pfad in seine Teile
-            parts = self.datadir.split('/')
+            parts = self.dataset_path.split('/')
             
             # Finde den Index des Verzeichnisses 'FlyingThings3D'
             try:
                 flyingthings3d_index = parts.index('FlyingThings3D')
             except ValueError:
-                raise ValueError(f"Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis: {self.datadir}")
+                raise ValueError(f"Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis: {self.dataset_path}")
 
             # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
             new_parts = parts[:flyingthings3d_index + 1] + ['Common_corruptions'] + ['no_corruption'] + ['severity_0'] + ['frames_finalpass'] + ['occlusion'] + [self.split_folder] + ['left']
@@ -78,7 +78,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
         
 
-        directory = os.path.join(self.datadir, 'frames_finalpass', self.split_folder)
+        directory = os.path.join(self.dataset_path, 'frames_finalpass', self.split_folder)
         print("Split-Folder: ", self.split_folder)
         sub_folders = [os.path.join(directory, subset) for subset in os.listdir(directory) if
                        os.path.isdir(os.path.join(directory, subset))] if os.path.isdir(directory) else []
@@ -100,8 +100,8 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         
         # Remove unused files (in sttr)
         if self.model_name == 'sttr':
-            flyingthings3d_index = self.datadir.split('/').index('FlyingThings3D')
-            path_unused_files = os.path.join('/', *(self.datadir.split('/')[:flyingthings3d_index + 1] + ['all_unused_files.txt']))
+            flyingthings3d_index = self.dataset_path.split('/').index('FlyingThings3D')
+            path_unused_files = os.path.join('/', *(self.dataset_path.split('/')[:flyingthings3d_index + 1] + ['all_unused_files.txt']))
             unused_files = [line.strip().rstrip() for line in open(path_unused_files, mode='r').read().splitlines()]
             
             new_img_left_filenames = []
