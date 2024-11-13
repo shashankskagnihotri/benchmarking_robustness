@@ -1,0 +1,1598 @@
+Started at Wed Nov 13 12:01:16 CET 2024
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/torch/cuda/__init__.py:155: UserWarning: 
+NVIDIA H100 PCIe with CUDA capability sm_90 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 sm_80 sm_86 compute_37.
+If you want to use the NVIDIA H100 PCIe GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+11/13 12:03:20 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 912717987
+    GPU 0: NVIDIA H100 PCIe
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 912717987
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+11/13 12:03:21 - mmengine - INFO - Config:
+checkpoint_config = dict(by_epoch=False, interval=1000, max_keep_ckpts=1)
+crop_size = (
+    512,
+    512,
+)
+data = dict(
+    samples_per_gpu=2,
+    test=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                512,
+                512,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]),
+    val=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                512,
+                512,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]))
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=16000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+evaluation = dict(interval=16000, metric='mIoU', save_best='mIoU')
+img_norm_cfg = dict(
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    to_rgb=True)
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/upernet/upernet_internimage_s_160k_voc12aug_512x512.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+lr_config = dict(
+    _delete_=True,
+    by_epoch=False,
+    min_lr=0.0,
+    policy='poly',
+    power=1.0,
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=1e-06)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.01, epsilon=8, iterations=20, name='segpgd', norm='linf'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=320,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        channels=80,
+        core_op='DCNv3',
+        depths=[
+            4,
+            4,
+            21,
+            4,
+        ],
+        drop_path_rate=0.3,
+        groups=[
+            5,
+            10,
+            20,
+            40,
+        ],
+        init_cfg=dict(
+            checkpoint=
+            'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_s_1k_224.pth',
+            type='Pretrained'),
+        layer_scale=1.0,
+        mlp_ratio=4.0,
+        norm_layer='LN',
+        offset_scale=1.0,
+        post_norm=True,
+        type='InternImage',
+        with_cp=False),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=[
+            80,
+            160,
+            320,
+            640,
+        ],
+        in_index=[
+            0,
+            1,
+            2,
+            3,
+        ],
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='UPerHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(
+    betas=(
+        0.9,
+        0.999,
+    ),
+    constructor='CustomLayerDecayOptimizerConstructor',
+    lr=6e-05,
+    paramwise_cfg=dict(
+        depths=[
+            4,
+            4,
+            21,
+            4,
+        ], layer_decay_rate=1.0, num_layers=33),
+    type='AdamW',
+    weight_decay=0.05)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=160000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+pretrained = 'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_s_1k_224.pth'
+resume = False
+runner = dict(type='IterBasedRunner')
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        flip=False,
+        img_scale=(
+            512,
+            512,
+        ),
+        transforms=[
+            dict(keep_ratio=True, type='Resize'),
+            dict(size_divisor=32, type='ResizeToMultiple'),
+            dict(type='RandomFlip'),
+            dict(
+                mean=[
+                    123.675,
+                    116.28,
+                    103.53,
+                ],
+                std=[
+                    58.395,
+                    57.12,
+                    57.375,
+                ],
+                to_rgb=True,
+                type='Normalize'),
+            dict(keys=[
+                'img',
+            ], type='ImageToTensor'),
+            dict(keys=[
+                'img',
+            ], type='Collect'),
+        ],
+        type='MultiScaleFlipAug'),
+]
+train_cfg = dict(
+    max_iters=160000, type='IterBasedTrainLoop', val_interval=16000)
+train_dataloader = dict(
+    batch_size=2,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/upernet/upernet_internimage_s_160k_voc12aug_512x512/attack_segpgd/norm_linf/iterations_20/epsilon_8/alpha_0.01/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/upernet/upernet_internimage_s_160k_voc12aug_512x512/attack_segpgd/norm_linf/iterations_20/epsilon_8/alpha_0.01'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+2024-11-13 12:04:34,122 - mmseg - INFO - using core type: DCNv3
+2024-11-13 12:04:34,122 - mmseg - INFO - using activation layer: GELU
+2024-11-13 12:04:34,123 - mmseg - INFO - using main norm layer: LN
+2024-11-13 12:04:34,123 - mmseg - INFO - using dpr: linear, 0.3
+2024-11-13 12:04:34,123 - mmseg - INFO - level2_post_norm: False
+2024-11-13 12:04:34,123 - mmseg - INFO - level2_post_norm_block_ids: None
+2024-11-13 12:04:34,123 - mmseg - INFO - res_post_norm: False
+2024-11-13 12:04:34,123 - mmseg - INFO - use_dcn_v4_op: False
+Number of parameters:  79866956
+11/13 12:22:39 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+11/13 12:22:39 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+11/13 12:22:42 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/upernet/upernet_internimage_s_160k_voc12aug_512x512.pth
+11/13 12:22:46 - mmengine - INFO - Load checkpoint from ../checkpoint_files/upernet/upernet_internimage_s_160k_voc12aug_512x512.pth
+11/13 12:45:14 - mmengine - INFO - Iter(test) [  50/1449]    eta: 10:27:46  time: 5.2643  data_time: 0.0022  memory: 52291  
+11/13 12:49:35 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 6:01:36  time: 4.5876  data_time: 0.0023  memory: 45151  
+11/13 12:54:00 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 4:30:23  time: 4.9240  data_time: 0.0017  memory: 54512  
+11/13 12:58:09 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 3:40:53  time: 5.6303  data_time: 0.0017  memory: 46214  
+11/13 13:02:07 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 3:08:38  time: 4.5375  data_time: 0.0016  memory: 46224  
+11/13 13:06:02 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 2:45:38  time: 4.1040  data_time: 0.0016  memory: 45416  
+11/13 13:10:23 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 2:28:07  time: 4.8265  data_time: 0.0260  memory: 44928  
+11/13 13:14:12 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 2:14:51  time: 5.3647  data_time: 0.0015  memory: 46143  
+11/13 13:17:51 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 2:02:14  time: 4.8941  data_time: 0.0015  memory: 43956  
+11/13 13:21:56 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:52:15  time: 5.2269  data_time: 0.0014  memory: 55916  
+11/13 13:25:43 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:42:52  time: 4.3215  data_time: 0.0014  memory: 51608  
+11/13 13:29:18 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:34:08  time: 4.3259  data_time: 0.0015  memory: 46126  
+11/13 13:33:03 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:26:22  time: 4.0800  data_time: 0.0014  memory: 45127  
+11/13 13:36:48 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 1:19:11  time: 5.4550  data_time: 0.0015  memory: 51478  
+11/13 13:40:25 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 1:12:21  time: 4.0100  data_time: 0.0015  memory: 45939  
+11/13 13:44:09 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 1:06:00  time: 5.3808  data_time: 0.0014  memory: 52475  
+11/13 13:47:46 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:59:52  time: 4.2844  data_time: 0.0015  memory: 45910  
+11/13 13:51:24 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:54:02  time: 4.1199  data_time: 0.0014  memory: 44301  
+11/13 13:54:45 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:48:18  time: 4.1166  data_time: 0.0014  memory: 9323  
+11/13 13:58:41 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:43:03  time: 4.7500  data_time: 0.0015  memory: 51679  
+11/13 14:02:06 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:37:44  time: 4.0015  data_time: 0.0014  memory: 44625  
+11/13 14:05:37 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:32:37  time: 5.0300  data_time: 0.0015  memory: 53502  
+11/13 14:09:15 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:27:40  time: 4.4576  data_time: 0.0014  memory: 45711  
+11/13 14:12:46 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:22:49  time: 4.5464  data_time: 0.0014  memory: 46143  
+11/13 14:16:27 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:18:05  time: 4.2867  data_time: 0.0014  memory: 52774  
+11/13 14:19:51 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:13:25  time: 3.9900  data_time: 0.0014  memory: 10970  
+11/13 14:23:15 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:08:50  time: 4.1569  data_time: 0.0014  memory: 10666  
+11/13 14:26:40 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:04:20  time: 4.0112  data_time: 0.0014  memory: 43550  
+11/13 14:30:03 - mmengine - INFO - per class results:
+11/13 14:30:03 - mmengine - INFO - 
++-------------+------+------+
+|    Class    | IoU  | Acc  |
++-------------+------+------+
+|  background | 2.8  | 3.13 |
+|  aeroplane  | 0.0  | 0.0  |
+|   bicycle   | 0.18 | 0.23 |
+|     bird    | 0.08 | 0.12 |
+|     boat    | 0.14 | 2.07 |
+|    bottle   | 0.15 | 2.47 |
+|     bus     | 0.0  | 0.0  |
+|     car     | 0.17 | 0.77 |
+|     cat     | 0.0  | 0.0  |
+|    chair    | 0.1  | 0.71 |
+|     cow     | 0.0  | 0.0  |
+| diningtable | 0.0  | 0.0  |
+|     dog     | 0.63 | 3.1  |
+|    horse    | 0.0  | 0.0  |
+|  motorbike  | 0.0  | 0.0  |
+|    person   | 0.12 | 0.47 |
+| pottedplant | 0.03 | 0.35 |
+|    sheep    | 0.0  | 0.0  |
+|     sofa    | 0.07 | 1.16 |
+|    train    | 0.0  | 0.0  |
+|  tvmonitor  | 0.96 | 3.83 |
++-------------+------+------+
+11/13 14:30:03 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 2.4800  mIoU: 0.2600  mAcc: 0.8800  data_time: 0.0342  time: 5.2699
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/torch/cuda/__init__.py:155: UserWarning: 
+NVIDIA H100 PCIe with CUDA capability sm_90 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 sm_80 sm_86 compute_37.
+If you want to use the NVIDIA H100 PCIe GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+11/13 14:32:06 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 1314408687
+    GPU 0: NVIDIA H100 PCIe
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 1314408687
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+11/13 14:32:07 - mmengine - INFO - Config:
+checkpoint_config = dict(by_epoch=False, interval=1000, max_keep_ckpts=1)
+crop_size = (
+    512,
+    512,
+)
+data = dict(
+    samples_per_gpu=2,
+    test=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                512,
+                512,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]),
+    val=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                512,
+                512,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]))
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=16000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+evaluation = dict(interval=16000, metric='mIoU', save_best='mIoU')
+img_norm_cfg = dict(
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    to_rgb=True)
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/upernet/upernet_internimage_s_160k_voc12aug_512x512.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+lr_config = dict(
+    _delete_=True,
+    by_epoch=False,
+    min_lr=0.0,
+    policy='poly',
+    power=1.0,
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=1e-06)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.1, epsilon=64, iterations=20, name='segpgd', norm='l2'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=320,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        channels=80,
+        core_op='DCNv3',
+        depths=[
+            4,
+            4,
+            21,
+            4,
+        ],
+        drop_path_rate=0.3,
+        groups=[
+            5,
+            10,
+            20,
+            40,
+        ],
+        init_cfg=dict(
+            checkpoint=
+            'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_s_1k_224.pth',
+            type='Pretrained'),
+        layer_scale=1.0,
+        mlp_ratio=4.0,
+        norm_layer='LN',
+        offset_scale=1.0,
+        post_norm=True,
+        type='InternImage',
+        with_cp=False),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=[
+            80,
+            160,
+            320,
+            640,
+        ],
+        in_index=[
+            0,
+            1,
+            2,
+            3,
+        ],
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='UPerHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(
+    betas=(
+        0.9,
+        0.999,
+    ),
+    constructor='CustomLayerDecayOptimizerConstructor',
+    lr=6e-05,
+    paramwise_cfg=dict(
+        depths=[
+            4,
+            4,
+            21,
+            4,
+        ], layer_decay_rate=1.0, num_layers=33),
+    type='AdamW',
+    weight_decay=0.05)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=160000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+pretrained = 'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_s_1k_224.pth'
+resume = False
+runner = dict(type='IterBasedRunner')
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        flip=False,
+        img_scale=(
+            512,
+            512,
+        ),
+        transforms=[
+            dict(keep_ratio=True, type='Resize'),
+            dict(size_divisor=32, type='ResizeToMultiple'),
+            dict(type='RandomFlip'),
+            dict(
+                mean=[
+                    123.675,
+                    116.28,
+                    103.53,
+                ],
+                std=[
+                    58.395,
+                    57.12,
+                    57.375,
+                ],
+                to_rgb=True,
+                type='Normalize'),
+            dict(keys=[
+                'img',
+            ], type='ImageToTensor'),
+            dict(keys=[
+                'img',
+            ], type='Collect'),
+        ],
+        type='MultiScaleFlipAug'),
+]
+train_cfg = dict(
+    max_iters=160000, type='IterBasedTrainLoop', val_interval=16000)
+train_dataloader = dict(
+    batch_size=2,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/upernet/upernet_internimage_s_160k_voc12aug_512x512/attack_segpgd/norm_l2/iterations_20/epsilon_64/alpha_0.1/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/upernet/upernet_internimage_s_160k_voc12aug_512x512/attack_segpgd/norm_l2/iterations_20/epsilon_64/alpha_0.1'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+2024-11-13 14:33:13,556 - mmseg - INFO - using core type: DCNv3
+2024-11-13 14:33:13,557 - mmseg - INFO - using activation layer: GELU
+2024-11-13 14:33:13,557 - mmseg - INFO - using main norm layer: LN
+2024-11-13 14:33:13,557 - mmseg - INFO - using dpr: linear, 0.3
+2024-11-13 14:33:13,557 - mmseg - INFO - level2_post_norm: False
+2024-11-13 14:33:13,557 - mmseg - INFO - level2_post_norm_block_ids: None
+2024-11-13 14:33:13,557 - mmseg - INFO - res_post_norm: False
+2024-11-13 14:33:13,557 - mmseg - INFO - use_dcn_v4_op: False
+Number of parameters:  79866956
+11/13 14:50:44 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+11/13 14:50:44 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+11/13 14:50:46 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/upernet/upernet_internimage_s_160k_voc12aug_512x512.pth
+11/13 14:50:50 - mmengine - INFO - Load checkpoint from ../checkpoint_files/upernet/upernet_internimage_s_160k_voc12aug_512x512.pth
+11/13 15:12:27 - mmengine - INFO - Iter(test) [  50/1449]    eta: 10:03:39  time: 5.1524  data_time: 0.0017  memory: 52291  
+11/13 15:16:41 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 5:48:38  time: 4.4635  data_time: 0.0019  memory: 45151  
+11/13 15:21:00 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 4:21:14  time: 4.7858  data_time: 0.0021  memory: 54512  
+11/13 15:25:04 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 3:33:42  time: 5.5028  data_time: 0.0015  memory: 46214  
+11/13 15:28:56 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 3:02:40  time: 4.4314  data_time: 0.0015  memory: 46224  
+11/13 15:32:45 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 2:40:31  time: 3.9862  data_time: 0.0015  memory: 45416  
+11/13 15:36:33 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 2:23:31  time: 4.5790  data_time: 0.0015  memory: 44928  
+11/13 15:40:22 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 2:09:52  time: 5.4094  data_time: 0.0015  memory: 46143  
+11/13 15:44:00 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:58:00  time: 4.8544  data_time: 0.0015  memory: 43956  
+11/13 15:48:03 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:48:35  time: 5.1894  data_time: 0.0015  memory: 55916  
+11/13 15:51:49 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:39:39  time: 4.2796  data_time: 0.0014  memory: 51607  
+11/13 15:55:19 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:31:14  time: 4.2907  data_time: 0.0014  memory: 46126  
+11/13 15:59:21 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:24:11  time: 4.0572  data_time: 0.0015  memory: 45127  
+11/13 16:03:05 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 1:17:17  time: 5.4356  data_time: 0.0014  memory: 51478  
+11/13 16:06:42 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 1:10:41  time: 3.9845  data_time: 0.0015  memory: 45939  
+11/13 16:10:23 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 1:04:31  time: 5.3708  data_time: 0.0015  memory: 52475  
+11/13 16:13:57 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:58:33  time: 4.2476  data_time: 0.0014  memory: 45910  
+11/13 16:17:34 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:52:54  time: 4.2125  data_time: 0.0014  memory: 44300  
+11/13 16:20:55 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:47:18  time: 4.0972  data_time: 0.0015  memory: 9331  
+11/13 16:24:54 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:42:11  time: 4.7234  data_time: 0.0014  memory: 51679  
+11/13 16:28:18 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:37:01  time: 3.9749  data_time: 0.0022  memory: 44627  
+11/13 16:31:48 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:32:01  time: 5.0127  data_time: 0.0015  memory: 53502  
+11/13 16:35:24 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:27:10  time: 4.4104  data_time: 0.0014  memory: 45710  
+11/13 16:38:52 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:22:24  time: 4.5139  data_time: 0.0015  memory: 46143  
+11/13 16:42:32 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:17:46  time: 4.2722  data_time: 0.0015  memory: 52774  
+11/13 16:45:55 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:13:11  time: 4.0076  data_time: 0.0014  memory: 10969  
+11/13 16:49:18 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:08:41  time: 4.1235  data_time: 0.0014  memory: 10666  
+11/13 16:52:42 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:04:15  time: 3.9986  data_time: 0.0014  memory: 43550  
+11/13 16:56:03 - mmengine - INFO - per class results:
+11/13 16:56:03 - mmengine - INFO - 
++-------------+-------+-------+
+|    Class    |  IoU  |  Acc  |
++-------------+-------+-------+
+|  background | 78.95 | 85.53 |
+|  aeroplane  | 41.08 | 44.44 |
+|   bicycle   | 23.36 | 51.72 |
+|     bird    | 22.45 | 55.27 |
+|     boat    | 19.54 | 51.69 |
+|    bottle   | 20.29 |  39.0 |
+|     bus     | 19.39 | 19.66 |
+|     car     | 39.34 | 69.11 |
+|     cat     | 32.41 | 47.14 |
+|    chair    |  8.86 | 18.82 |
+|     cow     |  3.96 |  4.34 |
+| diningtable | 22.66 | 41.48 |
+|     dog     | 22.75 | 46.75 |
+|    horse    |  25.4 | 48.75 |
+|  motorbike  | 41.17 | 55.88 |
+|    person   | 50.05 | 77.41 |
+| pottedplant | 13.63 |  37.8 |
+|    sheep    | 20.11 | 28.13 |
+|     sofa    |  9.47 | 20.19 |
+|    train    | 32.82 | 40.47 |
+|  tvmonitor  | 17.78 | 48.99 |
++-------------+-------+-------+
+11/13 16:56:03 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 75.3500  mIoU: 26.9300  mAcc: 44.4100  data_time: 0.0202  time: 5.1841
+Runtime: 17717
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n907
+Job ID: 24668171
+Array Job ID: 24668171_2
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 04:23:27
+CPU Efficiency: 11.14% of 1-15:25:52 core-walltime
+Job Wall-clock time: 04:55:44
+Memory Utilized: 8.03 GB
+Memory Efficiency: 53.56% of 15.00 GB

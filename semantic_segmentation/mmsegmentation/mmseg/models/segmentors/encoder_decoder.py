@@ -107,8 +107,9 @@ class EncoderDecoder(BaseSegmentor):
 
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
-        if "targeted" not in attack_cfg:
-            attack_cfg["targeted"] = False
+        if attack_cfg is not None:
+            if "targeted" not in attack_cfg:
+                attack_cfg["targeted"] = False
         self.attack_cfg = attack_cfg
         self.attack_loss = attack_loss
         self.criterion = MODELS.build(self.attack_loss) 
@@ -120,6 +121,11 @@ class EncoderDecoder(BaseSegmentor):
         self.counter=0
 
         assert self.with_decode_head
+
+        def count_parameters(model):
+            return sum(p.numel() for p in model.parameters() if p.requires_grad)
+        
+        print("Number of parameters: ", count_parameters(self))
 
     def _init_decode_head(self, decode_head: ConfigType) -> None:
         """Initialize ``decode_head``"""
@@ -443,6 +449,7 @@ class EncoderDecoder(BaseSegmentor):
             - ``seg_logits``(PixelData): Predicted logits of semantic
                 segmentation before normalization.
         """
+
         if data_samples is not None:
             batch_img_metas = [
                 data_sample.metainfo for data_sample in data_samples
@@ -464,8 +471,9 @@ class EncoderDecoder(BaseSegmentor):
 
 
         # propose:
-        epsilon = self.attack_cfg["epsilon"]/255 if inputs.max() <= 1 else self.attack_cfg["epsilon"]
-        alpha = self.attack_cfg["alpha"]*255 if inputs.max() > 1 else self.attack_cfg["alpha"]
+        if self.attack_cfg is not None:
+            epsilon = self.attack_cfg["epsilon"]/255 if inputs.max() <= 1 else self.attack_cfg["epsilon"]
+            alpha = self.attack_cfg["alpha"]*255 if inputs.max() > 1 else self.attack_cfg["alpha"]
 
         # print(f"new: epsilon={epsilon}, alpha={alpha}")
 
@@ -491,7 +499,7 @@ class EncoderDecoder(BaseSegmentor):
                     elif self.attack_cfg['norm'] == 'l2':
                         inputs = attack.init_l2(inputs, epsilon, clamp_min = 0, clamp_max=255)
                     else:
-                        raise NotImplementedError('Only linf and l2 norm implemented')                                               
+                        raise NotImplementedError('Norm ' + str(self.attack_cfg['norm']) +' not implemented, only linf and l2 norm implemented')                                               
                 
                 for itr in range(self.attack_cfg['iterations']):
                     inputs.requires_grad = True
@@ -501,10 +509,33 @@ class EncoderDecoder(BaseSegmentor):
                 
                     with torch.enable_grad():
                         seg_logits = self.inference(normalize(inputs), batch_img_metas)
-                        
-                        loss = self.loss(normalize(inputs), data_samples)['decode.loss_ce']
 
-                        
+                        # loss = self.loss(normalize(inputs), data_samples)['decode.loss_ce']
+                        loss_temp = self.loss(normalize(inputs), data_samples)
+
+                        if 'decode.loss_ce' in loss_temp:
+                            loss = loss_temp['decode.loss_ce']
+                        elif 'decode.loss_dice' in loss_temp:
+                            loss = loss_temp['decode.loss_dice']
+                        elif 'decode.loss_boundary' in loss_temp:
+                            loss = loss_temp['decode.loss_boundary']
+                        elif 'decode.loss_focal' in loss_temp:
+                            loss = loss_temp['decode.loss_focal']
+                        elif 'decode.loss_huasdorff_disstance' in loss_temp:
+                            loss = loss_temp['decode.loss_huasdorff_disstance']
+                        elif 'decode.loss_kld' in loss_temp:
+                            loss = loss_temp['decode.loss_kld']
+                        elif 'decode.loss_lovasz' in loss_temp:
+                            loss = loss_temp['decode.loss_lovasz']
+                        elif 'decode.loss_ohem' in loss_temp:
+                            loss = loss_temp['decode.loss_ohem']
+                        elif 'decode.loss_silog' in loss_temp:
+                            loss = loss_temp['decode.loss_silog']
+                        elif 'decode.loss_tversky' in loss_temp:
+                            loss = loss_temp['decode.loss_tversky']
+                        else:
+                            raise AttributeError('Decoder has no loss defined')
+         
                         img_meta = batch_img_metas[0]
                         batch_size, C, H, W = seg_logits.shape
                         if 'img_padding_size' not in img_meta:

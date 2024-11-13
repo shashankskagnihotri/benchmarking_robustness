@@ -1,0 +1,3804 @@
+Started at Sat Oct 26 09:09:16 CEST 2024
+10/26 09:09:21 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 323828173
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 323828173
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+10/26 09:09:21 - mmengine - INFO - Config:
+crop_size = (
+    512,
+    512,
+)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.01, epsilon=8, iterations=20, name='pgd', norm='linf'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1024,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        contract_dilation=True,
+        depth=50,
+        dilations=(
+            1,
+            1,
+            2,
+            4,
+        ),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        norm_eval=False,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        strides=(
+            1,
+            2,
+            1,
+            1,
+        ),
+        style='pytorch',
+        type='ResNetV1c'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=2048,
+        in_index=3,
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=40000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2048,
+        512,
+    ), type='Resize'),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_pgd/norm_linf/iterations_20/epsilon_8/alpha_0.01/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_pgd/norm_linf/iterations_20/epsilon_8/alpha_0.01'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+10/26 09:09:25 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+10/26 09:09:25 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+10/26 09:09:26 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 09:09:27 - mmengine - INFO - Load checkpoint from ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 09:14:56 - mmengine - INFO - Iter(test) [  50/1449]    eta: 2:33:00  time: 5.4975  data_time: 0.0015  memory: 19702  
+10/26 09:19:10 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 2:10:57  time: 4.2671  data_time: 0.0015  memory: 19296  
+10/26 09:23:29 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 2:01:30  time: 4.4902  data_time: 0.0014  memory: 19637  
+10/26 09:27:25 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 1:52:07  time: 5.7349  data_time: 0.0015  memory: 19746  
+10/26 09:31:05 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 1:43:45  time: 4.3138  data_time: 0.0014  memory: 19501  
+10/26 09:34:42 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 1:36:43  time: 3.6494  data_time: 0.0014  memory: 19447  
+10/26 09:38:14 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 1:30:21  time: 4.0758  data_time: 0.0014  memory: 19090  
+10/26 09:41:52 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 1:25:00  time: 5.3890  data_time: 0.0014  memory: 19724  
+10/26 09:45:19 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:19:36  time: 4.7754  data_time: 0.0014  memory: 18793  
+10/26 09:49:11 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:15:24  time: 4.9128  data_time: 0.0014  memory: 19381  
+10/26 09:52:41 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:10:40  time: 3.9342  data_time: 0.0014  memory: 19907  
+10/26 09:55:57 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:05:47  time: 3.9385  data_time: 0.0014  memory: 19458  
+10/26 09:59:28 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:01:27  time: 3.7128  data_time: 0.0014  memory: 19268  
+10/26 10:02:57 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:57:13  time: 5.3383  data_time: 0.0014  memory: 19842  
+10/26 10:06:18 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:52:58  time: 3.6171  data_time: 0.0014  memory: 19637  
+10/26 10:09:43 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:48:53  time: 4.8619  data_time: 0.0014  memory: 19381  
+10/26 10:13:00 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:44:47  time: 3.8688  data_time: 0.0014  memory: 19611  
+10/26 10:16:25 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:40:50  time: 3.7764  data_time: 0.0014  memory: 18952  
+10/26 10:19:28 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:36:46  time: 3.7753  data_time: 0.0014  memory: 5472  
+10/26 10:23:09 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:33:05  time: 4.4805  data_time: 0.0014  memory: 19958  
+10/26 10:26:13 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:29:10  time: 3.6520  data_time: 0.0014  memory: 18882  
+10/26 10:29:24 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:25:21  time: 4.5674  data_time: 0.0014  memory: 18739  
+10/26 10:32:48 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:21:40  time: 4.2064  data_time: 0.0014  memory: 19521  
+10/26 10:36:02 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:17:57  time: 4.4833  data_time: 0.0014  memory: 19724  
+10/26 10:39:20 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:14:18  time: 3.8264  data_time: 0.0014  memory: 19161  
+10/26 10:42:26 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:10:39  time: 3.5979  data_time: 0.0014  memory: 6526  
+10/26 10:45:32 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:07:02  time: 3.8162  data_time: 0.0014  memory: 6329  
+10/26 10:48:36 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:03:28  time: 3.6503  data_time: 0.0014  memory: 18445  
+10/26 10:51:42 - mmengine - INFO - per class results:
+10/26 10:51:42 - mmengine - INFO - 
++-------------+------+-------+
+|    Class    | IoU  |  Acc  |
++-------------+------+-------+
+|  background | 16.9 |  20.1 |
+|  aeroplane  | 6.78 | 18.26 |
+|   bicycle   | 7.11 | 60.53 |
+|     bird    | 5.32 |  16.1 |
+|     boat    | 2.63 |  8.44 |
+|    bottle   | 2.17 |  4.52 |
+|     bus     | 3.99 |  7.61 |
+|     car     | 6.3  | 17.57 |
+|     cat     | 0.35 |  0.68 |
+|    chair    | 0.57 | 10.73 |
+|     cow     | 3.42 |  7.85 |
+| diningtable | 0.16 |  0.59 |
+|     dog     | 0.13 |  0.28 |
+|    horse    | 3.27 |  6.5  |
+|  motorbike  | 9.9  | 30.05 |
+|    person   | 2.71 |  6.58 |
+| pottedplant | 4.17 | 17.96 |
+|    sheep    | 4.0  |  12.2 |
+|     sofa    | 0.17 |  1.84 |
+|    train    | 5.75 | 12.35 |
+|  tvmonitor  | 1.26 |  5.85 |
++-------------+------+-------+
+10/26 10:51:42 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 17.1000  mIoU: 4.1500  mAcc: 12.6900  data_time: 0.0146  time: 4.2339
+10/26 10:52:46 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 2069566531
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 2069566531
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+10/26 10:52:46 - mmengine - INFO - Config:
+crop_size = (
+    512,
+    512,
+)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.1, epsilon=64, iterations=20, name='pgd', norm='l2'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1024,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        contract_dilation=True,
+        depth=50,
+        dilations=(
+            1,
+            1,
+            2,
+            4,
+        ),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        norm_eval=False,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        strides=(
+            1,
+            2,
+            1,
+            1,
+        ),
+        style='pytorch',
+        type='ResNetV1c'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=2048,
+        in_index=3,
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=40000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2048,
+        512,
+    ), type='Resize'),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_pgd/norm_l2/iterations_20/epsilon_64/alpha_0.1/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_pgd/norm_l2/iterations_20/epsilon_64/alpha_0.1'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+10/26 10:53:25 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+10/26 10:53:25 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+10/26 10:53:26 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 10:53:27 - mmengine - INFO - Load checkpoint from ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 10:59:21 - mmengine - INFO - Iter(test) [  50/1449]    eta: 2:44:21  time: 5.5000  data_time: 0.0019  memory: 19702  
+10/26 11:03:35 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 2:16:32  time: 4.2714  data_time: 0.0018  memory: 19296  
+10/26 11:07:55 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 2:05:09  time: 4.4942  data_time: 0.0018  memory: 19638  
+10/26 11:11:51 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 1:54:47  time: 5.7344  data_time: 0.0018  memory: 19745  
+10/26 11:15:31 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 1:45:47  time: 4.3198  data_time: 0.0018  memory: 19500  
+10/26 11:19:09 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 1:38:22  time: 3.6499  data_time: 0.0018  memory: 19447  
+10/26 11:22:41 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 1:31:44  time: 4.0799  data_time: 0.0016  memory: 19090  
+10/26 11:26:19 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 1:26:10  time: 5.3910  data_time: 0.0016  memory: 19724  
+10/26 11:29:46 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:20:35  time: 4.7758  data_time: 0.0017  memory: 18793  
+10/26 11:33:38 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:16:13  time: 4.9109  data_time: 0.0017  memory: 19381  
+10/26 11:37:08 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:11:23  time: 3.9387  data_time: 0.0016  memory: 19907  
+10/26 11:40:24 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:06:24  time: 3.9367  data_time: 0.0017  memory: 19458  
+10/26 11:43:55 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:02:00  time: 3.7148  data_time: 0.0016  memory: 19268  
+10/26 11:47:43 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:57:42  time: 5.3420  data_time: 0.0017  memory: 19842  
+10/26 11:51:04 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:53:41  time: 3.6203  data_time: 0.0017  memory: 19638  
+10/26 11:54:29 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:49:30  time: 4.8659  data_time: 0.0016  memory: 19381  
+10/26 11:57:53 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:45:20  time: 3.9364  data_time: 0.0069  memory: 19611  
+10/26 12:01:26 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:41:26  time: 3.7751  data_time: 0.0017  memory: 18952  
+10/26 12:04:29 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:37:18  time: 3.7756  data_time: 0.0017  memory: 5472  
+10/26 12:08:10 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:33:32  time: 4.4777  data_time: 0.0017  memory: 19960  
+10/26 12:11:14 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:29:33  time: 3.6506  data_time: 0.0016  memory: 18882  
+10/26 12:14:25 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:25:41  time: 4.5743  data_time: 0.0016  memory: 18739  
+10/26 12:17:50 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:21:55  time: 4.2117  data_time: 0.0016  memory: 19521  
+10/26 12:21:04 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:18:10  time: 4.4894  data_time: 0.0017  memory: 19724  
+10/26 12:24:22 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:14:28  time: 3.8262  data_time: 0.0015  memory: 19161  
+10/26 12:27:28 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:10:46  time: 3.5980  data_time: 0.0015  memory: 6526  
+10/26 12:30:34 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:07:07  time: 3.8120  data_time: 0.0015  memory: 6329  
+10/26 12:33:38 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:03:30  time: 3.6486  data_time: 0.0014  memory: 18445  
+10/26 12:36:44 - mmengine - INFO - per class results:
+10/26 12:36:44 - mmengine - INFO - 
++-------------+-------+-------+
+|    Class    |  IoU  |  Acc  |
++-------------+-------+-------+
+|  background | 77.09 | 82.67 |
+|  aeroplane  | 33.35 |  65.6 |
+|   bicycle   | 29.12 |  82.7 |
+|     bird    | 53.73 | 79.78 |
+|     boat    | 29.43 |  61.2 |
+|    bottle   | 35.33 | 51.85 |
+|     bus     | 68.04 | 82.81 |
+|     car     | 46.14 | 84.36 |
+|     cat     |  61.2 | 84.04 |
+|    chair    |  10.1 | 28.73 |
+|     cow     | 37.25 | 51.27 |
+| diningtable | 12.07 | 17.23 |
+|     dog     | 48.92 | 71.92 |
+|    horse    | 41.14 | 65.14 |
+|  motorbike  |  62.1 |  77.6 |
+|    person   | 58.65 | 80.39 |
+| pottedplant | 27.49 | 50.74 |
+|    sheep    |  46.0 | 59.29 |
+|     sofa    |  8.39 | 22.35 |
+|    train    | 56.96 | 75.18 |
+|  tvmonitor  | 23.07 | 56.78 |
++-------------+-------+-------+
+10/26 12:36:45 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 78.5000  mIoU: 41.2200  mAcc: 63.4100  data_time: 0.0336  time: 4.2766
+10/26 12:38:50 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 379113502
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 379113502
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+10/26 12:38:50 - mmengine - INFO - Config:
+crop_size = (
+    512,
+    512,
+)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.01, epsilon=8, iterations=20, name='cospgd', norm='linf'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1024,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        contract_dilation=True,
+        depth=50,
+        dilations=(
+            1,
+            1,
+            2,
+            4,
+        ),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        norm_eval=False,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        strides=(
+            1,
+            2,
+            1,
+            1,
+        ),
+        style='pytorch',
+        type='ResNetV1c'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=2048,
+        in_index=3,
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=40000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2048,
+        512,
+    ), type='Resize'),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_cospgd/norm_linf/iterations_20/epsilon_8/alpha_0.01/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_cospgd/norm_linf/iterations_20/epsilon_8/alpha_0.01'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+10/26 12:39:59 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+10/26 12:39:59 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+10/26 12:40:01 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 12:40:02 - mmengine - INFO - Load checkpoint from ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 12:46:33 - mmengine - INFO - Iter(test) [  50/1449]    eta: 3:02:01  time: 5.5201  data_time: 0.0018  memory: 19702  
+10/26 12:50:48 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 2:25:12  time: 4.2947  data_time: 0.0015  memory: 19296  
+10/26 12:55:09 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 2:10:48  time: 4.5198  data_time: 0.0015  memory: 19638  
+10/26 12:59:06 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 1:58:58  time: 5.7657  data_time: 0.0015  memory: 19747  
+10/26 13:02:47 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 1:49:05  time: 4.3444  data_time: 0.0015  memory: 19501  
+10/26 13:06:26 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 1:41:04  time: 3.6707  data_time: 0.0015  memory: 19448  
+10/26 13:09:58 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 1:33:58  time: 4.0995  data_time: 0.0015  memory: 19091  
+10/26 13:13:38 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 1:28:06  time: 5.4128  data_time: 0.0015  memory: 19724  
+10/26 13:17:06 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:22:16  time: 4.8006  data_time: 0.0015  memory: 18793  
+10/26 13:20:59 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:17:42  time: 4.9504  data_time: 0.0015  memory: 19382  
+10/26 13:24:31 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:12:41  time: 3.9657  data_time: 0.0016  memory: 19907  
+10/26 13:27:48 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:07:34  time: 3.9562  data_time: 0.0015  memory: 19459  
+10/26 13:31:19 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:03:02  time: 3.7313  data_time: 0.0015  memory: 19268  
+10/26 13:34:50 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:58:37  time: 5.3776  data_time: 0.0015  memory: 19843  
+10/26 13:38:12 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:54:12  time: 3.6506  data_time: 0.0015  memory: 19638  
+10/26 13:41:38 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:49:58  time: 4.8847  data_time: 0.0015  memory: 19382  
+10/26 13:45:06 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:45:48  time: 4.3749  data_time: 0.0015  memory: 19612  
+10/26 13:48:36 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:41:48  time: 3.8008  data_time: 0.0015  memory: 18953  
+10/26 13:51:41 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:37:37  time: 3.8834  data_time: 0.0015  memory: 5472  
+10/26 13:55:24 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:33:50  time: 4.5041  data_time: 0.0015  memory: 19959  
+10/26 13:58:30 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:29:48  time: 3.6774  data_time: 0.0014  memory: 18883  
+10/26 14:01:42 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:25:54  time: 4.5893  data_time: 0.0015  memory: 18739  
+10/26 14:05:07 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:22:07  time: 4.2338  data_time: 0.0014  memory: 19521  
+10/26 14:08:23 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:18:19  time: 4.5142  data_time: 0.0028  memory: 19724  
+10/26 14:11:42 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:14:35  time: 3.8485  data_time: 0.0015  memory: 19161  
+10/26 14:14:49 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:10:51  time: 3.6310  data_time: 0.0015  memory: 6527  
+10/26 14:17:57 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:07:10  time: 3.8374  data_time: 0.0014  memory: 6330  
+10/26 14:21:01 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:03:32  time: 3.6693  data_time: 0.0015  memory: 18445  
+10/26 14:24:08 - mmengine - INFO - per class results:
+10/26 14:24:08 - mmengine - INFO - 
++-------------+------+------+
+|    Class    | IoU  | Acc  |
++-------------+------+------+
+|  background | 0.0  | 0.0  |
+|  aeroplane  | 0.43 | 0.82 |
+|   bicycle   | 0.0  | 0.0  |
+|     bird    | 0.0  | 0.0  |
+|     boat    | 0.13 | 0.31 |
+|    bottle   | 0.0  | 0.0  |
+|     bus     | 0.0  | 0.0  |
+|     car     | 0.01 | 0.03 |
+|     cat     | 0.0  | 0.0  |
+|    chair    | 0.0  | 0.05 |
+|     cow     | 0.0  | 0.0  |
+| diningtable | 0.0  | 0.04 |
+|     dog     | 0.0  | 0.0  |
+|    horse    | 0.0  | 0.0  |
+|  motorbike  | 0.0  | 0.0  |
+|    person   | 0.05 | 0.14 |
+| pottedplant | 0.05 | 0.22 |
+|    sheep    | 0.0  | 0.0  |
+|     sofa    | 0.0  | 0.0  |
+|    train    | 0.03 | 0.04 |
+|  tvmonitor  | 0.0  | 0.0  |
++-------------+------+------+
+10/26 14:24:08 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 0.0200  mIoU: 0.0300  mAcc: 0.0800  data_time: 0.0178  time: 4.3108
+10/26 14:26:10 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 786112986
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 786112986
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+10/26 14:26:11 - mmengine - INFO - Config:
+crop_size = (
+    512,
+    512,
+)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.1, epsilon=64, iterations=20, name='cospgd', norm='l2'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1024,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        contract_dilation=True,
+        depth=50,
+        dilations=(
+            1,
+            1,
+            2,
+            4,
+        ),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        norm_eval=False,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        strides=(
+            1,
+            2,
+            1,
+            1,
+        ),
+        style='pytorch',
+        type='ResNetV1c'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=2048,
+        in_index=3,
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=40000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2048,
+        512,
+    ), type='Resize'),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_cospgd/norm_l2/iterations_20/epsilon_64/alpha_0.1/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_cospgd/norm_l2/iterations_20/epsilon_64/alpha_0.1'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+10/26 14:27:18 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+10/26 14:27:18 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+10/26 14:27:20 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 14:27:21 - mmengine - INFO - Load checkpoint from ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 14:33:45 - mmengine - INFO - Iter(test) [  50/1449]    eta: 2:58:37  time: 5.5237  data_time: 0.0018  memory: 19703  
+10/26 14:38:00 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 2:23:41  time: 4.2932  data_time: 0.0019  memory: 19296  
+10/26 14:42:21 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 2:09:52  time: 4.5185  data_time: 0.0018  memory: 19638  
+10/26 14:46:18 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 1:58:19  time: 5.7661  data_time: 0.0018  memory: 19746  
+10/26 14:50:01 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 1:48:37  time: 4.3456  data_time: 0.0018  memory: 19500  
+10/26 14:53:39 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 1:40:42  time: 3.6713  data_time: 0.0018  memory: 19448  
+10/26 14:57:12 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 1:33:42  time: 4.1117  data_time: 0.0018  memory: 19091  
+10/26 15:00:52 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 1:27:52  time: 5.4183  data_time: 0.0018  memory: 19724  
+10/26 15:04:20 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:22:04  time: 4.8068  data_time: 0.0018  memory: 18793  
+10/26 15:08:15 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:17:33  time: 4.9540  data_time: 0.0018  memory: 19382  
+10/26 15:11:47 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:12:36  time: 3.9561  data_time: 0.0018  memory: 19907  
+10/26 15:15:04 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:07:29  time: 3.9658  data_time: 0.0036  memory: 19459  
+10/26 15:18:36 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:02:58  time: 3.7312  data_time: 0.0018  memory: 19268  
+10/26 15:22:07 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:58:34  time: 5.3938  data_time: 0.0018  memory: 19842  
+10/26 15:25:55 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:54:10  time: 3.6456  data_time: 0.0018  memory: 19638  
+10/26 15:29:21 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:50:17  time: 4.8927  data_time: 0.0017  memory: 19382  
+10/26 15:32:47 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:46:05  time: 4.4080  data_time: 0.0033  memory: 19612  
+10/26 15:36:18 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:42:03  time: 3.8122  data_time: 0.0017  memory: 18953  
+10/26 15:39:24 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:37:50  time: 3.8979  data_time: 0.0097  memory: 5472  
+10/26 15:43:06 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:34:00  time: 4.5049  data_time: 0.0017  memory: 19961  
+10/26 15:46:12 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:29:57  time: 3.6701  data_time: 0.0017  memory: 18883  
+10/26 15:49:24 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:26:01  time: 4.5932  data_time: 0.0016  memory: 18739  
+10/26 15:52:49 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:22:13  time: 4.2333  data_time: 0.0016  memory: 19521  
+10/26 15:56:04 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:18:24  time: 4.5034  data_time: 0.0017  memory: 19724  
+10/26 15:59:24 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:14:39  time: 3.8448  data_time: 0.0016  memory: 19161  
+10/26 16:02:31 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:10:54  time: 3.6218  data_time: 0.0022  memory: 6527  
+10/26 16:05:38 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:07:12  time: 3.8328  data_time: 0.0015  memory: 6329  
+10/26 16:08:42 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:03:32  time: 3.6669  data_time: 0.0015  memory: 18445  
+10/26 16:11:50 - mmengine - INFO - per class results:
+10/26 16:11:50 - mmengine - INFO - 
++-------------+-------+-------+
+|    Class    |  IoU  |  Acc  |
++-------------+-------+-------+
+|  background | 70.41 | 75.35 |
+|  aeroplane  | 29.88 | 58.17 |
+|   bicycle   |  29.5 |  82.3 |
+|     bird    | 43.27 | 73.27 |
+|     boat    | 23.71 | 58.67 |
+|    bottle   | 29.25 | 46.35 |
+|     bus     | 56.58 | 78.73 |
+|     car     |  35.9 | 79.43 |
+|     cat     | 51.72 | 77.53 |
+|    chair    |  5.89 | 24.26 |
+|     cow     | 31.99 | 45.82 |
+| diningtable |  8.74 | 14.31 |
+|     dog     | 40.35 | 64.97 |
+|    horse    | 36.15 | 63.99 |
+|  motorbike  | 53.93 | 72.75 |
+|    person   | 48.48 | 75.99 |
+| pottedplant | 22.21 | 50.53 |
+|    sheep    | 37.56 | 53.84 |
+|     sofa    |  5.63 | 19.64 |
+|    train    |  52.3 | 72.06 |
+|  tvmonitor  | 17.53 | 54.31 |
++-------------+-------+-------+
+10/26 16:11:50 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 71.9400  mIoU: 34.8100  mAcc: 59.1600  data_time: 0.0367  time: 4.3258
+10/26 16:14:02 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 48770859
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 48770859
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+10/26 16:14:02 - mmengine - INFO - Config:
+crop_size = (
+    512,
+    512,
+)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.01, epsilon=8, iterations=20, name='segpgd', norm='linf'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1024,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        contract_dilation=True,
+        depth=50,
+        dilations=(
+            1,
+            1,
+            2,
+            4,
+        ),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        norm_eval=False,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        strides=(
+            1,
+            2,
+            1,
+            1,
+        ),
+        style='pytorch',
+        type='ResNetV1c'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=2048,
+        in_index=3,
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=40000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2048,
+        512,
+    ), type='Resize'),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_segpgd/norm_linf/iterations_20/epsilon_8/alpha_0.01/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_segpgd/norm_linf/iterations_20/epsilon_8/alpha_0.01'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+10/26 16:15:22 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+10/26 16:15:22 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+10/26 16:15:24 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 16:15:25 - mmengine - INFO - Load checkpoint from ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 16:21:44 - mmengine - INFO - Iter(test) [  50/1449]    eta: 2:56:07  time: 5.4997  data_time: 0.0018  memory: 19701  
+10/26 16:25:58 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 2:22:12  time: 4.2686  data_time: 0.0018  memory: 19295  
+10/26 16:30:17 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 2:08:45  time: 4.4906  data_time: 0.0018  memory: 19637  
+10/26 16:34:13 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 1:57:21  time: 5.7332  data_time: 0.0019  memory: 19746  
+10/26 16:37:54 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 1:47:46  time: 4.3192  data_time: 0.0018  memory: 19500  
+10/26 16:41:31 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 1:39:57  time: 3.6500  data_time: 0.0018  memory: 19447  
+10/26 16:45:03 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 1:33:00  time: 4.0798  data_time: 0.0017  memory: 19089  
+10/26 16:48:41 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 1:27:14  time: 5.3914  data_time: 0.0017  memory: 19723  
+10/26 16:52:08 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:21:29  time: 4.7782  data_time: 0.0017  memory: 18792  
+10/26 16:56:00 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:17:00  time: 4.9062  data_time: 0.0017  memory: 19381  
+10/26 16:59:30 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:12:03  time: 3.9425  data_time: 0.0016  memory: 19906  
+10/26 17:02:46 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:06:59  time: 3.9379  data_time: 0.0017  memory: 19458  
+10/26 17:06:17 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:02:30  time: 3.7075  data_time: 0.0017  memory: 19267  
+10/26 17:09:46 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:58:08  time: 5.3441  data_time: 0.0017  memory: 19842  
+10/26 17:13:07 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:53:46  time: 3.6229  data_time: 0.0016  memory: 19637  
+10/26 17:16:32 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:49:34  time: 4.8670  data_time: 0.0017  memory: 19381  
+10/26 17:19:56 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:45:24  time: 3.8802  data_time: 0.0017  memory: 19611  
+10/26 17:23:34 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:41:34  time: 3.7772  data_time: 0.0016  memory: 18951  
+10/26 17:26:38 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:37:23  time: 3.7819  data_time: 0.0016  memory: 5471  
+10/26 17:30:20 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:33:37  time: 4.4809  data_time: 0.0016  memory: 19958  
+10/26 17:33:24 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:29:37  time: 3.6510  data_time: 0.0016  memory: 18882  
+10/26 17:36:35 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:25:45  time: 4.5701  data_time: 0.0017  memory: 18738  
+10/26 17:39:59 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:21:59  time: 4.2079  data_time: 0.0016  memory: 19520  
+10/26 17:43:14 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:18:13  time: 4.4877  data_time: 0.0016  memory: 19723  
+10/26 17:46:32 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:14:30  time: 3.8259  data_time: 0.0016  memory: 19160  
+10/26 17:49:38 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:10:47  time: 3.5986  data_time: 0.0015  memory: 6526  
+10/26 17:52:44 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:07:08  time: 3.8137  data_time: 0.0016  memory: 6329  
+10/26 17:55:48 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:03:30  time: 3.6512  data_time: 0.0016  memory: 18444  
+10/26 17:58:54 - mmengine - INFO - per class results:
+10/26 17:58:54 - mmengine - INFO - 
++-------------+------+-------+
+|    Class    | IoU  |  Acc  |
++-------------+------+-------+
+|  background | 4.69 |  5.19 |
+|  aeroplane  | 4.0  |  9.67 |
+|   bicycle   | 6.54 | 40.91 |
+|     bird    | 2.19 |  3.99 |
+|     boat    | 1.72 |  4.15 |
+|    bottle   | 0.35 |  0.5  |
+|     bus     | 0.27 |  0.52 |
+|     car     | 1.28 |  4.64 |
+|     cat     | 0.11 |  0.22 |
+|    chair    | 0.42 | 11.17 |
+|     cow     | 0.49 |  0.81 |
+| diningtable | 0.24 |  1.82 |
+|     dog     | 0.16 |  0.4  |
+|    horse    | 0.14 |  0.23 |
+|  motorbike  | 3.03 | 10.76 |
+|    person   | 0.34 |  1.02 |
+| pottedplant | 1.67 |  7.99 |
+|    sheep    | 1.33 |  2.69 |
+|     sofa    | 0.13 |  1.94 |
+|    train    | 1.26 |  1.99 |
+|  tvmonitor  | 0.26 |  1.49 |
++-------------+------+-------+
+10/26 17:58:54 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 4.6000  mIoU: 1.4600  mAcc: 5.3400  data_time: 0.0200  time: 4.2851
+10/26 18:01:27 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 808673005
+    GPU 0: Tesla V100-SXM2-32GB
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 808673005
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+10/26 18:01:28 - mmengine - INFO - Config:
+crop_size = (
+    512,
+    512,
+)
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        512,
+        512,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/VOCdevkit/VOC2012'
+dataset_aug = dict(
+    ann_file='ImageSets/Segmentation/aug.txt',
+    data_prefix=dict(
+        img_path='JPEGImages', seg_map_path='SegmentationClassAug'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_train = dict(
+    ann_file='ImageSets/Segmentation/train.txt',
+    data_prefix=dict(img_path='JPEGImages', seg_map_path='SegmentationClass'),
+    data_root='data/VOCdevkit/VOC2012',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(
+            keep_ratio=True,
+            ratio_range=(
+                0.5,
+                2.0,
+            ),
+            scale=(
+                2048,
+                512,
+            ),
+            type='RandomResize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            512,
+            512,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(size=(
+            512,
+            512,
+        ), type='Pad'),
+        dict(type='PackSegInputs'),
+    ],
+    type='PascalVOCDataset')
+dataset_type = 'PascalVOCDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.1, epsilon=64, iterations=20, name='segpgd', norm='l2'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1024,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        contract_dilation=True,
+        depth=50,
+        dilations=(
+            1,
+            1,
+            2,
+            4,
+        ),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        norm_eval=False,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        strides=(
+            1,
+            2,
+            1,
+            1,
+        ),
+        style='pytorch',
+        type='ResNetV1c'),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        size=(
+            512,
+            512,
+        ),
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=2048,
+        in_index=3,
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=21,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=40000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2048,
+        512,
+    ), type='Resize'),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        datasets=[
+            dict(
+                ann_file='ImageSets/Segmentation/train.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages', seg_map_path='SegmentationClass'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+            dict(
+                ann_file='ImageSets/Segmentation/aug.txt',
+                data_prefix=dict(
+                    img_path='JPEGImages',
+                    seg_map_path='SegmentationClassAug'),
+                data_root='data/VOCdevkit/VOC2012',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(
+                        keep_ratio=True,
+                        ratio_range=(
+                            0.5,
+                            2.0,
+                        ),
+                        scale=(
+                            2048,
+                            512,
+                        ),
+                        type='RandomResize'),
+                    dict(
+                        cat_max_ratio=0.75,
+                        crop_size=(
+                            512,
+                            512,
+                        ),
+                        type='RandomCrop'),
+                    dict(prob=0.5, type='RandomFlip'),
+                    dict(type='PhotoMetricDistortion'),
+                    dict(size=(
+                        512,
+                        512,
+                    ), type='Pad'),
+                    dict(type='PackSegInputs'),
+                ],
+                type='PascalVOCDataset'),
+        ],
+        type='ConcatDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2048,
+            512,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        512,
+        512,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(size=(
+        512,
+        512,
+    ), type='Pad'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        ann_file='ImageSets/Segmentation/val.txt',
+        data_prefix=dict(
+            img_path='JPEGImages', seg_map_path='SegmentationClass'),
+        data_root='data/VOCdevkit/VOC2012',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='PascalVOCDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_segpgd/norm_l2/iterations_20/epsilon_64/alpha_0.1/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/pascal/pspnet/pspnet_r50-d8_4xb4-40k_voc12aug-512x512/attack_segpgd/norm_l2/iterations_20/epsilon_64/alpha_0.1'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+10/26 18:02:55 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+10/26 18:02:55 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+10/26 18:02:57 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 18:02:58 - mmengine - INFO - Load checkpoint from ../checkpoint_files/pspnet/pspnet_r50-d8_512x512_40k_voc12aug_20200613_161222-ae9c1b8c.pth
+10/26 18:09:30 - mmengine - INFO - Iter(test) [  50/1449]    eta: 3:01:59  time: 5.5061  data_time: 0.0017  memory: 19702  
+10/26 18:13:44 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 2:25:04  time: 4.2728  data_time: 0.0019  memory: 19295  
+10/26 18:18:04 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 2:10:38  time: 4.4978  data_time: 0.0018  memory: 19637  
+10/26 18:22:10 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 1:58:46  time: 5.7438  data_time: 0.0018  memory: 19745  
+10/26 18:25:51 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 1:49:43  time: 4.3221  data_time: 0.0018  memory: 19499  
+10/26 18:29:29 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 1:41:31  time: 3.6527  data_time: 0.0018  memory: 19447  
+10/26 18:33:01 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 1:34:18  time: 4.0869  data_time: 0.0018  memory: 19089  
+10/26 18:36:39 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 1:28:20  time: 5.3991  data_time: 0.0018  memory: 19723  
+10/26 18:40:06 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 1:22:25  time: 4.7804  data_time: 0.0018  memory: 18792  
+10/26 18:43:58 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 1:17:49  time: 4.9133  data_time: 0.0018  memory: 19381  
+10/26 18:47:29 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 1:12:45  time: 3.9433  data_time: 0.0018  memory: 19906  
+10/26 18:50:45 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 1:07:36  time: 3.9437  data_time: 0.0018  memory: 19458  
+10/26 18:54:16 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 1:03:03  time: 3.7178  data_time: 0.0018  memory: 19267  
+10/26 18:57:46 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:58:37  time: 5.3514  data_time: 0.0019  memory: 19841  
+10/26 19:01:07 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:54:11  time: 3.6243  data_time: 0.0018  memory: 19637  
+10/26 19:04:33 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:49:56  time: 4.8640  data_time: 0.0019  memory: 19381  
+10/26 19:07:53 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:45:44  time: 4.0357  data_time: 0.0024  memory: 19611  
+10/26 19:11:27 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:41:45  time: 3.7860  data_time: 0.0017  memory: 18951  
+10/26 19:14:30 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:37:34  time: 3.7811  data_time: 0.0018  memory: 5471  
+10/26 19:18:11 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:33:46  time: 4.4858  data_time: 0.0018  memory: 19960  
+10/26 19:21:16 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:29:44  time: 3.6557  data_time: 0.0017  memory: 18882  
+10/26 19:24:27 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:25:50  time: 4.5848  data_time: 0.0018  memory: 18738  
+10/26 19:27:51 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:22:04  time: 4.2133  data_time: 0.0017  memory: 19520  
+10/26 19:31:06 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:18:17  time: 4.4923  data_time: 0.0018  memory: 19723  
+10/26 19:34:25 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:14:33  time: 3.8337  data_time: 0.0018  memory: 19160  
+10/26 19:37:31 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:10:50  time: 3.6199  data_time: 0.0194  memory: 6526  
+10/26 19:40:37 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:07:09  time: 3.8157  data_time: 0.0018  memory: 6328  
+10/26 19:43:41 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:03:31  time: 3.6555  data_time: 0.0017  memory: 18444  
+10/26 19:46:47 - mmengine - INFO - per class results:
+10/26 19:46:47 - mmengine - INFO - 
++-------------+-------+-------+
+|    Class    |  IoU  |  Acc  |
++-------------+-------+-------+
+|  background | 73.17 | 78.29 |
+|  aeroplane  | 31.95 | 64.76 |
+|   bicycle   | 30.52 | 82.94 |
+|     bird    | 45.72 |  74.8 |
+|     boat    | 24.84 | 60.69 |
+|    bottle   |  30.9 | 47.37 |
+|     bus     | 60.27 | 79.43 |
+|     car     |  40.4 | 80.55 |
+|     cat     | 56.59 | 80.65 |
+|    chair    |  7.39 | 26.09 |
+|     cow     | 33.97 | 46.57 |
+| diningtable |  9.83 | 15.43 |
+|     dog     | 44.27 | 67.01 |
+|    horse    | 39.17 | 65.39 |
+|  motorbike  | 56.38 | 74.53 |
+|    person   | 52.31 | 79.17 |
+| pottedplant | 26.22 |  51.4 |
+|    sheep    | 38.88 |  54.3 |
+|     sofa    |  7.08 | 22.65 |
+|    train    | 55.17 | 74.55 |
+|  tvmonitor  | 20.17 | 59.04 |
++-------------+-------+-------+
+10/26 19:46:47 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 74.6900  mIoU: 37.3900  mAcc: 61.2200  data_time: 0.0246  time: 4.2990
+Runtime: 38275
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n487
+Job ID: 24525495
+Array Job ID: 24524112_0
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 09:04:16
+CPU Efficiency: 10.66% of 3-13:07:20 core-walltime
+Job Wall-clock time: 10:38:25
+Memory Utilized: 3.63 GB
+Memory Efficiency: 30.24% of 12.00 GB

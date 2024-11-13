@@ -59,7 +59,7 @@ def create_cor_csv(model_path:Path):
 
 if __name__ == "__main__":
     workdir = Path("./")
-    for dataset in ["cityscapes",]:
+    for dataset in ["ade","cityscapes","pascal"]:
         print()
         print(dataset)
         dataset_path = workdir/Path(dataset+"/")

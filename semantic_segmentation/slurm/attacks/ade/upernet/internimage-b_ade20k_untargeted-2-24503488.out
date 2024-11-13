@@ -1,0 +1,18 @@
+Started at Wed Oct 23 14:25:29 CEST 2024
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 124, in <module>
+    main()
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 86, in main
+    cfg = Config.fromfile(args.config)
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 461, in fromfile
+    cfg_dict, cfg_text, env_variables = Config._file2dict(
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 947, in _file2dict
+    raise e
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 889, in _file2dict
+    _cfg_dict, _cfg_text, _env_variables = Config._file2dict(
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 845, in _file2dict
+    if lazy_import is None and Config._is_lazy_import(filename):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 1661, in _is_lazy_import
+    with open(filename, encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/configs/upernet/../../mmsegmentation/configs/_base__/models/upernet_r50.py'
+Runtime: 2

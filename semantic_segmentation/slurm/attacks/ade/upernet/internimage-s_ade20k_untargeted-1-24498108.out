@@ -1,0 +1,34 @@
+Started at Sun Oct 20 08:35:28 CEST 2024
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 124, in <module>
+    main()
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 86, in main
+    cfg = Config.fromfile(args.config)
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 461, in fromfile
+    cfg_dict, cfg_text, env_variables = Config._file2dict(
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 947, in _file2dict
+    raise e
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 889, in _file2dict
+    _cfg_dict, _cfg_text, _env_variables = Config._file2dict(
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 845, in _file2dict
+    if lazy_import is None and Config._is_lazy_import(filename):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 1661, in _is_lazy_import
+    with open(filename, encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/configs/upernet/../_base_/models/upernet_r50.py'
+Runtime: 6
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n485
+Job ID: 24501229
+Array Job ID: 24498108_1
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 00:00:02
+CPU Efficiency: 0.71% of 00:04:40 core-walltime
+Job Wall-clock time: 00:00:35
+Memory Utilized: 2.51 MB
+Memory Efficiency: 0.02% of 15.00 GB

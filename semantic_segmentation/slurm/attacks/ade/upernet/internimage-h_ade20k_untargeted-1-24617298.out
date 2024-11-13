@@ -1,0 +1,1633 @@
+Started at Wed Nov  6 16:55:44 CET 2024
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/torch/cuda/__init__.py:155: UserWarning: 
+NVIDIA H100 PCIe with CUDA capability sm_90 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 sm_80 sm_86 compute_37.
+If you want to use the NVIDIA H100 PCIe GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+11/06 16:57:47 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 1383090400
+    GPU 0: NVIDIA H100 PCIe
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 1383090400
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+11/06 16:57:48 - mmengine - INFO - Config:
+checkpoint_config = dict(by_epoch=False, interval=1000, max_keep_ckpts=1)
+crop_size = (
+    896,
+    896,
+)
+data = dict(
+    samples_per_gpu=1,
+    test=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                3584,
+                896,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]),
+    train=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(reduce_zero_label=True, type='LoadAnnotations'),
+        dict(img_scale=(
+            3584,
+            896,
+        ), ratio_range=(
+            0.5,
+            2.0,
+        ), type='Resize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            896,
+            896,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(
+            mean=[
+                123.675,
+                116.28,
+                103.53,
+            ],
+            std=[
+                58.395,
+                57.12,
+                57.375,
+            ],
+            to_rgb=True,
+            type='Normalize'),
+        dict(pad_val=0, seg_pad_val=255, size=(
+            896,
+            896,
+        ), type='Pad'),
+        dict(type='DefaultFormatBundle'),
+        dict(keys=[
+            'img',
+            'gt_semantic_seg',
+        ], type='Collect'),
+    ]),
+    val=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                3584,
+                896,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]))
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/ade/ADEChallengeData2016'
+dataset_type = 'ADE20KDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=16000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+evaluation = dict(interval=16000, metric='mIoU', save_best='mIoU')
+img_norm_cfg = dict(
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    to_rgb=True)
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/upernet/upernet_internimage_h_896_160k_ade20k.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+lr_config = dict(
+    _delete_=True,
+    by_epoch=False,
+    min_lr=0.0,
+    policy='poly',
+    power=1.0,
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=1e-06)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.01, epsilon=8, iterations=20, name='cospgd', norm='linf'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1280,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        center_feature_scale=True,
+        channels=320,
+        core_op='DCNv3',
+        depths=[
+            6,
+            6,
+            32,
+            6,
+        ],
+        drop_path_rate=0.5,
+        dw_kernel_size=5,
+        groups=[
+            10,
+            20,
+            40,
+            80,
+        ],
+        init_cfg=dict(
+            checkpoint=
+            'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_h_jointto22k_384.pth',
+            type='Pretrained'),
+        layer_scale=None,
+        level2_post_norm=True,
+        level2_post_norm_block_ids=[
+            5,
+            11,
+            17,
+            23,
+            29,
+        ],
+        mlp_ratio=4.0,
+        norm_layer='LN',
+        offset_scale=1.0,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        post_norm=False,
+        res_post_norm=True,
+        type='InternImage',
+        with_cp=False),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=[
+            320,
+            640,
+            1280,
+            2560,
+        ],
+        in_index=[
+            0,
+            1,
+            2,
+            3,
+        ],
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='UPerHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(
+    betas=(
+        0.9,
+        0.999,
+    ),
+    constructor='CustomLayerDecayOptimizerConstructor',
+    lr=2e-05,
+    paramwise_cfg=dict(
+        depths=[
+            6,
+            6,
+            32,
+            6,
+        ],
+        layer_decay_rate=0.95,
+        num_layers=50,
+        offset_lr_scale=1.0),
+    type='AdamW',
+    weight_decay=0.05)
+optimizer_config = dict(
+    _delete_=True, grad_clip=dict(max_norm=0.1, norm_type=2))
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=160000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+pretrained = 'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_h_jointto22k_384.pth'
+resume = False
+runner = dict(type='IterBasedRunner')
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        flip=False,
+        img_scale=(
+            3584,
+            896,
+        ),
+        transforms=[
+            dict(keep_ratio=True, type='Resize'),
+            dict(size_divisor=32, type='ResizeToMultiple'),
+            dict(type='RandomFlip'),
+            dict(
+                mean=[
+                    123.675,
+                    116.28,
+                    103.53,
+                ],
+                std=[
+                    58.395,
+                    57.12,
+                    57.375,
+                ],
+                to_rgb=True,
+                type='Normalize'),
+            dict(keys=[
+                'img',
+            ], type='ImageToTensor'),
+            dict(keys=[
+                'img',
+            ], type='Collect'),
+        ],
+        type='MultiScaleFlipAug'),
+]
+train_cfg = dict(
+    max_iters=160000, type='IterBasedTrainLoop', val_interval=16000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/training', seg_map_path='annotations/training'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(
+                keep_ratio=True,
+                ratio_range=(
+                    0.5,
+                    2.0,
+                ),
+                scale=(
+                    2048,
+                    512,
+                ),
+                type='RandomResize'),
+            dict(
+                cat_max_ratio=0.75, crop_size=(
+                    512,
+                    512,
+                ), type='RandomCrop'),
+            dict(prob=0.5, type='RandomFlip'),
+            dict(type='PhotoMetricDistortion'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(reduce_zero_label=True, type='LoadAnnotations'),
+    dict(img_scale=(
+        3584,
+        896,
+    ), ratio_range=(
+        0.5,
+        2.0,
+    ), type='Resize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        896,
+        896,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        to_rgb=True,
+        type='Normalize'),
+    dict(pad_val=0, seg_pad_val=255, size=(
+        896,
+        896,
+    ), type='Pad'),
+    dict(type='DefaultFormatBundle'),
+    dict(keys=[
+        'img',
+        'gt_semantic_seg',
+    ], type='Collect'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/ade/upernet/upernet_internimage_h_896_160k_ade20k/attack_cospgd/norm_linf/iterations_20/epsilon_8/alpha_0.01/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/ade/upernet/upernet_internimage_h_896_160k_ade20k/attack_cospgd/norm_linf/iterations_20/epsilon_8/alpha_0.01'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+2024-11-06 16:58:49,690 - mmseg - INFO - using core type: DCNv3
+2024-11-06 16:58:49,690 - mmseg - INFO - using activation layer: GELU
+2024-11-06 16:58:49,690 - mmseg - INFO - using main norm layer: LN
+2024-11-06 16:58:49,690 - mmseg - INFO - using dpr: linear, 0.5
+2024-11-06 16:58:49,690 - mmseg - INFO - level2_post_norm: True
+2024-11-06 16:58:49,690 - mmseg - INFO - level2_post_norm_block_ids: [5, 11, 17, 23, 29]
+2024-11-06 16:58:49,690 - mmseg - INFO - res_post_norm: True
+2024-11-06 16:58:49,690 - mmseg - INFO - use_dcn_v4_op: False
+Number of parameters:  1120338396
+11/06 17:04:44 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+11/06 17:04:45 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+11/06 17:04:48 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/upernet/upernet_internimage_h_896_160k_ade20k.pth
+11/06 17:04:56 - mmengine - INFO - Load checkpoint from ../checkpoint_files/upernet/upernet_internimage_h_896_160k_ade20k.pth
+11/06 17:32:32 - mmengine - INFO - Iter(test) [  50/2000]    eta: 17:55:20  time: 24.8812  data_time: 0.0028  memory: 62847  
+11/06 17:51:55 - mmengine - INFO - Iter(test) [ 100/2000]    eta: 14:52:12  time: 24.4228  data_time: 0.0030  memory: 62173  
+11/06 18:10:55 - mmengine - INFO - Iter(test) [ 150/2000]    eta: 13:33:33  time: 23.3688  data_time: 0.0018  memory: 54829  
+11/06 18:30:27 - mmengine - INFO - Iter(test) [ 200/2000]    eta: 12:49:33  time: 22.8930  data_time: 0.0018  memory: 70288  
+11/06 18:49:01 - mmengine - INFO - Iter(test) [ 250/2000]    eta: 12:08:30  time: 22.1510  data_time: 0.0018  memory: 75935  
+11/06 19:07:32 - mmengine - INFO - Iter(test) [ 300/2000]    eta: 11:34:36  time: 23.1528  data_time: 0.0123  memory: 59266  
+11/06 19:26:30 - mmengine - INFO - Iter(test) [ 350/2000]    eta: 11:07:16  time: 21.4977  data_time: 0.0017  memory: 61428  
+11/06 19:45:17 - mmengine - INFO - Iter(test) [ 400/2000]    eta: 10:41:21  time: 23.0353  data_time: 0.0016  memory: 59986  
+11/06 20:02:24 - mmengine - INFO - Iter(test) [ 450/2000]    eta: 10:11:11  time: 20.8701  data_time: 0.0017  memory: 50509  
+11/06 20:20:59 - mmengine - INFO - Iter(test) [ 500/2000]    eta: 9:48:03  time: 21.6455  data_time: 0.0016  memory: 51004  
+11/06 20:40:46 - mmengine - INFO - Iter(test) [ 550/2000]    eta: 9:28:46  time: 23.7229  data_time: 0.0016  memory: 57623  
+11/06 20:59:14 - mmengine - INFO - Iter(test) [ 600/2000]    eta: 9:06:37  time: 23.2842  data_time: 0.0017  memory: 57702  
+11/06 21:17:46 - mmengine - INFO - Iter(test) [ 650/2000]    eta: 8:45:03  time: 22.7217  data_time: 0.0018  memory: 63305  
+11/06 21:37:26 - mmengine - INFO - Iter(test) [ 700/2000]    eta: 8:25:58  time: 23.1812  data_time: 0.0016  memory: 60867  
+11/06 21:56:33 - mmengine - INFO - Iter(test) [ 750/2000]    eta: 8:05:59  time: 22.6759  data_time: 0.0015  memory: 64195  
+11/06 22:14:10 - mmengine - INFO - Iter(test) [ 800/2000]    eta: 7:43:45  time: 22.4093  data_time: 0.0018  memory: 51606  
+11/06 22:32:56 - mmengine - INFO - Iter(test) [ 850/2000]    eta: 7:23:42  time: 22.6480  data_time: 0.0017  memory: 50120  
+11/06 22:50:21 - mmengine - INFO - Iter(test) [ 900/2000]    eta: 7:02:08  time: 20.2238  data_time: 0.0172  memory: 53678  
+11/06 23:09:28 - mmengine - INFO - Iter(test) [ 950/2000]    eta: 6:42:50  time: 22.2357  data_time: 0.0016  memory: 56832  
+11/06 23:27:21 - mmengine - INFO - Iter(test) [1000/2000]    eta: 6:22:22  time: 21.2686  data_time: 0.0017  memory: 56989  
+11/06 23:46:30 - mmengine - INFO - Iter(test) [1050/2000]    eta: 6:03:16  time: 23.6171  data_time: 0.0016  memory: 64391  
+11/07 00:05:11 - mmengine - INFO - Iter(test) [1100/2000]    eta: 5:43:47  time: 21.8260  data_time: 0.0032  memory: 55467  
+11/07 00:23:27 - mmengine - INFO - Iter(test) [1150/2000]    eta: 5:24:04  time: 22.4319  data_time: 0.0058  memory: 54149  
+11/07 00:42:13 - mmengine - INFO - Iter(test) [1200/2000]    eta: 5:04:49  time: 21.6123  data_time: 0.0030  memory: 57534  
+11/07 01:00:05 - mmengine - INFO - Iter(test) [1250/2000]    eta: 4:45:04  time: 21.7463  data_time: 0.0015  memory: 58449  
+11/07 01:17:29 - mmengine - INFO - Iter(test) [1300/2000]    eta: 4:25:11  time: 22.2981  data_time: 0.0096  memory: 50675  
+11/07 01:35:45 - mmengine - INFO - Iter(test) [1350/2000]    eta: 4:05:54  time: 20.5778  data_time: 0.0015  memory: 50677  
+11/07 01:54:12 - mmengine - INFO - Iter(test) [1400/2000]    eta: 3:46:48  time: 23.3401  data_time: 0.0015  memory: 58212  
+11/07 02:11:51 - mmengine - INFO - Iter(test) [1450/2000]    eta: 3:27:25  time: 23.1417  data_time: 0.0015  memory: 56837  
+11/07 02:29:45 - mmengine - INFO - Iter(test) [1500/2000]    eta: 3:08:15  time: 20.5858  data_time: 0.0014  memory: 50120  
+11/07 02:49:00 - mmengine - INFO - Iter(test) [1550/2000]    eta: 2:49:32  time: 22.6327  data_time: 0.0015  memory: 55949  
+11/07 03:06:54 - mmengine - INFO - Iter(test) [1600/2000]    eta: 2:30:28  time: 21.8453  data_time: 0.0016  memory: 49786  
+11/07 03:25:08 - mmengine - INFO - Iter(test) [1650/2000]    eta: 2:11:32  time: 20.5716  data_time: 0.0015  memory: 70467  
+11/07 03:44:13 - mmengine - INFO - Iter(test) [1700/2000]    eta: 1:52:45  time: 22.3898  data_time: 0.0016  memory: 55848  
+11/07 04:03:10 - mmengine - INFO - Iter(test) [1750/2000]    eta: 1:34:01  time: 22.0306  data_time: 0.0015  memory: 56697  
+11/07 04:20:59 - mmengine - INFO - Iter(test) [1800/2000]    eta: 1:15:06  time: 22.6863  data_time: 0.0032  memory: 51221  
+11/07 04:39:43 - mmengine - INFO - Iter(test) [1850/2000]    eta: 0:56:19  time: 22.4855  data_time: 0.0017  memory: 45729  
+11/07 04:57:12 - mmengine - INFO - Iter(test) [1900/2000]    eta: 0:37:28  time: 21.5760  data_time: 0.0015  memory: 60187  
+11/07 05:15:59 - mmengine - INFO - Iter(test) [1950/2000]    eta: 0:18:44  time: 21.5694  data_time: 0.0015  memory: 73655  
+11/07 05:33:49 - mmengine - INFO - Iter(test) [2000/2000]    eta: 0:00:00  time: 20.1989  data_time: 0.0014  memory: 60841  
+11/07 05:33:49 - mmengine - INFO - per class results:
+11/07 05:33:49 - mmengine - INFO - 
++---------------------+------+------+
+|        Class        | IoU  | Acc  |
++---------------------+------+------+
+|         wall        | 0.17 | 0.26 |
+|       building      | 0.16 | 0.24 |
+|         sky         | 0.72 | 0.74 |
+|        floor        | 0.09 | 0.12 |
+|         tree        | 0.24 | 0.27 |
+|       ceiling       | 0.04 | 0.05 |
+|         road        | 0.0  | 0.0  |
+|         bed         | 0.33 | 0.51 |
+|      windowpane     | 0.03 | 0.13 |
+|        grass        | 1.12 | 1.63 |
+|       cabinet       | 0.07 | 0.16 |
+|       sidewalk      | 0.05 | 0.06 |
+|        person       | 0.39 | 0.47 |
+|        earth        | 0.0  | 0.0  |
+|         door        | 0.05 | 0.18 |
+|        table        | 0.11 | 0.24 |
+|       mountain      | 0.08 | 0.13 |
+|        plant        | 0.01 | 0.02 |
+|       curtain       | 0.11 | 0.28 |
+|        chair        | 0.03 | 0.08 |
+|         car         | 1.4  | 2.62 |
+|        water        | 0.0  | 0.0  |
+|       painting      | 0.1  | 0.38 |
+|         sofa        | 0.0  | 0.0  |
+|        shelf        | 0.0  | 0.0  |
+|        house        | 0.0  | 0.0  |
+|         sea         | 0.13 | 0.24 |
+|        mirror       | 0.0  | 0.04 |
+|         rug         | 0.0  | 0.01 |
+|        field        | 0.0  | 0.0  |
+|       armchair      | 0.13 | 0.63 |
+|         seat        | 0.0  | 0.0  |
+|        fence        | 0.0  | 0.0  |
+|         desk        | 0.0  | 0.01 |
+|         rock        | 0.0  | 0.0  |
+|       wardrobe      | 0.0  | 0.0  |
+|         lamp        | 0.14 | 0.29 |
+|       bathtub       | 0.0  | 0.0  |
+|       railing       | 0.02 | 0.07 |
+|       cushion       | 0.16 | 0.36 |
+|         base        | 0.0  | 0.0  |
+|         box         | 0.0  | 0.0  |
+|        column       | 0.0  | 0.0  |
+|      signboard      | 0.02 | 0.03 |
+|   chest of drawers  | 0.0  | 0.0  |
+|       counter       | 0.0  | 0.0  |
+|         sand        | 0.0  | 0.0  |
+|         sink        | 0.37 | 0.8  |
+|      skyscraper     | 0.0  | 0.0  |
+|      fireplace      | 1.18 | 1.55 |
+|     refrigerator    | 0.0  | 0.0  |
+|      grandstand     | 0.0  | 0.0  |
+|         path        | 0.0  | 0.0  |
+|        stairs       | 0.0  | 0.0  |
+|        runway       | 0.0  | 0.0  |
+|         case        | 0.0  | 0.0  |
+|      pool table     | 0.0  | 0.0  |
+|        pillow       | 0.0  | 0.01 |
+|     screen door     | 0.0  | 0.0  |
+|       stairway      | 0.0  | 0.0  |
+|        river        | 0.0  | 0.0  |
+|        bridge       | 0.0  | 0.0  |
+|       bookcase      | 0.0  | 0.0  |
+|        blind        | 0.0  | 0.0  |
+|     coffee table    | 0.0  | 0.0  |
+|        toilet       | 0.0  | 0.0  |
+|        flower       | 0.0  | 0.0  |
+|         book        | 0.02 | 0.06 |
+|         hill        | 0.01 | 0.04 |
+|        bench        | 0.0  | 0.0  |
+|      countertop     | 0.0  | 0.0  |
+|        stove        | 0.88 | 0.96 |
+|         palm        | 0.0  | 0.0  |
+|    kitchen island   | 0.0  | 0.0  |
+|       computer      | 2.69 | 3.15 |
+|     swivel chair    | 0.0  | 0.0  |
+|         boat        | 0.0  | 0.01 |
+|         bar         | 0.0  | 0.0  |
+|    arcade machine   | 0.0  | 0.0  |
+|        hovel        | 0.0  | 0.0  |
+|         bus         | 0.0  | 0.0  |
+|        towel        | 0.0  | 0.0  |
+|        light        | 0.0  | 0.0  |
+|        truck        | 0.0  | 0.0  |
+|        tower        | 0.0  | 0.0  |
+|      chandelier     | 0.0  | 0.0  |
+|        awning       | 0.0  | 0.0  |
+|     streetlight     | 0.0  | 0.0  |
+|        booth        | 0.0  | 0.0  |
+| television receiver | 0.0  | 0.0  |
+|       airplane      | 0.08 | 0.2  |
+|      dirt track     | 0.0  | 0.0  |
+|       apparel       | 0.0  | 0.0  |
+|         pole        | 0.0  | 0.0  |
+|         land        | 0.0  | 0.0  |
+|      bannister      | 0.0  | 0.0  |
+|      escalator      | 0.0  | 0.0  |
+|       ottoman       | 0.0  | 0.0  |
+|        bottle       | 0.03 | 0.07 |
+|        buffet       | 0.0  | 0.0  |
+|        poster       | 0.0  | 0.0  |
+|        stage        | 0.0  | 0.0  |
+|         van         | 0.0  | 0.0  |
+|         ship        | 0.0  | 0.0  |
+|       fountain      | 0.0  | 0.0  |
+|    conveyer belt    | 0.0  | 0.0  |
+|        canopy       | 0.0  | 0.0  |
+|        washer       | 0.0  | 0.0  |
+|      plaything      | 0.0  | 0.0  |
+|    swimming pool    | 0.0  | 0.0  |
+|        stool        | 0.0  | 0.0  |
+|        barrel       | 0.0  | 0.0  |
+|        basket       | 0.0  | 0.0  |
+|      waterfall      | 0.0  | 0.0  |
+|         tent        | 0.0  | 0.0  |
+|         bag         | 0.0  | 0.0  |
+|       minibike      | 0.0  | 0.0  |
+|        cradle       | 0.0  | 0.0  |
+|         oven        | 0.0  | 0.0  |
+|         ball        | 0.0  | 0.0  |
+|         food        | 0.0  | 0.0  |
+|         step        | 0.0  | 0.0  |
+|         tank        | 0.0  | 0.0  |
+|      trade name     | 0.02 | 0.02 |
+|      microwave      | 0.32 | 2.85 |
+|         pot         | 0.0  | 0.0  |
+|        animal       | 0.0  | 0.0  |
+|       bicycle       | 0.35 | 1.45 |
+|         lake        | 0.0  | 0.0  |
+|      dishwasher     | 1.43 | 2.08 |
+|        screen       | 0.0  | 0.0  |
+|       blanket       | 0.0  | 0.0  |
+|      sculpture      | 0.0  | 0.0  |
+|         hood        | 0.0  | 0.0  |
+|        sconce       | 0.0  | 0.0  |
+|         vase        | 0.04 | 0.51 |
+|    traffic light    | 0.0  | 0.0  |
+|         tray        | 0.0  | 0.03 |
+|        ashcan       | 0.0  | 0.0  |
+|         fan         | 0.0  | 0.0  |
+|         pier        | 0.0  | 0.0  |
+|      crt screen     | 0.11 | 0.44 |
+|        plate        | 0.0  | 0.0  |
+|       monitor       | 0.0  | 0.0  |
+|    bulletin board   | 0.0  | 0.0  |
+|        shower       | 0.03 | 4.31 |
+|       radiator      | 0.0  | 0.0  |
+|        glass        | 0.0  | 0.0  |
+|        clock        | 0.02 | 0.08 |
+|         flag        | 0.0  | 0.0  |
++---------------------+------+------+
+11/07 05:33:49 - mmengine - INFO - Iter(test) [2000/2000]    aAcc: 0.2900  mIoU: 0.0900  mAcc: 0.1900  data_time: 0.0299  time: 22.4638
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/torch/cuda/__init__.py:155: UserWarning: 
+NVIDIA H100 PCIe with CUDA capability sm_90 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 sm_80 sm_86 compute_37.
+If you want to use the NVIDIA H100 PCIe GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+11/07 05:36:20 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
+    CUDA available: True
+    MUSA available: False
+    numpy_random_seed: 519694694
+    GPU 0: NVIDIA H100 PCIe
+    CUDA_HOME: None
+    GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
+    PyTorch: 1.13.1
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.1
+    OpenCV: 3.4.18
+    MMEngine: 0.10.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 519694694
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+11/07 05:36:21 - mmengine - INFO - Config:
+checkpoint_config = dict(by_epoch=False, interval=1000, max_keep_ckpts=1)
+crop_size = (
+    896,
+    896,
+)
+data = dict(
+    samples_per_gpu=1,
+    test=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                3584,
+                896,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]),
+    train=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(reduce_zero_label=True, type='LoadAnnotations'),
+        dict(img_scale=(
+            3584,
+            896,
+        ), ratio_range=(
+            0.5,
+            2.0,
+        ), type='Resize'),
+        dict(cat_max_ratio=0.75, crop_size=(
+            896,
+            896,
+        ), type='RandomCrop'),
+        dict(prob=0.5, type='RandomFlip'),
+        dict(type='PhotoMetricDistortion'),
+        dict(
+            mean=[
+                123.675,
+                116.28,
+                103.53,
+            ],
+            std=[
+                58.395,
+                57.12,
+                57.375,
+            ],
+            to_rgb=True,
+            type='Normalize'),
+        dict(pad_val=0, seg_pad_val=255, size=(
+            896,
+            896,
+        ), type='Pad'),
+        dict(type='DefaultFormatBundle'),
+        dict(keys=[
+            'img',
+            'gt_semantic_seg',
+        ], type='Collect'),
+    ]),
+    val=dict(pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(
+            flip=False,
+            img_scale=(
+                3584,
+                896,
+            ),
+            transforms=[
+                dict(keep_ratio=True, type='Resize'),
+                dict(size_divisor=32, type='ResizeToMultiple'),
+                dict(type='RandomFlip'),
+                dict(
+                    mean=[
+                        123.675,
+                        116.28,
+                        103.53,
+                    ],
+                    std=[
+                        58.395,
+                        57.12,
+                        57.375,
+                    ],
+                    to_rgb=True,
+                    type='Normalize'),
+                dict(keys=[
+                    'img',
+                ], type='ImageToTensor'),
+                dict(keys=[
+                    'img',
+                ], type='Collect'),
+            ],
+            type='MultiScaleFlipAug'),
+    ]))
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    corruption=None,
+    enable_normalization=False,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/ade/ADEChallengeData2016'
+dataset_type = 'ADE20KDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=16000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(draw=True, type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+evaluation = dict(interval=16000, metric='mIoU', save_best='mIoU')
+img_norm_cfg = dict(
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    to_rgb=True)
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'none'
+load_from = '../checkpoint_files/upernet/upernet_internimage_h_896_160k_ade20k.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+lr_config = dict(
+    _delete_=True,
+    by_epoch=False,
+    min_lr=0.0,
+    policy='poly',
+    power=1.0,
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=1e-06)
+model = dict(
+    attack_cfg=dict(
+        alpha=0.1, epsilon=64, iterations=20, name='cospgd', norm='l2'),
+    attack_loss=dict(
+        loss_weight=1.0,
+        reduction='none',
+        type='CrossEntropyLoss',
+        use_sigmoid=False),
+    auxiliary_head=dict(
+        align_corners=False,
+        channels=256,
+        concat_input=False,
+        dropout_ratio=0.1,
+        in_channels=1280,
+        in_index=2,
+        loss_decode=dict(
+            loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        num_convs=1,
+        type='FCNHead'),
+    backbone=dict(
+        center_feature_scale=True,
+        channels=320,
+        core_op='DCNv3',
+        depths=[
+            6,
+            6,
+            32,
+            6,
+        ],
+        drop_path_rate=0.5,
+        dw_kernel_size=5,
+        groups=[
+            10,
+            20,
+            40,
+            80,
+        ],
+        init_cfg=dict(
+            checkpoint=
+            'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_h_jointto22k_384.pth',
+            type='Pretrained'),
+        layer_scale=None,
+        level2_post_norm=True,
+        level2_post_norm_block_ids=[
+            5,
+            11,
+            17,
+            23,
+            29,
+        ],
+        mlp_ratio=4.0,
+        norm_layer='LN',
+        offset_scale=1.0,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        post_norm=False,
+        res_post_norm=True,
+        type='InternImage',
+        with_cp=False),
+    data_preprocessor=dict(
+        bgr_to_rgb=True,
+        corruption=None,
+        enable_normalization=False,
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        pad_val=0,
+        seg_pad_val=255,
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        type='SegDataPreProcessor'),
+    decode_head=dict(
+        align_corners=False,
+        channels=512,
+        dropout_ratio=0.1,
+        in_channels=[
+            320,
+            640,
+            1280,
+            2560,
+        ],
+        in_index=[
+            0,
+            1,
+            2,
+            3,
+        ],
+        loss_decode=dict(
+            loss_weight=1.0,
+            reduction='none',
+            type='CrossEntropyLoss',
+            use_sigmoid=False),
+        norm_cfg=dict(requires_grad=True, type='SyncBN'),
+        num_classes=150,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='UPerHead'),
+    enable_normalization=False,
+    normalize_mean_std=dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ], std=[
+            58.395,
+            57.12,
+            57.375,
+        ]),
+    perform_attack=True,
+    pretrained='open-mmlab://resnet50_v1c',
+    test_cfg=dict(mode='whole'),
+    train_cfg=dict(),
+    type='EncoderDecoder')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    clip_grad=None,
+    optimizer=dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005),
+    type='OptimWrapper')
+optimizer = dict(
+    betas=(
+        0.9,
+        0.999,
+    ),
+    constructor='CustomLayerDecayOptimizerConstructor',
+    lr=2e-05,
+    paramwise_cfg=dict(
+        depths=[
+            6,
+            6,
+            32,
+            6,
+        ],
+        layer_decay_rate=0.95,
+        num_layers=50,
+        offset_lr_scale=1.0),
+    type='AdamW',
+    weight_decay=0.05)
+optimizer_config = dict(
+    _delete_=True, grad_clip=dict(max_norm=0.1, norm_type=2))
+param_scheduler = [
+    dict(
+        begin=0,
+        by_epoch=False,
+        end=160000,
+        eta_min=0.0001,
+        power=0.9,
+        type='PolyLR'),
+]
+pretrained = 'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_h_jointto22k_384.pth'
+resume = False
+runner = dict(type='IterBasedRunner')
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        flip=False,
+        img_scale=(
+            3584,
+            896,
+        ),
+        transforms=[
+            dict(keep_ratio=True, type='Resize'),
+            dict(size_divisor=32, type='ResizeToMultiple'),
+            dict(type='RandomFlip'),
+            dict(
+                mean=[
+                    123.675,
+                    116.28,
+                    103.53,
+                ],
+                std=[
+                    58.395,
+                    57.12,
+                    57.375,
+                ],
+                to_rgb=True,
+                type='Normalize'),
+            dict(keys=[
+                'img',
+            ], type='ImageToTensor'),
+            dict(keys=[
+                'img',
+            ], type='Collect'),
+        ],
+        type='MultiScaleFlipAug'),
+]
+train_cfg = dict(
+    max_iters=160000, type='IterBasedTrainLoop', val_interval=16000)
+train_dataloader = dict(
+    batch_size=4,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/training', seg_map_path='annotations/training'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(
+                keep_ratio=True,
+                ratio_range=(
+                    0.5,
+                    2.0,
+                ),
+                scale=(
+                    2048,
+                    512,
+                ),
+                type='RandomResize'),
+            dict(
+                cat_max_ratio=0.75, crop_size=(
+                    512,
+                    512,
+                ), type='RandomCrop'),
+            dict(prob=0.5, type='RandomFlip'),
+            dict(type='PhotoMetricDistortion'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(reduce_zero_label=True, type='LoadAnnotations'),
+    dict(img_scale=(
+        3584,
+        896,
+    ), ratio_range=(
+        0.5,
+        2.0,
+    ), type='Resize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        896,
+        896,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        to_rgb=True,
+        type='Normalize'),
+    dict(pad_val=0, seg_pad_val=255, size=(
+        896,
+        896,
+    ), type='Pad'),
+    dict(type='DefaultFormatBundle'),
+    dict(keys=[
+        'img',
+        'gt_semantic_seg',
+    ], type='Collect'),
+]
+tta_model = dict(type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2048,
+                512,
+            ), type='Resize'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    save_dir=
+    '../aa_workdir/ade/upernet/upernet_internimage_h_896_160k_ade20k/attack_cospgd/norm_l2/iterations_20/epsilon_64/alpha_0.1/show_dir',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = '../aa_workdir/ade/upernet/upernet_internimage_h_896_160k_ade20k/attack_cospgd/norm_l2/iterations_20/epsilon_64/alpha_0.1'
+
+/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+2024-11-07 05:37:40,345 - mmseg - INFO - using core type: DCNv3
+2024-11-07 05:37:40,345 - mmseg - INFO - using activation layer: GELU
+2024-11-07 05:37:40,345 - mmseg - INFO - using main norm layer: LN
+2024-11-07 05:37:40,345 - mmseg - INFO - using dpr: linear, 0.5
+2024-11-07 05:37:40,345 - mmseg - INFO - level2_post_norm: True
+2024-11-07 05:37:40,345 - mmseg - INFO - level2_post_norm_block_ids: [5, 11, 17, 23, 29]
+2024-11-07 05:37:40,345 - mmseg - INFO - res_post_norm: True
+2024-11-07 05:37:40,345 - mmseg - INFO - use_dcn_v4_op: False
+Number of parameters:  1120338396
+11/07 05:47:56 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+11/07 05:47:56 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_val:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test:
+(VERY_HIGH   ) RuntimeInfoHook                    
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+11/07 05:47:57 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+Loads checkpoint by local backend from path: ../checkpoint_files/upernet/upernet_internimage_h_896_160k_ade20k.pth
+11/07 05:48:02 - mmengine - INFO - Load checkpoint from ../checkpoint_files/upernet/upernet_internimage_h_896_160k_ade20k.pth
+11/07 06:18:32 - mmengine - INFO - Iter(test) [  50/2000]    eta: 19:48:20  time: 24.7342  data_time: 0.0027  memory: 62847  
+11/07 06:38:01 - mmengine - INFO - Iter(test) [ 100/2000]    eta: 15:46:28  time: 24.2569  data_time: 0.0031  memory: 62173  
+11/07 06:57:06 - mmengine - INFO - Iter(test) [ 150/2000]    eta: 14:11:25  time: 23.4745  data_time: 0.0115  memory: 54828  
+11/07 07:16:40 - mmengine - INFO - Iter(test) [ 200/2000]    eta: 13:17:33  time: 22.9270  data_time: 0.0020  memory: 70288  
+11/07 07:35:17 - mmengine - INFO - Iter(test) [ 250/2000]    eta: 12:30:36  time: 22.2303  data_time: 0.0018  memory: 75935  
+11/07 07:53:45 - mmengine - INFO - Iter(test) [ 300/2000]    eta: 11:52:16  time: 22.9368  data_time: 0.0019  memory: 59266  
+11/07 08:12:40 - mmengine - INFO - Iter(test) [ 350/2000]    eta: 11:21:45  time: 21.5353  data_time: 0.0018  memory: 61428  
+11/07 08:31:23 - mmengine - INFO - Iter(test) [ 400/2000]    eta: 10:53:19  time: 22.9430  data_time: 0.0056  memory: 59986  
+11/07 08:48:25 - mmengine - INFO - Iter(test) [ 450/2000]    eta: 10:21:16  time: 20.7843  data_time: 0.0018  memory: 50519  
+11/07 09:06:54 - mmengine - INFO - Iter(test) [ 500/2000]    eta: 9:56:29  time: 21.5374  data_time: 0.0017  memory: 51004  
+11/07 09:26:31 - mmengine - INFO - Iter(test) [ 550/2000]    eta: 9:35:54  time: 23.5983  data_time: 0.0017  memory: 57624  
+11/07 09:44:53 - mmengine - INFO - Iter(test) [ 600/2000]    eta: 9:12:35  time: 23.1483  data_time: 0.0030  memory: 57702  
+11/07 10:03:23 - mmengine - INFO - Iter(test) [ 650/2000]    eta: 8:50:17  time: 22.7760  data_time: 0.0156  memory: 63305  
+11/07 10:22:58 - mmengine - INFO - Iter(test) [ 700/2000]    eta: 8:30:31  time: 23.0178  data_time: 0.0017  memory: 60867  
+11/07 10:42:00 - mmengine - INFO - Iter(test) [ 750/2000]    eta: 8:09:53  time: 22.5718  data_time: 0.0016  memory: 64195  
+11/07 10:59:34 - mmengine - INFO - Iter(test) [ 800/2000]    eta: 7:47:12  time: 22.4796  data_time: 0.0353  memory: 51606  
+11/07 11:18:16 - mmengine - INFO - Iter(test) [ 850/2000]    eta: 7:26:43  time: 22.5514  data_time: 0.0019  memory: 50120  
+11/07 11:35:38 - mmengine - INFO - Iter(test) [ 900/2000]    eta: 7:04:47  time: 20.1096  data_time: 0.0016  memory: 53677  
+11/07 11:54:41 - mmengine - INFO - Iter(test) [ 950/2000]    eta: 6:45:10  time: 22.1778  data_time: 0.0017  memory: 56832  
+11/07 12:12:32 - mmengine - INFO - Iter(test) [1000/2000]    eta: 6:24:27  time: 21.3084  data_time: 0.0016  memory: 56989  
+11/07 12:31:46 - mmengine - INFO - Iter(test) [1050/2000]    eta: 6:05:14  time: 23.7323  data_time: 0.0017  memory: 64392  
+11/07 12:50:33 - mmengine - INFO - Iter(test) [1100/2000]    eta: 5:45:38  time: 21.9461  data_time: 0.0017  memory: 55467  
+11/07 13:08:56 - mmengine - INFO - Iter(test) [1150/2000]    eta: 5:25:49  time: 22.5691  data_time: 0.0018  memory: 54149  
+11/07 13:27:49 - mmengine - INFO - Iter(test) [1200/2000]    eta: 5:06:28  time: 21.7543  data_time: 0.0017  memory: 57534  
+11/07 13:45:49 - mmengine - INFO - Iter(test) [1250/2000]    eta: 4:46:38  time: 21.8315  data_time: 0.0017  memory: 58449  
+11/07 14:03:17 - mmengine - INFO - Iter(test) [1300/2000]    eta: 4:26:37  time: 22.3811  data_time: 0.0018  memory: 50674  
+11/07 14:21:37 - mmengine - INFO - Iter(test) [1350/2000]    eta: 4:07:15  time: 20.6523  data_time: 0.0017  memory: 50680  
+11/07 14:40:09 - mmengine - INFO - Iter(test) [1400/2000]    eta: 3:48:01  time: 23.4562  data_time: 0.0017  memory: 58212  
+11/07 14:58:14 - mmengine - INFO - Iter(test) [1450/2000]    eta: 3:28:32  time: 23.2280  data_time: 0.0016  memory: 56837  
+11/07 15:16:14 - mmengine - INFO - Iter(test) [1500/2000]    eta: 3:09:22  time: 20.6691  data_time: 0.0015  memory: 50120  
+11/07 15:35:34 - mmengine - INFO - Iter(test) [1550/2000]    eta: 2:50:33  time: 22.7367  data_time: 0.0017  memory: 55940  
+11/07 15:53:35 - mmengine - INFO - Iter(test) [1600/2000]    eta: 2:31:22  time: 21.9669  data_time: 0.0017  memory: 49781  
+11/07 16:12:04 - mmengine - INFO - Iter(test) [1650/2000]    eta: 2:12:17  time: 20.5624  data_time: 0.0015  memory: 70474  
+11/07 16:30:57 - mmengine - INFO - Iter(test) [1700/2000]    eta: 1:53:26  time: 22.4210  data_time: 0.0018  memory: 55848  
+11/07 16:49:58 - mmengine - INFO - Iter(test) [1750/2000]    eta: 1:34:33  time: 22.0167  data_time: 0.0015  memory: 56692  
+11/07 17:07:48 - mmengine - INFO - Iter(test) [1800/2000]    eta: 1:15:31  time: 22.7389  data_time: 0.0224  memory: 51223  
+11/07 17:26:31 - mmengine - INFO - Iter(test) [1850/2000]    eta: 0:56:37  time: 22.4183  data_time: 0.0017  memory: 45730  
+11/07 17:43:59 - mmengine - INFO - Iter(test) [1900/2000]    eta: 0:37:40  time: 21.5516  data_time: 0.0015  memory: 60187  
+slurmstepd: error: *** JOB 24635402 ON uc2n908 CANCELLED AT 2024-11-07T17:55:26 DUE TO TIME LIMIT ***
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n908
+Job ID: 24635402
+Array Job ID: 24617298_1
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: TIMEOUT (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 12:23:00
+CPU Efficiency: 6.19% of 8-08:01:52 core-walltime
+Job Wall-clock time: 1-01:00:14
+Memory Utilized: 8.60 GB
+Memory Efficiency: 43.02% of 20.00 GB

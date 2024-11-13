@@ -341,7 +341,7 @@ model = dict(
                 0.1,
             ],
             loss_weight=2.0,
-            reduction='mean',
+            reduction='none',
             type='mmdet.CrossEntropyLoss',
             use_sigmoid=False),
         loss_dice=dict(
@@ -349,12 +349,12 @@ model = dict(
             eps=1.0,
             loss_weight=5.0,
             naive_dice=True,
-            reduction='mean',
+            reduction='none',
             type='mmdet.DiceLoss',
             use_sigmoid=True),
         loss_mask=dict(
             loss_weight=5.0,
-            reduction='mean',
+            reduction='none',
             type='mmdet.CrossEntropyLoss',
             use_sigmoid=True),
         num_classes=150,

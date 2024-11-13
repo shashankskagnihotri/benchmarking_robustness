@@ -2,6 +2,7 @@
 import argparse
 import os
 import os.path as osp
+import torch
 
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
@@ -121,4 +122,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    with torch.autocast(device_type="cuda"):
+        main()

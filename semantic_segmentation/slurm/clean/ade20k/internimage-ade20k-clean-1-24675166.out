@@ -1,0 +1,12 @@
+Started at Wed Nov 13 21:25:38 CET 2024
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 126, in <module>
+    main()
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 87, in main
+    cfg = Config.fromfile(args.config)
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 460, in fromfile
+    lazy_import is None and not Config._is_lazy_import(filename):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 1661, in _is_lazy_import
+    with open(filename, encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '../configs/upernet_internimage_s_512_160k_ade20k.py'
+Runtime: 2

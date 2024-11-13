@@ -1,0 +1,22 @@
+Started at Tue Nov 12 21:54:58 CET 2024
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 126, in <module>
+    main()
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 87, in main
+    cfg = Config.fromfile(args.config)
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 460, in fromfile
+    lazy_import is None and not Config._is_lazy_import(filename):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 1661, in _is_lazy_import
+    with open(filename, encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: './configs/mask2former/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_voc12aug-512x512.py'
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 126, in <module>
+    main()
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 87, in main
+    cfg = Config.fromfile(args.config)
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 460, in fromfile
+    lazy_import is None and not Config._is_lazy_import(filename):
+  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 1661, in _is_lazy_import
+    with open(filename, encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: './configs/mask2former/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_voc12aug-512x512.py'
+Runtime: 8
