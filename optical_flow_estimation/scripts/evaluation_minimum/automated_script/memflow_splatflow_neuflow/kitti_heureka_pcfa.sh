@@ -4,12 +4,12 @@
 
 # User whose jobs you want to monitor
 USER="ma_jcaspary"
-LOGFILE="/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/memflow_splatflow_neuflow/kitti_heureka_pcfa.log"
-cd /hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/memflow_splatflow_neuflow
+LOGFILE="/hkfs/work/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/memflow_splatflow_neuflow/kitti_heureka_pcfa.log"
+cd /hkfs/work/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/automated_script/memflow_splatflow_neuflow
 # List of shell script names and their corresponding job amounts
 declare -A scripts_and_amounts=(
-  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/memflow/kitti-2015/pcfa_i20_heureka.sh"]=1
-  ["/hkfs/work/workspace/scratch/ma_jcaspary-ma_jcaspary-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/splatflow/kitti-2015/pcfa_i20_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/memflow/kitti-2015/pcfa_i20_heureka.sh"]=1
+  ["/hkfs/work/workspace/scratch/ma_lucschwa-team_project_fss2024/benchmarking_robustness/optical_flow_estimation/scripts/evaluation_minimum/splatflow/kitti-2015/pcfa_i20_heureka.sh"]=1
 )
 
 # Function to check the number of running and pending jobs

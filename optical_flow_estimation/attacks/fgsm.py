@@ -48,9 +48,9 @@ def fgsm(
     image_1_adv = fgsm_attack(attack_args, image_1, image_1_grad, orig_image_1)
     image_2_adv = fgsm_attack(attack_args, image_2, image_2_grad, orig_image_2)
     # pdb.set_trace()
-
-    perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv, clone=True)
-    preds = model(perturbed_inputs)
+    with torch.no_grad():
+        perturbed_inputs = replace_images_dic(inputs, image_1_adv, image_2_adv, clone=True)
+        preds = model(perturbed_inputs)
 
     return preds, perturbed_inputs
 

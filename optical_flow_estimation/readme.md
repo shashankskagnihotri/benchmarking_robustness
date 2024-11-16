@@ -28,7 +28,7 @@ For those, you need to have the CUDA toolkit installed (from https://developer.n
 
 Install alt_cuda_corr:
 ```
-cd ptlflow_attacked/utils/external/alt_cuda_corr/
+cd ptlflow/ptlflow/utils/external/alt_cuda_corr/
 python setup.py install
 ```
 
@@ -49,4 +49,3 @@ If you get ImportError: cannot import name 'packaging' from 'pkg_resources', try
 python -m pip install setuptools==69.5.1
 ```
 
-Additionally, if you are working on a cluster and have problems with the installation of the optional dependencies, try claiming a GPU via srun and try installing again.
