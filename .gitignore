@@ -178,3 +178,4 @@ dataset/
 .fio
 *.png
 *.npz
+*.out
