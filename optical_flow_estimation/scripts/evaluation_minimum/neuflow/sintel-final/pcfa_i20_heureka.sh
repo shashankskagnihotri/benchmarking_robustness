@@ -2,7 +2,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
 #SBATCH --time=47:59:59
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:2
 #SBATCH --partition=accelerated
 #SBATCH --job-name=neuflow_sintel-final_pcfa
 #SBATCH --output=slurm/neuflow_sintel-final_pcfa_%A_%a.out
@@ -11,7 +11,7 @@
 model="neuflow"
 dataset="sintel-final"
 checkpoint="sintel"
-targeteds="True False"
+targeteds="True"
 targets="negative zero"
 norm="two"
 attacks="pcfa"
@@ -60,7 +60,7 @@ done
 # Step 3: Calculate the number of SLURM array tasks
 total_jobs=${#combinations[@]}
 echo "Total number of jobs: $total_jobs"
-jobs_per_task=4  # Number of jobs to run per SLURM task
+jobs_per_task=2  # Number of jobs to run per SLURM task
 
 # Compute the total number of array tasks (rounding up)
 array_length=$(( (total_jobs + jobs_per_task - 1) / jobs_per_task ))
@@ -73,7 +73,7 @@ fi
 start_job=$(( SLURM_ARRAY_TASK_ID * jobs_per_task ))
 
 # Run up to 4 combinations on separate GPUs
-for i in $(seq 0 3)  # Loop over 4 GPUs (0 to 3)
+for i in $(seq 0 1)  # Loop over 4 GPUs (0 to 3)
 do
     jobnum=$(( start_job + i ))
     

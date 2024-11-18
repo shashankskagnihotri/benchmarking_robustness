@@ -179,6 +179,18 @@
           "model_parameters": 12659389,
           "point_matching_method": "correlation",
           "time": "03/2023"
+        },
+        {
+          "model": "neuflow",
+          "model_parameters": 3847042,
+          "point_matching_method": "cnn + attention",
+          "time": "03/2024"
+        },
+        {
+          "model": "splatflow",
+          "model_parameters": 8999555,
+          "point_matching_method": "splatting",
+          "time": "01/2024"
         }
       ]
 }
