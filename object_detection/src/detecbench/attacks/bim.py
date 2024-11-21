@@ -14,14 +14,14 @@ class BIM(Attack):
         epsilon: float,
         alpha: float,
         steps: int,
-        targeted: bool = False,
+        target: bool = False,
         norm: str = "inf",
     ):
         """""" ""
         self.epsilon = epsilon
         self.alpha = alpha
         self.steps = steps
-        self.targeted = targeted
+        self.target = target
         self.norm = norm
 
     def run_batch(self, data_batch: dict, model: BaseModel, evaluators: list[Evaluator]):
@@ -34,6 +34,27 @@ class BIM(Attack):
             # Get gradient
             adv_images.requires_grad = True
             data_batch_prepro["inputs"][0] = adv_images
+            if self.target:
+                if isinstance(self.target, bool):
+                    target = torch.full_like(
+                        data_batch_prepro["data_samples"][0].gt_instances.labels, 42
+                    )
+                elif isinstance(self.target, int):
+                    target = torch.full_like(
+                        data_batch_prepro["data_samples"][0].gt_instances.labels, self.target
+                    )
+                elif isinstance(self.target, torch.Tensor):
+                    assert (
+                        self.target.shape
+                        == data_batch_prepro["data_samples"][0].gt_instances.labels.shape
+                    )
+                    target = self.target
+                else:
+                    raise ValueError("Invalid target type")
+
+                original_labels = data_batch_prepro["data_samples"][0].gt_instances.labels
+                data_batch_prepro["data_samples"][0].gt_instances.labels = target
+
             model.training = True  # avoid missing arguments error in some models
             losses = model(**data_batch_prepro, mode="loss")
             cost, _ = model.parse_losses(losses)
@@ -46,7 +67,7 @@ class BIM(Attack):
             sign_data_grad = grad.sign()
 
             # Create the perturbed image by adjusting each pixel of the input image
-            if self.targeted:
+            if self.target:
                 sign_data_grad *= -1
             adv_images = adv_images.detach() + self.alpha * sign_data_grad
 
@@ -70,6 +91,8 @@ class BIM(Attack):
                 model.data_preprocessor.std,
                 inplace=True,
             )(data_batch_prepro["inputs"][0])
+            if self.target:
+                data_batch_prepro["data_samples"][0].gt_instances.labels = original_labels
             model.training = False  # avoid missing arguments error in some models
             self._evaluator_process(evaluators[step + 1], data_batch_prepro, model)
 
