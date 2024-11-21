@@ -11,7 +11,7 @@ from mmengine.config import Config
 
 
 def detecbench(
-    task: PGD | FGSM | BIM | CommonCorruption | CommonCorruption3d,
+    task: PGD | FGSM | BIM | CommonCorruption | CommonCorruption3d | Literal["iid"],
     model: str,
     checkpoint: str,
     log_dir: str = "./logs",
@@ -39,6 +39,8 @@ def detecbench(
     elif isinstance(task, CommonCorruption3d):
         is_3dcc = True
         task_name = "3DCC"
+    elif task == "iid":
+        task_name = "iid"
     else:
         raise NotImplementedError
 
@@ -48,13 +50,13 @@ def detecbench(
     cfg.load_from = checkpoint
 
     if is_cc:
-        assert not isinstance(task, (PGD, FGSM, BIM))
+        assert not isinstance(task, (PGD, FGSM, BIM, str))
         if task.dataset == "Pascal":
             cfg.val_dataloader.dataset.img_subdir = f"{task.name}/severity_{task.severity}/"
         elif task.dataset == "Coco":
             cfg.val_dataloader.dataset.data_prefix.img = f"{task.name}/severity_{task.severity}/"
     elif is_3dcc:
-        assert not isinstance(task, (PGD, FGSM, BIM))
+        assert not isinstance(task, (PGD, FGSM, BIM, str))
         if task.dataset == "Pascal":
             cfg.val_dataloader.dataset.img_subdir = f"{task.name}/{task.severity}/"
         elif task.dataset == "Coco":
@@ -90,7 +92,7 @@ def detecbench(
 
     if is_attack:
         # Setup the modified validation loop
-        assert not isinstance(task, (CommonCorruption, CommonCorruption3d))
+        assert not isinstance(task, (CommonCorruption, CommonCorruption3d, str))
         replace_val_loop(attack=task, use_wandb=use_wandb)
 
     # Run the attack
