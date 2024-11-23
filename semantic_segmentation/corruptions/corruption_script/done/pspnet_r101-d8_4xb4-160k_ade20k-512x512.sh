@@ -4,8 +4,8 @@
 #SBATCH --ntasks=1
 #SBATCH --partition=gpu_4
 #SBATCH --gres=gpu:1
-#SBATCH --mem=100G
-#SBATCH --cpus-per-task=16
+#SBATCH --mem=10G
+#SBATCH --cpus-per-task=8
 #SBATCH --job-name=corruption_pspnet_r101-d8_4xb4-160k_ade20k-512x512
 #SBATCH --output=slurm/corruption_pspnet_r101-d8_4xb4-160k_ade20k-512x512.out
 #SBATCH --mail-type=ALL
@@ -17,10 +17,10 @@ cd mmsegmentation
 
 # List of corruption methods
 corruptions=(
-    'gaussian_noise'
-    'shot_noise'
-    'impulse_noise'
-    'defocus_blur'
+    # 'gaussian_noise'
+    # 'shot_noise'
+    # 'impulse_noise'
+    # 'defocus_blur'
     'glass_blur'
     'motion_blur'
     'zoom_blur'

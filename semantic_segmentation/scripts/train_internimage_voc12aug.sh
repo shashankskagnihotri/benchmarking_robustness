@@ -27,6 +27,9 @@ then
 elif [[ $SLURM_ARRAY_TASK_ID -eq 3 ]]
 then
     python tools/train.py ../configs/internimage/upernet_internimage_t_160k_voc12aug_512x512.py --work-dir ../work_dirs/upernet_internimage_t_160k_voc12aug_512x512
+elif [[ $SLURM_ARRAY_TASK_ID -eq 4 ]]
+then
+    python tools/train.py ../configs/internimage/upernet_internimage_s_160k_ade20k_2048x512.py --work-dir ../work_dirs/upernet_internimage_s_160k_ade20k_2048x512
 else
     echo "All submitted"
 fi 

@@ -1,0 +1,16 @@
+Started at Sun Oct  6 12:51:30 CEST 2024
+/var/spool/slurmd/job24391476/slurm_script: line 17: activate: No such file or directory
+/pfs/work7/workspace/scratch/ma_mkacar-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/mmseg/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
+  warnings.warn('Now, we support DCNv4 in InternImage.')
+Traceback (most recent call last):
+  File "/pfs/work7/workspace/scratch/ma_mkacar-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/train.py", line 104, in <module>
+    main()
+  File "/pfs/work7/workspace/scratch/ma_mkacar-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/train.py", line 58, in main
+    cfg = Config.fromfile(args.config)
+  File "/pfs/work7/workspace/scratch/ma_mkacar-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 460, in fromfile
+    lazy_import is None and not Config._is_lazy_import(filename):
+  File "/pfs/work7/workspace/scratch/ma_mkacar-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/config/config.py", line 1661, in _is_lazy_import
+    with open(filename, encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '../configs/internimage/upernet_internimage_t_160k_voc12aug_512x512.py'
+/var/spool/slurmd/job24391476/slurm_script: line 37: date +%s: command not found
+Runtime: 0
