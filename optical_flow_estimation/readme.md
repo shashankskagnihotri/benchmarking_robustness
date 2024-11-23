@@ -53,6 +53,8 @@ python -m pip install setuptools==69.5.1
 matchflow: install Quadtree Attention (under ptlflow/ptlflow/models/matchflow/QuadtreeAttention setup.py install)
 separableflow: intall GANet (under ptlflow/ptlflow/models/separableflow compile.sh)
 scv4: install pytorch-scatter (conda install pytorch-scatter -c pyg)
+neuflow: needs cupy (pip install cupy)
+splatflow: needs pytorch 2.x
 
 Note: To install, a gpu with CUDA is needed. 
 
