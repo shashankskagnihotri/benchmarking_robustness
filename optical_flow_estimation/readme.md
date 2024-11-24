@@ -49,3 +49,25 @@ If you get ImportError: cannot import name 'packaging' from 'pkg_resources', try
 python -m pip install setuptools==69.5.1
 ```
 
+### Model specific dependencies
+matchflow: install Quadtree Attention (under ptlflow/ptlflow/models/matchflow/QuadtreeAttention setup.py install)
+separableflow: intall GANet (under ptlflow/ptlflow/models/separableflow compile.sh)
+scv4: install pytorch-scatter (conda install pytorch-scatter -c pyg)
+neuflow: needs cupy (pip install cupy)
+splatflow: needs pytorch 2.x
+
+Note: To install, a gpu with CUDA is needed. 
+
+### Optional Dependencies for Horeka:
+After installing pytorch with Cuda 12.1, I installed Cudatoolkit with conda:
+conda install nvidia/label/cuda-12.1.0::cuda-toolkit
+
+then get with srun a gpu and you should be able to install the optionals.
+
+If this is not working install cudatoolkit without sudo from nvidia:
+https://developer.nvidia.com/cuda-12-1-0-download-archive
+
+After this stackoverflow:
+https://stackoverflow.com/questions/39379792/install-cuda-without-root
+
+Then get the gpus with srun and install the optionals.
