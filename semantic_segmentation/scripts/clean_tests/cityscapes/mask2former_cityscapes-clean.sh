@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --job-name=mask2former_cityscapes_clean
 #SBATCH --output=slurm/clean/cityscapes/mask2former_cityscapes_clean_%a_%A.out
-#SBATCH --array=0-3
+#SBATCH --array=3
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=david.schader@students.uni-mannheim.de
 
@@ -40,7 +40,7 @@ then
 elif [[ $SLURM_ARRAY_TASK_ID -eq 3 ]]
 then
 
-    python tools/test.py ./configs/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024.py .../work_dirs/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_ade20k-512x512/best_mIoU_iter_155000.pth --work-dir ../clean_workdir/cityscapes/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024 --show-dir ../clean_workdir/cityscapes/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024/show_dir
+    python tools/test.py ./configs/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024.py ../checkpoint_files/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024_20221127_143802-9ab177f6.pth --work-dir ../clean_workdir/cityscapes/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024 --show-dir ../clean_workdir/cityscapes/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024/show_dir
 
 
 else

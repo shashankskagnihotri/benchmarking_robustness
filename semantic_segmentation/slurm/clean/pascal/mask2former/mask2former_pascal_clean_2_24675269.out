@@ -868,3 +868,76 @@ after_run:
 11/13 21:34:10 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
 Loads checkpoint by local backend from path: /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/work_dirs/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_voc12aug-512x512/best_mIoU_iter_135000.pth
 11/13 21:34:11 - mmengine - INFO - Load checkpoint from /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/work_dirs/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_voc12aug-512x512/best_mIoU_iter_135000.pth
+11/13 21:39:08 - mmengine - INFO - Iter(test) [  50/1449]    eta: 2:17:44  time: 0.3048  data_time: 0.0011  memory: 33759  
+11/13 21:39:20 - mmengine - INFO - Iter(test) [ 100/1449]    eta: 1:09:29  time: 0.1078  data_time: 0.0011  memory: 33717  
+11/13 21:39:29 - mmengine - INFO - Iter(test) [ 150/1449]    eta: 0:45:55  time: 0.1578  data_time: 0.0010  memory: 33752  
+11/13 21:39:36 - mmengine - INFO - Iter(test) [ 200/1449]    eta: 0:33:44  time: 0.2477  data_time: 0.0011  memory: 33680  
+11/13 21:39:41 - mmengine - INFO - Iter(test) [ 250/1449]    eta: 0:26:21  time: 0.0920  data_time: 0.0011  memory: 988  
+11/13 21:39:48 - mmengine - INFO - Iter(test) [ 300/1449]    eta: 0:21:28  time: 0.0618  data_time: 0.0011  memory: 968  
+11/13 21:39:54 - mmengine - INFO - Iter(test) [ 350/1449]    eta: 0:17:56  time: 0.1143  data_time: 0.0010  memory: 33680  
+11/13 21:40:20 - mmengine - INFO - Iter(test) [ 400/1449]    eta: 0:15:14  time: 0.1192  data_time: 0.0011  memory: 33761  
+11/13 21:40:26 - mmengine - INFO - Iter(test) [ 450/1449]    eta: 0:13:52  time: 0.0627  data_time: 0.0015  memory: 989  
+11/13 21:40:32 - mmengine - INFO - Iter(test) [ 500/1449]    eta: 0:12:02  time: 0.1059  data_time: 0.0011  memory: 33664  
+11/13 21:40:38 - mmengine - INFO - Iter(test) [ 550/1449]    eta: 0:10:32  time: 0.0622  data_time: 0.0011  memory: 33769  
+11/13 21:40:43 - mmengine - INFO - Iter(test) [ 600/1449]    eta: 0:09:15  time: 0.0682  data_time: 0.0011  memory: 987  
+11/13 21:40:49 - mmengine - INFO - Iter(test) [ 650/1449]    eta: 0:08:09  time: 0.0934  data_time: 0.0011  memory: 892  
+11/13 21:40:58 - mmengine - INFO - Iter(test) [ 700/1449]    eta: 0:07:14  time: 0.1702  data_time: 0.0015  memory: 33765  
+11/13 21:41:03 - mmengine - INFO - Iter(test) [ 750/1449]    eta: 0:06:23  time: 0.0679  data_time: 0.0011  memory: 33752  
+11/13 21:41:12 - mmengine - INFO - Iter(test) [ 800/1449]    eta: 0:05:41  time: 0.3494  data_time: 0.0011  memory: 33734  
+11/13 21:41:18 - mmengine - INFO - Iter(test) [ 850/1449]    eta: 0:05:00  time: 0.1210  data_time: 0.0011  memory: 969  
+11/13 21:41:22 - mmengine - INFO - Iter(test) [ 900/1449]    eta: 0:04:22  time: 0.0804  data_time: 0.0010  memory: 892  
+11/13 21:41:27 - mmengine - INFO - Iter(test) [ 950/1449]    eta: 0:03:48  time: 0.0866  data_time: 0.0011  memory: 892  
+11/13 21:41:33 - mmengine - INFO - Iter(test) [1000/1449]    eta: 0:03:18  time: 0.0961  data_time: 0.0011  memory: 33769  
+11/13 21:41:37 - mmengine - INFO - Iter(test) [1050/1449]    eta: 0:02:49  time: 0.0612  data_time: 0.0010  memory: 930  
+11/13 21:41:44 - mmengine - INFO - Iter(test) [1100/1449]    eta: 0:02:23  time: 0.2870  data_time: 0.0010  memory: 33643  
+11/13 21:41:49 - mmengine - INFO - Iter(test) [1150/1449]    eta: 0:01:59  time: 0.0763  data_time: 0.0010  memory: 949  
+11/13 21:41:55 - mmengine - INFO - Iter(test) [1200/1449]    eta: 0:01:36  time: 0.1429  data_time: 0.0010  memory: 987  
+11/13 21:42:01 - mmengine - INFO - Iter(test) [1250/1449]    eta: 0:01:14  time: 0.1294  data_time: 0.0010  memory: 33638  
+11/13 21:42:07 - mmengine - INFO - Iter(test) [1300/1449]    eta: 0:00:54  time: 0.0895  data_time: 0.0011  memory: 987  
+11/13 21:42:11 - mmengine - INFO - Iter(test) [1350/1449]    eta: 0:00:35  time: 0.0654  data_time: 0.0011  memory: 969  
+11/13 21:42:15 - mmengine - INFO - Iter(test) [1400/1449]    eta: 0:00:16  time: 0.0614  data_time: 0.0010  memory: 892  
+11/13 21:42:19 - mmengine - INFO - per class results:
+11/13 21:42:19 - mmengine - INFO - 
++-------------+-------+-------+
+|    Class    |  IoU  |  Acc  |
++-------------+-------+-------+
+|  background | 96.15 | 97.99 |
+|  aeroplane  | 93.82 | 98.98 |
+|   bicycle   | 47.16 | 97.16 |
+|     bird    | 96.21 | 98.45 |
+|     boat    | 73.74 | 87.59 |
+|    bottle   | 87.53 | 96.58 |
+|     bus     | 96.22 | 97.99 |
+|     car     |  92.4 | 95.86 |
+|     cat     | 96.17 | 98.15 |
+|    chair    | 46.87 | 57.63 |
+|     cow     | 91.43 |  93.5 |
+| diningtable | 63.91 | 68.69 |
+|     dog     | 94.29 | 98.59 |
+|    horse    | 88.54 | 96.16 |
+|  motorbike  | 93.41 | 96.59 |
+|    person   | 90.91 |  94.3 |
+| pottedplant | 74.55 | 91.74 |
+|    sheep    |  94.5 | 97.59 |
+|     sofa    | 62.82 | 76.56 |
+|    train    | 94.66 | 97.82 |
+|  tvmonitor  | 84.62 | 92.56 |
++-------------+-------+-------+
+11/13 21:42:19 - mmengine - INFO - Iter(test) [1449/1449]    aAcc: 96.5600  mIoU: 83.8100  mAcc: 91.9300  data_time: 0.0266  time: 0.3366
+Runtime: 887
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n908
+Job ID: 24675269
+Array Job ID: 24675269_2
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 00:12:42
+CPU Efficiency: 10.41% of 02:02:00 core-walltime
+Job Wall-clock time: 00:15:15
+Memory Utilized: 4.73 GB
+Memory Efficiency: 47.28% of 10.00 GB

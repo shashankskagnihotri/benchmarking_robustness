@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --job-name=internimage-ade20k-clean
 #SBATCH --output=slurm/clean/ade20k/internimage-ade20k-clean-%a-%A.out
-#SBATCH --array=0-1
+#SBATCH --array=1
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=david.schader@students.uni-mannheim.de
 
@@ -26,7 +26,7 @@ then
 elif [[ $SLURM_ARRAY_TASK_ID -eq 1 ]]
 then
 
-    python tools/test.py ../configs/upernet_internimage_s_512_160k_ade20k.py ../checkpoint_files/upernet_internimage_s_512_160k_ade20k.pth --work-dir ../clean_workdir/ade20k/upernet_internimage_s_512_160k_ade20k --show-dir ../clean_workdir/ade20k/upernet_internimage_s_512_160k_ade20k/show_dir
+    python tools/test.py ../configs/upernet/upernet_internimage_s_512_160k_ade20k.py ../checkpoint_files/upernet/upernet_internimage_s_512_160k_ade20k.pth --work-dir ../clean_workdir/ade20k/upernet/upernet_internimage_s_512_160k_ade20k --show-dir ../clean_workdir/ade20k/upernet/upernet_internimage_s_512_160k_ade20k/show_dir
 
 
 elif [[ $SLURM_ARRAY_TASK_ID -eq 2 ]]

@@ -1,18 +1,18 @@
-Started at Wed Nov 13 21:05:22 CET 2024
+Started at Thu Nov 14 02:56:44 CET 2024
 /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/torch/cuda/__init__.py:155: UserWarning: 
 NVIDIA H100 PCIe with CUDA capability sm_90 is not compatible with the current PyTorch installation.
 The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 sm_80 sm_86 compute_37.
 If you want to use the NVIDIA H100 PCIe GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
 
   warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
-11/13 21:05:25 - mmengine - INFO - 
+11/14 02:58:25 - mmengine - INFO - 
 ------------------------------------------------------------
 System environment:
     sys.platform: linux
     Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
     CUDA available: True
     MUSA available: False
-    numpy_random_seed: 1999383859
+    numpy_random_seed: 1366852446
     GPU 0: NVIDIA H100 PCIe
     CUDA_HOME: None
     GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
@@ -40,13 +40,13 @@ Runtime environment:
     cudnn_benchmark: True
     mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
     dist_cfg: {'backend': 'nccl'}
-    seed: 1999383859
+    seed: 1366852446
     Distributed launcher: none
     Distributed training: False
     GPU number: 1
 ------------------------------------------------------------
 
-11/13 21:05:26 - mmengine - INFO - Config:
+11/14 02:58:26 - mmengine - INFO - Config:
 auto_scale_lr = dict(base_batch_size=16, enable=False)
 backbone_embed_multi = dict(decay_mult=0.0, lr_mult=0.1)
 backbone_norm_multi = dict(decay_mult=0.0, lr_mult=0.1)
@@ -682,8 +682,8 @@ work_dir = '../aa_workdir/cityscapes/mask2former/mask2former_swin-s_8xb2-90k_cit
 /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
   warnings.warn('Now, we support DCNv4 in InternImage.')
 Number of parameters:  68723870
-11/13 21:06:19 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
-11/13 21:06:19 - mmengine - INFO - Hooks will be executed in the following order:
+11/14 03:08:43 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+11/14 03:08:43 - mmengine - INFO - Hooks will be executed in the following order:
 before_run:
 (VERY_HIGH   ) RuntimeInfoHook                    
 (BELOW_NORMAL) LoggerHook                         
@@ -768,43 +768,59 @@ after_test:
 after_run:
 (BELOW_NORMAL) LoggerHook                         
  -------------------- 
-11/13 21:06:20 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+11/14 03:08:46 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
 Loads checkpoint by local backend from path: ../checkpoint_files/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024_20221127_143802-9ab177f6.pth
-> /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py(2184)load_checkpoint()
--> checkpoint = _load_checkpoint_to_model(
-(Pdb) 
-Traceback (most recent call last):
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 126, in <module>
-    main()
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 121, in main
-    runner.test()
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1821, in test
-    self.load_or_resume()
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1699, in load_or_resume
-    self.load_checkpoint(self._load_from)
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 2184, in load_checkpoint
-    checkpoint = _load_checkpoint_to_model(
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 2184, in load_checkpoint
-    checkpoint = _load_checkpoint_to_model(
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/bdb.py", line 90, in trace_dispatch
-    return self.dispatch_line(frame)
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/bdb.py", line 115, in dispatch_line
-    if self.quitting: raise BdbQuit
-bdb.BdbQuit
+11/14 03:08:49 - mmengine - INFO - Load checkpoint from ../checkpoint_files/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024_20221127_143802-9ab177f6.pth
+11/14 03:32:30 - mmengine - INFO - Iter(test) [ 50/500]    eta: 3:32:09  time: 15.0042  data_time: 0.0086  memory: 45785  
+11/14 03:45:06 - mmengine - INFO - Iter(test) [100/500]    eta: 2:24:45  time: 14.9608  data_time: 0.0057  memory: 39878  
+11/14 03:57:38 - mmengine - INFO - Iter(test) [150/500]    eta: 1:53:42  time: 14.9640  data_time: 0.0071  memory: 39954  
+11/14 04:10:07 - mmengine - INFO - Iter(test) [200/500]    eta: 1:31:49  time: 14.8206  data_time: 0.0040  memory: 39954  
+11/14 04:22:33 - mmengine - INFO - Iter(test) [250/500]    eta: 1:13:39  time: 14.8300  data_time: 0.0043  memory: 39878  
+11/14 04:34:58 - mmengine - INFO - Iter(test) [300/500]    eta: 0:57:23  time: 14.7735  data_time: 0.0043  memory: 39878  
+11/14 04:47:25 - mmengine - INFO - Iter(test) [350/500]    eta: 0:42:12  time: 14.8191  data_time: 0.0042  memory: 39878  
+11/14 05:00:03 - mmengine - INFO - Iter(test) [400/500]    eta: 0:27:46  time: 15.2408  data_time: 0.0147  memory: 39954  
+11/14 05:12:40 - mmengine - INFO - Iter(test) [450/500]    eta: 0:13:45  time: 14.8222  data_time: 0.0042  memory: 39954  
+11/14 05:25:06 - mmengine - INFO - Iter(test) [500/500]    eta: 0:00:00  time: 14.8138  data_time: 0.0038  memory: 39954  
+11/14 05:25:06 - mmengine - INFO - per class results:
+11/14 05:25:06 - mmengine - INFO - 
++---------------+-------+-------+
+|     Class     |  IoU  |  Acc  |
++---------------+-------+-------+
+|      road     |  7.51 |  7.81 |
+|    sidewalk   |  1.46 |  1.62 |
+|    building   | 20.52 | 64.92 |
+|      wall     |  0.06 |  0.09 |
+|     fence     |  1.17 |  7.51 |
+|      pole     |  2.79 |  4.26 |
+| traffic light |  2.72 |  4.85 |
+|  traffic sign |  4.34 |  9.81 |
+|   vegetation  | 10.76 | 12.75 |
+|    terrain    |  0.28 |  0.29 |
+|      sky      |  6.31 |  6.39 |
+|     person    |  3.89 | 17.57 |
+|     rider     |  0.16 |  0.73 |
+|      car      |  7.35 | 12.27 |
+|     truck     |  0.54 | 16.97 |
+|      bus      |  0.66 |  0.67 |
+|     train     |  0.0  |  0.0  |
+|   motorcycle  |  0.18 |  0.41 |
+|    bicycle    |  1.23 |  2.35 |
++---------------+-------+-------+
+11/14 05:25:06 - mmengine - INFO - Iter(test) [500/500]    aAcc: 20.9800  mIoU: 3.7900  mAcc: 9.0100  data_time: 0.1134  time: 16.3432
 /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/torch/cuda/__init__.py:155: UserWarning: 
 NVIDIA H100 PCIe with CUDA capability sm_90 is not compatible with the current PyTorch installation.
 The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 sm_80 sm_86 compute_37.
 If you want to use the NVIDIA H100 PCIe GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
 
   warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
-11/13 21:06:25 - mmengine - INFO - 
+11/14 05:27:01 - mmengine - INFO - 
 ------------------------------------------------------------
 System environment:
     sys.platform: linux
     Python: 3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:36:39) [GCC 12.3.0]
     CUDA available: True
     MUSA available: False
-    numpy_random_seed: 64360163
+    numpy_random_seed: 1300599986
     GPU 0: NVIDIA H100 PCIe
     CUDA_HOME: None
     GCC: gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-18)
@@ -832,13 +848,13 @@ Runtime environment:
     cudnn_benchmark: True
     mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
     dist_cfg: {'backend': 'nccl'}
-    seed: 64360163
+    seed: 1300599986
     Distributed launcher: none
     Distributed training: False
     GPU number: 1
 ------------------------------------------------------------
 
-11/13 21:06:26 - mmengine - INFO - Config:
+11/14 05:27:02 - mmengine - INFO - Config:
 auto_scale_lr = dict(base_batch_size=16, enable=False)
 backbone_embed_multi = dict(decay_mult=0.0, lr_mult=0.1)
 backbone_norm_multi = dict(decay_mult=0.0, lr_mult=0.1)
@@ -1474,8 +1490,8 @@ work_dir = '../aa_workdir/cityscapes/mask2former/mask2former_swin-s_8xb2-90k_cit
 /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/ops_dcnv3/modules/dcnv3.py:20: UserWarning: Now, we support DCNv4 in InternImage.
   warnings.warn('Now, we support DCNv4 in InternImage.')
 Number of parameters:  68723870
-11/13 21:07:32 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
-11/13 21:07:32 - mmengine - INFO - Hooks will be executed in the following order:
+11/14 05:38:17 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+11/14 05:38:18 - mmengine - INFO - Hooks will be executed in the following order:
 before_run:
 (VERY_HIGH   ) RuntimeInfoHook                    
 (BELOW_NORMAL) LoggerHook                         
@@ -1560,27 +1576,59 @@ after_test:
 after_run:
 (BELOW_NORMAL) LoggerHook                         
  -------------------- 
-11/13 21:07:33 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+11/14 05:38:22 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
 Loads checkpoint by local backend from path: ../checkpoint_files/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024_20221127_143802-9ab177f6.pth
-> /pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py(2184)load_checkpoint()
--> checkpoint = _load_checkpoint_to_model(
-(Pdb) 
-Traceback (most recent call last):
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 126, in <module>
-    main()
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/mmsegmentation/tools/test.py", line 121, in main
-    runner.test()
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1821, in test
-    self.load_or_resume()
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 1699, in load_or_resume
-    self.load_checkpoint(self._load_from)
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 2184, in load_checkpoint
-    checkpoint = _load_checkpoint_to_model(
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/site-packages/mmengine/runner/runner.py", line 2184, in load_checkpoint
-    checkpoint = _load_checkpoint_to_model(
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/bdb.py", line 90, in trace_dispatch
-    return self.dispatch_line(frame)
-  File "/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/miniconda3/envs/py310/lib/python3.10/bdb.py", line 115, in dispatch_line
-    if self.quitting: raise BdbQuit
-bdb.BdbQuit
-Runtime: 132
+11/14 05:38:25 - mmengine - INFO - Load checkpoint from ../checkpoint_files/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024_20221127_143802-9ab177f6.pth
+11/14 06:01:03 - mmengine - INFO - Iter(test) [ 50/500]    eta: 3:22:26  time: 15.0135  data_time: 0.0046  memory: 45785  
+11/14 06:13:37 - mmengine - INFO - Iter(test) [100/500]    eta: 2:20:22  time: 14.8864  data_time: 0.0045  memory: 39878  
+11/14 06:26:19 - mmengine - INFO - Iter(test) [150/500]    eta: 1:51:25  time: 15.8210  data_time: 0.0043  memory: 39954  
+11/14 06:39:11 - mmengine - INFO - Iter(test) [200/500]    eta: 1:31:00  time: 14.9449  data_time: 0.0060  memory: 39954  
+11/14 06:51:55 - mmengine - INFO - Iter(test) [250/500]    eta: 1:13:23  time: 14.9279  data_time: 0.0061  memory: 39878  
+11/14 07:04:44 - mmengine - INFO - Iter(test) [300/500]    eta: 0:57:27  time: 15.0344  data_time: 0.0106  memory: 39878  
+11/14 07:17:24 - mmengine - INFO - Iter(test) [350/500]    eta: 0:42:22  time: 14.9318  data_time: 0.0049  memory: 39878  
+11/14 07:30:05 - mmengine - INFO - Iter(test) [400/500]    eta: 0:27:53  time: 16.0019  data_time: 0.0066  memory: 39954  
+11/14 07:42:40 - mmengine - INFO - Iter(test) [450/500]    eta: 0:13:47  time: 14.9287  data_time: 0.0051  memory: 39954  
+11/14 07:55:12 - mmengine - INFO - Iter(test) [500/500]    eta: 0:00:00  time: 14.9331  data_time: 0.0064  memory: 39954  
+11/14 07:55:12 - mmengine - INFO - per class results:
+11/14 07:55:12 - mmengine - INFO - 
++---------------+-------+-------+
+|     Class     |  IoU  |  Acc  |
++---------------+-------+-------+
+|      road     | 96.31 | 97.93 |
+|    sidewalk   | 71.87 | 84.91 |
+|    building   | 88.76 | 94.24 |
+|      wall     | 20.84 | 26.01 |
+|     fence     |  39.9 |  54.8 |
+|      pole     | 55.06 | 71.63 |
+| traffic light | 53.43 | 68.94 |
+|  traffic sign | 73.71 | 84.93 |
+|   vegetation  | 89.04 |  94.5 |
+|    terrain    | 40.78 | 58.18 |
+|      sky      | 94.61 | 98.13 |
+|     person    | 72.24 | 84.11 |
+|     rider     | 32.05 | 45.43 |
+|      car      | 91.91 | 96.32 |
+|     truck     | 68.61 | 83.63 |
+|      bus      | 82.75 | 90.41 |
+|     train     | 64.96 | 83.98 |
+|   motorcycle  | 22.98 | 31.65 |
+|    bicycle    | 61.89 |  79.6 |
++---------------+-------+-------+
+11/14 07:55:12 - mmengine - INFO - Iter(test) [500/500]    aAcc: 93.4200  mIoU: 64.3000  mAcc: 75.2300  data_time: 0.1367  time: 16.4026
+Runtime: 17934
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n906
+Job ID: 24675358
+Array Job ID: 24675358_3
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 04:49:03
+CPU Efficiency: 12.07% of 1-15:55:28 core-walltime
+Job Wall-clock time: 04:59:26
+Memory Utilized: 7.49 GB
+Memory Efficiency: 74.94% of 10.00 GB

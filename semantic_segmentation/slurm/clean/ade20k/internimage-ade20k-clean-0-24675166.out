@@ -615,3 +615,217 @@ after_run:
 11/13 21:27:02 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
 Loads checkpoint by local backend from path: ../checkpoint_files/upernet/upernet_internimage_t_512_160k_ade20k.pth
 11/13 21:27:04 - mmengine - INFO - Load checkpoint from ../checkpoint_files/upernet/upernet_internimage_t_512_160k_ade20k.pth
+11/13 21:39:32 - mmengine - INFO - Iter(test) [  50/2000]    eta: 8:05:19  time: 0.4366  data_time: 0.0013  memory: 39290  
+11/13 21:40:20 - mmengine - INFO - Iter(test) [ 100/2000]    eta: 4:05:46  time: 0.5861  data_time: 0.0013  memory: 39286  
+11/13 21:40:35 - mmengine - INFO - Iter(test) [ 150/2000]    eta: 2:46:27  time: 0.2379  data_time: 0.0012  memory: 39272  
+11/13 21:40:57 - mmengine - INFO - Iter(test) [ 200/2000]    eta: 2:04:55  time: 0.3921  data_time: 0.0012  memory: 39288  
+11/13 21:41:19 - mmengine - INFO - Iter(test) [ 250/2000]    eta: 1:39:40  time: 0.2805  data_time: 0.0012  memory: 39285  
+11/13 21:41:35 - mmengine - INFO - Iter(test) [ 300/2000]    eta: 1:22:12  time: 0.0494  data_time: 0.0012  memory: 39285  
+11/13 21:41:55 - mmengine - INFO - Iter(test) [ 350/2000]    eta: 1:10:00  time: 0.3134  data_time: 0.0010  memory: 39285  
+11/13 21:42:11 - mmengine - INFO - Iter(test) [ 400/2000]    eta: 1:00:24  time: 0.2647  data_time: 0.0011  memory: 39284  
+11/13 21:42:16 - mmengine - INFO - Iter(test) [ 450/2000]    eta: 0:52:19  time: 0.1224  data_time: 0.0011  memory: 39270  
+11/13 21:42:23 - mmengine - INFO - Iter(test) [ 500/2000]    eta: 0:45:53  time: 0.0462  data_time: 0.0011  memory: 39252  
+11/13 21:42:30 - mmengine - INFO - Iter(test) [ 550/2000]    eta: 0:40:38  time: 0.2570  data_time: 0.0012  memory: 39284  
+11/13 21:42:36 - mmengine - INFO - Iter(test) [ 600/2000]    eta: 0:36:13  time: 0.1916  data_time: 0.0013  memory: 39285  
+11/13 21:42:47 - mmengine - INFO - Iter(test) [ 650/2000]    eta: 0:32:37  time: 0.3325  data_time: 0.0010  memory: 42707  
+11/13 21:42:59 - mmengine - INFO - Iter(test) [ 700/2000]    eta: 0:29:32  time: 0.0506  data_time: 0.0013  memory: 39290  
+11/13 21:43:12 - mmengine - INFO - Iter(test) [ 750/2000]    eta: 0:26:52  time: 0.7137  data_time: 0.0010  memory: 39295  
+11/13 21:43:18 - mmengine - INFO - Iter(test) [ 800/2000]    eta: 0:24:19  time: 0.0455  data_time: 0.0012  memory: 39273  
+11/13 21:43:21 - mmengine - INFO - Iter(test) [ 850/2000]    eta: 0:22:00  time: 0.0457  data_time: 0.0012  memory: 697  
+11/13 21:43:27 - mmengine - INFO - Iter(test) [ 900/2000]    eta: 0:20:01  time: 0.2072  data_time: 0.0012  memory: 39266  
+11/13 21:43:41 - mmengine - INFO - Iter(test) [ 950/2000]    eta: 0:18:20  time: 0.2464  data_time: 0.0012  memory: 39283  
+11/13 21:43:47 - mmengine - INFO - Iter(test) [1000/2000]    eta: 0:16:42  time: 0.0462  data_time: 0.0011  memory: 39283  
+11/13 21:43:57 - mmengine - INFO - Iter(test) [1050/2000]    eta: 0:15:15  time: 0.3936  data_time: 0.0012  memory: 42710  
+11/13 21:44:06 - mmengine - INFO - Iter(test) [1100/2000]    eta: 0:13:55  time: 0.0744  data_time: 0.0306  memory: 39272  
+11/13 21:44:12 - mmengine - INFO - Iter(test) [1150/2000]    eta: 0:12:39  time: 0.1253  data_time: 0.0011  memory: 39259  
+11/13 21:44:16 - mmengine - INFO - Iter(test) [1200/2000]    eta: 0:11:27  time: 0.0459  data_time: 0.0012  memory: 1883  
+11/13 21:44:21 - mmengine - INFO - Iter(test) [1250/2000]    eta: 0:10:21  time: 0.1642  data_time: 0.0011  memory: 39275  
+11/13 21:44:24 - mmengine - INFO - Iter(test) [1300/2000]    eta: 0:09:19  time: 0.0451  data_time: 0.0011  memory: 700  
+11/13 21:44:28 - mmengine - INFO - Iter(test) [1350/2000]    eta: 0:08:22  time: 0.0501  data_time: 0.0025  memory: 39249  
+11/13 21:44:40 - mmengine - INFO - Iter(test) [1400/2000]    eta: 0:07:32  time: 0.2716  data_time: 0.0368  memory: 39279  
+11/13 21:44:45 - mmengine - INFO - Iter(test) [1450/2000]    eta: 0:06:42  time: 0.2290  data_time: 0.0012  memory: 39266  
+11/13 21:44:48 - mmengine - INFO - Iter(test) [1500/2000]    eta: 0:05:54  time: 0.0453  data_time: 0.0010  memory: 699  
+11/13 21:44:52 - mmengine - INFO - Iter(test) [1550/2000]    eta: 0:05:09  time: 0.0475  data_time: 0.0011  memory: 39281  
+11/13 21:44:54 - mmengine - INFO - Iter(test) [1600/2000]    eta: 0:04:27  time: 0.0447  data_time: 0.0012  memory: 697  
+11/13 21:45:01 - mmengine - INFO - Iter(test) [1650/2000]    eta: 0:03:48  time: 0.0431  data_time: 0.0010  memory: 39284  
+11/13 21:45:07 - mmengine - INFO - Iter(test) [1700/2000]    eta: 0:03:11  time: 0.0453  data_time: 0.0013  memory: 39268  
+11/13 21:45:14 - mmengine - INFO - Iter(test) [1750/2000]    eta: 0:02:35  time: 0.0484  data_time: 0.0010  memory: 39278  
+11/13 21:45:19 - mmengine - INFO - Iter(test) [1800/2000]    eta: 0:02:01  time: 0.0486  data_time: 0.0037  memory: 39251  
+11/13 21:45:22 - mmengine - INFO - Iter(test) [1850/2000]    eta: 0:01:28  time: 0.0455  data_time: 0.0012  memory: 646  
+11/13 21:45:27 - mmengine - INFO - Iter(test) [1900/2000]    eta: 0:00:58  time: 0.0489  data_time: 0.0011  memory: 39291  
+11/13 21:45:34 - mmengine - INFO - Iter(test) [1950/2000]    eta: 0:00:28  time: 0.0452  data_time: 0.0011  memory: 39257  
+11/13 21:45:40 - mmengine - INFO - Iter(test) [2000/2000]    eta: 0:00:00  time: 0.0423  data_time: 0.0009  memory: 39291  
+11/13 21:45:40 - mmengine - INFO - per class results:
+11/13 21:45:40 - mmengine - INFO - 
++---------------------+-------+-------+
+|        Class        |  IoU  |  Acc  |
++---------------------+-------+-------+
+|         wall        | 76.88 | 88.71 |
+|       building      | 82.46 | 92.55 |
+|         sky         | 94.18 | 97.23 |
+|        floor        | 80.03 |  90.8 |
+|         tree        | 73.41 | 88.42 |
+|       ceiling       | 84.05 |  91.7 |
+|         road        | 84.47 | 90.44 |
+|         bed         | 89.12 | 95.24 |
+|      windowpane     | 60.34 | 76.58 |
+|        grass        |  66.8 | 83.07 |
+|       cabinet       | 58.08 | 71.35 |
+|       sidewalk      | 68.25 | 83.75 |
+|        person       | 79.07 | 91.87 |
+|        earth        | 31.98 |  42.9 |
+|         door        |  48.8 | 65.58 |
+|        table        | 58.59 | 75.58 |
+|       mountain      |  59.4 |  73.2 |
+|        plant        | 51.41 | 62.86 |
+|       curtain       | 72.66 | 84.63 |
+|        chair        |  55.7 | 69.21 |
+|         car         | 84.36 | 92.26 |
+|        water        | 49.11 | 64.81 |
+|       painting      | 71.11 | 87.88 |
+|         sofa        | 64.04 | 81.65 |
+|        shelf        | 42.13 | 61.45 |
+|        house        | 40.34 | 51.43 |
+|         sea         | 50.71 | 70.87 |
+|        mirror       | 65.14 | 73.18 |
+|         rug         | 57.76 | 68.07 |
+|        field        | 26.09 | 46.66 |
+|       armchair      | 41.43 |  58.8 |
+|         seat        | 61.84 | 79.71 |
+|        fence        | 42.03 | 58.33 |
+|         desk        | 45.33 | 62.52 |
+|         rock        | 43.91 | 66.26 |
+|       wardrobe      | 48.49 | 68.11 |
+|         lamp        | 60.51 | 73.71 |
+|       bathtub       |  75.8 | 83.93 |
+|       railing       | 29.58 | 39.53 |
+|       cushion       | 57.84 | 70.26 |
+|         base        | 19.95 | 26.83 |
+|         box         | 20.82 | 26.24 |
+|        column       | 40.32 | 48.89 |
+|      signboard      | 35.62 | 49.13 |
+|   chest of drawers  | 36.54 | 52.05 |
+|       counter       | 40.84 | 51.28 |
+|         sand        | 37.91 |  53.7 |
+|         sink        |  70.4 | 78.76 |
+|      skyscraper     | 65.88 | 83.52 |
+|      fireplace      | 74.33 | 86.98 |
+|     refrigerator    | 74.78 | 84.31 |
+|      grandstand     | 45.24 | 71.02 |
+|         path        | 24.34 |  35.0 |
+|        stairs       | 33.17 | 43.57 |
+|        runway       |  70.4 | 92.67 |
+|         case        | 57.02 | 66.13 |
+|      pool table     | 91.87 | 95.93 |
+|        pillow       | 60.58 | 72.52 |
+|     screen door     | 66.42 | 78.09 |
+|       stairway      | 27.59 | 32.53 |
+|        river        | 11.81 | 26.24 |
+|        bridge       | 67.29 | 78.43 |
+|       bookcase      | 39.25 | 54.25 |
+|        blind        | 32.67 | 37.26 |
+|     coffee table    | 54.47 | 80.79 |
+|        toilet       | 84.29 | 90.72 |
+|        flower       | 42.75 | 57.48 |
+|         book        | 51.15 | 71.51 |
+|         hill        | 12.55 | 19.25 |
+|        bench        | 47.57 | 56.08 |
+|      countertop     | 56.99 | 71.39 |
+|        stove        | 76.05 | 85.51 |
+|         palm        | 51.75 | 74.42 |
+|    kitchen island   | 30.83 | 54.35 |
+|       computer      | 63.88 | 73.46 |
+|     swivel chair    | 50.85 | 68.04 |
+|         boat        | 42.05 | 50.18 |
+|         bar         | 30.74 | 36.55 |
+|    arcade machine   | 22.86 | 24.27 |
+|        hovel        | 22.33 | 23.87 |
+|         bus         | 88.42 | 95.65 |
+|        towel        | 59.93 | 69.89 |
+|        light        | 55.03 | 61.96 |
+|        truck        | 35.48 | 45.48 |
+|        tower        | 19.38 | 30.51 |
+|      chandelier     | 65.59 | 79.62 |
+|        awning       |  27.8 | 33.53 |
+|     streetlight     | 26.87 | 36.37 |
+|        booth        | 54.57 | 56.47 |
+| television receiver | 67.01 | 76.36 |
+|       airplane      | 55.34 | 64.57 |
+|      dirt track     |  6.85 | 11.19 |
+|       apparel       |  31.6 | 45.71 |
+|         pole        | 25.08 | 35.64 |
+|         land        |  3.68 |  4.87 |
+|      bannister      |  8.06 | 10.02 |
+|      escalator      | 22.14 | 26.11 |
+|       ottoman       | 46.26 |  61.6 |
+|        bottle       | 36.18 | 53.28 |
+|        buffet       | 43.92 | 49.67 |
+|        poster       | 31.15 | 43.23 |
+|        stage        | 12.98 | 16.07 |
+|         van         | 45.24 | 62.11 |
+|         ship        |  7.55 | 12.17 |
+|       fountain      |  5.25 |  5.3  |
+|    conveyer belt    | 73.46 | 88.55 |
+|        canopy       | 16.92 |  21.4 |
+|        washer       |  68.0 | 71.87 |
+|      plaything      | 27.45 | 37.64 |
+|    swimming pool    | 36.57 | 49.63 |
+|        stool        | 43.69 | 59.57 |
+|        barrel       | 27.59 | 65.08 |
+|        basket       | 33.88 | 43.89 |
+|      waterfall      | 49.88 | 62.31 |
+|         tent        | 95.34 | 97.71 |
+|         bag         | 11.53 | 15.05 |
+|       minibike      | 69.35 | 76.24 |
+|        cradle       | 76.36 | 94.07 |
+|         oven        | 43.47 | 53.34 |
+|         ball        | 39.24 | 46.54 |
+|         food        | 48.97 | 56.71 |
+|         step        | 11.32 | 14.26 |
+|         tank        | 50.36 | 50.78 |
+|      trade name     | 26.63 | 32.67 |
+|      microwave      | 67.47 | 74.74 |
+|         pot         | 43.36 | 50.79 |
+|        animal       | 59.18 | 62.44 |
+|       bicycle       | 55.35 | 77.21 |
+|         lake        | 60.31 | 71.27 |
+|      dishwasher     | 66.06 | 73.42 |
+|        screen       | 72.67 | 86.17 |
+|       blanket       | 11.45 | 13.12 |
+|      sculpture      | 53.76 | 71.58 |
+|         hood        | 56.71 | 59.63 |
+|        sconce       | 47.03 | 59.37 |
+|         vase        | 32.83 | 46.42 |
+|    traffic light    | 29.57 | 45.25 |
+|         tray        | 10.19 | 19.06 |
+|        ashcan       | 44.05 | 57.62 |
+|         fan         | 60.95 | 74.49 |
+|         pier        | 54.56 | 72.48 |
+|      crt screen     |  9.04 | 19.38 |
+|        plate        | 55.04 | 66.87 |
+|       monitor       | 18.56 | 26.44 |
+|    bulletin board   | 38.83 | 45.51 |
+|        shower       |  2.29 |  5.55 |
+|       radiator      |  60.1 | 67.35 |
+|        glass        |  9.77 | 10.29 |
+|        clock        | 26.66 | 31.54 |
+|         flag        | 43.79 | 48.53 |
++---------------------+-------+-------+
+11/13 21:45:40 - mmengine - INFO - Iter(test) [2000/2000]    aAcc: 82.5200  mIoU: 47.6000  mAcc: 58.6600  data_time: 0.0235  time: 0.5576
+Runtime: 1203
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n908
+Job ID: 24675356
+Array Job ID: 24675166_0
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 00:14:28
+CPU Efficiency: 8.79% of 02:44:40 core-walltime
+Job Wall-clock time: 00:20:35
+Memory Utilized: 4.89 GB
+Memory Efficiency: 48.92% of 10.00 GB

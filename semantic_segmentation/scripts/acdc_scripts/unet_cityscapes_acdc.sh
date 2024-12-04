@@ -11,6 +11,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=david.schader@students.uni-mannheim.de
 
+cd mmsegmentation 
 echo "Started at $(date)";
 
 start=$(date +%s)  # Start time

@@ -1,0 +1,22 @@
+Started at Fri Nov 15 12:34:22 CET 2024
+Traceback (most recent call last):
+  File "tools/test.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Runtime: 0
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n912
+Job ID: 24697875
+Array Job ID: 24697875_3
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 00:03:20 core-walltime
+Job Wall-clock time: 00:00:25
+Memory Utilized: 2.63 MB
+Memory Efficiency: 0.03% of 10.00 GB

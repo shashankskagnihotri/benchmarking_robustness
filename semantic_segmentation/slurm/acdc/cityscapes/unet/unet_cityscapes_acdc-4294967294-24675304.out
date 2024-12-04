@@ -1,0 +1,18 @@
+Started at Wed Nov 13 23:59:00 CET 2024
+python: can't open file '/pfs/work7/workspace/scratch/ma_dschader-team_project_fss2024/benchmarking_robustness/semantic_segmentation/tools/test.py': [Errno 2] No such file or directory
+Runtime: 0
+
+============================= JOB FEEDBACK =============================
+
+NodeName=uc2n904
+Job ID: 24675304
+Cluster: uc2
+User/Group: ma_dschader/ma_ma
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 8
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 00:03:20 core-walltime
+Job Wall-clock time: 00:00:25
+Memory Utilized: 2.58 MB
+Memory Efficiency: 0.03% of 10.00 GB
