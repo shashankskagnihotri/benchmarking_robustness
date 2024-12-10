@@ -30,40 +30,40 @@ cfgs = [
     # cfg("cascade_rcnn_swin-s_coco", 2), #* with patience 5 Epoch(val) [6][2500/2500]    coco/bbox_mAP: 0.4490  coco/bbox_mAP_50: 0.6500  coco/bbox_mAP_75: 0.4870  coco/bbox_mAP_s: 0.2710  coco/bbox_mAP_m: 0.4830  coco/bbox_mAP_l: 0.6060
     # cfg(
     #     "codino_convnext-s_coco", 2
-    # ),  #! resubmit (resumed epoch: 8, iter: 295720 ran till Epoch(train) [12][ 8200/29572])
+    # ),  #! resubmit (resumed epoch: 8, iter: 295720 ran till Epoch(train) [12][ 8200/29572]) resumed epoch: 11, iter: 384436 ran till Epoch(train) [15][ 8000/29572], resumed epoch: 14, iter: 473152 ran till Epoch(train) [18][ 6600/29572]
     # cfg(
     #     "codino_swin-s_coco", 2
-    # ),  # ? memory error did with_cp=true and submitted if fails again try ampoptim, but it runs (resumed epoch: 8, iter: 295720 ran till [11][24300/29572])
+    # ),  # ? memory error did with_cp=true and submitted if fails again try ampoptim, but it runs (resumed epoch: 8, iter: 295720 ran till [11][24300/29572]), resumed epoch: 10, iter: 354864 ran till Epoch(train) [13][24100/29572]
     # cfg(
     #     "ddq_convnext-s_coco", 2
-    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs (resumed epoch: 10, iter: 295720 ran till Epoch(train) [15][ 9650/29572])
+    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs (resumed epoch: 10, iter: 295720 ran till Epoch(train) [15][ 9650/29572]) resumed epoch: 14, iter: 414008ran till Epoch(train) [19][ 6300/29572])
     # cfg(
     #     "ddq_swin-s_coco", 2
-    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs some time might have to fix something (resumed epoch: 6, iter: 177432 ran till Epoch(train) [11][  550/29572])
+    # ),  # ? memory error with_cp is alreary true, i think ampoptim gave errors, but it runs some time might have to fix something (resumed epoch: 6, iter: 177432 ran till Epoch(train) [11][  550/29572]); resumed epoch: 10, iter: 295720 ran till Epoch(train) [14][29550/29572]
     # cfg("deformable_detr_convnext-s_coco", 4), #* with patience 15 Epoch(val) [24][1250/1250]    coco/bbox_mAP: 0.4620  coco/bbox_mAP_50: 0.6550  coco/bbox_mAP_75: 0.5050  coco/bbox_mAP_s: 0.2890  coco/bbox_mAP_m: 0.4920  coco/bbox_mAP_l: 0.6140
     # cfg("deformable_detr_swin-s_coco", 4),  #* ran completly Epoch(val) [36][1250/1250]    coco/bbox_mAP: 0.4830  coco/bbox_mAP_50: 0.6700  coco/bbox_mAP_75: 0.5280  coco/bbox_mAP_s: 0.3250  coco/bbox_mAP_m: 0.5090  coco/bbox_mAP_l: 0.6250
     # cfg(
     #     "dino_convnext-s_coco", 2
-    # ),  #! resubmit (resumed epoch: 20, iter: 709728 ran till Epoch(train) [26][ 7000/29572])
+    # ),  #! resubmit (resumed epoch: 20, iter: 709728 ran till Epoch(train) [26][ 7000/29572]); resumed epoch: 25, iter: 857588 ran till Epoch(train) [31][ 6700/29572]
     # cfg(
     #     "dino_swin-s_coco", 2
-    # ),  #! resubmit (resumed epoch: 19, iter: 680156 ran till Epoch(train) [24][24950/29572])
+    # ),  #! resubmit (resumed epoch: 19, iter: 680156 ran till Epoch(train) [24][24950/29572]); resumed epoch: 23, iter: 798444 ran till Epoch(train) [28][22950/29572]
     # cfg(
     #     "glip_convnext-s_coco", 2
-    # ),  #! resubmit (resumed epoch: 6, iter: 351798 ran till Epoch(train)  [9][46250/58633])
+    # ),  #! resubmit (resumed epoch: 6, iter: 351798 ran till Epoch(train)  [9][46250/58633]); resumed epoch: 8, iter: 469064 ran till Epoch(train) [11][46850/58633]
     # cfg(
     #     "glip_swin-s_coco", 2
-    # ),  #! resubmit (resumed epoch: 6, iter: 351798 ran till Epoch(train)  [9][32400/58633])
+    # ),  #! resubmit (resumed epoch: 6, iter: 351798 ran till Epoch(train)  [9][32400/58633]; resumed epoch: 8, iter: 469064 ran till Epoch(train) [11][35100/58633] eta: 19 days
     # cfg(
     #     "paa_convnext-s_coco", 2
     # ),  #* stopped with patience 5, Epoch(val) [11][2500/2500]    coco/bbox_mAP: 0.4440  coco/bbox_mAP_50: 0.6340  coco/bbox_mAP_75: 0.4870  coco/bbox_mAP_s: 0.2880  coco/bbox_mAP_m: 0.4890  coco/bbox_mAP_l: 0.5930
     # cfg("paa_swin-s_coco", 2), #* with patience 5 Epoch(val) [11][2500/2500]    coco/bbox_mAP: 0.4500  coco/bbox_mAP_50: 0.6410  coco/bbox_mAP_75: 0.4900  coco/bbox_mAP_s: 0.2790  coco/bbox_mAP_m: 0.4940  coco/bbox_mAP_l: 0.6040
     # cfg(
     #     "rtmdet_convnext-s_coco", 2
-    # ),  #! with patience 5: Epoch(val) [16][500/500]    coco/bbox_mAP: 0.3690  coco/bbox_mAP_50: 0.5440 coco/bbox_mAP_75: 0.3960  coco/bbox_mAP_s: 0.1780  coco/bbox_mAP_m: 0.4170  coco/bbox_mAP_l: 0.5540 (resumed epoch: 10, iter: 293170 ran till Epoch(train) [20][23800/29317])
+    # ),  #! with patience 5: Epoch(val) [16][500/500]    coco/bbox_mAP: 0.3690  coco/bbox_mAP_50: 0.5440 coco/bbox_mAP_75: 0.3960  coco/bbox_mAP_s: 0.1780  coco/bbox_mAP_m: 0.4170  coco/bbox_mAP_l: 0.5540 (resumed epoch: 10, iter: 293170 ran till Epoch(train) [20][23800/29317]), resumed epoch: 19, iter: 557023 ran till Epoch(train) [29][22400/29317] eta: 1 day
     # cfg(
     #     "rtmdet_swin-s_coco", 2
-    # ),  #! resubmit Epoch(val) [8][500/500]    coco/bbox_mAP: 0.2710  coco/bbox_mAP_50: 0.4370  coco/bbox_mAP_75: 0.2880  coco/bbox_mAP_s: 0.0880  coco/bbox_mAP_m: 0.3000  coco/bbox_mAP_l: 0.4430  data_time: 0.0069  time: 0.4472 (had no start epoch since it first was set to only save after 10 epoch which the first run did not hit (fixed since then), ran till Epoch(train)  [8][29300/29317])
+    # ),  #! resubmit Epoch(val) [8][500/500]    coco/bbox_mAP: 0.2710  coco/bbox_mAP_50: 0.4370  coco/bbox_mAP_75: 0.2880  coco/bbox_mAP_s: 0.0880  coco/bbox_mAP_m: 0.3000  coco/bbox_mAP_l: 0.4430  data_time: 0.0069  time: 0.4472 (had no start epoch since it first was set to only save after 10 epoch which the first run did not hit (fixed since then), ran till Epoch(train)  [8][29300/29317]), resumed epoch: 8, iter: 234536 ran till Epoch(train) [18][ 6200/29317] eta: 3 days
     # cfg("sparse_rcnn_convnext-s_coco", 2),  #* ran full 36 epochs Epoch(val) [36][2500/2500]    coco/bbox_mAP: 0.4740  coco/bbox_mAP_50: 0.6700  coco/bbox_mAP_75: 0.5200  coco/bbox_mAP_s: 0.3030  coco/bbox_mAP_m: 0.5050  coco/bbox_mAP_l: 0.6430
     # cfg("sparse_rcnn_swin-s_coco", 2),  #* ran fully Epoch(val) [36][2500/2500]    coco/bbox_mAP: 0.4750  coco/bbox_mAP_50: 0.6710  coco/bbox_mAP_75: 0.5170  coco/bbox_mAP_s: 0.3040  coco/bbox_mAP_m: 0.5030  coco/bbox_mAP_l: 0.6420
     # cfg(
@@ -74,7 +74,7 @@ cfgs = [
     # ),  #* with patience 5 Epoch(val) [10][2500/2500]    coco/bbox_mAP: 0.4510  coco/bbox_mAP_50: 0.6360  coco/bbox_mAP_75: 0.4890  coco/bbox_mAP_s: 0.2840  coco/bbox_mAP_m: 0.4890  coco/bbox_mAP_l: 0.5940; with patience 15 Epoch(val) [26][2500/2500]    coco/bbox_mAP: 0.4590  coco/bbox_mAP_50: 0.6410  coco/bbox_mAP_75: 0.4970  coco/bbox_mAP_s: 0.3080  coco/bbox_mAP_m: 0.5030  coco/bbox_mAP_l: 0.5910
     # cfg(
     #     "tood_r101-dconv-c3-c5_fpn_ms-2x_coco", 2
-    # ),  #! resubmit started for first time ran till Epoch(train) [13][11350/29317]
+    # ),  #* resubmit started for first time ran till Epoch(train) [13][11350/29317], resumed epoch: 12, iter: 351804 ran til Epoch(val) [24][2500/2500]    coco/bbox_mAP: 0.4900  coco/bbox_mAP_50: 0.6640  coco/bbox_mAP_75: 0.5320  coco/bbox_mAP_s: 0.3150  coco/bbox_mAP_m: 0.5290
 ]
 
 
