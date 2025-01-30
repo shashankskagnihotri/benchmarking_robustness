@@ -4,8 +4,8 @@
 # Licensed under The MIT License [see LICENSE for details]
 # --------------------------------------------------------
 _base_ = [
-    '../../mmsegmentation/configs/_base_/models/upernet_r50.py', '../../mmsegmentation/configs/_base_/datasets/acdc_fog.py',
-    '../../mmsegmentation/configs/_base_/default_runtime.py', '../../mmsegmentation/configs/_base_/schedules/schedule_160k.py'
+    '../../../mmsegmentation/configs/_base_/models/upernet_r50.py', '../../../mmsegmentation/configs/_base_/datasets/acdc_fog.py',
+    '../../../mmsegmentation/configs/_base_/default_runtime.py', '../../../mmsegmentation/configs/_base_/schedules/schedule_160k.py'
 ]
 pretrained = 'https://huggingface.co/OpenGVLab/InternImage/resolve/main/internimage_l_22k_192to384.pth'
 model = dict(

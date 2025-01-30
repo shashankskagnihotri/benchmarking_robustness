@@ -1,4 +1,4 @@
-_base_ = ['../../mmsegmentation/configs/_base_/default_runtime.py', '../../mmsegmentation/configs/_base_/datasets/acdc_rain.py']
+_base_ = ['../../../mmsegmentation/configs/_base_/default_runtime.py', '../../../mmsegmentation/configs/_base_/datasets/acdc_rain.py']
 
 crop_size = (512, 1024)
 data_preprocessor = dict(
