@@ -1,3 +1,8 @@
+import random
+import numpy as np
+from torch.utils.data import DataLoader, random_split, Subset
+
+
 def get_dataset(dataset:str, dataset_path:str, split:str, architeture_name:str):
 
     dataset = dataset.lower()
@@ -7,11 +12,9 @@ def get_dataset(dataset:str, dataset_path:str, split:str, architeture_name:str):
         from .sceneflow import SceneFlowFlyingThings3DDataset
         print("Dataset path: ", dataset_path)
         return SceneFlowFlyingThings3DDataset(dataset_path, architeture_name, split)
-    
     elif dataset == 'sintel':
         from .mpisintel import MPISintelDataset
         return MPISintelDataset(dataset_path, architeture_name, split)
-    
     elif dataset == 'kitti' or dataset == 'kitti2015':
         from .kitti2015 import KITTIBaseDataset
         if split == 'test':
@@ -29,14 +32,6 @@ def get_dataset(dataset:str, dataset_path:str, split:str, architeture_name:str):
 
 
 ### START - Get data loaders for CFNet and GWCNet
-
-import random
-import numpy as np
-from torch.utils.data import DataLoader, random_split, Subset
-from dataloader import get_dataset
-
-
-
 def get_data_loader_1(args, architeture_name):
     train_dataset = get_dataset(
         args.dataset, args.dataset_path, architeture_name=architeture_name, split="train"

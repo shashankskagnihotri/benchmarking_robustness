@@ -4,12 +4,12 @@
 
 import torch.nn as nn
 
-from module.feat_extractor_backbone import build_backbone
-from module.feat_extractor_tokenizer import build_tokenizer
-from module.pos_encoder import build_position_encoding
-from module.regression_head import build_regression_head
-from module.transformer import build_transformer
-from utilities.misc import batched_index_select, NestedTensor
+from .feat_extractor_backbone import build_backbone
+from .feat_extractor_tokenizer import build_tokenizer
+from .pos_encoder import build_position_encoding
+from .regression_head import build_regression_head
+from .transformer import build_transformer
+from disparity_estimation.sttr.utilities.misc import batched_index_select, NestedTensor
 
 
 class STTR(nn.Module):

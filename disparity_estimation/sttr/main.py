@@ -9,17 +9,18 @@ import random
 import numpy as np
 import torch
 
-from dataset import build_data_loader
-from module.sttr import STTR
-from utilities.checkpoint_saver import Saver
-from utilities.eval import evaluate
-from utilities.inference import inference
-from utilities.summary_logger import TensorboardSummary
-from utilities.train import train_one_epoch
-from utilities.foward_pass import set_downsample, write_summary
-from module.loss import build_criterion
+# from .dataset import build_data_loader
+from .module.sttr import STTR
+from .utilities.checkpoint_saver import Saver
+from .utilities.eval import evaluate
+from .utilities.inference import inference
+from .utilities.summary_logger import TensorboardSummary
+from .utilities.train import train_one_epoch
+from .utilities.foward_pass import set_downsample, forward_pass
+from .module.loss import build_criterion
 
-from dataloader import get_data_loader_1
+from .dataloader import get_data_loader_1
+from disparity_estimation.attacks.attack import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack, BIMAttack
 
 
 def get_args_parser():
@@ -86,6 +87,9 @@ def get_args_parser():
     parser.add_argument('--loss_weight', type=str, default='rr:1.0, l1_raw:1.0, l1:1.0, occ_be:1.0',
                         help='Weight for losses')
     parser.add_argument('--validation_max_disp', type=int, default=-1)
+
+    # attack 
+    parser.add_argument('--attack_type', required=False, default=None, help='Specify the attack to apply. --phase must be test')
 
     return parser
 
@@ -161,6 +165,7 @@ def main(args):
     lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.lr_decay_rate)
 
     # mixed precision training
+    print("AMP: ", args.apex)
     if args.apex:
         from apex import amp
         model, optimizer = amp.initialize(model, optimizer, opt_level='O1')
@@ -186,10 +191,9 @@ def main(args):
             print("Unexpected keys: ", ','.join(unexpected_filtered))
             raise Exception("Unexpected keys.")
         print("Pre-trained model successfully loaded.")
-        print("Path to checkpoint: ", args.loadckpt)
 
         # if not ft/inference/eval, load states for optimizer, lr_scheduler, amp and prev best
-        if not (args.ft or args.inference or args.eval):
+        if not (args.ft or args.inference or args.eval or args.attack_type):
             if len(unexpected) > 0:  # loaded checkpoint has bn parameters, legacy resume, skip loading
                 raise Exception("Resuming legacy model with BN parameters. Not possible due to BN param change. " +
                                 "Do you want to finetune or inference? If so, check your arguments.")
@@ -226,12 +230,88 @@ def main(args):
 
     # set downsample rate
     set_downsample(args)
-
+    
     # eval
     if args.eval:
-        print("Start evaluation")
-        evaluate(model, criterion, data_loader_test, device, 0, summary_writer, save_output=False)
-        return
+        eval_stats = evaluate(model, criterion, data_loader_test, device, 0, summary_writer, save_output=False)
+        results = {'epe': eval_stats['epe'], 'iou': eval_stats['iou'], '3px_error': eval_stats['px_error_rate']}
+        return results
+    
+    if args.attack_type is not None:
+        # mixed precision training
+        scaler = torch.cuda.amp.GradScaler() if args.apex else None
+
+        # model = torch.nn.DataParallel(model.half())
+        # model = model.half().to('cuda:0')
+        # Annahme: model ist dein geladenes Modell
+        # for name, param in model.named_parameters():
+        #    print(f"Parameter: {name}, Datentyp: {param.dtype}, Device: {param.device}")
+        model.eval()
+        criterion.eval()
+        stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+
+        if args.attack_type == "cospgd":
+            attacker = CosPGDAttack(
+                model, architecture=args.model, epsilon=args.epsilon, alpha=args.alpha, num_iterations=args.num_iterations, 
+                norm=args.norm, num_classes=None, targeted=False, criterion=criterion, stats=stats, device=device,
+            )
+        elif args.attack_type == "fgsm":
+            attacker = FGSMAttack(
+                model, architecture=args.model, epsilon=args.epsilon, targeted=False, criterion=criterion, stats=stats,
+            ) 
+        elif args.attack_type == "pgd":
+            attacker = PGDAttack(
+                model, architecture=args.model, epsilon=args.epsilon, alpha=args.alpha, num_iterations=args.num_iterations, 
+                norm=args.norm, random_start=True, targeted=False, criterion=criterion, stats=stats, device=device,
+            )
+        elif args.attack_type =='bim':
+            attacker = BIMAttack(
+                model, architecture=args.model, epsilon=args.epsilon, alpha=args.alpha, num_iterations=args.num_iterations, 
+                norm=args.norm, targeted=False, criterion=criterion, stats=stats
+            ) 
+        elif args.attack_type == 'apgd':
+            attacker = APGDAttack(
+                model, architecture=args.model, eps=args.epsilon, num_iterations=args.num_iterations, 
+                norm=args.norm, criterion=criterion, stats=stats, device=device,
+            )
+        else:
+            raise ValueError("Attack type not recognized")
+
+        eval_stats = {'l1': 0.0, 'occ_be': 0.0, 'l1_raw': 0.0, 'iou': 0.0, 'rr': 0.0, 'epe': 0.0, 'error_px': 0.0, 'total_px': 0.0}
+        valid_samples = len(data_loader_test)
+
+        for batch_idx, sample in enumerate(data_loader_test):
+            print("batch", batch_idx)
+            perturbed_results = attacker.attack(sample["left"], sample["right"], sample["disp"], sample["occ_mask"], sample["occ_mask_right"])
+            for iteration in perturbed_results.keys():
+                model.eval()
+                perturbed_left, perturbed_right = perturbed_results[iteration]
+
+                # forward pass
+                data = {
+                    'left': perturbed_left,
+                    'right': perturbed_right,
+                    'disp': sample['disp'],
+                    'occ_mask': sample['occ_mask'],
+                    'occ_mask_right': sample['occ_mask_right'],
+                }
+                outputs, losses, sampled_disp = forward_pass(model, data, device, criterion, eval_stats)
+
+                print(f"Iteration {iteration} loss: {losses['aggregated'].item()}")
+ 
+                if losses is None:
+                    valid_samples -= 1
+                    continue
+ 
+                # clear cache
+                torch.cuda.empty_cache()
+ 
+        # compute avg
+        eval_stats['epe'] = eval_stats['epe'] / (valid_samples * len(perturbed_results.keys()))
+        eval_stats['iou'] = eval_stats['iou'] / (valid_samples * len(perturbed_results.keys()))
+        eval_stats['px_error_rate'] = eval_stats['error_px'] / eval_stats['total_px']
+        results = {'epe': eval_stats['epe'], 'iou': eval_stats['iou'], '3px_error': eval_stats['px_error_rate']}
+        return results
 
     # train
     print("Start training")
@@ -250,7 +330,7 @@ def main(args):
         torch.cuda.empty_cache()
 
         # save if pretrain, save every 50 epochs
-        if args.pre_train or epoch % 1 == 0:
+        if args.pre_train or epoch % 50 == 0:
             save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, False, amp)
 
         # validate
@@ -258,31 +338,44 @@ def main(args):
         # save if best
         if prev_best > eval_stats['epe'] and 0.5 > eval_stats['px_error_rate']:
             save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, True, amp)
-            write_summary(eval_stats, summary_writer, epoch, 'train')
 
     # save final model
     save_checkpoint(epoch, model, optimizer, lr_scheduler, prev_best, checkpoint_saver, False, amp)
 
     return
 
-def train():
+
+def merge_args(base_args: argparse.Namespace, override_args: argparse.Namespace) -> argparse.Namespace:
+    merged = vars(base_args).copy()
+    merged.update(vars(override_args))
+    return argparse.Namespace(**merged)
+
+
+def train(args_from_wrapper=None):
     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
     args, unknown = ap.parse_known_args()
+    if args_from_wrapper is not None:
+        args = merge_args(args, args_from_wrapper)
     args.eval = False
-    main(args)
-    # ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
-    # args_ = ap.parse_known_args()
-
-    # main(args_)
+    return main(args)
 
 
-
-def test():
+def test(args_from_wrapper=None):
     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
     args, unknown = ap.parse_known_args()
+    if args_from_wrapper is not None:
+        args = merge_args(args, args_from_wrapper)
     args.eval = True
-    main(args)
+    return main(args)
     
+
+def attack(args_from_wrapper=None):
+    ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])
+    args, unknown = ap.parse_known_args()
+    if args_from_wrapper is not None:
+        args = merge_args(args, args_from_wrapper)
+    return main(args) 
+
 
 # if __name__ == '__main__':
 #     ap = argparse.ArgumentParser('STTR training and evaluation script', parents=[get_args_parser()])

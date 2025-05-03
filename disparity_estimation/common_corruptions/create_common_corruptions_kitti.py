@@ -33,10 +33,12 @@ def process_batch(batch_indices, dataloader, corruption_names):
         image_right = dataloader.load_image(image_right_path)
 
         for corruption in corruption_names:
-            for severity in range(5):
+            for severity in range(1, 6):
                 
-                image_left_path_corrupted = image_left_path.replace('KITTI_2015', f'KITTI_2015/Common_corruptions/{corruption}/severity_{severity}')
-                image_right_path_corrupted = image_right_path.replace('KITTI_2015', f'KITTI_2015/Common_corruptions/{corruption}/severity_{severity}')
+                # image_left_path_corrupted = image_left_path.replace('KITTI_2015', f'KITTI_2015/Common_corruptions/{corruption}/severity_{severity}')
+                # image_right_path_corrupted = image_right_path.replace('KITTI_2015', f'KITTI_2015/Common_corruptions/{corruption}/severity_{severity}')
+                image_left_path_corrupted = image_left_path.replace('no_corruption/severity_0', f'{corruption}/severity_{severity}')
+                image_right_path_corrupted = image_right_path.replace('no_corruption/severity_0', f'{corruption}/severity_{severity}')
                 
                 if os.path.isfile(image_left_path_corrupted) and os.path.isfile(image_right_path_corrupted):
                     logger.info(f'{i} {len(dataloader)} images corrupted {corruption} {severity} alredy exists')
@@ -47,8 +49,8 @@ def process_batch(batch_indices, dataloader, corruption_names):
                 image_right_arr = np.array(image_right)
 
                 print("Corrupting Image")
-                corrupted_left = corrupt(image_left_arr, corruption_name=corruption, severity=severity+1)
-                corrupted_right = corrupt(image_right_arr, corruption_name=corruption, severity=severity+1)
+                corrupted_left = corrupt(image_left_arr, corruption_name=corruption, severity=severity)
+                corrupted_right = corrupt(image_right_arr, corruption_name=corruption, severity=severity)
 
                 print("Saving Image")
                 os.makedirs(os.path.dirname(image_left_path_corrupted), exist_ok=True)
@@ -78,11 +80,11 @@ def parallel_process(dataloader):
             future.result()  # Rufe result auf, um mögliche Ausnahmen zu erfassen
 
 # get dataset
-dataloader = get_dataset('kitti','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/KITTI_2015','test','')
+dataloader = get_dataset('kitti', '../datasets/KITTI_2015/Common_corruptions/no_corruption/severity_0', 'train', '')
 
-# parallel_process(dataloader)
+parallel_process(dataloader)
 
 # Läuft rückwarts
-process_batch(range(len(dataloader) - 1, -1, -1), dataloader, get_corruption_names())
+# process_batch(range(len(dataloader) - 1, -1, -1), dataloader, get_corruption_names())
 
 logging.shutdown()

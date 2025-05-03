@@ -7,9 +7,9 @@ from typing import Iterable
 import torch
 from tqdm import tqdm
  
-from utilities.foward_pass import forward_pass, write_summary
-from utilities.misc import save_and_clear
-from utilities.summary_logger import TensorboardSummary
+from .foward_pass import forward_pass, write_summary
+from .misc import save_and_clear
+from .summary_logger import TensorboardSummary
  
  
 @torch.no_grad()

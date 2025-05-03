@@ -9,8 +9,8 @@ from typing import Iterable
 import torch
 from tqdm import tqdm
 
-from utilities.foward_pass import forward_pass, write_summary
-from utilities.summary_logger import TensorboardSummary
+from .foward_pass import forward_pass, write_summary
+from .summary_logger import TensorboardSummary
 
 
 def train_one_epoch(model: torch.nn.Module, data_loader: Iterable, optimizer: torch.optim.Optimizer,

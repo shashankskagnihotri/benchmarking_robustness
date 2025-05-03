@@ -188,6 +188,9 @@ data/
 sample_data/
 run/
 *.dat
+disparity_estimation/datasets/FlyingThings3D/
+disparity_estimation/datasets/KITTI_2015/
+disparity_estimation/pretrained_weights/
 
 
 checkpoints/

@@ -37,8 +37,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
     def _read_data(self):
 
-        import os
-
         def generate_disparity_path(original_path:str) -> str:
             # Zerlege den originalen Pfad in seine Teile
             parts = original_path.split('/')
@@ -53,13 +51,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             new_parts = parts[:flyingthings3d_index + 1] + ['disparity'] + parts[flyingthings3d_index + 5:]
 
             # Erstelle den neuen Pfad
-            new_path = "/" + os.path.join(*new_parts)
+            new_path = os.path.join(*new_parts)
             return new_path
 
         def generate_occlusion_path() -> str:
-
-            # os.path.join(self.datadir, 'occlusion', self.split_folder, 'left')
-
             # Zerlege den originalen Pfad in seine Teile
             parts = self.dataset_path.split('/')
             
@@ -70,10 +65,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
                 raise ValueError(f"Der Pfad enthält kein 'FlyingThings3D'-Verzeichnis: {self.dataset_path}")
 
             # Ersetze den Pfad ab 'FlyingThings3D' mit dem neuen Pfad
-            new_parts = parts[:flyingthings3d_index + 1] + ['Common_corruptions'] + ['no_corruption'] + ['severity_0'] + ['frames_finalpass'] + ['occlusion'] + [self.split_folder] + ['left']
+            new_parts = parts[:flyingthings3d_index + 1] + ['occlusion'] + [self.split_folder] + ['disparity_occlusions'] + ['left']
 
             # Erstelle den neuen Pfad
-            new_path = "/" + os.path.join(*new_parts)
+            new_path = os.path.join(*new_parts)
             return new_path
 
         
@@ -95,13 +90,12 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             
             
         number_of_images_before = len(self.img_left_filenames)
-        number_of_images_after = len(self.img_left_filenames)
         print(f"Inital number of images: {number_of_images_before}")
         
         # Remove unused files (in sttr)
-        if self.model_name == 'sttr':
+        if self.model_name in ['sttr', 'sttr-light']:
             flyingthings3d_index = self.dataset_path.split('/').index('FlyingThings3D')
-            path_unused_files = os.path.join('/', *(self.dataset_path.split('/')[:flyingthings3d_index + 1] + ['all_unused_files.txt']))
+            path_unused_files = os.path.join(*(self.dataset_path.split('/')[:flyingthings3d_index + 1] + ['all_unused_files.txt']))
             unused_files = [line.strip().rstrip() for line in open(path_unused_files, mode='r').read().splitlines()]
             
             new_img_left_filenames = []
@@ -115,11 +109,9 @@ class SceneFlowFlyingThings3DDataset(Dataset):
                     # print(img)  # Optional: Zum Debuggen, drucke das Bild aus
                     new_img_left_filenames.append(img)  # Füge das Bild zur Liste hinzu
 
-                
             self.img_left_filenames = new_img_left_filenames
 
-            print(f"Removed {number_of_images_before - number_of_images_after} unused files")
-        
+            print(f"Removed {number_of_images_before - len(self.img_left_filenames)} unused files")
         
 
         self.img_left_filenames = natsorted(self.img_left_filenames)
@@ -127,18 +119,16 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         
         self.disp_left_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_left_filenames]
         self.disp_right_filenames = [generate_disparity_path(img_path).replace('.png', '.pfm') for img_path in self.img_right_filenames]
-
         directory = generate_occlusion_path()
         self.occ_left_filenames = [os.path.join(directory, occ) for occ in os.listdir(directory)] if os.path.isdir(directory) else []
         self.occ_left_filenames = natsorted(self.occ_left_filenames)
         self.occ_right_filenames = [img_path.replace('left', 'right') for img_path in self.occ_left_filenames]
 
-        print("Final number of images: ", number_of_images_after)
+        print("Final number of images: ", len(self.img_left_filenames))
         print("Final number of occlusion files: ", len(self.occ_left_filenames))
         print("Final number of disparity files: ", len(self.disp_left_filenames))
         print("")
         
-
     def load_image(self, filename) -> Image:
         return Image.open(filename).convert('RGB')
 
@@ -147,12 +137,10 @@ class SceneFlowFlyingThings3DDataset(Dataset):
     
     def load_occ(self, filename) -> np.ndarray[bool]:
         return np.array(Image.open(filename)).astype(bool)
-    
 
     def __len__(self) -> int:
         return len(self.img_left_filenames)
 
-    
     def __getitem__(self, index):
         img_left = self.load_image(self.img_left_filenames[index])
         img_right = self.load_image(self.img_right_filenames[index])
@@ -165,7 +153,7 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             return self.get_item_psmnet(img_left, img_right, disp_left)
         elif self.model_name in ['gwcnet', 'gwcnet-g', 'gwcnet-gc']:
             return self.get_item_gwcnet(img_left, img_right, disp_left)
-        elif self.model_name == 'sttr':
+        elif self.model_name in ['sttr', 'sttr-light']:
             # This might give an error here because there are less oclusion files then others
             occ_left = self.load_occ(self.occ_left_filenames[index])
             occ_right = self.load_occ(self.occ_right_filenames[index])
@@ -175,24 +163,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         
         else:
             raise NotImplemented(f"No dataloder for {self.model_name} implemented")
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def get_item_sttr(self, left_img:Image, right_img:Image, left_disp:np.ndarray[np.float32], right_disp:np.ndarray[np.float32], left_occ:np.ndarray[bool], right_occ:np.ndarray[bool]) -> dict:
         result = {}
@@ -214,8 +184,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
         # disp_left, _ = readPFM(disp_left_fname)
         # disp_right, _ = readPFM(disp_right_fname)
 
-
-
         if self.training:
             # horizontal flip
             result['left'], result['right'], result['occ_mask'], result['occ_mask_right'], disp, disp_right \
@@ -226,24 +194,25 @@ class SceneFlowFlyingThings3DDataset(Dataset):
 
             # random crop        
             result = sttr.stereo_albumentation.random_crop(360, 640, result, self.split_folder)
+            
+            self.transformation = Compose([
+                sttr.stereo_albumentation.RandomShiftRotate(always_apply=True),
+                sttr.stereo_albumentation.RGBShiftStereo(always_apply=True, p_asym=0.3),
+                OneOf([
+                    sttr.stereo_albumentation.GaussNoiseStereo(always_apply=True, p_asym=1.0),
+                    sttr.stereo_albumentation.RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
+                ], p=1.0)
+            ])
         else:
             result['occ_mask'] = left_occ
             result['occ_mask_right'] = right_occ
             result['disp'] = left_disp
             result['disp_right'] = right_disp
+            self.transformation = None
 
-        result = sttr.preprocess.augment(result, Compose([
-                sttr.stereo_albumentation.RandomShiftRotate(always_apply=True),
-                sttr.stereo_albumentation.RGBShiftStereo(always_apply=True, p_asym=0.3),
-                OneOf([
-                    sttr.stereo_albumentation.GaussNoiseStereo(always_apply=True, p_asym=1.0, p=False),
-                    sttr.stereo_albumentation.RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
-                ], p=1.0)
-            ]))
+        result = sttr.preprocess.augment(result, self.transformation)
 
         return result
-
-
 
     def get_item_psmnet(self, left_img:Image, right_img:Image, disparity:Image) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         
@@ -273,8 +242,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
             left_img       = processed(left_img)
             right_img      = processed(right_img) 
             return left_img, right_img, disparity
-
-
 
     def get_item_cfnet(self, left_img, right_img, disparity) -> dict:
         
@@ -361,12 +328,6 @@ class SceneFlowFlyingThings3DDataset(Dataset):
                     "disparity": torch.Tensor(disparity),
                     "top_pad": 0,
                     "right_pad": 0}
-
-
-
-
-
-
 
     def get_item_gwcnet(self, left_img:Image, right_img:Image, disparity:Image) -> dict:
         

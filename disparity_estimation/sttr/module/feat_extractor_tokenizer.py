@@ -6,7 +6,7 @@ import torch
 from torch import nn, Tensor
 from torchvision.models.densenet import _DenseBlock
 
-from utilities.misc import center_crop
+from disparity_estimation.sttr.utilities.misc import center_crop
 
 
 class TransitionUp(nn.Module):

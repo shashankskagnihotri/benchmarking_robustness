@@ -5,7 +5,7 @@
 import torch
 import mlflow
 
-from utilities.misc import NestedTensor
+from .misc import NestedTensor
 
 
 def write_summary(stats, summary, step, mode):

@@ -77,6 +77,8 @@ def augment(input_data, transformation):
 
     if transformation is not None:
         # perform augmentation first
+        # import ipdb; ipdb.set_trace()
+        print(input_data.keys())
         input_data = transformation(**input_data)
 
     w = input_data['disp'].shape[-1]

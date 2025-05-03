@@ -127,6 +127,22 @@ def random_crop(min_crop_height, min_crop_width, input_data, split):
     return input_data
 
 
+# http://vfdev-5-albumentations.readthedocs.io/en/docs_pytorch_fix/_modules/albumentations/augmentations/functional.html
+def normalize(img, mean, std, max_pixel_value=255.0):
+    mean = np.array(mean, dtype=np.float32)
+    mean *= max_pixel_value
+
+    std = np.array(std, dtype=np.float32)
+    std *= max_pixel_value
+
+    denominator = np.reciprocal(std, dtype=np.float32)
+
+    img = img.astype(np.float32)
+    img -= mean
+    img *= denominator
+    return img
+
+
 """
 Base
 """
@@ -151,6 +167,10 @@ class StereoTransform(BasicTransform):
             params["fill_value"] = self.fill_value
         params.update({"cols": kwargs["left"].shape[1], "rows": kwargs["right"].shape[0]})
         return params
+    
+    def update_transform_params(self, params, data):
+        # Prevent Albumentations from trying to access data["images"]
+        return self.update_params(params, **data)
 
 
 class RightOnlyTransform(BasicTransform):
@@ -234,10 +254,13 @@ class Normalize(StereoTransform):
         self.max_pixel_value = max_pixel_value
 
     def apply(self, image, **params):
-        return F.normalize(image, self.mean, self.std, self.max_pixel_value)
+        # return F.normalize(image, self.mean, self.std, self.max_pixel_value)
+        return normalize(image, self.mean, self.std, self.max_pixel_value)
 
     def get_transform_init_args_names(self):
         return ("mean", "std", "max_pixel_value")
+    
+    
 
 
 class ToTensor(StereoTransform):

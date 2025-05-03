@@ -24,7 +24,7 @@ logger = logging.getLogger()
 logger.info('Begin of corruption')
 
 import sys
-start_at = int(sys.argv[1])
+# start_at = int(sys.argv[1])
 
 
 # FlyingThings3D
@@ -38,8 +38,10 @@ def process_batch(batch_indices, dataloader, corruption_names):
         for corruption in corruption_names:
             for severity in range(1, 6):
                 
-                image_left_path_corrupted = image_left_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
-                image_right_path_corrupted = image_right_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
+                # image_left_path_corrupted = image_left_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
+                # image_right_path_corrupted = image_right_path.replace('FlyingThings3D', f'FlyingThings3D/Common_corruptions/{corruption}/severity_{severity}')
+                image_left_path_corrupted = image_left_path.replace('no_corruption/severity_0', f'{corruption}/severity_{severity}')
+                image_right_path_corrupted = image_right_path.replace('no_corruption/severity_0', f'{corruption}/severity_{severity}')
                 
                 if os.path.isfile(image_left_path_corrupted) and os.path.isfile(image_right_path_corrupted):
                     logger.info(f'{i} {len(dataloader)} images corrupted {corruption} {severity} alredy exists')
@@ -74,14 +76,14 @@ def parallel_process(dataloader):
             future.result()  # Rufe result auf, um mögliche Ausnahmen zu erfassen
 
 # get dataset
-dataloader = get_dataset('sceneflow','/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D','test','')
+dataloader = get_dataset('sceneflow', '../datasets/FlyingThings3D/Common_corruptions/no_corruption/severity_0', 'test', '')
 
 print(f'len dataloader: {len(dataloader)}')
 
-# parallel_process(dataloader)
+parallel_process(dataloader)
 
-for i in range(start_at, len(dataloader)):
-    process_batch([i], dataloader, get_corruption_names())
+# for i in range(start_at, len(dataloader)):
+#     process_batch([i], dataloader, get_corruption_names())
 
 # created = 0
 # not_created = 0

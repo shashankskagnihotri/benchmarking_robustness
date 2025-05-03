@@ -5,7 +5,7 @@
 import torch
 import mlflow
 
-from utilities.misc import NestedTensor
+from .misc import NestedTensor
 
 downsample = 0
 

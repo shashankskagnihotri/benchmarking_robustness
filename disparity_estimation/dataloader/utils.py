@@ -1,16 +1,15 @@
 def get_checkpoint_path(dataset:str, model:str) -> str:
     checkpoints = {
         "sceneflow": {
-            "gwcnet-gc": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/gwcnet/sceneflow/gwcnet-gc/checkpoint_000015.ckpt",
-            "gwcnet-g": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/gwcnet/sceneflow/gwcnet-g/checkpoint_000015.ckpt",
-            "cfnet": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/cfnet/sceneflow_pretraining.ckpt",
-            "sttr": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr/sceneflow_pretrained_model.pth.tar",
-            "sttr-light": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr-light/sttr_light_sceneflow_pretrained_model.pth.tar"
+            "gwcnet-gc": "disparity_estimation/pretrained_weights/gwcnet/sceneflow/gwcnet-gc/checkpoint_000015.ckpt",
+            "gwcnet-g": "disparity_estimation/pretrained_weights/gwcnet/sceneflow/gwcnet-g/checkpoint_000015.ckpt",
+            "cfnet": "disparity_estimation/pretrained_weights/cfnet/sceneflow_pretraining.ckpt",
+            "sttr": "disparity_estimation/pretrained_weights/sttr/sceneflow_pretrained_model.pth.tar",
+            "sttr-light": "disparity_estimation/pretrained_weights/sttr-light/sttr_light_sceneflow_pretrained_model.pth.tar",
         },
         "kitti2015": {
-            "gwcnet-gc": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/gwcnet/kitti15/gwcnet-g/best.ckpt",
-            "gwcnet-g": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/gwcnet/kitti15/gwcnet-g/best.ckpt",
-            "sttr": "/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/pretrained_weights/sttr/kitti_finetuned_model.pth.tar"
+            "gwcnet-g": "disparity_estimation/pretrained_weights/gwcnet/kitti15/gwcnet-g/best.ckpt",
+            "sttr": "disparity_estimation/pretrained_weights/sttr/kitti_finetuned_model.pth.tar",
         }
     }
     
@@ -25,9 +24,8 @@ def get_checkpoint_path(dataset:str, model:str) -> str:
 
 def get_dataset_path(dataset:str, corruption_type:str='no_corruption', severity_level:int=0) -> str:
     dataset_paths = {
-        "sceneflow": f"/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/FlyingThings3D/Common_corruptions/{corruption_type}/severity_{severity_level}",
-        "kitti2015": f"/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/KITTI_2015/Common_corruptions/{corruption_type}/severity_{severity_level}",
-        "mpisintel": f"/pfs/work7/workspace/scratch/ma_faroesch-team_project_fss2024/dataset/mpisintel/Common_corruptions/{corruption_type}/severity_{severity_level}"
+        "sceneflow": f"disparity_estimation/datasets/FlyingThings3D/Common_corruptions/{corruption_type}/severity_{severity_level}",
+        "kitti2015": f"disparity_estimation/datasets/KITTI_2015/Common_corruptions/{corruption_type}/severity_{severity_level}",
     }
 
     if dataset not in dataset_paths:

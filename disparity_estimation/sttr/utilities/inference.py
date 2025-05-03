@@ -7,7 +7,7 @@ import time
 import torch
 from tqdm import tqdm
 
-from utilities.misc import NestedTensor, save_and_clear
+from .misc import NestedTensor, save_and_clear
 
 
 def forward_pass_without_loss(model, data, device, downsample):

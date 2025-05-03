@@ -39,12 +39,11 @@ class KITTIBaseDataset(data.Dataset):
         self.datadir = datadir
         self.split = split
         self.architecture_name = architecture_name.lower()
-
-        if 'no_corruption' in self.datadir: #:
-            # Note: Kitty has no test set with disp_occ, please create your own test set from the training set
-            self.sub_folder = 'training/'
-        else:
-            self.sub_folder = 'testing'
+        
+        # Note: Kitty has no test set with disp_occ, please create your own test set from the training set
+        self.sub_folder = 'training/'
+        if self.split == 'test':
+            self.sub_folder = 'testing/'
 
         # elif split == 'test':
         #     raise NotImplementedError("Note: Kitty has no test set with disp_occ, please create your own test set from the training set")
@@ -79,7 +78,7 @@ class KITTIBaseDataset(data.Dataset):
         parts[index+3] = "disp_occ_0"
 
         # Erstelle den neuen Pfad
-        new_path = "/" + os.path.join(*parts)
+        new_path = os.path.join(*parts)
         return new_path
 
     def _read_data(self):
@@ -115,10 +114,11 @@ class KITTIBaseDataset(data.Dataset):
     def _augmentation(self):
         if self.architecture_name == 'sttr' or self.architecture_name == 'sttr-light':
             if self.split == 'train':
-                self.transformation = Compose([
-                    RGBShiftStereo(always_apply=True, p_asym=0.5),
-                    RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
-                ])
+                # self.transformation = Compose([
+                #     RGBShiftStereo(always_apply=True, p_asym=0.5),
+                #     RandomBrightnessContrastStereo(always_apply=True, p_asym=0.5)
+                # ])
+                self.transformation = None
             elif self.split == 'validation' or self.split == 'test' or self.split == 'validation_all':
                 self.transformation = None
             else:

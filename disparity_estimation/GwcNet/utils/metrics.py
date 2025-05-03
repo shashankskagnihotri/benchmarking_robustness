@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from utils.experiment import make_nograd_func
+from .experiment import make_nograd_func
 from torch.autograd import Variable
 from torch import Tensor
 
