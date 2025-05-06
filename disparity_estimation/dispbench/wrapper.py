@@ -1,8 +1,7 @@
 import argparse
 import os
-import sys
 import mlflow
-from .dataloader.utils import get_checkpoint_path, get_dataset_path
+from dataloader.utils import get_checkpoint_path, get_dataset_path
 
 
 def run_from_args(args):
@@ -47,13 +46,13 @@ def run_from_args(args):
         mlflow.log_params(vars(args))
 
         if args.model == "cfnet":
-            from .CFNet import main
+            from CFNet import main
         elif args.model in "gwcnet-gc":
-            from .GwcNet import main
+            from GwcNet import main
         elif args.model == "sttr":
-            from .sttr import main
+            from sttr import main
         elif args.model == "sttr-light":
-            from .sttr_light import main
+            from sttr_light import main
         else:
             raise ValueError("Architecture/Model not recognized")
 

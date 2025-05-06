@@ -7,7 +7,7 @@ from collections import OrderedDict
 import torch
 from torch import nn, Tensor
 
-from disparity_estimation.sttr.utilities.misc import batched_index_select, NestedTensor
+from sttr.utilities.misc import batched_index_select, NestedTensor
 
 
 class Criterion(nn.Module):

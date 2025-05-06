@@ -9,7 +9,7 @@ from .feat_extractor_tokenizer import build_tokenizer
 from .pos_encoder import build_position_encoding
 from .regression_head import build_regression_head
 from .transformer import build_transformer
-from disparity_estimation.sttr.utilities.misc import batched_index_select, NestedTensor
+from sttr.utilities.misc import batched_index_select, NestedTensor
 
 
 class STTR(nn.Module):

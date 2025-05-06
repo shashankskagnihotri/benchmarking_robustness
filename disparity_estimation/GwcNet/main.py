@@ -23,7 +23,7 @@ import mlflow
 from torchvision import transforms
 
 from .dataloader import get_data_loader_1
-from disparity_estimation.attacks.attack import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack, BIMAttack
+from attacks.attack import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack, BIMAttack
 
 
 cudnn.benchmark = True

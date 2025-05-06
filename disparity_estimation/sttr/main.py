@@ -20,7 +20,7 @@ from .utilities.foward_pass import set_downsample, forward_pass
 from .module.loss import build_criterion
 
 from .dataloader import get_data_loader_1
-from disparity_estimation.attacks.attack import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack, BIMAttack
+from attacks.attack import CosPGDAttack, FGSMAttack, PGDAttack, APGDAttack, BIMAttack
 
 
 def get_args_parser():

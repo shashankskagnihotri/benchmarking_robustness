@@ -19,16 +19,20 @@ pip install -e .
 ### Pretrained Weights
 
 1. Download the file `pretrain_weights.zip`
-2. Place it under the directory `disparity_estimation/`
-3. Unzip the contents
+2. Unzip the contents
 
 ### Datasets
 
 #### KITTI2015
 
-1. Download `kitti2015.zip`
-2. Place it under the directory `disparity_estimation/datasets/`
-3. Unzip the contents
+1. Download the KITTI 2015 dataset from [KITTI Scene Flow Benchmark](https://www.cvlibs.net/datasets/kitti/eval_scene_flow.php?benchmark=stereo).
+2. After unzipping, ensure the contents include `training/` and `testing/` directories. Place them under `datasets/`.
+3. Then run the following commands:
+
+```bash
+cd datasets
+./create_kitti2015.sh
+```
 
 #### SceneFlow
 
@@ -49,7 +53,7 @@ cd datasets
 You can load a pre-trained model by specifying the model name and the dataset it was last fine-tuned on:
 
 ```python
-from disparity_estimation.evals import load_model
+from dispbench.evals import load_model
 
 model = load_model(model_name='GWCNet-G', dataset='SceneFlow')
 ```
@@ -59,13 +63,13 @@ model = load_model(model_name='GWCNet-G', dataset='SceneFlow')
 #### Adversarial Attacks
 
 ```python
-from disparity_estimation.evals import evaluate
+from dispbench.evals import evaluate
 
 model, results = evaluate(
     model_name='GWCNet-G',
     dataset='KITTI2015',
     retrieve_existing=False,
-    threat_config='path/to/adv_attacks.yml',
+    threat_config='configs/adv_attacks.yml',
 )
 ```
 
@@ -80,13 +84,13 @@ model, results = evaluate(
 #### 2D Common Corruptions
 
 ```python
-from disparity_estimation.evals import evaluate
+from dispbench.evals import evaluate
 
 model, results = evaluate(
     model_name='GWCNet-G',
     dataset='KITTI2015',
     retrieve_existing=False,
-    threat_config='path/to/2d_corruptions.yml',
+    threat_config='configs/2d_corruptions.yml',
 )
 ```
 

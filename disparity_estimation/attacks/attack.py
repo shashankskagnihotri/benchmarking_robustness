@@ -437,7 +437,7 @@ class CosPGDAttack:
         }
         if self.architecture in ['sttr', 'sttr-light']:
             # px_error and epe as pixelwise losses
-            from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+            from sttr.utilities.foward_pass import forward_pass
             with autocast():
                 outputs, losses, disp = forward_pass(self.model, data, device, self.criterion, self.stats, logger=self.logger)
             outputs = outputs['disp_pred']
@@ -445,7 +445,7 @@ class CosPGDAttack:
             
         else:
             # Handle other architectures as before
-            if self.architecture in ['cfnet', 'gwcnet-g']:
+            if self.architecture in ['cfnet', 'gwcnet-g', 'gwcnet-gc']:
                 outputs = self.model(perturbed_left, perturbed_right)[0][0].to(device)
             else:
                 outputs = self.model(perturbed_left, perturbed_right)["disparities"].squeeze(0).to(device)
@@ -485,11 +485,11 @@ class FGSMAttack:
             occ_mask = occ_mask.cuda()
 
         # Forward Pass: Pass the perturbed images through the model
-        if self.architecture in ['cfnet', 'gwcnet-g']:
+        if self.architecture in ['cfnet', 'gwcnet-g', 'gwcnet-gc']:
             predicted_disparity = self.model(left=perturbed_left, right=perturbed_right)[0][0].cuda()
         
         elif self.architecture in ['sttr', 'sttr-light']:
-            from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+            from sttr.utilities.foward_pass import forward_pass
             
             data = {
                 'left': perturbed_left,
@@ -603,11 +603,11 @@ class PGDAttack:
             # Prepare the input for the model
             inputs = {"images": [[perturbed_left, perturbed_right]]}
 
-            if self.architecture in ['cfnet', 'gwcnet-g']:
+            if self.architecture in ['cfnet', 'gwcnet-g', 'gwcnet-gc']:
                 # Forward pass without mixed precision
                 predicted_disparity = self.model(left=perturbed_left, right=perturbed_right)[0][0].cuda()
             elif self.architecture in ['sttr', 'sttr-light']:
-                from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+                from sttr.utilities.foward_pass import forward_pass
                 
                 data = {
                     'left': perturbed_left,
@@ -759,7 +759,7 @@ class APGDAttack():
             if self.architecture == 'cfnet' or 'gwcnet-g' in self.architecture:
                 disparity_target = self.model(left=x_left, right=x_right)[0][0].detach().to(self.device)
             elif 'sttr' in self.architecture:
-                from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+                from sttr.utilities.foward_pass import forward_pass
                 data = {
                     'left': x_left,
                     'right': x_right,
@@ -797,7 +797,7 @@ class APGDAttack():
         if self.architecture == 'cfnet' or 'gwcnet-g' in self.architecture:
             disparity_pred = self.model(x_best[:, 0], x_best[:, 1])[0][0].to(self.device)
         elif 'sttr' in self.architecture:
-            from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+            from sttr.utilities.foward_pass import forward_pass
             data = {
                 'left': x_best[:, 0],
                 'right': x_best[:, 1],
@@ -824,7 +824,7 @@ class APGDAttack():
             if self.architecture == 'cfnet' or 'gwcnet-g' in self.architecture:
                 disparity_pred = self.model(left=x_adv[:, 0], right=x_adv[:, 1])[0][0].to(self.device)
             elif 'sttr' in self.architecture:
-                from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+                from sttr.utilities.foward_pass import forward_pass
                 data = {
                     'left': x_adv[:, 0],
                     'right': x_adv[:, 1],
@@ -859,7 +859,7 @@ class APGDAttack():
             if self.architecture == 'cfnet' or 'gwcnet-g' in self.architecture:
                 disparity_pred = self.model(x_adv[:, 0], x_adv[:, 1])[0][0].to(self.device)
             elif 'sttr' in self.architecture:
-                from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+                from sttr.utilities.foward_pass import forward_pass
                 data = {
                     'left': x_adv[:, 0],
                     'right': x_adv[:, 1],
@@ -942,7 +942,7 @@ class BIMAttack:
                 # Forward pass without mixed precision
                 outputs = self.model(left=perturbed_left, right=perturbed_right)[0][0].squeeze(0)
             elif self.architecture in ['sttr', 'sttr-light']:
-                from disparity_estimation.sttr.utilities.foward_pass import forward_pass
+                from sttr.utilities.foward_pass import forward_pass
                 
                 data = {
                     'left': perturbed_left,

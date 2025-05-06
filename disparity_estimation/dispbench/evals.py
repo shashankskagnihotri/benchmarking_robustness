@@ -4,7 +4,7 @@ import yaml
 import pandas as pd
 import torch
 
-from .dataloader.utils import get_checkpoint_path, get_dataset_path
+from dataloader.utils import get_checkpoint_path
 from .wrapper import run_from_args
 
 common_corruptions = [
@@ -65,27 +65,27 @@ def load_model(model_name: str, dataset: str):
         raise ValueError(f"Checkpoint {checkpoint} does not exist")
     
     if model_name == "cfnet":
-        from .CFNet.models import __models__
+        from CFNet.models import __models__
         model = torch.nn.DataParallel(__models__[model_name](256))
         state_dict = torch.load(checkpoint)
         model.load_state_dict(state_dict["model"])
         print("Loaded CFNet")
     elif model_name in "gwcnet-gc":
-        from .GwcNet.models import __models__
+        from GwcNet.models import __models__
         model = torch.nn.DataParallel(__models__[model_name](192))
         state_dict = torch.load(checkpoint)
         model.load_state_dict(state_dict["model"])
         print("Loaded GWCNet")
     elif model_name == "sttr":
-        from .sttr.main import get_args_parser
-        from .sttr.module.sttr import STTR
+        from sttr.main import get_args_parser
+        from sttr.module.sttr import STTR
         ap = argparse.ArgumentParser('', parents=[get_args_parser()])
         args = ap.parse_args()
         model = STTR(args)
         print("Loaded STTR")
     elif model_name == "sttr-light":
-        from .sttr_light.main import get_args_parser
-        from .sttr_light.module.sttr import STTR
+        from sttr_light.main import get_args_parser
+        from sttr_light.module.sttr import STTR
         ap = argparse.ArgumentParser('', parents=[get_args_parser()])
         args = ap.parse_args()
         model = STTR(args)
@@ -111,7 +111,7 @@ def evaluate(model_name: str, dataset: str, retrieve_existing: bool, threat_conf
             raise ValueError("Severity must be an integer between 1 and 5.")
 
         if retrieve_existing:
-            csv_path = "disparity_estimation/eval_csv/eval_2d_corruptions.csv"
+            csv_path = "eval_csv/eval_2d_corruptions.csv"
             df = pd.read_csv(csv_path)
 
             filtered= df[
@@ -141,7 +141,7 @@ def evaluate(model_name: str, dataset: str, retrieve_existing: bool, threat_conf
         results = run_from_args(args)
     elif threat_model in attacks:
         if retrieve_existing:
-            csv_path = "disparity_estimation/eval_csv/eval_adv_attacks.csv"
+            csv_path = "eval_csv/eval_adv_attacks.csv"
             df = pd.read_csv(csv_path)
 
             filtered = df[
@@ -177,6 +177,7 @@ def evaluate(model_name: str, dataset: str, retrieve_existing: bool, threat_conf
     
 
 def main():
+    """
     model = load_model(model_name='STTR', dataset='SceneFlow')
     model = load_model(model_name='STTR-Light', dataset='SceneFlow')
     model = load_model(model_name='CFNet', dataset='SceneFlow')
@@ -184,22 +185,23 @@ def main():
     model = load_model(model_name='GWCNet-G', dataset='SceneFlow')
     model = load_model(model_name='GWCNet-G', dataset='KITTI2015')
     model = load_model(model_name='STTR', dataset='KITTI2015')
-    
+    """
     model, results = evaluate(
-        model_name='STTR',
-        dataset='KITTI2015',
-        retrieve_existing=False,
-        threat_config='disparity_estimation/configs/adv_attacks.yml',
-    )
-    print(results)
-    
-    model, results = evaluate(
-        model_name='GWCNet-G',
+        model_name='CFNet', # STTR-Light, CFNet
         dataset='SceneFlow',
         retrieve_existing=False,
-        threat_config='disparity_estimation/configs/2d_corruptions.yml',
+        threat_config='configs/adv_attacks.yml',
     )
     print(results)
+    """
+    model, results = evaluate(
+        model_name='CFNet',#, , STTR-Light, CFNet
+        dataset='SceneFlow',
+        retrieve_existing=False,
+        threat_config='configs/2d_corruptions.yml',
+    )
+    print(results)
+    """
 
 
 if __name__ == '__main__':

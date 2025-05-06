@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import nn, Tensor
 
 from .context_adjustment_layer import build_context_adjustment_layer
-from disparity_estimation.sttr_light.utilities.misc import batched_index_select, torch_1d_sample, NestedTensor
+from sttr_light.utilities.misc import batched_index_select, torch_1d_sample, NestedTensor
 
 
 class RegressionHead(nn.Module):
