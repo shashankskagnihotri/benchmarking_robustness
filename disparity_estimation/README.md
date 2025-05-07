@@ -18,7 +18,7 @@ pip install -e .
 
 ### Pretrained Weights
 
-1. Download the file `pretrain_weights.zip`
+1. Download the file [`pretrain_weights.zip`](https://data.dws.informatik.uni-mannheim.de/machinelearning/robustness_benchmarking/disparity_estimation/pretrained_weights.zip)
 2. Unzip the contents
 
 ### Datasets
