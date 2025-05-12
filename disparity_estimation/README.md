@@ -96,7 +96,7 @@ model, results = evaluate(
 
 - `retrieve_existing` works as described above.
 - `2d_corruptions.yml` should contain:
-  - `threat model`: the name of the corruption (supported: `'gaussian noise'`, `'shot noise'`, `'impulse noise'`, `'defocus blur'`, `'frosted glass blur'`, `'motion blur'`, `'zoom blur'`, `'snow'`, `'frost'`, `'fog'`, `'brightness'`, `'contrast'`, `'elastic'`, `'pixelate'`, `'jpeg'`)
+  - `threat model`: the name of the corruption (supported: `'gaussian_noise'`, `'shot_noise'`, `'impulse_noise'`, `'defocus_blur'`, `'frosted_glass_blur'`, `'motion_blur'`, `'zoom_blur'`, `'snow'`, `'frost'`, `'fog'`, `'brightness'`, `'contrast'`, `'elastic'`, `'pixelate'`, `'jpeg'`)
   - `severity`: an integer from 1 to 5 indicating the corruption severity
 
 ---

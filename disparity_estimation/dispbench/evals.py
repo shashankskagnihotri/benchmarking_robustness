@@ -177,7 +177,6 @@ def evaluate(model_name: str, dataset: str, retrieve_existing: bool, threat_conf
     
 
 def main():
-    """
     model = load_model(model_name='STTR', dataset='SceneFlow')
     model = load_model(model_name='STTR-Light', dataset='SceneFlow')
     model = load_model(model_name='CFNet', dataset='SceneFlow')
@@ -185,23 +184,22 @@ def main():
     model = load_model(model_name='GWCNet-G', dataset='SceneFlow')
     model = load_model(model_name='GWCNet-G', dataset='KITTI2015')
     model = load_model(model_name='STTR', dataset='KITTI2015')
-    """
+    
     model, results = evaluate(
-        model_name='CFNet', # STTR-Light, CFNet
-        dataset='SceneFlow',
+        model_name='STTR',
+        dataset='KITTI2015',
         retrieve_existing=False,
         threat_config='configs/adv_attacks.yml',
     )
     print(results)
-    """
+    
     model, results = evaluate(
-        model_name='CFNet',#, , STTR-Light, CFNet
+        model_name='GWCNet-G',
         dataset='SceneFlow',
         retrieve_existing=False,
         threat_config='configs/2d_corruptions.yml',
     )
     print(results)
-    """
 
 
 if __name__ == '__main__':
