@@ -46,8 +46,8 @@ pcfa_arguments = [
 ]
 tdcc_arguments = [
     "attack",
-    "3dcc_corruption",
-    "3dcc_intensity",
+    "tdcc_corruption",
+    "tdcc_intensity",
     "attack_targeted",
 ]
 cc_arguments = [
@@ -73,6 +73,7 @@ class AttackArgumentParser:
                 or arg.startswith("pcfa")
                 or arg.startswith("apgd")
                 or arg.startswith("3dcc")
+                or arg.startswith("tdcc")
                 or arg.startswith("cc")
             ):
                 self.attack_args[arg] = list(set(self.to_list(getattr(args, arg))))
