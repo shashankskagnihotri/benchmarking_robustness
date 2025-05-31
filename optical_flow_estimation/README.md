@@ -43,6 +43,8 @@ pip install -e .
 1. Download the MPI Sintel dataset from the [MPI Sintel Flow Dataset](http://sintel.is.tue.mpg.de/downloads).
 2. After unzipping, ensure the contents include `training/` and `test/` directories.
 3. Move the dataset to the following path: `datasets/Sintel`.
+4. Download the MPI Sintel Depth training data from the [MPI Sintel Depth Training Data](http://sintel.is.tue.mpg.de/depth).
+5. Unzip the archive and ensure it contains `training/camdata_left`, `training/depth`, and `training/depth_viz`. Move these directories under `datasets/Sintel/training`.
 
 #### 3D Common Corruptions Images
 
@@ -54,8 +56,7 @@ datasets/3D_Common_Corruption_Images/Sintel
 ```
 
 ```bash
-cd datasets
-./download.sh
+bash download.sh
 ```
 
 ---

@@ -181,6 +181,5 @@ dataset/
 *.out
 
 optical_flow_estimation/outputs
-optical_flow_estimation/datasets/kitti2015
-optical_flow_estimation/datasets/Sintel
+optical_flow_estimation/datasets
 optical_flow_estimation/ptlflow_logs

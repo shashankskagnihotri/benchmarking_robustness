@@ -193,11 +193,14 @@ def evaluate(
 
         # run Adversarial Weather
         args = get_args_parser(model_name, dataset)
-        args.output_path = Path(f'outputs/validate/{model_name}_{args.pretrained_ckpt}/weather/"weather')
+        args.output_path = Path(f'outputs/validate/{model_name}_{args.pretrained_ckpt}/weather/{weather}')
         args.output_path.mkdir(parents=True, exist_ok=True)
+        args.attack = 'weather'
+        args.attack_targeted = targeted
+        args.attack_target = target
         
         model = get_model(model_name, args.pretrained_ckpt, args)
-        attack(args, model)
+        # attack(args, model)
 
         # load results from json
         results = get_results(args.output_path / f'metrics_{dataset}.json')
@@ -294,7 +297,7 @@ if __name__ == "__main__":
     )
 
     model, results = evaluate(
-        model_name='pip RAFT',
+        model_name='RAFT',
         dataset='KITTI2015', 
         retrieve_existing=True,
     )
@@ -313,7 +316,7 @@ if __name__ == "__main__":
     model, results = evaluate(
         model_name='RAFT', 
         dataset='Sintel-Final', 
-        retrieve_existing=False, 
+        retrieve_existing=True, 
         threat_model='Adversarial_Weather', 
         weather='snow', num_particles=10000, targeted=True, target='zero',
     )

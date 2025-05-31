@@ -17,7 +17,7 @@
 # =============================================================================
 
 import pdb
-
+import ast
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
@@ -53,6 +53,7 @@ from attacks.fab import fab
 from attacks.pcfa import pcfa
 from attacks.tdcc import get_dataset_3DCC
 from attacks.common_corruptions import common_corrupt
+from attacks.weather import weather
 from attacks.attack_utils.attack_args_parser import AttackArgumentParser
 from attacks.attack_utils.attack_args_parser import (
     attack_targeted_string,
@@ -106,6 +107,7 @@ def _init_parser() -> ArgumentParser:
             "apgd",
             "fab",
             "pcfa",
+            "weather",
             "3dcc",
             "common_corruptions",
             "none",
@@ -395,6 +397,227 @@ def _init_parser() -> ArgumentParser:
         help="If set, save a table of metrics for every image.",
     )
     parser.add_argument("--overwrite_output", type=bool, default=False)
+
+    # ======== Weather Attack Related Args ========
+    parser.add_argument(
+        "--weather_optimizer",
+        default="Adam",
+        help="the optimizer used for the perturbations.",
+    )
+    parser.add_argument(
+        "--weather_steps",
+        type=int,
+        default=750,
+        nargs="*",
+        help="the number of optimization steps per image.",
+    )
+    parser.add_argument(
+        "--weather_learn_offset",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, initial position of the particles will be optimized.",
+    )
+    parser.add_argument(
+        "--weather_learn_motionoffset",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the endpoint of the particle motion will be optimized (along with the starting point).",
+    )
+    parser.add_argument(
+        "--weather_learn_color",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the color of the particle will be optimized.",
+    )
+    parser.add_argument(
+        "--weather_learn_transparency",
+        default=True,
+        type=ast.literal_eval,
+        help="if specified, the transparency of the particles will be optimized.",
+    )
+    parser.add_argument(
+        "--weather_alph_motion",
+        default=1000.0,
+        type=float,
+        help="weighting for the motion loss.",
+    )
+    parser.add_argument(
+        "--weather_alph_motionoffset",
+        default=1000.0,
+        type=float,
+        help="weighting for the motion offset loss.",
+    )
+    parser.add_argument(
+        "--weather_data",
+        default="/path/to/generated_weather_npz_data",
+        help="may specify a dataset that contains weather data (locations, masks, etc). It should have the same structure as the used dataset.",
+    )
+    parser.add_argument(
+        "--weather_dataset",
+        default="Sintel",
+        nargs="*",
+        help="specify the dataset which should be used for evaluation",
+    )
+    parser.add_argument(
+        "--weather_dataset_stage",
+        default="training",
+        choices=["training", "evaluation"],
+        help="specify the dataset stage ('training' or 'evaluation') that should be used.",
+    )
+    parser.add_argument(
+        "--weather_rendering_method",
+        default="additive",
+        choices=["meshkin", "additive"],
+        help="choose a method rendering the particle color. 'meshkin' use alpha-blending with order-independent transparency calculation, while 'additive' adds the color value to the image. Default: 'meshkin', choices: [meshkin, additive].",
+    )
+    parser.add_argument(
+        "--weather_transparency_scale",
+        default=1.0,
+        type=float,
+        help="a scaling factor, by which the tansparency for every particle is multiplied.",
+    )
+    parser.add_argument(
+        "--weather_depth_check",
+        default=False,
+        type=ast.literal_eval,
+        help="if specified, particles will not be rendered if behind an object.",
+    )
+    parser.add_argument(
+        "--weather_depth_check_differentiable",
+        type=ast.literal_eval,
+        default=False,
+        nargs="*",
+        help="if specified, the rendering check for particle occlusion by objects is included into the compute graph.",
+    )
+    parser.add_argument(
+        "--weather_scene_scale",
+        default=1.0,
+        type=float,
+        help="A global scaling to the scene depth. If the value is > 1, all scenes will appear bigger and more particles will show up in the foreground.",
+    )
+    parser.add_argument(
+        "--weather_recolor",
+        default=False,
+        type=ast.literal_eval,
+        help="If specified, all weather is recolored with the given r,g,b value (no variations).",
+    )
+    parser.add_argument(
+        "--weather_do_motionblur",
+        default=True,
+        type=ast.literal_eval,
+        help="control if particles are rendered with motion blur (default=True).",
+    )
+    parser.add_argument(
+        "--weather_motionblur_scale",
+        default=0.025,
+        type=float,
+        help="a scaling factor in [0,1], by which the motion blur is shortened. No motion blur appears for 0, while the full blur vector is used with 1. A full motion blur might need a higher number of motionblur_samples.",
+    )
+    parser.add_argument(
+        "--weather_motionblur_samples",
+        default=10,
+        type=int,
+        help="the number of flakes that is drawn per blurred flake. More samples are needed for faster objects or a larger motionblur_scale.",
+    )
+    # GMA/Raft model iters
+    parser.add_argument(
+        "--weather_model_iters",
+        default=32,
+        type=int,
+        help="the number of iters for gma/raft model, to override the ptlflow setting.",
+    )
+    parser.add_argument(
+        "--weather_flakesize_max",
+        default=71,
+        type=int,
+        help="the maximal size for particles in pixels.",
+    )
+    parser.add_argument(
+        "--weather_depth_decay",
+        default=10,
+        type=float,
+        help="a decay factor for the particle template size by depth. The particle template size is 1/depth/depth_decay.",
+    )
+    parser.add_argument(
+        "--weather_constant_transparency",
+        default=0,
+        type=float,
+        help="if set to a value != 0, this is the default transparency for all initialized particles. Otherwise, the transparency is a hat-function that reaches its peak at a depth of 2.",
+    )
+    parser.add_argument(
+        "--weather_motion_y",
+        default=0.0,
+        type=float,
+        help="the motion in y-direction for all particles between frames.",
+    )
+    parser.add_argument(
+        "--weather_motion_random_scale",
+        default=0.0,
+        type=float,
+        help="randomizes the magnitude of the particle motion relative to the motion vector length. By setting to 0.5, the motion vector can be longer or smaller up to half its length. (default=0.0)",
+    )
+    parser.add_argument(
+        "--weather_motion_random_angle",
+        default=0.0,
+        type=float,
+        help="maximal random offset angle for the particle motion in degree. (default=0.0, max=180)",
+    )
+    parser.add_argument(
+        "--weather_flake_r",
+        default=255,
+        type=int,
+        help="the R value for the particle RGB",
+    )
+    parser.add_argument(
+        "--weather_flake_g",
+        default=255,
+        type=int,
+        help="the G value for the particle RGB",
+    )
+    parser.add_argument(
+        "--weather_flake_b",
+        default=255,
+        type=int,
+        help="the B value for the particle RGB",
+    )
+    parser.add_argument(
+        "--weather_flake_random_h",
+        default=0,
+        type=float,
+        help="the upper bound for HSL color Hue (H) randomization. Hue runs from 0° to 360°, hence values >= 180 will give fully randomized hues.",
+    )
+    parser.add_argument(
+        "--weather_flake_random_l",
+        default=0,
+        type=float,
+        help="the upper bound for HSL color Lightness (L) randomization. Lightness runs from 0 (black) over 0.5 (color) to 1 (white).",
+    )
+    parser.add_argument(
+        "--weather_frame_per_scene",
+        default=0,
+        type=int,
+        help="the number of optimization scenes per sintel-sequence (if 0, all scenes per sequence are taken).",
+    )
+    parser.add_argument(
+        "--weather_no_flake_dat",
+        default=True,
+        type=ast.literal_eval,
+        help="if this flag is used, no data about the particle (positions, flakes, transparencies) will be stored.",
+    )
+    parser.add_argument(
+        "--weather_lr",
+        type=float,
+        default=0.00001,
+        help="learning rate for updating the distortion via stochastic gradient descent or Adam. Default: 0.001.",
+    )
+    parser.add_argument(
+        "--weather_unregistered_artifacts",
+        default=True,
+        type=ast.literal_eval,
+        help="if True, artifacts are saved to the output folder but not registered. Saves time and memory during training.",
+    )
+    parser.add_argument('--weather_num_flakes', default=1000, type=int,
+        help="the number of particles that will be generated initially.")
     return parser
 
 
@@ -437,7 +660,7 @@ def attack(args: Namespace, model: BaseModel) -> pd.DataFrame:
     iteration_data.append(("model", args.model))
     iteration_data.append(("checkpoint", args.pretrained_ckpt))
     attack_args_parser = AttackArgumentParser(args)
-    
+
     for attack_args in attack_args_parser:
         for key, value in attack_args.items():
             if "_" in key:
@@ -544,6 +767,9 @@ def attack_one_dataloader(
     """
     metrics_sum = {}
     iteration_metrics_sum = {}
+    if attack_args["attack"] == "weather":
+        attack_args["model"] = args.model
+
     if attack_args["attack"] == "3dcc":
         dataloader = get_dataset_3DCC(
             model,
@@ -587,7 +813,7 @@ def attack_one_dataloader(
                 orig_preds = model(inputs)
             torch.cuda.empty_cache()
 
-            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa":
+            if attack_args["attack_targeted"] or attack_args["attack"] == "pcfa" or attack_args["attack"] == "weather":
                 if attack_args["attack_target"] == "negative":
                     targeted_flow_tensor = -orig_preds["flows"]
                 else:
@@ -640,6 +866,10 @@ def attack_one_dataloader(
                     preds = orig_preds
                 case "3dcc":
                     preds = orig_preds
+                case "weather":
+                    preds, perturbed_inputs = weather(
+                        attack_args, model, targeted_inputs, i, args.output_path
+                    )
 
             for key in preds:
                 if torch.is_tensor(preds[key]):
