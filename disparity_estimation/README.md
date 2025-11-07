@@ -1,6 +1,6 @@
 # Disparity Estimation Benchmark
 
-## Paper: DispBench: Benchmarking Disparity Estimation to Synthetic Corruptions
+## Paper: [DispBench: Benchmarking Disparity Estimation to Synthetic Corruptions](https://openreview.net/pdf?id=yIEInigSp9)
 ## Accepted at that Synthetic Data for Computer Vision Workshop@ CVPR 2025
 
 Please cite the work if you use the code:
@@ -8,14 +8,14 @@ Please cite the work if you use the code:
 ```
 @inproceedings{agnihotri2025dispbench,
   title={DispBench: Benchmarking Disparity Estimation to Synthetic Corruptions},
-  author={Agnihotri, Shashank and Ansari, Amaan and Dackermann, Annika and R{\"o}sch, Fabian and Keuper, Margret},
+  author={Agnihotri, Shashank* and Ansari, Amaan* and Dackermann, Annika* and R{\"o}sch, Fabian* and Keuper, Margret},
   booktitle={Synthetic Data for Computer Vision Workshop@ CVPR 2025}
 }
 ```
 
 > Normal Text
 ```
-Agnihotri, Shashank, Amaan Ansari, Annika Dackermann, Fabian Rösch, and Margret Keuper. "DispBench: Benchmarking Disparity Estimation to Synthetic Corruptions." In Synthetic Data for Computer Vision Workshop@ CVPR 2025. 2025.
+Agnihotri, Shashank*, Amaan Ansari*, Annika Dackermann*, Fabian Rösch*, and Margret Keuper. "DispBench: Benchmarking Disparity Estimation to Synthetic Corruptions." In Synthetic Data for Computer Vision Workshop@ CVPR 2025. 2025.
 ```
 
 This repository provides tools and pre-trained models for benchmarking the robustness of disparity estimation.
