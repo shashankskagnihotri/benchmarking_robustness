@@ -7,7 +7,8 @@ Please cite the work if you use the code:
 @inproceedings{agnihotri2025synthetic,
   title={Are Synthetic Corruptions A Reliable Proxy For Real-World Corruptions?},
   author={Agnihotri, Shashank and Schader, David and Sharei, Nico and Ka{\c{c}}ar, Mehmet Ege and Keuper, Margret},
-  booktitle={Synthetic Data for Computer Vision Workshop@ CVPR 2025}
+  booktitle={Synthetic Data for Computer Vision Workshop@ CVPR 2025},
+  year={2025}
 }
 ```
 
